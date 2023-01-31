@@ -1,0 +1,17 @@
+.*
+!/.gitignore
+!/.github
+
+# Build artifacts
+/.dist
+
+# macOS Boot Image
+/com.apple.recovery.boot
+
+# macOS specific caches
+/.fseventsd
+/.Spotlight-V100
+/.Trashes
+
+# Windows specific caches
+/$RECYCLE.BIN

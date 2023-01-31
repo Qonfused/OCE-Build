@@ -1,0 +1,54 @@
+{
+  "oc-version": "^0.8.8",
+  "oc-build": "DEBUG",
+  "include": {
+    "*": [".contentVisibility"],
+    "acpi": {
+      "SSDT-AWAC": "./src/ACPI/SSDT-AWAK.test.dsl"
+    },
+    "drivers": ["AudioDxe", "HfsPlus", "OpenCanopy", "OpenRuntime", "ResetNvramEntry"],
+    "kexts": {
+      "Lilu": "acidanthera/Lilu=latest",
+      "WhateverGreen": "acidanthera/WhateverGreen=latest",
+      "AppleALC": "acidanthera/AppleALC=latest",
+      "VirtualSMC": "acidanthera/VirtualSMC=latest",
+      "SMCBatteryManager": "*",
+      "SMCProcessor": "*",
+      "SMCSuperIO": "*",
+      "AsusSMC": "hieplpvip/AsusSMC=^1.4.1",
+      "AirportItlwm-Ventura": "OpenIntelWireless/itlwm=^2.2.0",
+      "AirportItlwm-Monterey": "OpenIntelWireless/itlwm=^2.2.0",
+      "AirportItlwm-Big_Sur": "OpenIntelWireless/itlwm=^2.2.0",
+      "AirportItlwm-Catalina": "OpenIntelWireless/itlwm=^2.2.0",
+      "BlueToolFixup": "acidanthera/BrcmPatchRAM=latest",
+      "IntelBluetoothFirmware": "OpenIntelWireless/IntelBluetoothFirmware=^2.2.0",
+      "IntelBluetoothInjector": "*",
+      "IntelBTPatcher": "*",
+      "CpuTscSync": "acidanthera/CpuTscSync=latest",
+      "DiskArbitrationFixup": "",
+      "ECEnabler": "1Revenger1/ECEnabler=latest",
+      "FeatureUnlock": "acidanthera/FeatureUnlock=latest",
+      "HibernationFixup": "acidanthera/HibernationFixup=latest",
+      "NVMeFix": "acidanthera/NVMeFix=latest",
+      "RealtekCardReader": "0xFireWolf/RealtekCardReader=latest",
+      "RealtekCardReaderFriend": "0xFireWolf/RealtekCardReaderFriend=latest",
+      "RestrictEvents": "acidanthera/RestrictEvents=latest",
+      "USBToolBox": "USBToolBox/kext=latest",
+      "UTBMap": "./src/Kexts/UTBMap.kext",
+      "VoodooI2C/VoodooI2CServices": "*",
+      "VoodooI2C/VoodooGPIO": "*",
+      "VoodooI2C/VoodooInput": "*",
+      "VoodooI2C": "VoodooI2C/VoodooI2C=latest",
+      "VoodooI2CHID": "*",
+      "VoodooPS2Controller": "acidanthera/VoodooPS2=latest",
+      "VoodooPS2Controller/VoodooPS2Keyboard": "*"
+    },
+    "resources": {
+      "theme": "Acidanthera/GoldenGate"
+    }
+  },
+  "exclude": {
+    "*": [".contentFlavour"]
+  },
+  "build_dir": "./dist"
+}
