@@ -14,7 +14,7 @@ source ./lib/sources.sh
 
 
 # Change CWD
-cd ${CONFIG%/*}
+cd ${CONFIG%/*}/$(dirname $BUILD_DIR)
 
 ################################################################################
 #                            Prepare build folder                              #
