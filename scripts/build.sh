@@ -13,8 +13,11 @@ source ./lib/macros.sh
 source ./lib/sources.sh
 
 
+# Lock PWD reference to config.json
+PWD=${CONFIG%/*}/$(dirname $BUILD_DIR)
+BUILD_DIR=$PWD/$BUILD_DIR
 # Change CWD
-cd ${CONFIG%/*}/$(dirname $BUILD_DIR)
+cd ${CONFIG%/*}
 
 ################################################################################
 #                            Prepare build folder                              #
@@ -78,7 +81,7 @@ cfg 'include.acpi' | $jq -r 'keys[]' | while read -r ssdt; do
   src=$(cfg "include.acpi.\"$ssdt\"")
   # Build SSDT
   target=$EFI_DIR/OC/ACPI/$ssdt.aml
-  $IASL -ve -p "$target" $src > /dev/null 2>&1
+  $IASL -ve -p "$target" "$src" > /dev/null 2>&1
 done
 
 # TODO: Handle building external ACPI sources and patches per ACPI spec
