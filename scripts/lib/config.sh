@@ -10,6 +10,7 @@
 source ./bin/jq/imports.sh
 source ./lib/macros.sh
 
+
 CONFIG=$(get_args "$@" '-c --config' "$(rsearch 'config.json')")
 
 cfg() {

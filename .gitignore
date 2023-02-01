@@ -3,7 +3,7 @@
 !/.github
 
 # Build artifacts
-/.dist
+/dist
 
 # macOS Boot Image
 /com.apple.recovery.boot

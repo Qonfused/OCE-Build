@@ -14,10 +14,11 @@ source ./lib/sources.sh
 
 
 # Lock PWD reference to config.json
-PWD=${CONFIG%/*}/$(dirname $BUILD_DIR)
-BUILD_DIR=$PWD/$BUILD_DIR
+PWD=$(realpath "$(realpath "$(pwd)/${CONFIG%/*}")/$(dirname $BUILD_DIR)")
+CONFIG=$(realpath "$(pwd)/$CONFIG")
+BUILD_DIR="$PWD/${BUILD_DIR##*/}"
 # Change CWD
-cd ${CONFIG%/*}
+cd "${CONFIG%/*}"
 
 ################################################################################
 #                            Prepare build folder                              #
