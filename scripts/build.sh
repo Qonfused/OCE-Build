@@ -29,8 +29,7 @@ rm -r $BUILD_DIR > /dev/null 2>&1
 mkdir -p $BUILD_DIR
 
 # Match to OC-pkg
-OC_SPECIFIER=$([ -z "$OC_COMMIT" ] && echo "$OC_VERSION" || echo "@$OC_COMMIT")
-OC_PKG=$(kBuild_pkg 'OpenCorePkg' $OC_SPECIFIER)
+OC_PKG=$(kBuild_pkg 'OpenCorePkg' $OC_VERSION)
 # Create OC-pkg resource folder
 OC_LOCK=$(echo $OC_PKG | $jq -r '.lock')
 OC_PKG_DIR=$BUILD_DIR/.temp/$OC_LOCK
