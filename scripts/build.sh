@@ -17,6 +17,7 @@ source ./lib/sources.sh
 PWD=$(realpath "$(realpath "$(pwd)/${CONFIG%/*}")/$(dirname $BUILD_DIR)")
 CONFIG=$(realpath "$(pwd)/$CONFIG")
 BUILD_DIR="$PWD/${BUILD_DIR##*/}"
+
 # Change CWD
 cd "${CONFIG%/*}"
 
@@ -37,9 +38,19 @@ mkdir -p $OC_PKG_DIR
 # Unpackage OC-pkg source
 OC_PKG_URL=$(echo $OC_PKG | $jq -r '.url')
 curl -sL $OC_PKG_URL | bsdtar -xvf- -C $OC_PKG_DIR > /dev/null 2>&1
+
 # Extract EFI directory
 mkdir -p $EFI_DIR
 cp -a $OC_PKG_DIR/X64/EFI/. $EFI_DIR
+# TODO: Handle removing wild-card exclusions
+# for p in ("$(__arr__ $(cfg 'exclude."*"'))"); do
+#   echo p $p
+#   # INCLUDE=$(cfg $CONFIG "include.\*")
+#   # EXCLUDE=$(cfg $CONFIG "exclude.\*")
+#   # if [[ $INCLUDE != *"\"$p\""* && $EXCLUDE == *"\"$p\""* ]]; then
+#   #   find $EFI_DIR -type f -name $p -delete
+#   # fi
+# done
 
 # Create OC-bin resource folder
 mkdir -p $OC_BIN_DIR
@@ -51,24 +62,30 @@ cp -a $OC_BIN_DIR/Resources/. $EFI_DIR/OC/Resources
 # Copy OC-bin drivers
 git -C $OC_BIN_DIR sparse-checkout add "Drivers" > /dev/null 2>&1
 cp -a $OC_BIN_DIR/Drivers/. $EFI_DIR/OC/Drivers
+# Cleanup OC-bin directory
+rm -fr $OC_BIN_DIR/.git
+rm -r $OC_BIN_DIR
+
+################################################################################
+#                           Create Scripts directory                           #
+################################################################################
+
+mkdir -p $SCR_DIR/bin
+
+# Extract OC scripts into scripts directory
+cp -a $OC_PKG_DIR/Utilities/ocvalidate/ocvalidate $SCR_DIR/bin
+chmod +x $OCVALIDATE
 
 # Create iasl directory
 mkdir -p $IASL_DIR
 # Sparse checkout MaciASL repo
 git clone --filter=blob:none --sparse $MACIASL_URL $IASL_DIR > /dev/null 2>&1
 git -C $IASL_DIR sparse-checkout add "Dist" > /dev/null 2>&1
-
-################################################################################
-#                           Create Scripts directory                           #
-################################################################################
-
-# Extract OC scripts into scripts directory
-mkdir -p $SCR_DIR/bin
-cp -a $OC_PKG_DIR/Utilities/ocvalidate/ocvalidate $SCR_DIR/bin
-chmod +x $OCVALIDATE
-
 # Copy iasl binary
 cp $IASL_DIR/Dist/iasl-stable $SCR_DIR/bin/
+# Cleanup MaciASL/iasl directory
+rm -fr $IASL_DIR/.git
+rm -r $IASL_DIR
 # Mark iasl binary as executable
 chmod +x $IASL
 
@@ -83,6 +100,8 @@ cfg 'include.acpi' | $jq -r 'keys[]' | while read -r ssdt; do
   target=$EFI_DIR/OC/ACPI/$ssdt.aml
   $IASL -ve -p "$target" "$src" > /dev/null 2>&1
 done
+
+rm $IASL; unset $IASL
 
 # TODO: Handle building external ACPI sources and patches per ACPI spec
 
@@ -161,7 +180,8 @@ cfg 'include.kexts' | $jq -r 'keys[]' | while read -r key; do
   fi
 done
 
-# TODO: Handle plugin-specific versioning (*/*)
+# Cleanup kext resources folder
+rm -r $BUILD_DIR/.temp/kexts
 
 ################################################################################
 #                             Build Tools folder                               #
@@ -180,32 +200,9 @@ done
 #                             Build config.plist                               #
 ################################################################################
 
+# Copy sample plist
 cp $OC_PKG_DIR/Docs/Sample.plist $EFI_DIR/OC/config.plist
-
-# TODO
-
-################################################################################
-#                            Prune build resources                             #
-################################################################################
-
 # Cleanup OC-pkg directory
 rm -r $OC_PKG_DIR
-# Cleanup OC-bin directory
-rm -fr $OC_BIN_DIR/.git
-rm -r $OC_BIN_DIR
-# Cleanup MaciASL/iasl directory
-rm -fr $IASL_DIR/.git
-rm -r $IASL_DIR
 
-# Cleanup kext resources folder
-rm -r $BUILD_DIR/.temp/kexts
-
-# TODO: Handle removing wild-card exclusions
-# for p in ("$(__arr__ $(cfg 'exclude."*"'))"); do
-#   echo p $p
-#   # INCLUDE=$(cfg $CONFIG "include.\*")
-#   # EXCLUDE=$(cfg $CONFIG "exclude.\*")
-#   # if [[ $INCLUDE != *"\"$p\""* && $EXCLUDE == *"\"$p\""* ]]; then
-#   #   find $EFI_DIR -type f -name $p -delete
-#   # fi
-# done
+# TODO
