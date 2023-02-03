@@ -13,17 +13,12 @@ source ./lib/macros.sh
 source ./lib/sources.sh
 
 
-# Lock PWD reference to config.json
-PWD=$(realpath "$(realpath "$(pwd)/${CONFIG%/*}")/$(dirname $BUILD_DIR)")
-CONFIG=$(realpath "$(pwd)/$CONFIG")
-BUILD_DIR="$PWD/${BUILD_DIR##*/}"
-
-# Change CWD
-cd "${CONFIG%/*}"
-
 ################################################################################
 #                            Prepare build folder                              #
 ################################################################################
+
+# Change CWD
+cd "${CONFIG%/*}"
 
 # Create new build folder
 rm -r $BUILD_DIR > /dev/null 2>&1
@@ -32,7 +27,7 @@ mkdir -p $BUILD_DIR
 # Match to OC-pkg
 OC_PKG=$(kBuild_pkg 'OpenCorePkg' $OC_VERSION)
 # Create OC-pkg resource folder
-OC_LOCK=$(echo $OC_PKG | $jq -r '.lock')
+OC_LOCK=$(echo $OC_PKG | $jq -r '.resolution')
 OC_PKG_DIR=$BUILD_DIR/.temp/$OC_LOCK
 mkdir -p $OC_PKG_DIR
 # Unpackage OC-pkg source
@@ -53,15 +48,16 @@ cp -a $OC_PKG_DIR/X64/EFI/. $EFI_DIR
 # done
 
 # Create OC-bin resource folder
+OC_BIN_DIR=$BUILD_DIR/.temp/@acidanthera/OcBinaryData
 mkdir -p $OC_BIN_DIR
 # Sparse checkout OC-bin repo
 git clone --filter=blob:none --sparse $OC_BIN_URL $OC_BIN_DIR > /dev/null 2>&1
-# Copy OC-bin resources
-git -C $OC_BIN_DIR sparse-checkout add "Resources" > /dev/null 2>&1
-cp -a $OC_BIN_DIR/Resources/. $EFI_DIR/OC/Resources
 # Copy OC-bin drivers
 git -C $OC_BIN_DIR sparse-checkout add "Drivers" > /dev/null 2>&1
 cp -a $OC_BIN_DIR/Drivers/. $EFI_DIR/OC/Drivers
+# Copy OC-bin resources
+git -C $OC_BIN_DIR sparse-checkout add "Resources" > /dev/null 2>&1
+cp -a $OC_BIN_DIR/Resources/. $EFI_DIR/OC/Resources
 # Cleanup OC-bin directory
 rm -fr $OC_BIN_DIR/.git
 rm -r $OC_BIN_DIR
@@ -74,20 +70,22 @@ mkdir -p $SCR_DIR/bin
 
 # Extract OC scripts into scripts directory
 cp -a $OC_PKG_DIR/Utilities/ocvalidate/ocvalidate $SCR_DIR/bin
+# Mark ocvalidate as executable
 chmod +x $OCVALIDATE
 
 # Create iasl directory
+IASL_DIR=$BUILD_DIR/.temp/@acidanthera/MaciASL
 mkdir -p $IASL_DIR
 # Sparse checkout MaciASL repo
 git clone --filter=blob:none --sparse $MACIASL_URL $IASL_DIR > /dev/null 2>&1
 git -C $IASL_DIR sparse-checkout add "Dist" > /dev/null 2>&1
 # Copy iasl binary
 cp $IASL_DIR/Dist/iasl-stable $SCR_DIR/bin/
+# Mark iasl binary as executable
+chmod +x $IASL
 # Cleanup MaciASL/iasl directory
 rm -fr $IASL_DIR/.git
 rm -r $IASL_DIR
-# Mark iasl binary as executable
-chmod +x $IASL
 
 ################################################################################
 #                               Build ACPI folder                              #
@@ -100,8 +98,6 @@ cfg 'include.acpi' | $jq -r 'keys[]' | while read -r ssdt; do
   target=$EFI_DIR/OC/ACPI/$ssdt.aml
   $IASL -ve -p "$target" "$src" > /dev/null 2>&1
 done
-
-rm $IASL; unset $IASL
 
 # TODO: Handle building external ACPI sources and patches per ACPI spec
 
@@ -145,23 +141,21 @@ cfg 'include.kexts' | $jq -r 'keys[]' | while read -r key; do
   fi
 
   # Get version lock
-  lock=$(echo $kext_pkg | $jq -r ".lock | select( . != null )")
+  lock=$(echo "$kext_pkg" | $jq -r '.resolution | select( . != null )')
   if [[ -z "$lock" ]]; then continue; fi
   # Download kext archive
-  pkg=$BUILD_DIR/.temp/kexts/$lock
+  pkg=$BUILD_DIR/.temp/$lock
   url=$(echo $kext_pkg | $jq -r '.url')
   mkdir -p $pkg && curl -sL $url | bsdtar -xvf- -C $pkg > /dev/null 2>&1
 
   # Extract kext if only packaged binary
-  match=$(find $pkg -maxdepth 2 -type d -name "*.kext")
+  match=$(find $pkg -maxdepth 3 -type d -name "*.kext")
   num=$(echo "$match" | wc -l)
   if [[ $num -gt 1 ]]; then
-    match=$(find $pkg -maxdepth 2 -type d -name "$key.kext")
-    if [[ -z "$match" ]]; then continue; fi
+    match=$(find $pkg -maxdepth 3 -type d -name "$key.kext")
   fi
   # Copy kext to EFI folder
-  cp -r "$match" $EFI_DIR/OC/Kexts/$key.kext
-  if [[ $num -eq 1 ]]; then rm -r $pkg; else rm -r "$match"; fi
+  if [[ -n "$match" ]]; then cp -r "$match" $EFI_DIR/OC/Kexts/$key.kext; fi
 done
 
 # Extract bundled kexts from kext resources folder
@@ -173,11 +167,8 @@ cfg 'include.kexts' | $jq -r 'keys[]' | while read -r key; do
   if [[ $key == *"/"* || $specifier != "*" ]]; then continue; fi
 
   # Match existing packages to kext
-  match=$(find $BUILD_DIR/.temp/kexts -maxdepth 3 -type d -name "${key##*/}.kext")
-  if [[ -n "$match" ]]; then
-    cp -r "$match" $EFI_DIR/OC/Kexts/$key.kext
-    rm -r "$match"
-  fi
+  match=$(find $BUILD_DIR/.temp -maxdepth 4 -type d -name "${key##*/}.kext")
+  if [[ -n "$match" ]]; then cp -r "$match" $EFI_DIR/OC/Kexts/$key.kext; fi
 done
 
 # Cleanup kext resources folder

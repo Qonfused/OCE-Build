@@ -19,6 +19,11 @@ OC_BUILD=$(cfg '"oc-build"' "DEBUG")
 OC_COMMIT=$(cfg '"oc-commit"')
 BUILD_DIR=$(cfg "build_dir" "./dist")
 
+# Lock PWD reference to config.json
+PWD=$(realpath "$(realpath "$(pwd)/${CONFIG%/*}")/$(dirname $BUILD_DIR)")
+CONFIG=$(realpath "$(pwd)/$CONFIG")
+BUILD_DIR="$PWD/${BUILD_DIR##*/}"
+
 ################################################################################
 #                              Hardcoded constants                             #
 ################################################################################
@@ -30,14 +35,10 @@ DORTANIA_BUILD_URL="https://github.com/dortania/build-repo/releases/download"
 DORTANIA_BUILD_CATALOG="https://raw.githubusercontent.com/dortania/build-repo/builds/config.json"
 
 ################################################################################
-#                               Derived properties                             #
+#                                Build Resources                               #
 ################################################################################
 
-# Build resources
-OC_PKG_DIR=$BUILD_DIR/.temp/OC-pkg
-OC_BIN_DIR=$BUILD_DIR/.temp/OC-bin
-IASL_DIR=$BUILD_DIR/.temp/iasl
-
+# Build output
 SCR_DIR=$BUILD_DIR/scripts
 EFI_DIR=$BUILD_DIR/EFI
 
