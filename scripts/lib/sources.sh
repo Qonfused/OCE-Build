@@ -15,7 +15,7 @@ source ./lib/macros.sh
 kCatalog=$(curl -sL $DORTANIA_BUILD_CATALOG)
 
 # Get build url from Dortania build repo
-kBuild_pkg() {
+dBuild_pkg() {
   entry=$(echo "$kCatalog" | $jq -r ".$1.versions")
   build=$(__lower__ $OC_BUILD)
   nth_url() { echo "$entry" | $jq -r ".[$1].links.$build"; }
@@ -35,7 +35,7 @@ kBuild_pkg() {
 "{
   \"version\": \"$(nth_version $i)\",
   \"url\": \"$url\",
-  \"resolution\": \"@$src@git:$(nth_version $i)#$(nth_commit $i)\",
+  \"resolution\": \"@$src@dbuild:$(nth_version $i)#$(nth_commit $i)\",
   \"checksum\": \"$(echo "$entry" | $jq -r ".[$i].hashes.$build.sha256")\"
 }"
   fi

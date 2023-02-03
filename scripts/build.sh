@@ -25,7 +25,7 @@ rm -r $BUILD_DIR > /dev/null 2>&1
 mkdir -p $BUILD_DIR
 
 # Match to OC-pkg
-OC_PKG=$(kBuild_pkg 'OpenCorePkg' $OC_VERSION)
+OC_PKG=$(dBuild_pkg 'OpenCorePkg' $OC_VERSION)
 # Create OC-pkg resource folder
 OC_LOCK=$(echo $OC_PKG | $jq -r '.resolution')
 OC_PKG_DIR=$BUILD_DIR/.temp/$OC_LOCK
@@ -134,7 +134,7 @@ cfg 'include.kexts' | $jq -r 'keys[]' | while read -r key; do
 
   # Handle acidanthera kexts through dortania build repo
   if [[ $specifier != *"/"*"="* || $specifier == "acidanthera/"* ]]; then
-    kext_pkg=$(kBuild_pkg $kext ${specifier#*=})
+    kext_pkg=$(dBuild_pkg $kext ${specifier#*=})
   # Handle 3rd-party or unbuilt kexts through Github releases api
   else
     kext_pkg=$(Github_pkg $key $kext $specifier)
