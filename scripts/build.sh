@@ -40,15 +40,12 @@ curl -sL $OC_PKG_URL | bsdtar -xvf- -C $OC_PKG_DIR > /dev/null 2>&1
 # Extract EFI directory
 mkdir -p $EFI_DIR
 cp -a $OC_PKG_DIR/X64/EFI/. $EFI_DIR
-# TODO: Handle removing wild-card exclusions
-# for p in ("$(__arr__ $(cfg 'exclude."*"'))"); do
-#   echo p $p
-#   # INCLUDE=$(cfg $CONFIG "include.\*")
-#   # EXCLUDE=$(cfg $CONFIG "exclude.\*")
-#   # if [[ $INCLUDE != *"\"$p\""* && $EXCLUDE == *"\"$p\""* ]]; then
-#   #   find $EFI_DIR -type f -name $p -delete
-#   # fi
-# done
+# Handle removing wild-card exclusions
+cfg 'exclude."*"' | $jq -r '.[]' | while read -r f; do
+  if [[ $(cfg 'include."*"') != *\"$f\"* ]]; then
+    find $EFI_DIR -type f -name $f -delete
+  fi
+done
 
 # Create OC-bin resource folder
 OC_BIN_DIR=$BUILD_DIR/.temp/@acidanthera/OcBinaryData
