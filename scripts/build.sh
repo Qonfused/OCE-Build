@@ -7,6 +7,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 ##
 
+# Change CWD for imports
+cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd
+
 source ./lib/config.sh
 source ./lib/constants.sh
 source ./lib/macros.sh
@@ -17,7 +20,7 @@ source ./lib/sources.sh
 #                            Prepare build folder                              #
 ################################################################################
 
-# Change CWD
+# Change CWD for config.json
 cd "${CONFIG%/*}"
 
 # Create new build folder
