@@ -38,9 +38,11 @@ DORTANIA_BUILD_CATALOG="https://raw.githubusercontent.com/dortania/build-repo/bu
 #                                Build Resources                               #
 ################################################################################
 
-# Build output
-SCR_DIR=$BUILD_DIR/scripts
 EFI_DIR=$BUILD_DIR/EFI
+ACPI_DIR=$BUILD_DIR/EFI/OC/ACPI
+KEXTS_DIR=$BUILD_DIR/EFI/OC/Kexts
+
+SCR_DIR=$BUILD_DIR/scripts
 
 # Executables
 OCVALIDATE="$SCR_DIR/bin/ocvalidate"

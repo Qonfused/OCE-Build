@@ -97,8 +97,8 @@ rm -r $IASL_DIR
 # Create ACPI resources folder
 cfg 'include.acpi' | $jq -r 'keys[]' | while read -r ssdt; do
   src=$(cfg "include.acpi.\"$ssdt\"")
+  target=$ACPI_DIR/$ssdt.aml
   # Build SSDT
-  target=$EFI_DIR/OC/ACPI/$ssdt.aml
   $IASL -ve -p "$target" "$src" > /dev/null 2>&1
 done
 
@@ -123,18 +123,17 @@ done
 
 # Create and extract kext resources folder
 cfg 'include.kexts' | $jq -r 'keys[]' | while read -r key; do
-  if [[ -z "$key" || -d "$EFI_DIR/OC/Kexts/$key.kext" ]]; then continue; fi
+  if [[ -z "$key" || -d "$KEXTS_DIR/$key.kext" ]]; then continue; fi
   
   specifier=$(cfg "include.kexts.\"$key\"")
   # Handle kext if specifier matches a local filepath
-  if [[ -d "$specifier" ]]; then
-    cp -r "$specifier" $EFI_DIR/OC/Kexts/$key.kext; continue
+  if [ -d "$specifier" ]; then cp -r "$specifier" $KEXTS_DIR/$key.kext; continue
   # Omit kext if packaged with another kext (or is a plugin)
   elif [[ $key == *"/"* || $specifier == "*" ]]; then continue; fi
+
   # Check that repo name (optional) matches kext name
   repo=$(echo "$specifier" | sed -E 's/.*\/([^:]+)=.*/\1/')
   kext=$([[ $specifier != $repo ]] && echo "$repo" || echo "$key")
-
   # Handle acidanthera kexts through dortania build repo
   if [[ $specifier != *"/"*"="* || $specifier == "acidanthera/"* ]]; then
     kext_pkg=$(dBuild_pkg $kext ${specifier#*=})
@@ -154,16 +153,16 @@ cfg 'include.kexts' | $jq -r 'keys[]' | while read -r key; do
   # Extract kext if only packaged binary
   match=$(find $pkg -maxdepth 3 -type d -name "*.kext")
   num=$(echo "$match" | wc -l)
-  if [[ $num -gt 1 ]]; then
-    match=$(find $pkg -maxdepth 3 -type d -name "$key.kext")
-  fi
+  if [[ $num -gt 1 ]]; then match=$(find $pkg -maxdepth 3 -name "$key.kext"); fi
   # Copy kext to EFI folder
-  if [[ -n "$match" ]]; then cp -r "$match" $EFI_DIR/OC/Kexts/$key.kext; fi
+  if [[ -n "$match" ]]; then cp -r "$match" $KEXTS_DIR/$key.kext; fi
+
+  # TODO: Update lockfile
 done
 
 # Extract bundled kexts from kext resources folder
 cfg 'include.kexts' | $jq -r 'keys[]' | while read -r key; do
-  if [[ -z "$key" || -d "$EFI_DIR/OC/Kexts/$key.kext" ]]; then continue; fi
+  if [[ -z "$key" || -d "$KEXTS_DIR/$key.kext" ]]; then continue; fi
 
   specifier=$(cfg "include.kexts.\"$key\"")
   # Omit kext if standalone or is a plugin
@@ -171,11 +170,10 @@ cfg 'include.kexts' | $jq -r 'keys[]' | while read -r key; do
 
   # Match existing packages to kext
   match=$(find $BUILD_DIR/.temp -maxdepth 4 -type d -name "${key##*/}.kext")
-  if [[ -n "$match" ]]; then cp -r "$match" $EFI_DIR/OC/Kexts/$key.kext; fi
-done
+  if [[ -n "$match" ]]; then cp -r "$match" $KEXTS_DIR/$key.kext; fi
 
-# Cleanup kext resources folder
-rm -r $BUILD_DIR/.temp/kexts
+  # TODO: Update lockfile
+done
 
 ################################################################################
 #                             Build Tools folder                               #
@@ -200,3 +198,10 @@ cp $OC_PKG_DIR/Docs/Sample.plist $EFI_DIR/OC/config.plist
 rm -r $OC_PKG_DIR
 
 # TODO
+
+################################################################################
+#                                 Post-build                                   #
+################################################################################
+
+# Cleanup temp resources folder
+rm -r $BUILD_DIR/.temp
