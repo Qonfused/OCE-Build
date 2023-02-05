@@ -20,7 +20,8 @@ __key__() {
   type=$(awk -F'[<>]' '{print $2}' <<< "$value_match")
   # Handle multi-line matches
   if [[ "$value_match" != "$s<$type>"*"</$type>" ]]; then
-    src=$(awk "/$s<key>$key<\/key>/ ? c++ : c" <<< "$src")
+    offset=$(grep -n -m 1 "$key_match" <<< "$src" | sed  's/\([0-9]*\).*/\1/')
+    src=$(tail -n +$offset <<< "$src")
     value_match=$(__paired_key__ "$src" "$s" "$type")
   fi
   # Return value match
