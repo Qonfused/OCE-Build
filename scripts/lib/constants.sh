@@ -21,7 +21,6 @@ BUILD_DIR=$(cfg "build_dir" "./dist")
 
 # Lock build_dir reference to PWD
 BUILD_DIR="$__PWD__/${BUILD_DIR##*/}"
-echo "$BUILD_DIR"
 
 ################################################################################
 #                              Hardcoded constants                             #

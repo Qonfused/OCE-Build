@@ -19,7 +19,7 @@ if [[ -z "$CONFIG" || "$CONFIG" == "-c --config" ]]; then
 elif [[ ! -f "$__PWD__/$CONFIG" ]]; then
   fexit "  Provided config filepath does not exist."
 # Change config file reference to PWD
-else CONFIG="$(realpath "$__PWD__/${CONFIG%/*}")"; fi
+else CONFIG="$(realpath "$__PWD__/$CONFIG")"; fi
 
 cfg() {
   output=$(cat "$CONFIG" | $jq -r ".$1 | select( . != null )" 2>/dev/null)
