@@ -19,10 +19,9 @@ OC_BUILD=$(cfg '"oc-build"' "DEBUG")
 OC_COMMIT=$(cfg '"oc-commit"')
 BUILD_DIR=$(cfg "build_dir" "./dist")
 
-# Lock PWD reference to config.json
-PWD=$(realpath "$(realpath "$(pwd)/${CONFIG%/*}")/$(dirname $BUILD_DIR)")
-CONFIG=$(realpath "$(pwd)/$CONFIG")
-BUILD_DIR="$PWD/${BUILD_DIR##*/}"
+# Lock build_dir reference to PWD
+BUILD_DIR="$__PWD__/${BUILD_DIR##*/}"
+echo "$BUILD_DIR"
 
 ################################################################################
 #                              Hardcoded constants                             #
