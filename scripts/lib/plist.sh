@@ -16,10 +16,11 @@ __key__() {
   key_match=$(grep -m 1 "<key>$key</key>" <<< "$src")
   s=$(sed -E 's/^([[:space:]]+).*/\1/' <<< "$key_match")
   # Get initial match
-  value_match=$(grep -A1 "$key_match" <<< "$src" | tail -n 1)
-  type=$(tr -d "[:space:]<>" <<< "$value_match")
+  value_match=$(grep -m 1 -A1 "$key_match" <<< "$src" | tail -n -1)
+  type=$(awk -F'[<>]' '{print $2}' <<< "$value_match")
   # Handle multi-line matches
   if [[ "$value_match" != "$s<$type>"*"</$type>" ]]; then
+    src=$(awk "/$s<key>$key<\/key>/ ? c++ : c" <<< "$src")
     value_match=$(__paired_key__ "$src" "$s" "$type")
   fi
   # Return value match
@@ -31,6 +32,7 @@ __arr__() {
   # Match nearest array type
   key_match=$(grep -m 1 "<array>" <<< "$src")
   s=$(sed -E 's/^([[:space:]]+).*/\1/' <<< "$key_match")
+  src=$(awk "/$s<array>/ ? c++ : c" <<< "$src")
   value_match=$(__paired_key__ "$src" "$s" "array")
   # Get nth element (if specified)
   if [[ -n "$2" ]]; then
