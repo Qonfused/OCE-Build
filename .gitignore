@@ -1,6 +1,7 @@
 .*
 !/.gitignore
 !/.github
+!/.vscode
 
 # Build artifacts
 /dist
