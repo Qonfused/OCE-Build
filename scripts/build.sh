@@ -79,7 +79,6 @@ entry=$($yq -i e "with(.\"OpenCorePkg\" ;
   .dependencies.\"OcBinaryData\" |= {
     \"resolution\": \"@acidanthera/OcBinaryData@github:#${OC_BIN_SHA:0:8}\",
     \"url\": \"$OC_BIN_URL\",
-    \"checksum\": \"$OC_BIN_SHA\",
     \"extract\": [\"./Drivers/.\", \"./Resources/.\"],
     \"type\": \"binary\"
   }
