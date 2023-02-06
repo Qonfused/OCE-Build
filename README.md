@@ -15,7 +15,7 @@ While this project is primarily intended to be used for unsupported Macs using [
   - [x] Versioning for local & external Kext sources
     - [x] Fetch external Kext sources by release version or commit
   - [ ] Automated config.plist schema conflict resolution
-  - [ ] Lockfile creation for intelligent registry management
+  - [x] Lockfile creation for intelligent registry management
 - **Incremental Builds**
   - [ ] Advanced ACPI language support
     - [x] Support for building DSL source into compiled AML
