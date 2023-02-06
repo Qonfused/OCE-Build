@@ -52,7 +52,8 @@ Github_pkg() {
     pkg=$($jq '.assets[0]' <<< "$entry")
     if [[ -n $pkg && $($jq '.assets[] | length' <<< "$entry") > 1 ]]; then
       query=$(sed 's/[-_]/.*/g' <<< "$kext-$OC_BUILD|$key")
-      pkg=$($jq "first(.assets[] | select(.name|match(\"$query\")))" <<< "$entry")
+      match=$($jq "first(.assets[] | select(.name|match(\"$query\")))" <<< "$entry")
+      if [[ -n "$match" ]]; then pkg="$match"; fi
     fi; echo "$pkg";
   }
   nth_url() { $jq -r '.browser_download_url' <<< "$(nth_pkg $1)"; }
