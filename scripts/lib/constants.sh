@@ -41,6 +41,7 @@ ACPI_DIR=$BUILD_DIR/EFI/OC/ACPI
 KEXTS_DIR=$BUILD_DIR/EFI/OC/Kexts
 
 SCR_DIR=$BUILD_DIR/scripts
+LOCKFILE="./oc-build.lock"
 
 # Executables
 OCVALIDATE="$SCR_DIR/bin/ocvalidate"
