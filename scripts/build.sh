@@ -91,9 +91,13 @@ entry=$($yq -i e "with(.\"OpenCorePkg\" ;
 mkdir -p $SCR_DIR/bin
 
 # Extract OC scripts into scripts directory
+cp -r $OC_PKG_DIR/Utilities/macrecovery/. $SCR_DIR/macrecovery
 cp -a $OC_PKG_DIR/Utilities/ocvalidate/ocvalidate $SCR_DIR/bin
 # Mark ocvalidate as executable
 chmod +x $OCVALIDATE
+
+# Download GenSMBIOS script
+git clone $GENSMBIOS_URL $SCR_DIR/GenSMBIOS > /dev/null 2>&1
 
 # Create iasl directory
 IASL_DIR=$BUILD_DIR/.temp/@acidanthera/MaciASL

@@ -28,9 +28,12 @@ BUILD_DIR="$__PWD__/${BUILD_DIR##*/}"
 
 OC_PKG_URL="https://github.com/acidanthera/OpenCorePkg/"
 OC_BIN_URL="https://github.com/acidanthera/OcBinaryData/"
-MACIASL_URL="https://github.com/acidanthera/MaciASL/"
+
 DORTANIA_BUILD_URL="https://github.com/dortania/build-repo/releases/download"
 DORTANIA_BUILD_CATALOG="https://raw.githubusercontent.com/dortania/build-repo/builds/config.json"
+
+GENSMBIOS_URL="https://github.com/corpnewt/GenSMBIOS"
+MACIASL_URL="https://github.com/acidanthera/MaciASL/"
 
 ################################################################################
 #                                Build Resources                               #
