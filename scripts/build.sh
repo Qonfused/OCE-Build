@@ -229,12 +229,13 @@ done
 #                             Build config.plist                               #
 ################################################################################
 
-# Copy sample plist
-cp $OC_PKG_DIR/Docs/Sample.plist $EFI_DIR/OC/config.plist
-# Cleanup OC-pkg directory
-rm -r $OC_PKG_DIR
-
-# TODO
+# Default to local config.plist if present
+if [[ -f ./config.plist ]]; then cp ./config.plist $EFI_DIR/OC/config.plist
+# Fall back to building from sample plist
+else
+  cp $OC_PKG_DIR/Docs/Sample.plist $EFI_DIR/OC/config.plist
+  # TODO
+fi
 
 ################################################################################
 #                                 Post-build                                   #
