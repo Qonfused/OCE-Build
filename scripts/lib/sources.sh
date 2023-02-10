@@ -7,6 +7,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 ##
 
+source ./bin/jq/imports.sh
 source ./lib/constants.sh
 source ./lib/macros.sh
 
