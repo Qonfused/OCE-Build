@@ -15,13 +15,26 @@
 # String manipulation
 __lower__() { echo "$1" | tr "[:upper:]" "[:lower:]"; }
 __upper__() { echo "$1" | tr "[:lower:]" "[:upper:]"; }
+__trim__() { echo "${1//[[:space:]]/}"; }
 
-# # Array manipulation
-# __arr__() {
-#   src=$(echo "${1//,/ }" | sed 's/[][]//g');
-#   echo "${src[@]%%,*}"
-#   # for i in "${src[@]%%,*}"; do echo "$i" | sed -En "s/\"([^\"]*).*/\\1/p"; done
-# }
+# Array manipulation
+__arr__() {
+  src=$(echo "${1//,/ }" | sed 's/[][]//g');
+  echo "${src[@]%%,*}"
+  # for i in "${src[@]%%,*}"; do echo "$i" | sed -En "s/\"([^\"]*).*/\\1/p"; done
+}
+
+# Parse yaml/plist types
+__parse__() {
+  type=$(__trim__ $(sed 's/.*\"\(.*\)|.*/\1/' <<< "$1"))
+  value=$(sed 's/.*| \(.*\)\".*/\1/' <<< "$1" | tr -d '\\"')
+  case $type in
+    Data) value=$(sed 's/.*<\(.*\)>.*/\1/' <<< "$value" | xxd -r -p | base64) ;;
+    String) value=$(sed 's/.*\"\(.*\)\".*/\1/' <<< "$value") ;;
+    *) value=$(sed 's/.*| \(.*\).*/\1/' <<< "$ln" | tr -d '\\"') ;;
+  esac
+  echo "$value"
+}
 
 ################################################################################
 #                                 Shell Macros                                 #

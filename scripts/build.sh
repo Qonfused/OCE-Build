@@ -10,10 +10,11 @@
 # Change CWD for imports
 __PWD__=$(pwd); cd "$( dirname "${BASH_SOURCE[0]}" )"
 
-source ./bin/yq/imports.sh
 source ./lib/config.sh
 source ./lib/constants.sh
 source ./lib/macros.sh
+source ./lib/patches.sh
+source ./lib/plist.sh
 source ./lib/sources.sh
 
 
@@ -37,19 +38,19 @@ echo "
 # Match to OC-pkg
 OC_PKG=$(dBuild_pkg 'OpenCorePkg' $OC_VERSION)
 # Create OC-pkg resource folder
-OC_LOCK=$(echo $OC_PKG | $jq -r '.resolution')
+OC_LOCK=$($yq '.resolution' <<< $OC_PKG)
 OC_PKG_DIR=$BUILD_DIR/.temp/$OC_LOCK
 mkdir -p $OC_PKG_DIR
 # Unpackage OC-pkg source
-OC_PKG_URL=$(echo $OC_PKG | $jq -r '.url')
+OC_PKG_URL=$($yq '.url' <<< $OC_PKG)
 curl -sL $OC_PKG_URL | bsdtar -xvf- -C $OC_PKG_DIR > /dev/null 2>&1
 
 # Extract EFI directory
 mkdir -p $EFI_DIR
 cp -a $OC_PKG_DIR/X64/EFI/. $EFI_DIR
 # Handle removing wild-card exclusions
-cfg 'exclude."*"' | $jq -r '.[]' | while read -r f; do
-  if [[ $(cfg 'include."*"') != *\"$f\"* ]]; then
+cfg 'exclude.wildcard[]' | while read -r f; do
+  if [[ -z $(cfg "include.wildcard[] | select(. == \"$f\")") ]]; then
     find $EFI_DIR -type f -name $f -delete
   fi
 done
@@ -91,13 +92,9 @@ entry=$($yq -i e "with(.\"OpenCorePkg\" ;
 mkdir -p $SCR_DIR/bin
 
 # Extract OC scripts into scripts directory
-cp -r $OC_PKG_DIR/Utilities/macrecovery/. $SCR_DIR/macrecovery
 cp -a $OC_PKG_DIR/Utilities/ocvalidate/ocvalidate $SCR_DIR/bin
 # Mark ocvalidate as executable
 chmod +x $OCVALIDATE
-
-# Download GenSMBIOS script
-git clone $GENSMBIOS_URL $SCR_DIR/GenSMBIOS > /dev/null 2>&1
 
 # Create iasl directory
 IASL_DIR=$BUILD_DIR/.temp/@acidanthera/MaciASL
@@ -118,9 +115,12 @@ rm -r $IASL_DIR
 ################################################################################
 
 # Create ACPI resources folder
-cfg 'include.acpi' | $jq -r 'keys[]' | while read -r ssdt; do
+cfg 'include.acpi | keys | .[]' | while read -r ssdt; do
+  if [[ -z "$ssdt" || -d "$ACPI_DIR/$ssdt.aml" ]]; then continue; fi
+
   src=$(cfg "include.acpi.\"$ssdt\"")
   target=$ACPI_DIR/$ssdt.aml
+
   # Build SSDT
   $IASL -ve -p "$target" "$src" > /dev/null 2>&1
 done
@@ -128,16 +128,22 @@ done
 # TODO: Handle building external ACPI sources and patches per ACPI spec
 
 ################################################################################
-#                              Build Drivers folder                            #
+#                        Build Tools and Drivers folders                       #
 ################################################################################
 
-# Remove non-whitelisted drivers
-for p in $EFI_DIR/OC/Drivers/*.efi; do
-  DEFAULT='["OpenRuntime"]'
-  INCLUDE=$(cfg "include.drivers" $DEFAULT)
-  EXCLUDE=$(cfg "exclude.drivers")
+# Remove non-whitelisted drivers and tools
+for p in $EFI_DIR/OC/*/*.efi; do
   f=$(basename ${p%.*})
-  if [[ $INCLUDE != *"\"$f\""* || $EXCLUDE == *"\"$f\""* ]]; then rm $p; fi
+  type=$(__lower__ $(dirname ${p##*$EFI_DIR/OC/}))
+  case type in
+    drivers) DEFAULT='["OpenRuntime"]' ;;
+    tools)   DEFAULT='["OpenShell"]'   ;;
+  esac
+  if [[ $DEFAULT == *"\"$f\""* ]]; then continue; fi
+  
+  INCLUDE=$(cfg "include.$type[] | select(. == \"$f\")")
+  EXCLUDE=$(cfg "exclude.$type[] | select(. == \"$f\")")
+  if [[ -z $INCLUDE || -n $EXCLUDE ]]; then rm $p; fi
 done
 
 ################################################################################
@@ -145,10 +151,12 @@ done
 ################################################################################
 
 # Create and extract kext resources folder
-cfg 'include.kexts' | $jq -r 'keys[]' | while read -r key; do
+cfg 'include.kexts | keys | .[]' | while read -r key; do
   if [[ -z "$key" || -d "$KEXTS_DIR/$key.kext" ]]; then continue; fi
   
-  specifier=$(cfg "include.kexts.\"$key\"")
+  specifier=$(cfg "include.kexts.\"$key\"".specifier)
+  # Fall back to actual key value if 'specifier' key does not exist
+  if [[ -z $specifier ]]; then specifier=$(cfg "include.kexts.\"$key\""); fi
   # Handle kext if specifier matches a local filepath
   if [ -d "$specifier" ]; then cp -r "$specifier" $KEXTS_DIR/$key.kext; continue
   # Omit kext if packaged with another kext (or is a plugin)
@@ -166,21 +174,20 @@ cfg 'include.kexts' | $jq -r 'keys[]' | while read -r key; do
   fi
 
   # Get version lock
-  lock=$(echo "$kext_pkg" | $jq -r '.resolution | select( . != null )')
-  if [[ -z "$lock" ]]; then continue; fi
+  lock=$($yq '.resolution' <<< "$kext_pkg")
+  if [[ -z "$lock" || $lock == 'null' ]]; then continue; fi
   # Download kext archive
   pkg=$BUILD_DIR/.temp/$lock
-  url=$(echo $kext_pkg | $jq -r '.url')
+  url=$($yq '.url' <<< "$kext_pkg")
   mkdir -p $pkg && curl -sL $url | bsdtar -xvf- -C $pkg > /dev/null 2>&1
 
   # Extract kext if only packaged binary
   match=$(find $pkg -maxdepth 3 -type d -name "*.kext")
-  num=$(echo "$match" | wc -l)
+  num=$(wc -l <<< "$match")
   if [[ $num -gt 1 ]]; then match=$(find $pkg -maxdepth 3 -name "$key.kext"); fi
   # Copy kext to EFI folder
   if [[ -n "$match" ]]; then cp -r "$match" $KEXTS_DIR/$key.kext
   else continue; fi
-
   # Remove pkg if standalone kext
   if [[ $num -eq 1 ]]; then rm -r $pkg; fi
 
@@ -193,10 +200,12 @@ cfg 'include.kexts' | $jq -r 'keys[]' | while read -r key; do
 done
 
 # Extract bundled kexts from kext resources folder
-cfg 'include.kexts' | $jq -r 'keys[]' | while read -r key; do
+cfg 'include.kexts | keys | .[]' | while read -r key; do
   if [[ -z "$key" || -d "$KEXTS_DIR/$key.kext" ]]; then continue; fi
 
-  specifier=$(cfg "include.kexts.\"$key\"")
+  specifier=$(cfg "include.kexts.\"$key\".specifier")
+  # Fall back to actual key value if 'specifier' key does not exist
+  if [[ -z $specifier ]]; then specifier=$(cfg "include.kexts.\"$key\""); fi
   # Omit kext if standalone or is a plugin
   if [[ $key == *"/"* || $specifier != "*" ]]; then continue; fi
 
@@ -213,28 +222,78 @@ cfg 'include.kexts' | $jq -r 'keys[]' | while read -r key; do
 done
 
 ################################################################################
-#                             Build Tools folder                               #
-################################################################################
-
-# Remove non-whitelisted tools
-for p in $EFI_DIR/OC/Tools/*.efi; do
-  DEFAULT='["OpenShell"]'
-  INCLUDE=$(cfg "include.tools" $DEFAULT)
-  EXCLUDE=$(cfg "exclude.tools")
-  f=$(basename ${p%.*})
-  if [[ $INCLUDE != *"\"$f\""* || $EXCLUDE == *"\"$f\""* ]]; then rm $p; fi
-done
-
-################################################################################
 #                             Build config.plist                               #
 ################################################################################
 
-# Default to local config.plist if present
-if [[ -f ./config.plist ]]; then cp ./config.plist $EFI_DIR/OC/config.plist
-# Fall back to building from sample plist
+target=$EFI_DIR/OC/config.plist
+
+# Default to provided config.plist if provided
+if [[ -f config.plist ]]; then cp config.plist $target
+# Build config.plist if not provided
+elif [[ ! -f config.yml ]]; then
+  fexit "  Missing reference config.plist or config.yml file.
+  Please provide a config.plist or config.yml file in the same directory as your build.yml file."
 else
-  cp $OC_PKG_DIR/Docs/Sample.plist $EFI_DIR/OC/config.plist
-  # TODO
+  # Use OC Sample plist as template
+  cp $OC_PKG_DIR/Docs/Sample.plist $target && __remove_comments__ "$target"
+
+  # Build each property specified in a config.yml file
+  $yq -o=props --unwrapScalar=false <<< "$(cat config.yml)" | while read ln; do
+    # Skip over keys enforcing a strict entry schema
+    keys=$(__trim__ ${ln%%=*})
+    if [[ $keys =~ ^ACPI.(Add|Delete|Patch)\..* \
+      || $keys =~ ^Booter.(MmioWhitelist|Patch)\..* \
+      || $keys =~ ^Kernel.(Add|Block|Force|Patch)\..* \
+      || $keys =~ ^Misc.(Entries|Tools)\..* \
+      || $keys =~ ^UEFI.(Drivers|ReservedMemory)\..* \
+    ]]; then continue; fi
+
+    # Recursively add missing entries
+    entry=$(pq "$target" "$keys")
+    if [[ -z $entry ]]; then __add_missing__ "$target" "$keys"; fi
+
+    # Parse macros and value types
+    type=$(__trim__ $(sed 's/.*\"\(.*\)|.*/\1/' <<< "$ln"))
+    case $type in
+      Macro)
+        value=$(sed 's/.*| \(.*\)\".*/\1/' <<< "$ln")
+        case $value in
+          @Clear)
+            # Skip null entries
+            if [[ -z $entry ]]; then continue
+            # Handle single-line entry
+            elif [[ $(wc -l <<< "$entry") -lt 2 ]]; then
+              output=$(grep -o '<[^>]*>' <<< "$value" | sed "N;s/\n//")
+            # Handle multi-line entries
+            else
+              output=$(sed -n '1p;$p' <<< "$entry" | awk '{$1=$1};1')
+            fi
+          ;;
+        esac
+        ;;
+      Data) output="<data>$(__parse__ "$ln")</data>" ;;
+      String) output="<string>$(__parse__ "$ln")</string>" ;;
+      Number) output="<integer>$(__parse__ "$ln")</integer>" ;;
+      Boolean) output="<$(__parse__ "$ln")/>" ;;
+    esac
+
+    replace_entries "$target" "$keys" "$output"
+  done
+
+  mkdir -p $BUILD_DIR/.patches
+
+  # Build patches
+  build_acpi_patches
+  build_driver_patches
+  build_kext_patches
+  build_tool_patches
+
+  # Apply all patches to config.plist
+  replace_entries "$target" ".ACPI.Add" "$ACPI_ADD"
+  replace_entries "$target" ".ACPI.Patch" "$ACPI_PATCH"
+  replace_entries "$target" ".Kernel.Add" "$KERNEL_ADD"
+  replace_entries "$target" ".UEFI.Drivers" "$DRIVERS_ADD"
+  replace_entries "$target" ".Misc.Tools" "$TOOLS_ADD"
 fi
 
 ################################################################################
@@ -243,3 +302,4 @@ fi
 
 # Cleanup temp resources folder
 rm -r $BUILD_DIR/.temp
+rm -r $BUILD_DIR/.patches
