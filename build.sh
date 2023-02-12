@@ -239,6 +239,8 @@ else
 
   # Build each property specified in a config.yml file
   $yq -o=props --unwrapScalar=false <<< "$(cat config.yml)" | while read ln; do
+    # Skip over linebreaks or comments
+    if [[ -z $ln || ${ln:0:1} == '#' ]]; then continue; fi
     # Skip over keys enforcing a strict entry schema
     keys=$(__trim__ ${ln%%=*})
     if [[ $keys =~ ^ACPI.(Add|Delete|Patch)\..* \
