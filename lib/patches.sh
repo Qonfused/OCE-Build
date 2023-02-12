@@ -108,8 +108,6 @@ build_acpi_patches() {
     offset=$(($(wc -l <<< "$ACPI_PATCH")-1))
     entry=$(awk '{printf "%s\\n", $0}'\
       <<< "$(ACPI_PATCH_ENTRY "$Base" "$BaseSkip" "$Comment" "$Count" "$Enabled" "$Find" "$Limit" "$Mask" "$OemTableId" "$Replace" "$ReplaceMask" "$Skip" "$TableLength" "$TableSignature")")
-    
-    echo "${offset}s|$|\\n${entry}|" > diag.txt
 
     ACPI_PATCH=$(sed "${offset}s|$|\\n${entry}|" <<< "$ACPI_PATCH" | grep -Ev "^$")
 
