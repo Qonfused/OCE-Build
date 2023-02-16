@@ -8,7 +8,13 @@
 ##
 
 
+################################################################################
+#                               Internal Methods                               #
+################################################################################
+
 __paired_key__() { sed -n "/^$2<$3>$/,/^$2<\/$3>$/p; /^$2<\/$3>$/q" <<< "$1"; }
+
+__key_idx__() { grep -n -m 1 "<key>$2</key>" <<< "$1" | sed 's|\([0-9]*\).*|\1|'; }
 
 __key__() {
   src="$1"; key="$2"
@@ -56,24 +62,42 @@ __arr__() {
   echo "$value_match"
 }
 
-__remove_comments__() {
+################################################################################
+#                                Plist Methods                                 #
+################################################################################
+
+remove_comments() {
   grep "<key>#.*</key>" <<< "$(cat "$1")" | while read ln; do
     idx=$(grep -n -m 1 "$ln" <<< "$(cat "$1")" | sed 's/\([0-9]*\).*/\1/')
     sed -i '' -e "$(($idx)),$(($idx+1))d" "$1"
   done
 }
 
-key_idx() { grep -n -m 1 "<key>$2</key>" <<< "$1" | sed 's|\([0-9]*\).*|\1|'; }
+replace_entries() {
+  src="$(cat $1)"; set -f; keys=($(echo ${2//./ })); entries="$3"
+  idx=0; for key in "${keys[@]}"; do
+    ((idx+="$(__key_idx__ "$src" "$key")"+0))
+    src="$(__key__ "$src" "$key")"
+  done
+
+  s=$(head -n 1 <<< "$src" | sed -E 's/^([[:space:]]+).*/\1/')
+  entries=$(sed -e "s|^|$s|" <<< "$entries" | awk '{printf "%s\\n", $0}')
+  output=$(sed -e "$((idx+1)),$((idx+$(wc -l <<< "$src")))d" "$1"\
+    | sed "${idx}s|$|\\n${entries}|"\
+    | grep -Ev "^$")
+
+  echo "$output" > "$1"
+}
 
 # Recursively adds missing entries, assuming dict type for each missing level.
-__add_missing__() {
+recursive_add_entries() {
   src="$(cat "$1")"; set -f; tree=(${2//./ })
   idx=0; for key in "${tree[@]}"; do
     val="$(__key__ "$src" "$key")"
     # Value exists
     if [[ -n $val ]]; then
       # Update cursor for next key
-      ((idx+="$(key_idx "$src" "$key")"+0)); src=$val
+      ((idx+="$(__key_idx__ "$src" "$key")"+0)); src=$val
     # Value does not exist
     else
       # Handle creating new values
@@ -87,22 +111,6 @@ __add_missing__() {
       ((idx+=1)); src=$(__key__ "$(cat $1)" "$key")
     fi
   done
-}
-
-replace_entries() {
-  src="$(cat $1)"; set -f; keys=($(echo ${2//./ })); entries="$3"
-  idx=0; for key in "${keys[@]}"; do
-    ((idx+="$(key_idx "$src" "$key")"+0))
-    src="$(__key__ "$src" "$key")"
-  done
-
-  s=$(head -n 1 <<< "$src" | sed -E 's/^([[:space:]]+).*/\1/')
-  entries=$(sed -e "s|^|$s|" <<< "$entries" | awk '{printf "%s\\n", $0}')
-  output=$(sed -e "$((idx+1)),$((idx+$(wc -l <<< "$src")))d" "$1"\
-    | sed "${idx}s|$|\\n${entries}|"\
-    | grep -Ev "^$")
-
-  echo "$output" > "$1"
 }
 
 pq() {

@@ -43,7 +43,7 @@ dBuild_pkg() {
 }
 
 Github_pkg() {
-  key=$1; kext=$2; src="${3%%=*}"
+  key=$1; bin=$2; src="${3%%=*}"
   releases=$(curl -s "https://api.github.com/repos/$src/releases")
   if [[ $releases == *'API rate limit exceeded'* ]]; then
     msg=$($jq '.message' <<<"$releases"); fexit "[Github API]: ${msg%%. *}.\""
@@ -52,7 +52,7 @@ Github_pkg() {
     entry=$($jq ".[$1]" <<< "$releases")
     pkg=$($jq '.assets[0]' <<< "$entry")
     if [[ -n $pkg && $($jq '.assets[] | length' <<< "$entry") > 1 ]]; then
-      query=$(sed 's/[-_]/.*/g' <<< "$kext-$OC_BUILD|$key")
+      query=$(sed 's/[-_]/.*/g' <<< "$bin-$OC_BUILD|$key")
       match=$($jq "first(.assets[] | select(.name|match(\"$query\")))" <<< "$entry")
       if [[ -n "$match" ]]; then pkg="$match"; fi
     fi; echo "$pkg";

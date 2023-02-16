@@ -1,3 +1,12 @@
+#!/usr/bin/env bash
+
+## @file
+# OpenCore config.plist patching macros written in bash.
+#
+# Copyright (c) 2023, Cory Bennett. All rights reserved.
+# SPDX-License-Identifier: BSD-3-Clause
+##
+
 
 ################################################################################
 #                                 ACPI Patches                                 #
@@ -84,7 +93,7 @@ build_acpi_patches() {
 
     get_key() {
       ln="$($yq --unwrapScalar=false ".\"$1\"" <<< "$patch")"
-      if [[ -n $ln && $ln != 'null' ]]; then echo $(__parse__ "$ln")
+      if [[ -n $ln && $ln != 'null' ]]; then echo $(__parse_type__ "$ln")
       else echo "$2"; fi
     }
 

@@ -17,15 +17,8 @@ __lower__() { echo "$1" | tr "[:upper:]" "[:lower:]"; }
 __upper__() { echo "$1" | tr "[:lower:]" "[:upper:]"; }
 __trim__() { echo "${1//[[:space:]]/}"; }
 
-# Array manipulation
-__arr__() {
-  src=$(echo "${1//,/ }" | sed 's/[][]//g');
-  echo "${src[@]%%,*}"
-  # for i in "${src[@]%%,*}"; do echo "$i" | sed -En "s/\"([^\"]*).*/\\1/p"; done
-}
-
 # Parse yaml/plist types
-__parse__() {
+__parse_type__() {
   type=$(__trim__ $(sed 's/.*\"\(.*\)|.*/\1/' <<< "$1"))
   value=$(sed 's/.*| \(.*\)\".*/\1/' <<< "$1" | tr -d '\\"')
   case $type in
@@ -51,17 +44,6 @@ get_args() {
 }
 
 fexit () { printf '%s\n' "$1" >&2; exit "${2-1}"; }
-
-################################################################################
-#                              Filesystem Macros                               #
-################################################################################
-
-rsearch() {
-  # Ref: https://www.npmjs.com/package/find-config#algorithm
-  if [ -f "$1" ]; then printf '%s\n' "${PWD%/}/$1"
-  elif [ "$PWD" != / ]; then (cd .. && rsearch "$1")
-  fi
-}
 
 ################################################################################
 #                              Networking Macros                               #

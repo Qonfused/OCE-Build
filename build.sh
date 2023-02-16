@@ -11,19 +11,29 @@
 __PWD__=$(pwd); cd "$( dirname "${BASH_SOURCE[0]}" )"
 
 source ./lib/config.sh
+
+CONFIG=$(get_args "$@" '-c --config' "$(__rsearch__ 'build.yml')")
+if [[ -z "$CONFIG" || "$CONFIG" == "-c --config" ]]; then
+  fexit "  Please provide a build config using the '-c' or '--config' flag.
+  Example usage:
+    \$ bash ./scripts/build.sh -c ../src/build.{json|yaml}"
+elif [[ ! -f "$__PWD__/$CONFIG" ]]; then
+  fexit "  Provided build config does not exist."
+# Change config file reference to PWD
+else CONFIG="$(realpath "$__PWD__/$CONFIG")"; fi
+
 source ./lib/constants.sh
 source ./lib/macros.sh
 source ./lib/patches.sh
 source ./lib/plist.sh
 source ./lib/sources.sh
 
+# Change CWD for config.json
+cd "${CONFIG%/*}"
 
 ################################################################################
 #                            Prepare build folder                              #
 ################################################################################
-
-# Change CWD for config.json
-cd "${CONFIG%/*}"
 
 # Create new build folder
 rm -r $BUILD_DIR > /dev/null 2>&1
@@ -44,16 +54,6 @@ mkdir -p $OC_PKG_DIR
 # Unpackage OC-pkg source
 OC_PKG_URL=$($yq '.url' <<< $OC_PKG)
 curl -sL $OC_PKG_URL | bsdtar -xvf- -C $OC_PKG_DIR > /dev/null 2>&1
-
-# Extract EFI directory
-mkdir -p $EFI_DIR
-cp -a $OC_PKG_DIR/X64/EFI/. $EFI_DIR
-# Handle removing wild-card exclusions
-cfg 'exclude.wildcard[]' | while read -r f; do
-  if [[ -z $(cfg "include.wildcard[] | select(. == \"$f\")") ]]; then
-    find $EFI_DIR -type f -name $f -delete
-  fi
-done
 # Update lockfile
 entry=$($yq -n ".\"OpenCorePkg\" = $OC_PKG | with(.\"OpenCorePkg\" ;
   .extract = \"./X64/EFI/.\" |
@@ -65,17 +65,10 @@ OC_BIN_DIR=$BUILD_DIR/.temp/@acidanthera/OcBinaryData
 mkdir -p $OC_BIN_DIR
 # Sparse checkout OC-bin repo
 git clone --filter=blob:none --sparse $OC_BIN_URL $OC_BIN_DIR > /dev/null 2>&1
-OC_BIN_SHA=$(git -C $OC_BIN_DIR rev-parse HEAD)
-# Copy OC-bin drivers
 git -C $OC_BIN_DIR sparse-checkout add "Drivers" > /dev/null 2>&1
-cp -a $OC_BIN_DIR/Drivers/. $EFI_DIR/OC/Drivers
-# Copy OC-bin resources
 git -C $OC_BIN_DIR sparse-checkout add "Resources" > /dev/null 2>&1
-cp -a $OC_BIN_DIR/Resources/. $EFI_DIR/OC/Resources
-# Cleanup OC-bin directory
-rm -fr $OC_BIN_DIR/.git
-rm -r $OC_BIN_DIR
 # Update lockfile
+OC_BIN_SHA=$(git -C $OC_BIN_DIR rev-parse HEAD)
 entry=$($yq -i e "with(.\"OpenCorePkg\" ;
   .dependencies.\"OcBinaryData\" |= {
     \"resolution\": \"@acidanthera/OcBinaryData@github:#${OC_BIN_SHA:0:8}\",
@@ -85,16 +78,35 @@ entry=$($yq -i e "with(.\"OpenCorePkg\" ;
   }
 )" $LOCKFILE)
 
-################################################################################
-#                           Create Scripts directory                           #
-################################################################################
-
-mkdir -p $SCR_DIR/bin
-
 # Extract OC scripts into scripts directory
+mkdir -p $SCR_DIR/bin
 cp -a $OC_PKG_DIR/Utilities/ocvalidate/ocvalidate $SCR_DIR/bin
-# Mark ocvalidate as executable
 chmod +x $OCVALIDATE
+
+# Extract EFI directory
+mkdir -p $EFI_DIR
+cp -a $OC_PKG_DIR/X64/EFI/. $EFI_DIR
+cp $OC_PKG_DIR/Docs/Sample.plist $EFI_DIR/OC/config.plist
+# Copy OC-bin drivers
+cp -a $OC_BIN_DIR/Drivers/. $EFI_DIR/OC/Drivers
+# Copy OC-bin resources
+cp -a $OC_BIN_DIR/Resources/. $EFI_DIR/OC/Resources
+# Handle removing wild-card exclusions
+cfg 'exclude.wildcard[]' | while read -r f; do
+  if [[ -z $(cfg "include.wildcard[] | select(. == \"$f\")") ]]; then
+    find $EFI_DIR -type f -name $f -delete
+  fi
+done
+
+# Cleanup OC-pkg directory
+rm -r $OC_PKG_DIR
+# Cleanup OC-bin directory
+rm -fr $OC_BIN_DIR/.git
+rm -r $OC_BIN_DIR
+
+################################################################################
+#                               Build ACPI folder                              #
+################################################################################
 
 # Create iasl directory
 IASL_DIR=$BUILD_DIR/.temp/@acidanthera/MaciASL
@@ -104,15 +116,10 @@ git clone --filter=blob:none --sparse $MACIASL_URL $IASL_DIR > /dev/null 2>&1
 git -C $IASL_DIR sparse-checkout add "Dist" > /dev/null 2>&1
 # Copy iasl binary
 cp $IASL_DIR/Dist/iasl-stable $SCR_DIR/bin/
-# Mark iasl binary as executable
 chmod +x $IASL
 # Cleanup MaciASL/iasl directory
 rm -fr $IASL_DIR/.git
 rm -r $IASL_DIR
-
-################################################################################
-#                               Build ACPI folder                              #
-################################################################################
 
 # Create ACPI resources folder
 cfg 'include.acpi | keys | .[]' | while read -r ssdt; do
@@ -186,10 +193,8 @@ cfg 'include.kexts | keys | .[]' | while read -r key; do
   num=$(wc -l <<< "$match")
   if [[ $num -gt 1 ]]; then match=$(find $pkg -maxdepth 3 -name "$key.kext"); fi
   # Copy kext to EFI folder
-  if [[ -n "$match" ]]; then cp -r "$match" $KEXTS_DIR/$key.kext
-  else continue; fi
-  # Remove pkg if standalone kext
-  if [[ $num -eq 1 ]]; then rm -r $pkg; fi
+  if [[ -n "$match" ]]; then cp -r "$match" $KEXTS_DIR/$key.kext; rm -r $match
+  else rm -r $pkg; continue; fi
 
   # Update lockfile
   echo "" >> $LOCKFILE
@@ -197,28 +202,30 @@ cfg 'include.kexts | keys | .[]' | while read -r key; do
     .extract = \".${match#*$lock}\" |
     .type = \"kext\"
   )" >> $LOCKFILE)
-done
+  
+  # Extract bundled kexts
+  find $pkg -maxdepth 3 -type d -name "*.kext" | while read -r p; do
+    # Get kext entry
+    k=$(basename ${p%.kext})
+    if [[ -z "$k" || -d "$KEXTS_DIR/$k.kext" ]]; then continue; fi
+    # Get entry specifier
+    s=$(cfg "include.kexts.\"$k\".specifier")
+    if [[ -z $s ]]; then s=$(cfg "include.kexts.\"$k\""); fi
+    # Extract kext if bundled or matches same specifier
+    if [[ $s == '*' || $s == $specifier ]]; then
+      cp -r "$p" $KEXTS_DIR/$k.kext; rm -r $p
+      # Update lockfile
+      l=$(cut -d/ -f1,2 <<< "${p#*$BUILD_DIR/.temp/}")
+      $yq -i e "(.[] | select(.resolution == \"$l\")).bundled
+        .\"$k\" = { \"extract\": \".${p#*$l}\", \"type\": \"kext\" }"\
+        $LOCKFILE
+    fi
+  done
 
-# Extract bundled kexts from kext resources folder
-cfg 'include.kexts | keys | .[]' | while read -r key; do
-  if [[ -z "$key" || -d "$KEXTS_DIR/$key.kext" ]]; then continue; fi
-
-  specifier=$(cfg "include.kexts.\"$key\".specifier")
-  # Fall back to actual key value if 'specifier' key does not exist
-  if [[ -z $specifier ]]; then specifier=$(cfg "include.kexts.\"$key\""); fi
-  # Omit kext if standalone or is a plugin
-  if [[ $key == *"/"* || $specifier != "*" ]]; then continue; fi
-
-  # Match existing packages to kext
-  match=$(find $BUILD_DIR/.temp -maxdepth 4 -type d -name "${key##*/}.kext")
-  lock=$(cut -d/ -f1,2 <<< "${match#*$BUILD_DIR/.temp/}")
-  if [[ -n "$match" ]]; then cp -r "$match" $KEXTS_DIR/$key.kext
-  else continue; fi
-
-  # Update lockfile
-  $yq -i e "(.[] | select(.resolution == \"$lock\")).bundled
-    .\"$key\" = { \"extract\": \".${match#*$lock}\", \"type\": \"kext\" }"\
-    $LOCKFILE
+  # Cleanup pkg
+  rm -r $pkg
+  # Cleanup .temp folder
+  if [[ -z $(ls -A ${match%"${lock#*/}"*}) ]]; then rm -r ${match%"${lock#*/}"*}; fi
 done
 
 ################################################################################
@@ -234,8 +241,8 @@ elif [[ ! -f config.yml ]]; then
   fexit "  Missing reference config.plist or config.yml file.
   Please provide a config.plist or config.yml file in the same directory as your build.yml file."
 else
-  # Use OC Sample plist as template
-  cp $OC_PKG_DIR/Docs/Sample.plist $target && __remove_comments__ "$target"
+  # Default to OC Sample plist as template
+  remove_comments "$target"
 
   # Build each property specified in a config.yml file
   $yq -o=props --unwrapScalar=false <<< "$(cat config.yml)" | while read ln; do
@@ -252,7 +259,7 @@ else
 
     # Recursively add missing entries
     entry=$(pq "$target" "$keys")
-    if [[ -z $entry ]]; then __add_missing__ "$target" "$keys"; fi
+    if [[ -z $entry ]]; then recursive_add_entries "$target" "$keys"; fi
 
     # Parse macros and value types
     type=$(__trim__ $(sed 's/.*\"\(.*\)|.*/\1/' <<< "$ln"))
@@ -273,34 +280,36 @@ else
           ;;
         esac
         ;;
-      Data) output="<data>$(__parse__ "$ln")</data>" ;;
-      String) output="<string>$(__parse__ "$ln")</string>" ;;
-      Number) output="<integer>$(__parse__ "$ln")</integer>" ;;
-      Boolean) output="<$(__parse__ "$ln")/>" ;;
+      Data) output="<data>$(__parse_type__ "$ln")</data>" ;;
+      String) output="<string>$(__parse_type__ "$ln")</string>" ;;
+      Number) output="<integer>$(__parse_type__ "$ln")</integer>" ;;
+      Boolean) output="<$(__parse_type__ "$ln")/>" ;;
     esac
 
     replace_entries "$target" "$keys" "$output"
   done
-
-  mkdir -p $BUILD_DIR/.patches
-
-  # Build patches
-  build_acpi_patches
-  build_driver_patches
-  build_kext_patches
-  build_tool_patches
-
-  # Apply all patches to config.plist
-  replace_entries "$target" ".ACPI.Add" "$ACPI_ADD"
-  replace_entries "$target" ".ACPI.Patch" "$ACPI_PATCH"
-  replace_entries "$target" ".Kernel.Add" "$KERNEL_ADD"
-  replace_entries "$target" ".UEFI.Drivers" "$DRIVERS_ADD"
-  replace_entries "$target" ".Misc.Tools" "$TOOLS_ADD"
 fi
+
+mkdir -p $BUILD_DIR/.patches
+
+# Build patches
+build_acpi_patches
+build_driver_patches
+build_kext_patches
+build_tool_patches
+
+# Apply all patches to config.plist
+replace_entries "$target" ".ACPI.Add" "$ACPI_ADD"
+replace_entries "$target" ".ACPI.Patch" "$ACPI_PATCH"
+replace_entries "$target" ".Kernel.Add" "$KERNEL_ADD"
+replace_entries "$target" ".UEFI.Drivers" "$DRIVERS_ADD"
+replace_entries "$target" ".Misc.Tools" "$TOOLS_ADD"
 
 ################################################################################
 #                                 Post-build                                   #
 ################################################################################
+
+exit
 
 # Cleanup temp resources folder
 rm -r $BUILD_DIR/.temp

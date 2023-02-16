@@ -11,15 +11,20 @@ source ./bin/yq/imports.sh
 source ./lib/macros.sh
 
 
-CONFIG=$(get_args "$@" '-c --config' "$(rsearch 'build.yml')")
-if [[ -z "$CONFIG" || "$CONFIG" == "-c --config" ]]; then
-  fexit "  Please provide a build config using the '-c' or '--config' flag.
-  Example usage:
-    \$ bash ./scripts/build.sh -c ../src/build.{json|yaml}"
-elif [[ ! -f "$__PWD__/$CONFIG" ]]; then
-  fexit "  Provided build config does not exist."
-# Change config file reference to PWD
-else CONFIG="$(realpath "$__PWD__/$CONFIG")"; fi
+################################################################################
+#                               Internal Methods                               #
+################################################################################
+
+__rsearch__() {
+  # Ref: https://www.npmjs.com/package/find-config#algorithm
+  if [ -f "$1" ]; then printf '%s\n' "${PWD%/}/$1"
+  elif [ "$PWD" != / ]; then (cd .. && __rsearch__ "$1")
+  fi
+}
+
+################################################################################
+#                               Config Methods                                 #
+################################################################################
 
 cfg() {
   src="$(cat $CONFIG | sed 's/".":/"wildcard":/')"
