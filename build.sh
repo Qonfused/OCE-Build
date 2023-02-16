@@ -309,8 +309,6 @@ replace_entries "$target" ".Misc.Tools" "$TOOLS_ADD"
 #                                 Post-build                                   #
 ################################################################################
 
-exit
-
 # Cleanup temp resources folder
 rm -r $BUILD_DIR/.temp
 rm -r $BUILD_DIR/.patches
