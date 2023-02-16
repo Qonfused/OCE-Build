@@ -74,11 +74,11 @@ remove_comments() {
 }
 
 replace_entries() {
-  src="$(cat $1)"; set -f; keys=($(echo ${2//./ })); entries="$3"
-  idx=0; for key in "${keys[@]}"; do
+  src="$(cat $1)"; set -f; keys=$(sed 's/\./\n/g' <<< "$2"); entries="$3"
+  idx=0; while read -r key; do
     ((idx+="$(__key_idx__ "$src" "$key")"+0))
     src="$(__key__ "$src" "$key")"
-  done
+  done <<< "$keys"
 
   s=$(head -n 1 <<< "$src" | sed -E 's/^([[:space:]]+).*/\1/')
   entries=$(sed -e "s|^|$s|" <<< "$entries" | awk '{printf "%s\\n", $0}')
@@ -91,8 +91,8 @@ replace_entries() {
 
 # Recursively adds missing entries, assuming dict type for each missing level.
 recursive_add_entries() {
-  src="$(cat "$1")"; set -f; tree=(${2//./ })
-  idx=0; for key in "${tree[@]}"; do
+  src="$(cat "$1")"; tree=$(sed 's/\./\n/g' <<< "$2")
+  idx=0; while read -r key; do
     val="$(__key__ "$src" "$key")"
     # Value exists
     if [[ -n $val ]]; then
@@ -110,13 +110,12 @@ recursive_add_entries() {
       # Update cursor for next key
       ((idx+=1)); src=$(__key__ "$(cat $1)" "$key")
     fi
-  done
+  done <<< "$tree"
 }
 
 pq() {
-  plist="$(cat $1)";
-  set -f; keys=($(echo ${2//./ }))
-  for k in "${keys[@]}"; do
+  plist="$(cat $1)"; keys=$(sed 's/\./\n/g' <<< "$2")
+  while read -r k; do
     key=$(sed -e 's/\[[^][]*\]//g' <<< "$k")
     plist="$(__key__ "$plist" "$key")"
     if [[ $k != $key ]]; then
@@ -124,6 +123,6 @@ pq() {
       plist=$(__arr__ "$plist" $elem)
       if [[ -z "$elem" ]]; then plist=$(sed '1d;$d' <<< "$plist"); fi
     fi
-  done
+  done <<< "$keys"
   echo "$plist"
 }
