@@ -242,16 +242,17 @@ build_kext_patches() {
     B=$(sed -r "s|^$KEXTS_DIR/||" <<< "${pkg%/Contents*}")
     C="$key"
     D=$([[ -z $(cfg "exclude.kexts.$key") ]] && echo "true" || echo "false")
-    E=$(find $pkg/MacOS -depth 1 2>/dev/null | sed -r "s|^${pkg%/Contents*}/||")
+    E=$(find "$pkg/MacOS" -mindepth 1 2>/dev/null \
+      | sed -r "s|^${pkg%/Contents*}/||")
     F=""
     G=""
-    H=$(find $pkg -depth 1 -name "Info.plist" 2>/dev/null\
+    H=$(find "$pkg" -maxdepth 1 -name "Info.plist" 2>/dev/null\
       | sed -r "s|^${pkg%/Contents*}/||")
 
     # Append Kext entry
     offset=$(($(wc -l <<< "$KERNEL_ADD")-1))
     entry=$(awk '{printf "%s\\n", $0}'\
-      <<< "$(KEXT_ADD_ENTRY "${Arch:-$A}" "${BundlePath:-$B}" "${Comment:-$C}" "${Enabled:-$D}" "${ExecutablePath:-$E}" "${MaxKernel:-$F}" "${Min_Kernel:-$G}" "${PlistPath:-$H}")")
+      <<< "$(KEXT_ADD_ENTRY "${Arch:-$A}" "${BundlePath:-$B}" "${Comment:-$C}" "${Enabled:-$D}" "${ExecutablePath:-$E}" "${MaxKernel:-$F}" "${MinKernel:-$G}" "${PlistPath:-$H}")")
     KERNEL_ADD=$(sed "${offset}s|$|\\n${entry}|" <<< "$KERNEL_ADD" | grep -Ev "^$")
 
     # Create plist patch
