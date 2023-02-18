@@ -15,17 +15,6 @@ source ./lib/macros.sh
 #                               Internal Methods                               #
 ################################################################################
 
-__rsearch__() {
-  # Ref: https://www.npmjs.com/package/find-config#algorithm
-  if [ -f "$1" ]; then printf '%s\n' "${PWD%/}/$1"
-  elif [ "$PWD" != / ]; then (cd .. && __rsearch__ "$1")
-  fi
-}
-
-################################################################################
-#                               Config Methods                                 #
-################################################################################
-
 cfg() {
   src="$(cat $CONFIG | sed 's/".":/"wildcard":/')"
   # Default to regular json/yaml parsing

@@ -34,13 +34,15 @@ __parse_type__() {
 ################################################################################
 
 get_args() {
-  args=($1); declare -a kargs=($2)
+  declare -a args=($1); declare -a kargs=($2)
+  [[ -n $3 ]] && offset=$3 || offset=0;
   for k in "${kargs[@]}"; do
-    for i in "${!args[@]}"; do
-      if [[ "${args[$i]}" = "${k}" ]]; then echo ${args[$(($i+1))]}; break; fi
+    i=-1; while (( i++ < "${#args[@]}" )); do
+      if [[ "${args[$i]}" == "${k}" ]]; then
+        echo ${args[$((i+offset))]}; break
+      fi
     done
   done
-  echo "$2"
 }
 
 fexit () { printf '%s\n' "$1" >&2; exit "${2-1}"; }

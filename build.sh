@@ -12,7 +12,7 @@ __PWD__=$(pwd); cd "$( dirname "${BASH_SOURCE[0]}" )"
 
 source ./lib/config.sh
 
-CONFIG=$(get_args "$@" '-c --config' "$(__rsearch__ 'build.yml')")
+CONFIG=$(get_args "$(echo "$@")" '-c --config' 1)
 if [[ -z "$CONFIG" || "$CONFIG" == "-c --config" ]]; then
   fexit "  Please provide a build config using the '-c' or '--config' flag.
   Example usage:
