@@ -215,8 +215,7 @@ cfg 'include.kexts | keys | .[]' | while read -r key; do
     if [[ $s == '*' || $s == $specifier ]]; then
       cp -r "$p" $KEXTS_DIR/$k.kext; rm -r $p
       # Update lockfile
-      l=$(cut -d/ -f1,2 <<< "${p#*$BUILD_DIR/.temp/}")
-      $yq -i e "(.[] | select(.resolution == \"$l\")).bundled
+      $yq -i e "(.[] | select(.resolution == \"$lock\")).bundled
         .\"$k\" = { \"extract\": \".${p#*$l}\", \"type\": \"kext\" }"\
         $LOCKFILE
     fi
