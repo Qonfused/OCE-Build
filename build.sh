@@ -36,7 +36,7 @@ cd "${CONFIG%/*}"
 ################################################################################
 
 # Create new build folder
-rm -r $BUILD_DIR > /dev/null 2>&1
+rm -fr $BUILD_DIR > /dev/null 2>&1
 mkdir -p $BUILD_DIR
 
 # Create build lockfile
@@ -203,7 +203,6 @@ cfg 'include.kexts | keys | .[]' | while read -r key; do
   else rm -r $pkg; continue; fi
 
   # Update lockfile
-  echo "" >> $LOCKFILE
   entry=$($yq -n ".\"$key\" = $kext_pkg | with(.\"$key\" ;
     .extract = \".${match#*$pkg}\" |
     .type = \"kext\"
