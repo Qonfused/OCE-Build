@@ -79,8 +79,8 @@ entry=$($yq -i e "with(.\"OpenCorePkg\" ;
 )" $LOCKFILE)
 
 # Extract OC scripts into scripts directory
-mkdir -p $SCR_DIR/bin
-cp -a $OC_PKG_DIR/Utilities/ocvalidate/ocvalidate $SCR_DIR/bin
+mkdir -p $SCR_DIR/ocvalidate
+cp -a $OC_PKG_DIR/Utilities/ocvalidate/. $SCR_DIR/ocvalidate
 chmod +x $OCVALIDATE
 
 # Extract EFI directory
@@ -116,6 +116,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   git clone --filter=blob:none --sparse $MACIASL_URL $IASL_DIR > /dev/null 2>&1
   git -C $IASL_DIR sparse-checkout add "Dist" > /dev/null 2>&1
   # Copy iasl binary
+  mkdir -p $SCR_DIR/bin
   cp $IASL_DIR/Dist/iasl-stable $SCR_DIR/bin/
   chmod +x $IASL
   # Cleanup MaciASL/iasl directory

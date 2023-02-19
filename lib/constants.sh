@@ -47,5 +47,7 @@ SCR_DIR=$BUILD_DIR/scripts
 LOCKFILE="./build.lock"
 
 # Executables
-OCVALIDATE="$SCR_DIR/bin/ocvalidate"
+OCVALIDATE="$SCR_DIR/ocvalidate/ocvalidate"
+if [[ "$OSTYPE" != "darwin"* ]]; then OCVALIDATE+=".linux"; fi
 IASL="$SCR_DIR/bin/iasl-stable"
+if [[ "$OSTYPE" != "darwin"* ]]; then IASL="$(type -p "iasl")"; fi
