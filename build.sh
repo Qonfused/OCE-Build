@@ -188,7 +188,8 @@ cfg 'include.kexts | keys | .[]' | while read -r key; do
   lock=$($yq '.resolution' <<< "$kext_pkg")
   if [[ -z "$lock" || $lock == 'null' ]]; then continue; fi
   # Download kext archive
-  pkg=$BUILD_DIR/.temp/${lock%/*}/$kext
+  vendor_dir=$BUILD_DIR/.temp/"${lock%/*}"
+  pkg=$vendor_dir/$kext
   url=$($yq '.url' <<< "$kext_pkg")
   mkdir -p $pkg && curl -sL $url | bsdtar -xvf- -C $pkg > /dev/null 2>&1
 
@@ -203,7 +204,7 @@ cfg 'include.kexts | keys | .[]' | while read -r key; do
   # Update lockfile
   echo "" >> $LOCKFILE
   entry=$($yq -n ".\"$key\" = $kext_pkg | with(.\"$key\" ;
-    .extract = \".${match#*$lock}\" |
+    .extract = \".${match#*$vendor_dir}\" |
     .type = \"kext\"
   )" >> $LOCKFILE)
   
@@ -220,15 +221,14 @@ cfg 'include.kexts | keys | .[]' | while read -r key; do
       cp -r "$p" $KEXTS_DIR/$k.kext; rm -r $p
       # Update lockfile
       $yq -i e "(.[] | select(.resolution == \"$lock\")).bundled
-        .\"$k\" = { \"extract\": \".${p#*$l}\", \"type\": \"kext\" }"\
+        .\"$k\" = { \"extract\": \".${p#*$vendor_dir}\", \"type\": \"kext\" }"\
         $LOCKFILE
     fi
   done
 
   # Cleanup pkg
   rm -r $pkg
-  # Cleanup .temp folder
-  vendor_dir=$BUILD_DIR/.temp/"${lock%/*}"
+  # Cleanup vendor folder folder
   if [[ -z $(ls -A $vendor_dir) ]]; then rm -r $vendor_dir; fi
 done
 
