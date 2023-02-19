@@ -52,8 +52,9 @@ fexit () { printf '%s\n' "$1" >&2; exit "${2-1}"; }
 ################################################################################
 
 itr_checksum() {
-  url=$1
-  checksum() { curl -sL "$url" | shasum -a 256 | grep -o '^\S*'; }
+  url="$1"
+  checksum() { curl -sL "$url" | shasum -a 256 | grep -Eo '[a-z0-9]+'; }
   arr=($(for i in {1..3}; do checksum; done))
-  IFS=$'\n' sort <<<"${arr[*]}" | uniq -d; unset IFS
+  IFS=$'\n' sorted=($(sort <<<"${arr[*]}")); unset IFS
+  echo "${sorted[0]}"
 }

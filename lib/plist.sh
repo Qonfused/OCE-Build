@@ -69,7 +69,7 @@ __arr__() {
 remove_comments() {
   grep "<key>#.*</key>" <<< "$(cat "$1")" | while read ln; do
     idx=$(grep -n -m 1 "$ln" <<< "$(cat "$1")" | sed 's/\([0-9]*\).*/\1/')
-    sed -i '' -e "$(($idx)),$(($idx+1))d" "$1"
+    sed -i '' -e "$(($idx)),$(($idx+1))d" "$1" > /dev/null 2>&1
   done
 }
 
