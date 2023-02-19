@@ -49,7 +49,7 @@ echo "
 OC_PKG=$(dBuild_pkg 'OpenCorePkg' $OC_VERSION)
 # Create OC-pkg resource folder
 OC_LOCK=$($yq '.resolution' <<< $OC_PKG)
-OC_PKG_DIR=$BUILD_DIR/.temp/$OC_LOCK
+OC_PKG_DIR=$BUILD_DIR/.temp/${OC_LOCK%/*}/OpenCorePkg
 mkdir -p $OC_PKG_DIR
 # Unpackage OC-pkg source
 OC_PKG_URL=$($yq '.url' <<< $OC_PKG)
@@ -184,7 +184,7 @@ cfg 'include.kexts | keys | .[]' | while read -r key; do
   lock=$($yq '.resolution' <<< "$kext_pkg")
   if [[ -z "$lock" || $lock == 'null' ]]; then continue; fi
   # Download kext archive
-  pkg=$BUILD_DIR/.temp/$lock
+  pkg=$BUILD_DIR/.temp/${lock%/*}/$kext
   url=$($yq '.url' <<< "$kext_pkg")
   mkdir -p $pkg && curl -sL $url | bsdtar -xvf- -C $pkg > /dev/null 2>&1
 
@@ -224,7 +224,8 @@ cfg 'include.kexts | keys | .[]' | while read -r key; do
   # Cleanup pkg
   rm -r $pkg
   # Cleanup .temp folder
-  if [[ -z $(ls -A ${match%"${lock#*/}"*}) ]]; then rm -r ${match%"${lock#*/}"*}; fi
+  vendor_dir=$BUILD_DIR/.temp/"${lock%/*}"
+  if [[ -z $(ls -A $vendor_dir) ]]; then rm -r $vendor_dir; fi
 done
 
 ################################################################################
