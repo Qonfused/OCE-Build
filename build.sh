@@ -299,11 +299,11 @@ build_kext_patches
 build_tool_patches
 
 # Apply all patches to config.plist
-replace_entries "$target" ".ACPI.Add" "$ACPI_ADD"
-replace_entries "$target" ".ACPI.Patch" "$ACPI_PATCH"
-replace_entries "$target" ".Kernel.Add" "$KERNEL_ADD"
-replace_entries "$target" ".UEFI.Drivers" "$DRIVERS_ADD"
-replace_entries "$target" ".Misc.Tools" "$TOOLS_ADD"
+replace_entries "$target" "ACPI.Add" "$ACPI_ADD"
+replace_entries "$target" "ACPI.Patch" "$ACPI_PATCH"
+replace_entries "$target" "Kernel.Add" "$KERNEL_ADD"
+replace_entries "$target" "UEFI.Drivers" "$DRIVERS_ADD"
+replace_entries "$target" "Misc.Tools" "$TOOLS_ADD"
 
 ################################################################################
 #                                 Post-build                                   #
