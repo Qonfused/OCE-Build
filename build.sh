@@ -108,18 +108,22 @@ rm -r $OC_BIN_DIR
 #                               Build ACPI folder                              #
 ################################################################################
 
-# Create iasl directory
-IASL_DIR=$BUILD_DIR/.temp/@acidanthera/MaciASL
-mkdir -p $IASL_DIR
-# Sparse checkout MaciASL repo
-git clone --filter=blob:none --sparse $MACIASL_URL $IASL_DIR > /dev/null 2>&1
-git -C $IASL_DIR sparse-checkout add "Dist" > /dev/null 2>&1
-# Copy iasl binary
-cp $IASL_DIR/Dist/iasl-stable $SCR_DIR/bin/
-chmod +x $IASL
-# Cleanup MaciASL/iasl directory
-rm -fr $IASL_DIR/.git
-rm -r $IASL_DIR
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  # Create iasl directory
+  IASL_DIR=$BUILD_DIR/.temp/@acidanthera/MaciASL
+  mkdir -p $IASL_DIR
+  # Sparse checkout MaciASL repo
+  git clone --filter=blob:none --sparse $MACIASL_URL $IASL_DIR > /dev/null 2>&1
+  git -C $IASL_DIR sparse-checkout add "Dist" > /dev/null 2>&1
+  # Copy iasl binary
+  cp $IASL_DIR/Dist/iasl-stable $SCR_DIR/bin/
+  chmod +x $IASL
+  # Cleanup MaciASL/iasl directory
+  rm -fr $IASL_DIR/.git
+  rm -r $IASL_DIR
+elif ! IASL="$(type -p "iasl")" || [[ -z $IASL ]]; then
+  fexit "No iasl executable or alias was found (e.g. in /usr/bin/iasl)."
+fi
 
 # Create ACPI resources folder
 cfg 'include.acpi | keys | .[]' | while read -r ssdt; do
