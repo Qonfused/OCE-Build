@@ -44,13 +44,16 @@ dBuild_pkg() {
 
 Github_pkg() {
   key=$1; bin=$2; src="${3%%=*}"
-  if [[ -n $GITHUB_TOKEN ]]; then
-    releases=$(curl -s "https://api.github.com/repos/$src/releases" \
-      --header "authorization: Bearer $GITHUB_TOKEN")
+  # Fetch github releases api
+  if [[ $IS_CI == 'true' && -n $GH_TOKEN ]]; then
+    releases=$(gh api --method GET /repos/$src/releases)
   else
     releases=$(curl -s "https://api.github.com/repos/$src/releases")
   fi
-  if [[ $releases == *'API rate limit exceeded'* ]]; then
+  # Handle bad API requests
+  if [[ $releases == *'Bad credentials'* ]]; then
+    msg=$($jq '.message' <<<"$releases"); fexit "[Github API]: ${msg%%. *}.\""
+  elif [[ $releases == *'API rate limit exceeded'* ]]; then
     msg=$($jq '.message' <<<"$releases"); fexit "[Github API]: ${msg%%. *}.\""
   fi
   nth_pkg() {
