@@ -44,7 +44,12 @@ dBuild_pkg() {
 
 Github_pkg() {
   key=$1; bin=$2; src="${3%%=*}"
-  releases=$(curl -s "https://api.github.com/repos/$src/releases")
+  if [[ -n $GITHUB_TOKEN ]]; then
+    releases=$(curl -s "https://api.github.com/repos/$src/releases" \
+      --header "authorization: Bearer $GITHUB_TOKEN")
+  else
+    releases=$(curl -s "https://api.github.com/repos/$src/releases")
+  fi
   if [[ $releases == *'API rate limit exceeded'* ]]; then
     msg=$($jq '.message' <<<"$releases"); fexit "[Github API]: ${msg%%. *}.\""
   fi
