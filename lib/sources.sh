@@ -46,7 +46,8 @@ Github_pkg() {
   key=$1; bin=$2; src="${3%%=*}"
   # Fetch github releases api
   if [[ -n $GH_TOKEN ]]; then
-    releases=$(curl --request GET \
+    releases=$(curl -s \
+      --request GET \
       --url https://api.github.com/repos/$src/releases \
       --header "Authorization: Bearer $GH_TOKEN")
   else
