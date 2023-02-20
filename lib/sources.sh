@@ -45,17 +45,20 @@ dBuild_pkg() {
 Github_pkg() {
   key=$1; bin=$2; src="${3%%=*}"
   # Fetch github releases api
-  if [[ $IS_CI == 'true' || -n $GH_TOKEN ]]; then
-    releases=$(gh api --method GET /repos/$src/releases)
+  if [[ -n $GH_TOKEN ]]; then
+    releases=$(curl --request GET \
+      --url https://api.github.com/repos/$src/releases \
+      --header "Authorization: Bearer $GH_TOKEN")
   else
     releases=$(curl -s "https://api.github.com/repos/$src/releases")
   fi
   # Handle bad API requests
-  if [[ $releases == *'Bad credentials'* ]]; then
-    msg=$($jq '.message' <<<"$releases"); fexit "[Github API]: ${msg%%. *}.\""
-  elif [[ $releases == *'API rate limit exceeded'* ]]; then
-    msg=$($jq '.message' <<<"$releases"); fexit "[Github API]: ${msg%%. *}.\""
+  if [[ $releases == *'Bad credentials'* || \
+        $releases == *'API rate limit exceeded'*
+  ]]; then
+    msg=$($jq '.message' <<< "$releases"); fexit "[Github API]: ${msg%%. *}.\""
   fi
+  # Parsing macros
   nth_pkg() {
     entry=$($jq ".[$1]" <<< "$releases")
     pkg=$($jq '.assets[0]' <<< "$entry")
