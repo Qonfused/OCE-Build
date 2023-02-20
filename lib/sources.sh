@@ -45,7 +45,7 @@ dBuild_pkg() {
 Github_pkg() {
   key=$1; bin=$2; src="${3%%=*}"
   # Fetch github releases api
-  if [[ $IS_CI == 'true' && -n $GH_TOKEN ]]; then
+  if [[ $IS_CI == 'true' || -n $GH_TOKEN ]]; then
     releases=$(gh api --method GET /repos/$src/releases)
   else
     releases=$(curl -s "https://api.github.com/repos/$src/releases")
