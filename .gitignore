@@ -1,13 +1,11 @@
 .*
-!/.gitignore
 !/.github
 !/.vscode
+!/.gitattributes
+!/.gitignore
 
 # Build artifacts
 /dist
-
-# macOS Boot Image
-/com.apple.recovery.boot
 
 # macOS specific caches
 /.fseventsd
