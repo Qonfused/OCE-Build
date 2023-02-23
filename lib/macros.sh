@@ -20,7 +20,7 @@ __trim__() { echo "${1//[[:space:]]/}"; }
 # Parse yaml/plist types
 __parse_type__() {
   type=$(__trim__ $(sed 's/.*\"\(.*\)|.*/\1/' <<< "$1"))
-  value=$(sed 's/.*| \(.*\)\".*/\1/' <<< "$1" | tr -d '\\"')
+  value=$(sed 's/.*| \(.*\)\".*/\1/' <<< "$1" | sed 's/\\"/\"/g')
   case $type in
     Data) value=$(sed 's/.*<\(.*\)>.*/\1/' <<< "$value" | xxd -r -p | base64) ;;
     String) value=$(sed 's/.*\"\(.*\)\".*/\1/' <<< "$value") ;;
