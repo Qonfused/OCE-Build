@@ -29,7 +29,6 @@ __parse_type__() {
       value=$(sed 's/.*\"\(.*\)\".*/\1/' <<< "$value") ;;
     *) value=$(sed 's/.*| \(.*\).*/\1/' <<< "$ln" | tr -d '\\"') ;;
   esac
-  echo "||$type|| $|$ ||$value||" >> ~/Desktop/diag.log
   echo "$value"
 }
 
