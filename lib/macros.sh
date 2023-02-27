@@ -23,9 +23,13 @@ __parse_type__() {
   value=$(sed 's/.*| \(.*\)\".*/\1/' <<< "$1" | sed 's/\\"/\"/g')
   case $type in
     Data) value=$(sed 's/.*<\(.*\)>.*/\1/' <<< "$value" | xxd -r -p | base64) ;;
-    String) value=$(sed 's/.*\"\(.*\)\".*/\1/' <<< "$value") ;;
+    String)
+      # Handle incorrect shell escaping
+      if [[ "${value: -1}" != \" ]]; then value+=$'"'; fi
+      value=$(sed 's/.*\"\(.*\)\".*/\1/' <<< "$value") ;;
     *) value=$(sed 's/.*| \(.*\).*/\1/' <<< "$ln" | tr -d '\\"') ;;
   esac
+  echo "||$type|| $|$ ||$value||" >> ~/Desktop/diag.log
   echo "$value"
 }
 
