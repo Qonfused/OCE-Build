@@ -25,7 +25,9 @@ __parse_type__() {
     Data) value=$(sed 's/.*<\(.*\)>.*/\1/' <<< "$value" | xxd -r -p | base64) ;;
     String)
       # Handle incorrect shell escaping
-      if [[ "${value: -1}" != \" ]]; then value+=$'"'; fi
+      if [[ "${value:0:1}" == \" && \
+            "${value: -1}" != \"
+      ]]; then value+=$'"'; fi
       value=$(sed 's/.*\"\(.*\)\".*/\1/' <<< "$value") ;;
     *) value=$(sed 's/.*| \(.*\).*/\1/' <<< "$ln" | tr -d '\\"') ;;
   esac
