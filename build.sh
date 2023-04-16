@@ -252,6 +252,18 @@ else
   $yq -o=props --unwrapScalar=false <<< "$(cat config.yml)" | while read ln; do
     # Skip over linebreaks or comments
     if [[ -z $ln || ${ln:0:1} == '#' ]]; then continue; fi
+
+    # Handle build macros for conditional config.plist settings
+    if [[ $ln =~ '@'(ifdef|endif).* ]]; then
+      def=$(xargs <<< ${ln#*=})
+      case "$def" in
+        'RELEASE'|'DEBUG') if [[ $def != $OC_BUILD ]]; then ((LN_SKIP=1)); fi ;;
+        *) unset LN_SKIP ;;
+      esac
+    fi
+    # Bail on macros after parsing and when set to skip lines
+    if [[ ${ln:0:1} == '@' || $LN_SKIP ]]; then continue; fi
+
     # Skip over keys enforcing a strict entry schema
     keys=$(__trim__ ${ln%%=*})
     if [[ $keys =~ ^ACPI.(Add|Delete|Patch)\..* \
