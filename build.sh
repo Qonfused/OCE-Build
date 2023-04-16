@@ -190,17 +190,17 @@ cfg 'include.kexts | keys | .[]' | while read -r key; do
   if [[ -z "$lock" || $lock == 'null' ]]; then continue; fi
   # Download kext archive
   pdir=$BUILD_DIR/.temp/"${lock%/*}"
-  pkg=$pdir/$kext
+  pkg="$pdir/$kext"
   url=$($yq '.url' <<< "$kext_pkg")
-  mkdir -p $pkg && curl -sL $url | bsdtar -xvf- -C $pkg > /dev/null 2>&1
+  mkdir -p "$pkg" && curl -sL $url | bsdtar -xvf- -C "$pkg" > /dev/null 2>&1
 
   # Extract kext if only packaged binary
-  match=$(find $pkg -maxdepth 3 -type d -name "*.kext")
+  match=$(find "$pkg" -maxdepth 3 -type d -name "*.kext")
   num=$(wc -l <<< "$match")
-  if [[ $num -gt 1 ]]; then match=$(find $pkg -maxdepth 3 -name "$key.kext"); fi
+  if [[ $num -gt 1 ]]; then match=$(find "$pkg" -maxdepth 3 -name "$key.kext"); fi
   # Copy kext to EFI folder
-  if [[ -n "$match" ]]; then cp -r "$match" $KEXTS_DIR/$key.kext; rm -r $match
-  else rm -r $pkg; continue; fi
+  if [[ -n "$match" ]]; then cp -r "$match" $KEXTS_DIR/$key.kext; rm -r "$match"
+  else rm -r "$pkg" >/dev/null 2>&1; continue; fi
 
   # Update lockfile
   entry=$($yq -n ".\"$key\" = $kext_pkg | with(.\"$key\" ;
@@ -209,7 +209,7 @@ cfg 'include.kexts | keys | .[]' | while read -r key; do
   )" >> $LOCKFILE)
   
   # Extract bundled kexts
-  find $pkg -maxdepth 3 -type d -name "*.kext" | while read -r p; do
+  find "$pkg" -maxdepth 3 -type d -name "*.kext" | while read -r p; do
     # Get kext entry
     k=$(basename ${p%.kext})
     if [[ -z "$k" || -d "$KEXTS_DIR/$k.kext" ]]; then continue; fi
@@ -227,9 +227,9 @@ cfg 'include.kexts | keys | .[]' | while read -r key; do
   done
 
   # Cleanup pkg
-  rm -r $pkg
+  rm -r "$pkg"
   # Cleanup parent package folder
-  if [[ -z $(ls -A $pdir) ]]; then rm -r $pdir; fi
+  if [[ -z $(ls -A "$pdir") ]]; then rm -r "$pdir"; fi
 done
 
 ################################################################################
