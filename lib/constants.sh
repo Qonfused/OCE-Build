@@ -48,6 +48,11 @@ LOCKFILE="./build.lock"
 
 # Executables
 OCVALIDATE="$SCR_DIR/ocvalidate/ocvalidate"
-if [[ "$OSTYPE" != "darwin"* ]]; then OCVALIDATE+=".linux"; fi
+MACSERIAL="$SCR_DIR/macserial/macserial"
+if [[ "$OSTYPE" != "darwin"* ]]; then
+    OCVALIDATE+=".linux"
+    MACSERIAL+=".linux"
+fi
+
 IASL="$SCR_DIR/bin/iasl-stable"
 if [[ "$OSTYPE" != "darwin"* ]]; then IASL="$(type -p "iasl")"; fi

@@ -82,6 +82,8 @@ entry=$($yq -i e "with(.\"OpenCorePkg\" ;
 mkdir -p $SCR_DIR/ocvalidate
 cp -a $OC_PKG_DIR/Utilities/ocvalidate/. $SCR_DIR/ocvalidate
 chmod +x $OCVALIDATE
+cp -a $OC_PKG_DIR/Utilities/macserial/. $SCR_DIR/macserial
+chmod +x $MACSERIAL
 
 # Extract EFI directory
 mkdir -p $EFI_DIR
