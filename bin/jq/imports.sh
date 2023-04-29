@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2086,SC2155
 
 ## @file
 # Import management for vendored binaries
@@ -13,7 +14,9 @@ case "$OSTYPE" in
   linux*)  jq_bin='jq-linux64' ;;
   msys*)   jq_bin='jq-win64.exe' ;;
 esac
-jq=$(realpath ./bin/jq/$jq_bin)
+
+export jq=$(realpath ./bin/jq/$jq_bin)
+
 # JQ_RELEASE="https://github.com/stedolan/jq/releases/download/jq-1.6"
 # mkdir -p ${jq%/*} && curl -o $jq -sL "$JQ_RELEASE/${jq##*/}" > /dev/null 2>&1
 # chmod +x $jq

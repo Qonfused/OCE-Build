@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+#shellcheck disable=SC2206,SC2207
 
 ## @file
 # A collection of macros for extending Bash functionality
@@ -19,7 +20,7 @@ __trim__() { echo "${1//[[:space:]]/}"; }
 
 # Parse yaml/plist types
 __parse_type__() {
-  type=$(__trim__ $(sed 's/.*\"\(.*\)|.*/\1/' <<< "$1"))
+  type=$(__trim__ "$(sed 's/.*\"\(.*\)|.*/\1/' <<< "$1")")
   value=$(sed 's/.*| \(.*\)\".*/\1/' <<< "$1" | sed 's/\\"/\"/g')
   case $type in
     Data) value=$(sed 's/.*<\(.*\)>.*/\1/' <<< "$value" | xxd -r -p | base64) ;;
@@ -29,7 +30,7 @@ __parse_type__() {
             "${value: -1}" != \"
       ]]; then value+=$'"'; fi
       value=$(sed 's/.*\"\(.*\)\".*/\1/' <<< "$value") ;;
-    *) value=$(sed 's/.*| \(.*\).*/\1/' <<< "$ln" | tr -d '\\"') ;;
+    *) value=$(sed 's/.*| \(.*\).*/\1/' <<< "$1" | tr -d '\\"') ;;
   esac
   echo "$value"
 }
@@ -44,7 +45,7 @@ get_args() {
   for k in "${kargs[@]}"; do
     i=-1; while (( i++ < "${#args[@]}" )); do
       if [[ "${args[$i]}" == "${k}" ]]; then
-        echo ${args[$((i+offset))]}; break
+        echo "${args[$((i+offset))]}"; break
       fi
     done
   done

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+#shellcheck disable=SC1091
 
 ## @file
 # JSON configuration reader script
@@ -15,8 +16,9 @@ source ./lib/macros.sh
 #                               Internal Methods                               #
 ################################################################################
 
+#shellcheck disable=SC2154
 cfg() {
-  src="$(cat $CONFIG | sed 's/".":/"wildcard":/')"
+  src="$(cat "$CONFIG" | sed 's/".":/"wildcard":/')"
   # Default to regular json/yaml parsing
   output=$(sed '1{/^---$/!q;};1,/^---$/d' <<< "$src" | $yq ".$1")
   # Fall back to parsing yaml front-matter

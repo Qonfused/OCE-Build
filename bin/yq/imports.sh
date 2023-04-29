@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2086,SC2155
 
 ## @file
 # Import management for vendored binaries
@@ -13,7 +14,9 @@ case "$OSTYPE" in
   linux*)  yq_bin='yq_linux_amd64' ;;
   msys*)   yq_bin='yq_windows_amd64' ;;
 esac
-yq=$(realpath ./bin/yq/$yq_bin)
+
+export yq=$(realpath ./bin/yq/$yq_bin)
+
 # YQ_RELEASE="https://github.com/mikefarah/yq/releases/download/v4.30.8"
 # mkdir -p ${yq%/*} && curl -o $yq -sL "$YQ_RELEASE/${yq##*/}" > /dev/null 2>&1
 # chmod +x $yq

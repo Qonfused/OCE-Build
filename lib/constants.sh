@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+#shellcheck disable=SC1091,SC2155
 
 ## @file
 # Build constants
@@ -14,37 +15,37 @@ source ./lib/config.sh
 #                            config.json properties                            #
 ################################################################################
 
-OC_VERSION=$(cfg '"oc-version"' "latest")
-OC_BUILD=$(cfg '"oc-build"' "DEBUG")
-OC_COMMIT=$(cfg '"oc-commit"')
-BUILD_DIR=$(cfg "build_dir" "./dist")
+export OC_VERSION="$(cfg '"oc-version"' "latest")"
+export OC_BUILD="$(cfg '"oc-build"' "DEBUG")"
+export OC_COMMIT="$(cfg '"oc-commit"')"
+export BUILD_DIR="$(cfg "build_dir" "./dist")"
 
 # Lock build_dir reference to PWD
-BUILD_DIR="$__PWD__/${BUILD_DIR##*/}"
+export BUILD_DIR="$__PWD__/${BUILD_DIR##*/}"
 
 ################################################################################
 #                              Hardcoded constants                             #
 ################################################################################
 
-OC_PKG_URL="https://github.com/acidanthera/OpenCorePkg/"
-OC_BIN_URL="https://github.com/acidanthera/OcBinaryData/"
+export OC_PKG_URL="https://github.com/acidanthera/OpenCorePkg/"
+export OC_BIN_URL="https://github.com/acidanthera/OcBinaryData/"
 
-DORTANIA_BUILD_URL="https://github.com/dortania/build-repo/releases/download"
-DORTANIA_BUILD_CATALOG="https://raw.githubusercontent.com/dortania/build-repo/builds/config.json"
+export DORTANIA_BUILD_URL="https://github.com/dortania/build-repo/releases/download"
+export DORTANIA_BUILD_CATALOG="https://raw.githubusercontent.com/dortania/build-repo/builds/config.json"
 
-GENSMBIOS_URL="https://github.com/corpnewt/GenSMBIOS"
-MACIASL_URL="https://github.com/acidanthera/MaciASL/"
+export GENSMBIOS_URL="https://github.com/corpnewt/GenSMBIOS"
+export MACIASL_URL="https://github.com/acidanthera/MaciASL/"
 
 ################################################################################
 #                                Build Resources                               #
 ################################################################################
 
-EFI_DIR=$BUILD_DIR/EFI
-ACPI_DIR=$BUILD_DIR/EFI/OC/ACPI
-KEXTS_DIR=$BUILD_DIR/EFI/OC/Kexts
+export EFI_DIR="$BUILD_DIR"/EFI
+export ACPI_DIR="$BUILD_DIR"/EFI/OC/ACPI
+export KEXTS_DIR="$BUILD_DIR"/EFI/OC/Kexts
 
-SCR_DIR=$BUILD_DIR/scripts
-LOCKFILE="./build.lock"
+export SCR_DIR="$BUILD_DIR"/scripts
+export LOCKFILE="./build.lock"
 
 # Executables
 OCVALIDATE="$SCR_DIR/ocvalidate/ocvalidate"
@@ -53,6 +54,9 @@ if [[ "$OSTYPE" != "darwin"* ]]; then
     OCVALIDATE+=".linux"
     MACSERIAL+=".linux"
 fi
+export OCVALIDATE
+export MACSERIAL
 
 IASL="$SCR_DIR/bin/iasl-stable"
 if [[ "$OSTYPE" != "darwin"* ]]; then IASL="$(type -p "iasl")"; fi
+export IASL

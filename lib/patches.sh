@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+#shellcheck disable=SC2154
 
 ## @file
 # OpenCore config.plist patching macros written in bash.
@@ -6,6 +7,8 @@
 # Copyright (c) 2023, Cory Bennett. All rights reserved.
 # SPDX-License-Identifier: BSD-3-Clause
 ##
+
+# REQUIRES ../bin/yq/imports.sh
 
 
 ################################################################################
@@ -82,10 +85,10 @@ build_acpi_patches() {
     ACPI_ADD=$(sed "${offset}s|$|\\n${entry}|" <<< "$ACPI_ADD" | grep -Ev "^$")
 
     # Create plist patch
-    echo "$ACPI_ADD" > $BUILD_DIR/.patches/ACPI_ADD.plist
+    echo "$ACPI_ADD" > "$BUILD_DIR"/.patches/ACPI_ADD.plist
   done
 
-  ACPI_ADD="$(cat $BUILD_DIR/.patches/ACPI_ADD.plist)"
+  ACPI_ADD="$(cat "$BUILD_DIR"/.patches/ACPI_ADD.plist)"
 
   # Build '$.ACPI.Patch' entries for configured patches
   for ((i=0; i<$($yq '.ACPI.Patch | length' <<< "$(cat config.yml)"); i++)); do
@@ -93,7 +96,7 @@ build_acpi_patches() {
 
     get_key() {
       ln="$($yq --unwrapScalar=false ".\"$1\"" <<< "$patch")"
-      if [[ -n $ln && $ln != 'null' ]]; then echo $(__parse_type__ "$ln")
+      if [[ -n $ln && $ln != 'null' ]]; then echo "$(__parse_type__ "$ln")"
       else echo "$2"; fi
     }
 
@@ -121,10 +124,10 @@ build_acpi_patches() {
     ACPI_PATCH=$(sed "${offset}s|$|\\n${entry}|" <<< "$ACPI_PATCH" | grep -Ev "^$")
 
     # Create plist patch
-    echo "$ACPI_PATCH" > $BUILD_DIR/.patches/ACPI_PATCH.plist
+    echo "$ACPI_PATCH" > "$BUILD_DIR"/.patches/ACPI_PATCH.plist
   done
 
-  ACPI_PATCH="$(cat $BUILD_DIR/.patches/ACPI_PATCH.plist)"
+  ACPI_PATCH="$(cat "$BUILD_DIR"/.patches/ACPI_PATCH.plist)"
 }
 
 ################################################################################
@@ -183,10 +186,10 @@ build_driver_patches() {
     DRIVERS_ADD=$(sed "${offset}s|$|\\n${entry}|" <<< "$DRIVERS_ADD" | grep -Ev "^$")
     
     # Create plist patch
-    echo "$DRIVERS_ADD" > $BUILD_DIR/.patches/DRIVERS_ADD.plist
+    echo "$DRIVERS_ADD" > "$BUILD_DIR"/.patches/DRIVERS_ADD.plist
   done
 
-  DRIVERS_ADD="$(cat $BUILD_DIR/.patches/DRIVERS_ADD.plist)"
+  DRIVERS_ADD="$(cat "$BUILD_DIR"/.patches/DRIVERS_ADD.plist)"
 }
 
 ################################################################################
@@ -223,8 +226,8 @@ build_kext_patches() {
 
     kext="${key%/*}"; pkg="$KEXTS_DIR/$kext.kext/Contents"
     # Resolve plugin kext name and pkg path
-    if [[ $key != $kext ]]; then
-      kext="${key##*/}"; pkg="$(find $pkg -name "${kext}.kext")/Contents"
+    if [[ $key != "$kext" ]]; then
+      kext="${key##*/}"; pkg="$(find "$pkg" -name "${kext}.kext")/Contents"
     fi
 
     # Build Kext entry values
@@ -256,10 +259,10 @@ build_kext_patches() {
     KERNEL_ADD=$(sed "${offset}s|$|\\n${entry}|" <<< "$KERNEL_ADD" | grep -Ev "^$")
 
     # Create plist patch
-    echo "$KERNEL_ADD" > $BUILD_DIR/.patches/KERNEL_ADD.plist
+    echo "$KERNEL_ADD" > "$BUILD_DIR"/.patches/KERNEL_ADD.plist
   done
   
-  KERNEL_ADD="$(cat $BUILD_DIR/.patches/KERNEL_ADD.plist)"
+  KERNEL_ADD="$(cat "$BUILD_DIR"/.patches/KERNEL_ADD.plist)"
 }
 
 ################################################################################
@@ -317,8 +320,8 @@ build_tool_patches() {
     TOOLS_ADD=$(sed "${offset}s|$|\\n${entry}|" <<< "$TOOLS_ADD" | grep -Ev "^$")
     
     # Create plist patch
-    echo "$TOOLS_ADD" > $BUILD_DIR/.patches/TOOLS_ADD.plist
+    echo "$TOOLS_ADD" > "$BUILD_DIR"/.patches/TOOLS_ADD.plist
   done
 
-  TOOLS_ADD="$(cat $BUILD_DIR/.patches/TOOLS_ADD.plist)"
+  TOOLS_ADD="$(cat "$BUILD_DIR"/.patches/TOOLS_ADD.plist)"
 }
