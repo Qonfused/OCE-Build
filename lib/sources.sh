@@ -64,7 +64,8 @@ Github_pkg() {
   nth_pkg() {
     entry=$($jq ".[$1]" <<< "$releases")
     pkg=$($jq '.assets[0]' <<< "$entry")
-    if [[ -n $pkg && $($jq '.assets[] | length' <<< "$entry") -gt 1 ]]; then
+    #shellcheck disable=SC2071
+    if [[ -n $pkg && $($jq '.assets[] | length' <<< "$entry") > 1 ]]; then
       query=$(sed 's/[-_]/.*/g' <<< "$bin-$OC_BUILD|$key")
       match=$($jq "first(.assets[] | select(.name|match(\"$query\")))" <<< "$entry")
       if [[ -n "$match" ]]; then pkg="$match"; fi
