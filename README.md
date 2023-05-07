@@ -1,6 +1,6 @@
 ## Overview
 
-The goal of this project is to enable a minimal framework for fast, secure, and reliable dependency & build management for OpenCore EFIs. OC-Build is designed to make projects highly composable and easily mainainable, prioritizing a small footprint in a git-friendly manner.
+The goal of this project is to enable a minimal framework for fast, secure, and reliable dependency & build management for OpenCore EFIs. OCE-Build is designed to make projects highly composable and easily mainainable, prioritizing a small footprint in a git-friendly manner.
 
 While this project is primarily intended to be used for unsupported Macs using [OpenCore Legacy Patcher (OCLP)](https://github.com/dortania/OpenCore-Legacy-Patcher) or for PC Hackintosh projects using [OpenCore](https://github.com/acidanthera/OpenCorePkg), other projects (including Virtual Machines) that use OpenCore are supported.
 
@@ -22,4 +22,4 @@ While this project is primarily intended to be used for unsupported Macs using [
     - [ ] Compile options with external refs and patches
 
 ## License
-[BSD 3-Clause License](https://github.com/Qonfused/OC-Build/blob/main/LICENSE).
+[BSD 3-Clause License](https://github.com/Qonfused/OCE-Build/blob/main/LICENSE).
