@@ -202,7 +202,9 @@ cfg 'include.kexts | keys | .[]' | while read -r key; do
   # Extract kext if only packaged binary
   match=$(find "$pkg" -maxdepth 3 -type d -name "*.kext")
   num=$(wc -l <<< "$match")
-  if [[ $num -gt 1 ]]; then match=$(find "$pkg" -maxdepth 3 -name "$key.kext"); fi
+  if [[ $num -gt 1 ]]; then
+    match=$(find "$pkg" -maxdepth 3 -name "$key.kext" | head -n 1)
+  fi
   # Copy kext to EFI folder
   if [[ -n "$match" ]]; then cp -r "$match" "$KEXTS_DIR/$key.kext"; rm -r "$match"
   else rm -r "$pkg" >/dev/null 2>&1; continue; fi
