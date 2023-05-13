@@ -258,12 +258,13 @@ else
   SRC="$(cat config.yml)"
   # Parse additional config.plist patches based on script flags.
   PATCHES=(config.patch:*.yml)
+  #shellcheck disable=SC2128
   if [[ $PATCHES != 'config.patch:*.yml' ]]; then
     for i in "${!PATCHES[@]}"; do
       file="${PATCHES[i]}"
       patch="$(sed -e "s/config\.patch\:\(.*\)\.yml/\1/" <<< "$file")"
       if printf '%s\n' "$@" | grep -Fxq -- "--$patch"; then
-        SRC+="$(echo -e "\n$(cat $file)")"
+        SRC+="$(echo -e "\n$(cat "$file")")"
       fi
     done
   fi
