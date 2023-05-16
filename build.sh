@@ -13,6 +13,7 @@ __PWD__=$(pwd); cd "$( dirname "${BASH_SOURCE[0]}" )"
 
 source ./lib/config.sh
 
+# Get location of build config file
 CONFIG=$(get_args "$(echo "$@")" '-c --config' 1)
 if [[ -z "$CONFIG" || "$CONFIG" == "-c --config" ]]; then
   fexit "  Please provide a build config using the '-c' or '--config' flag.
@@ -29,7 +30,7 @@ source ./lib/patches.sh
 source ./lib/plist.sh
 source ./lib/sources.sh
 
-# Change CWD for config.json
+# Change CWD for config.yml
 cd "${CONFIG%/*}" || exit 1
 
 ################################################################################
