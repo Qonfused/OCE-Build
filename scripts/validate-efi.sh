@@ -24,9 +24,6 @@ elif [[ ! -f "$__PWD__/$CONFIG" ]]; then
 # Change config file reference to PWD
 else CONFIG="$(realpath "$__PWD__/$CONFIG")"; fi
 
-# Change CWD for imports
-cd "$__PWD__"; cd "$(realpath "$(dirname "${BASH_SOURCE[0]}")")/lib/oce-build"
-
 source ./lib/constants.sh
 
 cd "$BUILD_DIR" || exit 1
