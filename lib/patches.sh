@@ -88,7 +88,7 @@ build_acpi_patches() {
     echo "$ACPI_ADD" > "$BUILD_DIR"/.patches/ACPI_ADD.plist
   done
 
-  ACPI_ADD="$(cat "$BUILD_DIR"/.patches/ACPI_ADD.plist)"
+  ACPI_ADD="$(cat "$BUILD_DIR"/.patches/ACPI_ADD.plist 2>/dev/null)"
 
   # Build '$.ACPI.Patch' entries for configured patches
   for ((i=0; i<$($yq '.ACPI.Patch | length' <<< "$(cat config.yml)"); i++)); do
@@ -127,7 +127,7 @@ build_acpi_patches() {
     echo "$ACPI_PATCH" > "$BUILD_DIR"/.patches/ACPI_PATCH.plist
   done
 
-  ACPI_PATCH="$(cat "$BUILD_DIR"/.patches/ACPI_PATCH.plist)"
+  ACPI_PATCH="$(cat "$BUILD_DIR"/.patches/ACPI_PATCH.plist 2>/dev/null)"
 }
 
 ################################################################################
@@ -189,7 +189,7 @@ build_driver_patches() {
     echo "$DRIVERS_ADD" > "$BUILD_DIR"/.patches/DRIVERS_ADD.plist
   done
 
-  DRIVERS_ADD="$(cat "$BUILD_DIR"/.patches/DRIVERS_ADD.plist)"
+  DRIVERS_ADD="$(cat "$BUILD_DIR"/.patches/DRIVERS_ADD.plist 2>/dev/null)"
 }
 
 ################################################################################
@@ -262,7 +262,7 @@ build_kext_patches() {
     echo "$KERNEL_ADD" > "$BUILD_DIR"/.patches/KERNEL_ADD.plist
   done
   
-  KERNEL_ADD="$(cat "$BUILD_DIR"/.patches/KERNEL_ADD.plist)"
+  KERNEL_ADD="$(cat "$BUILD_DIR"/.patches/KERNEL_ADD.plist 2>/dev/null)"
 }
 
 ################################################################################
@@ -323,5 +323,5 @@ build_tool_patches() {
     echo "$TOOLS_ADD" > "$BUILD_DIR"/.patches/TOOLS_ADD.plist
   done
 
-  TOOLS_ADD="$(cat "$BUILD_DIR"/.patches/TOOLS_ADD.plist)"
+  TOOLS_ADD="$(cat "$BUILD_DIR"/.patches/TOOLS_ADD.plist 2>/dev/null)"
 }
