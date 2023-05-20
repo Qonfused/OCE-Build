@@ -11,9 +11,11 @@
 # Change CWD for imports
 __PWD__=$(pwd); cd "$( dirname "${BASH_SOURCE[0]}" )"
 
-source ./lib/config.sh
+# Get base-config.yml contents
+BASE_CFG="$(cat base-config.yml)"
 
 # Get location of build config file
+source ./lib/config.sh
 CONFIG=$(get_args "$(echo "$@")" '-c --config' 1)
 if [[ -z "$CONFIG" || "$CONFIG" == "-c --config" ]]; then
   fexit "  Please provide a build config using the '-c' or '--config' flag.
@@ -256,7 +258,7 @@ else
   # Default to OC Sample plist as template
   remove_comments "$target"
 
-  SRC="$(cat config.yml)"
+  SRC="$BASE_CFG$(echo -e "\n$(cat config.yml)")"
   # Parse additional config.plist patches based on script flags.
   PATCHES=(config.patch:*.yml)
   #shellcheck disable=SC2128

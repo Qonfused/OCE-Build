@@ -1,0 +1,89 @@
+## @file
+# Base config.plist configuration file
+#
+# Copyright (c) 2023, Cory Bennett. All rights reserved.
+# SPDX-License-Identifier: BSD-3-Clause
+##
+
+# Refer to the below resources for more information on sensible defaults:
+# - https://dortania.github.io/OpenCore-Install-Guide/
+# - https://github.com/acidanthera/OpenCorePkg/blob/master/Docs/Configuration.pdf
+#   (or https://dortania.github.io/docs/latest/Configuration.html)
+
+
+# Clear reduntant or unused entries with the '@Clear' parsing macro.
+ACPI.Delete:                  Macro   | @Clear
+Booter.MmioWhitelist:         Macro   | @Clear
+Booter.Patch:                 Macro   | @Clear
+DeviceProperties.Add:         Macro   | @Clear
+Misc.Entries:                 Macro   | @Clear
+Kernel.Block:                 Macro   | @Clear
+Kernel.Force:                 Macro   | @Clear
+Kernel.Patch:                 Macro   | @Clear
+UEFI.ReservedMemory:          Macro   | @Clear
+
+# These entries are expected to be overwritten based on the build.yml file.
+# Clearing these entries ensures consistent behavior across build environments.
+ACPI.Add:                     Macro   | @Clear
+Kernel.Add:                   Macro   | @Clear
+Misc.Tools:                   Macro   | @Clear
+UEFI.Drivers:                 Macro   | @Clear
+
+################################################################################
+#                             Misc. Cosmetic fixes                             #
+################################################################################
+
+'@ifdef': RELEASE
+# Use default GoldenGate theme with OpenCanopy.
+# - https://dortania.github.io/OpenCore-Post-Install/cosmetic/gui.html
+Misc:
+  Boot:
+    PickerMode:               String  | "External"
+    PickerVariant:            String  | "Acidanthera\GoldenGate"
+'@endif':
+
+# Changes default macOS installer/keyboard language to English.
+# - You can find a list of supported languages below (convert HEX -> ASCI):
+#   https://github.com/acidanthera/OpenCorePkg/blob/master/Utilities/AppleKeyboardLayouts/AppleKeyboardLayouts.txt
+NVRAM:
+  Add:
+    7C436110-AB2A-4BBB-A880-FE41995C9F82:
+      prev-lang:kbd:          String  | "en-US:0"
+
+################################################################################
+#                           Platform (SMBIOS) fixes                            #
+################################################################################
+
+# Prevents SMBIOS injection into non-Apple operating systems.
+Kernel:
+  Quirks:
+    CustomSMBIOSGuid:         Boolean | true
+PlatformInfo:
+  UpdateSMBIOSMode:           String  | Custom
+
+################################################################################
+
+'@ifdef': DEBUG
+# Debugging quirks (recommended with DEBUG version of OpenCore)
+# - https://dortania.github.io/OpenCore-Install-Guide/troubleshooting/debug.html
+# - https://dortania.github.io/OpenCore-Install-Guide/troubleshooting/kernel-debugging.html#nvram
+Kernel:
+  Quirks:
+    PanicNoKextDump:          Boolean | true
+    PowerTimeoutKernelPanic:  Boolean | true
+Misc:
+  Debug:
+    AppleDebug:               Boolean | true
+    ApplePanic:               Boolean | true
+    DisableWatchDog:          Boolean | true
+    Target:                   Number  | 67
+NVRAM:
+  Add:
+    7C436110-AB2A-4BBB-A880-FE41995C9F82:
+      # Breakdown of used boot args:
+      # `-v`              (verbose mode)
+      # `debug=0x100`     (debug mask; disables watchdog to avoid panic reboot)
+      # `keepsyms=1`      (show panic log debug symbols)
+      # `msgbuf=1048576`  (Resizes kernel msg buffer to 1 MB; avoids truncation)
+      boot-args:              String  | "-v debug=0x100 keepsyms=1 msgbuf=1048576"
+'@endif':
