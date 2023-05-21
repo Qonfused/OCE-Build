@@ -55,11 +55,21 @@ NVRAM:
 ################################################################################
 
 # Prevents SMBIOS injection into non-Apple operating systems.
+#
+# This approach with UpdateSMBIOSMode relegates SMBIOS updates to macOS to avoid
+# colliding with Windows license activation and other custom OEM software.
+#
+# - Note: This has a side-effect of breaking Bootcamp compatibility on Windows.
+#         You can restore this functionality (at the cost of breaking OEM
+#         software on hackintoshes) by using the below OpenCore defaults:
+#             
+#             Kernel.Quirks.CustomSMBIOSGuid: Boolean | false
+#             PlatformInfo.UpdateSMBIOSMode:  String  | "Create"
 Kernel:
   Quirks:
     CustomSMBIOSGuid:         Boolean | true
 PlatformInfo:
-  UpdateSMBIOSMode:           String  | Custom
+  UpdateSMBIOSMode:           String  | "Custom"
 
 ################################################################################
 
