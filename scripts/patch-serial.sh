@@ -65,7 +65,7 @@ gen_serialdata() {
 # Regenerate with oce-build/scripts/patch-serial.sh
 MLB:                String | \"${SERIAL[1]}\"
 ROM:                Data   | <${ROM}>
-SystemProductName:  String | \"MacBookPro16,3\"
+SystemProductName:  String | \"${TYPE}\"
 SystemSerialNumber: String | \"${SERIAL_NUM[0]}\"
 SystemUUID:         String | \"$(uuidgen)\""
   echo "$serialdata" >> "$SERIAL"
