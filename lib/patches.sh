@@ -8,9 +8,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 ##
 
-# REQUIRES ../bin/yq/imports.sh
 
-
+#region ACPI
 ################################################################################
 #                                 ACPI Patches                                 #
 ################################################################################
@@ -130,6 +129,9 @@ build_acpi_patches() {
   ACPI_PATCH="$(cat "$BUILD_DIR"/.patches/ACPI_PATCH.plist 2>/dev/null)"
 }
 
+#endregion
+
+#region Driver
 ################################################################################
 #                                Driver Patches                                #
 ################################################################################
@@ -192,12 +194,15 @@ build_driver_patches() {
   DRIVERS_ADD="$(cat "$BUILD_DIR"/.patches/DRIVERS_ADD.plist 2>/dev/null)"
 }
 
+#endregion
+
+#region Kernel
 ################################################################################
-#                                 Kext Patches                                 #
+#                                Kernel Patches                                #
 ################################################################################
 
 KERNEL_ADD=$'<array>\n</array>'
-KEXT_ADD_ENTRY() {
+KERNEL_ADD_ENTRY() {
   echo \
 "  <dict>
     <key>Arch</key>
@@ -219,7 +224,88 @@ KEXT_ADD_ENTRY() {
   </dict>"
 }
 
-build_kext_patches() {
+KERNEL_BLOCK=$'<array>\n</array>'
+KERNEL_BLOCK_ENTRY() {
+  echo \
+"  <dict>
+    <key>Arch</key>
+    <string>$1</string>
+    <key>Comment</key>
+    <string>$2</string>
+    <key>Enabled</key>
+    <${3}/>
+    <key>Identifier</key>
+    <string>$4</string>
+    <key>MaxKernel</key>
+    <string>$5</string>
+    <key>MinKernel</key>
+    <string>$6</string>
+    <key>Strategy</key>
+    <string>$7</string>
+  </dict>"
+}
+
+KERNEL_FORCE=$'<array>\n</array>'
+KERNEL_FORCE_ENTRY() {
+  echo \
+"  <dict>
+    <key>Arch</key>
+    <string>$1</string>
+    <key>BundlePath</key>
+    <string>$2</string>
+    <key>Comment</key>
+    <string>$3</string>
+    <key>Enabled</key>
+    <${4}/>
+    <key>ExecutablePath</key>
+    <string>$5</string>
+    <key>Identifier</key>
+    <string>$6</string>
+    <key>MaxKernel</key>
+    <string>$7</string>
+    <key>MinKernel</key>
+    <string>$8</string>
+    <key>PlistPath</key>
+    <string>$9</string>
+  </dict>"
+}
+
+KERNEL_PATCH=$'<array>\n</array>'
+KERNEL_PATCH_ENTRY() {
+  echo \
+"  <dict>
+    <key>Arch</key>
+    <string>$1</string>
+    <key>Base</key>
+    <string>$2</string>
+    <key>Comment</key>
+    <string>$3</string>
+    <key>Count</key>
+    <integer>$4</integer>
+    <key>Enabled</key>
+    <$5/>
+    <key>Find</key>
+    <data>$6</data>
+    <key>Identifier</key>
+    <string>$7</string>
+    <key>Limit</key>
+    <integer>$8</integer>
+    <key>Mask</key>
+    <data>$9</data>
+    <key>MaxKernel</key>
+    <string>${10}</string>
+    <key>MinKernel</key>
+    <string>${11}</string>
+    <key>Replace</key>
+    <data>${12}</data>
+    <key>ReplaceMask</key>
+    <data>${13}</data>
+    <key>Skip</key>
+    <integer>${14}</integer>
+  </dict>"
+}
+
+build_kernel_patches() {
   # Build '$.Kernel.Add' entries for all kexts/plugins
   cfg 'include.kexts | keys | .[]' | while read -r key; do
     if [[ -z "$key" && ! -d "$KEXTS_DIR/$key.kext" ]]; then continue; fi
@@ -255,7 +341,7 @@ build_kext_patches() {
     # Append Kext entry
     offset=$(($(wc -l <<< "$KERNEL_ADD")-1))
     entry=$(awk '{printf "%s\\n", $0}'\
-      <<< "$(KEXT_ADD_ENTRY "${Arch:-$A}" "${BundlePath:-$B}" "${Comment:-$C}" "${Enabled:-$D}" "${ExecutablePath:-$E}" "${MaxKernel:-$F}" "${MinKernel:-$G}" "${PlistPath:-$H}")")
+      <<< "$(KERNEL_ADD_ENTRY "${Arch:-$A}" "${BundlePath:-$B}" "${Comment:-$C}" "${Enabled:-$D}" "${ExecutablePath:-$E}" "${MaxKernel:-$F}" "${MinKernel:-$G}" "${PlistPath:-$H}")")
     KERNEL_ADD=$(sed "${offset}s|$|\\n${entry}|" <<< "$KERNEL_ADD" | grep -Ev "^$")
 
     # Create plist patch
@@ -263,8 +349,116 @@ build_kext_patches() {
   done
   
   KERNEL_ADD="$(cat "$BUILD_DIR"/.patches/KERNEL_ADD.plist 2>/dev/null)"
+
+  # Build '$.Kernel.Block' entries for configured patches
+  for ((i=0; i<$($yq '.Kernel.Block | length' <<< "$(cat config.yml)"); i++)); do
+    patch=$($yq --unwrapScalar=false ".Kernel.Block.$i" <<< "$(cat config.yml)")
+
+    get_key() {
+      ln="$($yq --unwrapScalar=false ".\"$1\"" <<< "$patch")"
+      if [[ -n $ln && $ln != 'null' ]]; then echo "$(__parse_type__ "$ln")"
+      else echo "$2"; fi
+    }
+
+    # Build Kernel Block values
+    Arch=$(           get_key 'Arch'        'any')
+    Comment=$(        get_key 'Comment'     '')
+    Enabled=$(        get_key 'Enabled'     'true')
+    Identifier=$(     get_key 'Identifier'  '')
+    MaxKernel=$(      get_key 'MaxKernel'   '')
+    MinKernel=$(      get_key 'MinKernel'   '')
+    Strategy=$(       get_key 'Strategy'    'Disable')
+
+    # Append Kernel entry
+    offset=$(($(wc -l <<< "$KERNEL_BLOCK")-1))
+    entry=$(awk '{printf "%s\\n", $0}'\
+      <<< "$(KERNEL_BLOCK_ENTRY "$Arch" "$Comment" "$Enabled" "$Identifier" "$MaxKernel" "$MinKernel" "$Strategy")")
+
+    KERNEL_BLOCK=$(sed "${offset}s|$|\\n${entry}|" <<< "$KERNEL_BLOCK" | grep -Ev "^$")
+
+    # Create plist patch
+    echo "$KERNEL_BLOCK" > "$BUILD_DIR"/.patches/KERNEL_BLOCK.plist
+  done
+  
+  KERNEL_BLOCK="$(cat "$BUILD_DIR"/.patches/KERNEL_BLOCK.plist 2>/dev/null)"
+
+  # Build '$.Kernel.Force' entries for configured patches
+  for ((i=0; i<$($yq '.Kernel.Block | length' <<< "$(cat config.yml)"); i++)); do
+    patch=$($yq --unwrapScalar=false ".Kernel.Force.$i" <<< "$(cat config.yml)")
+
+    get_key() {
+      ln="$($yq --unwrapScalar=false ".\"$1\"" <<< "$patch")"
+      if [[ -n $ln && $ln != 'null' ]]; then echo "$(__parse_type__ "$ln")"
+      else echo "$2"; fi
+    }
+
+    # Build Kernel Force values
+    Arch=$(           get_key 'Arch'            'any')
+    BundlePath=$(     get_key 'BundlePath'      '')
+    Comment=$(        get_key 'Comment'         '')
+    Enabled=$(        get_key 'Enabled'         'true')
+    ExecutablePath=$( get_key 'ExecutablePath'  '')
+    Identifier=$(     get_key 'Identifier'      '')
+    MaxKernel=$(      get_key 'MaxKernel'       '')
+    MinKernel=$(      get_key 'MinKernel'       '')
+    PlistPath=$(      get_key 'PlistPath'       '')
+
+    # Append Kernel entry
+    offset=$(($(wc -l <<< "$KERNEL_FORCE")-1))
+    entry=$(awk '{printf "%s\\n", $0}'\
+      <<< "$(KERNEL_FORCE_ENTRY "$Arch" "$BundlePath" "$Comment" "$Enabled" "$ExecutablePath" "$Identifier" "$MaxKernel" "$MinKernel" "$PlistPath")")
+
+    KERNEL_FORCE=$(sed "${offset}s|$|\\n${entry}|" <<< "$KERNEL_FORCE" | grep -Ev "^$")
+
+    # Create plist patch
+    echo "$KERNEL_FORCE" > "$BUILD_DIR"/.patches/KERNEL_FORCE.plist
+  done
+
+  KERNEL_FORCE="$(cat "$BUILD_DIR"/.patches/KERNEL_FORCE.plist 2>/dev/null)"
+
+  # Build '$.Kernel.Patch' entries for configured patches
+  for ((i=0; i<$($yq '.Kernel.Patch | length' <<< "$(cat config.yml)"); i++)); do
+    patch=$($yq --unwrapScalar=false ".Kernel.Patch.$i" <<< "$(cat config.yml)")
+
+    get_key() {
+      ln="$($yq --unwrapScalar=false ".\"$1\"" <<< "$patch")"
+      if [[ -n $ln && $ln != 'null' ]]; then echo "$(__parse_type__ "$ln")"
+      else echo "$2"; fi
+    }
+
+    # Build Kernel Patch values
+    Arch=$(           get_key 'Arch'        'any')
+    Base=$(           get_key 'Base'        '')
+    Comment=$(        get_key 'Comment'     '')
+    Count=$(          get_key 'Count'       '0')
+    Enabled=$(        get_key 'Enabled'     'true')
+    Find=$(           get_key 'Find'        '')
+    Identifier=$(     get_key 'Identifier'  '')
+    Limit=$(          get_key 'Limit'       '0')
+    Mask=$(           get_key 'Mask'        '')
+    MaxKernel=$(      get_key 'MaxKernel'   '')
+    MinKernel=$(      get_key 'MinKernel'   '')
+    Replace=$(        get_key 'Replace'     '')
+    ReplaceMask=$(    get_key 'ReplaceMask' '')
+    Skip=$(           get_key 'Skip'        '0')
+
+    # Append Kernel entry
+    offset=$(($(wc -l <<< "$KERNEL_PATCH")-1))
+    entry=$(awk '{printf "%s\\n", $0}'\
+      <<< "$(KERNEL_PATCH_ENTRY "$Arch" "$Base" "$Comment" "$Count" "$Enabled" "$Find" "$Identifier" "$Limit" "$Mask" "$MaxKernel" "$MinKernel" "$Replace" "$ReplaceMask" "$Skip")")
+
+    KERNEL_PATCH=$(sed "${offset}s|$|\\n${entry}|" <<< "$KERNEL_PATCH" | grep -Ev "^$")
+
+    # Create plist patch
+    echo "$KERNEL_PATCH" > "$BUILD_DIR"/.patches/KERNEL_PATCH.plist
+  done
+
+  KERNEL_PATCH="$(cat "$BUILD_DIR"/.patches/KERNEL_PATCH.plist 2>/dev/null)"
 }
 
+#endregion
+
+#region Tool
 ################################################################################
 #                                 Tool Patches                                 #
 ################################################################################
@@ -325,3 +519,5 @@ build_tool_patches() {
 
   TOOLS_ADD="$(cat "$BUILD_DIR"/.patches/TOOLS_ADD.plist 2>/dev/null)"
 }
+
+#endregion

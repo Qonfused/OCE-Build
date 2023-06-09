@@ -332,17 +332,18 @@ fi
 
 mkdir -p "$BUILD_DIR"/.patches
 
-# Build patches
+# Build and apply all patches to config.plist
 build_acpi_patches
-build_driver_patches
-build_kext_patches
-build_tool_patches
-
-# Apply all patches to config.plist
 if [[ -n "$ACPI_ADD" ]]; then replace_entries "$target" "ACPI.Add" "$ACPI_ADD"; fi
 if [[ -n "$ACPI_PATCH" ]]; then replace_entries "$target" "ACPI.Patch" "$ACPI_PATCH"; fi
-if [[ -n "$KERNEL_ADD" ]]; then replace_entries "$target" "Kernel.Add" "$KERNEL_ADD"; fi
+build_driver_patches
 if [[ -n "$DRIVERS_ADD" ]]; then replace_entries "$target" "UEFI.Drivers" "$DRIVERS_ADD"; fi
+build_kernel_patches
+if [[ -n "$KERNEL_ADD" ]]; then replace_entries "$target" "Kernel.Add" "$KERNEL_ADD"; fi
+if [[ -n "$KERNEL_BLOCK" ]]; then replace_entries "$target" "Kernel.Block" "$KERNEL_BLOCK"; fi
+if [[ -n "$KERNEL_FORCE" ]]; then replace_entries "$target" "Kernel.Force" "$KERNEL_FORCE"; fi
+if [[ -n "$KERNEL_PATCH" ]]; then replace_entries "$target" "Kernel.Patch" "$KERNEL_PATCH"; fi
+build_tool_patches
 if [[ -n "$TOOLS_ADD" ]]; then replace_entries "$target" "Misc.Tools" "$TOOLS_ADD"; fi
 
 ################################################################################
