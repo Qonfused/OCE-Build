@@ -9,6 +9,8 @@
 ##
 
 
+CONFIG_YML="$BUILD_DIR/EFI/OC/config.yml"
+
 #region ACPI
 ################################################################################
 #                                 ACPI Patches                                 #
@@ -90,8 +92,8 @@ build_acpi_patches() {
   ACPI_ADD="$(cat "$BUILD_DIR"/.patches/ACPI_ADD.plist 2>/dev/null)"
 
   # Build '$.ACPI.Patch' entries for configured patches
-  for ((i=0; i<$($yq '.ACPI.Patch | length' <<< "$(cat config.yml)"); i++)); do
-    patch=$($yq --unwrapScalar=false ".ACPI.Patch.$i" <<< "$(cat config.yml)")
+  for ((i=0; i<$($yq '.ACPI.Patch | length' <<< "$(cat "$CONFIG_YML")"); i++)); do
+    patch=$($yq --unwrapScalar=false ".ACPI.Patch.$i" <<< "$(cat "$CONFIG_YML")")
 
     get_key() {
       ln="$($yq --unwrapScalar=false ".\"$1\"" <<< "$patch")"
@@ -351,8 +353,8 @@ build_kernel_patches() {
   KERNEL_ADD="$(cat "$BUILD_DIR"/.patches/KERNEL_ADD.plist 2>/dev/null)"
 
   # Build '$.Kernel.Block' entries for configured patches
-  for ((i=0; i<$($yq '.Kernel.Block | length' <<< "$(cat config.yml)"); i++)); do
-    patch=$($yq --unwrapScalar=false ".Kernel.Block.$i" <<< "$(cat config.yml)")
+  for ((i=0; i<$($yq '.Kernel.Block | length' <<< "$(cat "$CONFIG_YML")"); i++)); do
+    patch=$($yq --unwrapScalar=false ".Kernel.Block.$i" <<< "$(cat "$CONFIG_YML")")
 
     get_key() {
       ln="$($yq --unwrapScalar=false ".\"$1\"" <<< "$patch")"
@@ -383,8 +385,8 @@ build_kernel_patches() {
   KERNEL_BLOCK="$(cat "$BUILD_DIR"/.patches/KERNEL_BLOCK.plist 2>/dev/null)"
 
   # Build '$.Kernel.Force' entries for configured patches
-  for ((i=0; i<$($yq '.Kernel.Block | length' <<< "$(cat config.yml)"); i++)); do
-    patch=$($yq --unwrapScalar=false ".Kernel.Force.$i" <<< "$(cat config.yml)")
+  for ((i=0; i<$($yq '.Kernel.Force | length' <<< "$(cat "$CONFIG_YML")"); i++)); do
+    patch=$($yq --unwrapScalar=false ".Kernel.Force.$i" <<< "$(cat "$CONFIG_YML")")
 
     get_key() {
       ln="$($yq --unwrapScalar=false ".\"$1\"" <<< "$patch")"
@@ -417,8 +419,8 @@ build_kernel_patches() {
   KERNEL_FORCE="$(cat "$BUILD_DIR"/.patches/KERNEL_FORCE.plist 2>/dev/null)"
 
   # Build '$.Kernel.Patch' entries for configured patches
-  for ((i=0; i<$($yq '.Kernel.Patch | length' <<< "$(cat config.yml)"); i++)); do
-    patch=$($yq --unwrapScalar=false ".Kernel.Patch.$i" <<< "$(cat config.yml)")
+  for ((i=0; i<$($yq '.Kernel.Patch | length' <<< "$(cat "$CONFIG_YML")"); i++)); do
+    patch=$($yq --unwrapScalar=false ".Kernel.Patch.$i" <<< "$(cat "$CONFIG_YML")")
 
     get_key() {
       ln="$($yq --unwrapScalar=false ".\"$1\"" <<< "$patch")"

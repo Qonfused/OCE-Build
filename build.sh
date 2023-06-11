@@ -258,19 +258,20 @@ else
   # Default to OC Sample plist as template
   remove_comments "$target"
 
-  SRC="$BASE_CFG$(echo -e "\n$(cat config.yml)")"
+  SRC="$BASE_CFG$(echo -e "\n\n$(cat config.yml)")"
   # Parse additional config.plist patches based on script flags.
-  PATCHES=(config.patch:*.yml)
+  PATCHES=(config.patch\.*.yml)
   #shellcheck disable=SC2128
-  if [[ $PATCHES != 'config.patch:*.yml' ]]; then
+  if [[ $PATCHES != 'config.patch.*.yml' ]]; then
     for i in "${!PATCHES[@]}"; do
       file="${PATCHES[i]}"
-      patch="$(sed -e "s/config\.patch\:\(.*\)\.yml/\1/" <<< "$file")"
+      patch="$(sed -e "s/config\.patch\.\(.*\)\.yml/\1/" <<< "$file")"
       if printf '%s\n' "$@" | grep -Fxq -- "--$patch"; then
-        SRC+="$(echo -e "\n$(cat "$file")")"
+        SRC+="$(echo -e "\n\n$(cat "$file")")"
       fi
     done
   fi
+  echo "$SRC" > "$BUILD_DIR/EFI/OC/config.yml"
 
   # Build each property specified in a config.yml file
   $yq -o=props --unwrapScalar=false <<< "$SRC" | while read -r ln; do
