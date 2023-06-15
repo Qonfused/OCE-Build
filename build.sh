@@ -355,3 +355,4 @@ if [[ -n "$TOOLS_ADD" ]]; then replace_entries "$target" "Misc.Tools" "$TOOLS_AD
 # Cleanup temp resources folder
 rm -r "$BUILD_DIR"/.temp
 rm -r "$BUILD_DIR"/.patches
+rm -r "${SCR_DIR:?}"/bin
