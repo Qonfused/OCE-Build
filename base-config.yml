@@ -11,24 +11,6 @@
 #   (or https://dortania.github.io/docs/latest/Configuration.html)
 
 
-# Clear reduntant or unused entries with the '@Clear' parsing macro.
-ACPI.Delete:                  Macro   | @Clear
-Booter.MmioWhitelist:         Macro   | @Clear
-Booter.Patch:                 Macro   | @Clear
-DeviceProperties.Add:         Macro   | @Clear
-Misc.Entries:                 Macro   | @Clear
-Kernel.Block:                 Macro   | @Clear
-Kernel.Force:                 Macro   | @Clear
-Kernel.Patch:                 Macro   | @Clear
-UEFI.ReservedMemory:          Macro   | @Clear
-
-# These entries are expected to be overwritten based on the build.yml file.
-# Clearing these entries ensures consistent behavior across build environments.
-ACPI.Add:                     Macro   | @Clear
-Kernel.Add:                   Macro   | @Clear
-Misc.Tools:                   Macro   | @Clear
-UEFI.Drivers:                 Macro   | @Clear
-
 ################################################################################
 #                             Misc. Cosmetic fixes                             #
 ################################################################################

@@ -4,13 +4,5 @@
 !/.gitattributes
 !/.gitignore
 
-# Build artifacts
-/dist
-
-# macOS specific caches
-/.fseventsd
-/.Spotlight-V100
-/.Trashes
-
-# Windows specific caches
-/$RECYCLE.BIN
+# Python artifacts
+**/__pycache__
