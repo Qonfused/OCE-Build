@@ -50,10 +50,17 @@ def parseSerializedTypes(stype: str, value: str):
   return entry
 
 def writeSerializedTypes(value, defaults=('dict', None)):
+  # Extract native type and value
   stype, svalue = defaults
   if svalue is not None:
     stype  = value[0] if isinstance(value, tuple) else 'string'
     svalue = value[1] if isinstance(value, tuple) else ''
+    # Handle empty entries
+    try:
+      if not len(svalue):
+        if type(svalue) == dict: stype = 'dict'
+        if type(svalue) == list: stype = 'array'
+    except: pass
   entry  = None
   match stype:
     case 'date':    pass
@@ -106,6 +113,7 @@ def parsePlist(lines: list[str],
       _updateCursor(level, key, cursor)
     # Update dictionary values
     elif lnorm.startswith('<'):
+      # Attempt single-line extraction of type and value
       stype = re.findall('<([a-z]+)\/?>', lnorm, re.IGNORECASE)[0]
       value = re.findall('<[a-z]+>(.*)</[a-z]+>', lnorm, re.IGNORECASE)
       if len(value): value = value[0]

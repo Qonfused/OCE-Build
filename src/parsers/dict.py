@@ -11,13 +11,19 @@ def flattenDict(dic: dict):
   def recurse_flatten(v: any, prefix=''):
     match v:
       case dict():
-        for k, v2 in v.items():
-          p2 = "{}.{}".format(prefix, k)
-          recurse_flatten(v2, p2)
+        if not len(entries := v.items()):
+          flat_dict[prefix[1:]] = ('dict', v)
+        else:
+          for k, v2 in entries:
+            p2 = "{}.{}".format(prefix, k)
+            recurse_flatten(v2, p2)
       case list():
-        for i, v2 in enumerate(v):
-          p2 = "{}[{}]".format(prefix, i)
-          recurse_flatten(v2, p2)
+        if not len(v):
+          flat_dict[prefix[1:]] = ('list', v)
+        else:
+          for i, v2 in enumerate(v):
+            p2 = "{}[{}]".format(prefix, i)
+            recurse_flatten(v2, p2)
       case _:
         flat_dict[prefix[1:]] = v
   recurse_flatten(dic)
