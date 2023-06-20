@@ -129,7 +129,7 @@ def writeYAML(lines: list[str]=[],
         # Update max tree length
         if max_tree_len < tree_len: max_tree_len = tree_len
   # Write entries to lines
-  for (tree, (stype, svalue)) in zip(trees, flat_dict.values()):
+  for (tree, value) in zip(trees, flat_dict.values()):
     # Seek or create head index for current tree level
     for j, key in enumerate(tree):
       # Avoid inserting literal array indices
@@ -151,6 +151,10 @@ def writeYAML(lines: list[str]=[],
       if (is_root_key := (j == len(tree)-1)):
         # Update cursor position
         cursor['keys'] = tree[:j+1]
+
+        # Unpack native types
+        stype, svalue = type(value), value
+        if isinstance(value, tuple): stype, svalue = value
 
         indent = max_tree_len - (cursor['indent']*j + len(f"{key}:"))
         match schema:
