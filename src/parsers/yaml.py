@@ -24,7 +24,7 @@ def parseYAML(lines: list[str],
   Returns:
     Dictionary populated from annotated YAML entries.
   """
-  cursor = { 'keys': [], 'level': 0, 'indent': 0, 'skip': (def_flag := True) }
+  cursor = { 'keys': [], 'level': 0, 'indent': 0, 'skip': (def_flag := False) }
   for i,line in enumerate(lines):
     # Skip empty lines
     if len(lnorm := line.lstrip().rstrip()) == 0:
@@ -44,7 +44,7 @@ def parseYAML(lines: list[str],
         case '@ifdef': cursor['skip'] = flag in flags
         case '@endif': cursor['skip'] = def_flag
       continue
-    elif not cursor['skip']: continue
+    elif cursor['skip']: continue
     
     level = len(line[:-len(lnorm)])
     # Update cursor position

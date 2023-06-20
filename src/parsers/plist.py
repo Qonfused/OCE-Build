@@ -49,16 +49,16 @@ def parsePlist(lines: list[str],
   Returns:
     Dictionary populated from plist entries.
   """
-  cursor = { 'keys': [], 'level': 0, 'indent': 0, 'skip': (def_flag := True) }
+  cursor = { 'keys': [], 'level': 0, 'indent': 0, 'skip': (def_flag := False) }
   for i,line in enumerate(lines):
     # Skip empty lines
     if len(lnorm := line.lstrip()) == 0:
       continue
     # Skip multiline comments
     if lnorm.startswith('<!--') or (__comment_end := lnorm.endswith('-->')):
-      cursor['skip'] = not __comment_end
+      cursor['skip'] = __comment_end
       continue
-    if not cursor['skip']:
+    if cursor['skip']:
       continue
 
     level = len(line[:-len(lnorm)])
