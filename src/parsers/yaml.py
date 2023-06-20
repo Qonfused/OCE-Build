@@ -153,7 +153,7 @@ def writeYAML(lines: list[str]=[],
         cursor['keys'] = tree[:j+1]
 
         # Unpack native types
-        stype, svalue = type(value), value
+        stype, svalue = type(value).__name__, value
         if isinstance(value, tuple): stype, svalue = value
 
         indent = max_tree_len - (cursor['indent']*j + len(f"{key}:"))
@@ -179,6 +179,20 @@ def writeYAML(lines: list[str]=[],
               case 'list':    svalue = ''
               case 'string':  svalue = f'"{svalue}"'
               case _:         svalue = str(svalue)
+            # Escape control and reserved characters
+            # @see https://symfony.com/doc/current/reference/formats/yaml.html
+            reserve_chars = [':', '{', '}', '[', ']', ',', '&', '*', '#', '?',
+                             '|', '-', '<', '>', '=', '!', '%',' @', '`']
+            control_chars = ['\0', '\x01', '\x02', '\x03', '\x04', '\x05',
+                             '\x06', '\a', '\b', '\t', '\n', '\v', '\f', '\r',
+                             '\x0e', '\x0f', '\x10', '\x11', '\x12', '\x13',
+                             '\x14', '\x15', '\x16', '\x17', '\x18', '\x19',
+                             '\x1a', '\e', '\x1c', '\x1d', '\x1e', '\x1f',
+                             r'\N', r'\_', r'\L', r'\P']
+            if any([c for c in control_chars if c in svalue]):
+              svalue = f'"{svalue}"'
+            elif any([c for c in reserve_chars if c in svalue]):
+              svalue = f'\'{svalue}\''
             # Append value to entry
             entry += f' {svalue}'.rstrip()
         
