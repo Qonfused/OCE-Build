@@ -6,12 +6,23 @@
 ##
 
 import re
-from base64 import b64decode
+from base64 import b64encode, b64decode
 from dateutil.parser import parse
 
 from parsers._lib import _updateCursor
-from parsers.dict import nestedGet, nestedSet
+from parsers.dict import flattenDict, nestedGet, nestedSet
 
+
+plist_schema = {
+  '1.0': [
+    '<?xml version="1.0" encoding="UTF-8"?>',
+    '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">',
+    '<plist version="1.0">',
+    '<dict>',
+    '</dict>',
+    '</plist>'
+  ]
+}
 
 def parseSerializedTypes(stype: str, value: str):
   """Parse property list types to Python types.
@@ -38,12 +49,36 @@ def parseSerializedTypes(stype: str, value: str):
   except: pass # De-op
   return entry
 
+def writeSerializedTypes(value, defaults=('dict', None)):
+  stype, svalue = defaults
+  if svalue is not None:
+    stype  = value[0] if isinstance(value, tuple) else 'string'
+    svalue = value[1] if isinstance(value, tuple) else ''
+  entry  = None
+  match stype:
+    case 'date':    pass
+    case 'string':  pass
+    # Handle alternate serialized types
+    case 'float':   stype = 'real'
+    case 'int':     stype = 'integer'
+    # Handle alternate serialized values
+    case 'data':    svalue = b64encode(bytes.fromhex(svalue)).decode()
+    # Handle alternate entry schemas
+    case 'bool':
+      entry = [f'<{(stype := str(svalue).lower())}/>']
+    case _:
+      entry = [f'<{stype}>', f'</{stype}>']
+  # Default entry schema
+  if entry is None:
+    entry = [f'<{stype}>{svalue}</{stype}>']
+  return entry
+
 def parsePlist(lines: list[str],
                config: dict=dict()):
   """Parses a property list into a Python dictionary.
 
   Args:
-    lines: property list (plist) lines.
+    lines: Property list (plist) lines.
     config: Dictionary to be populated.
 
   Returns:
@@ -112,3 +147,80 @@ def parsePlist(lines: list[str],
     else: raise Exception(f'Invalid line at position {i}:\n\n{line}')
 
   return config
+
+def writePlist(lines: list[str]=plist_schema['1.0'],
+               config: dict=dict()):
+  """Writes a property list from a Python dictionary.
+
+  Args:
+    lines: Property list (plist) lines.
+    config: Dictionary to be written.
+
+  Returns:
+    Property list (plist) lines.
+  """
+  def try_index(*args):
+    try: return lines.index(*args)
+    except: return -1
+  cursor = { 'line': 0, 'indent': 2 }
+  for (keys, value) in flattenDict(config).items():
+    # Validate root dicitonary entry
+    head = try_index('<dict>')
+    if head == -1: raise Exception(f'Invalid property list: No root found.')
+
+    # Seek or create head index for current tree level
+    for j, key in enumerate(tree := str(keys).split('.')):
+      padding = (" "*cursor['indent'])*(j+1)
+
+      # Create parent dictionary for object arrays
+      is_root_key = (j == len(tree)-1)
+      if isinstance(key, int):
+        # Seek to current array index
+        num_entries = 0
+        while not (has_array_index := key == (num_entries - 1)):
+          line_padding = (line := lines[head])[:-len(line.lstrip())]
+          if line == f'{padding[:-2]}</array>': break
+          elif line == f'{line_padding}<dict>': num_entries += 1
+          head += 1
+        # Skip end of previous array entry
+        if (has_entries := lines[head-1] != f'{padding[:-2]}<array>'):
+          while lines[head-1] != f'{padding}</dict>': head += 1
+          head -= 1
+        # Create new array entry
+        if not (has_entries and has_array_index):
+          if has_entries: head += 1
+          lines[head:head] = [f'{padding}<dict>', f'{padding}</dict>']
+          head += 1
+        # Seek to end of entry
+        continue
+      # Insert array indices as additional keys
+      elif (re_match := re.search('(.*)\[([0-9]+)\]', key)):
+        key, idx = re_match.groups()
+        tree[j] = key
+        tree[j+1:j+1] = [int(idx)]
+      
+      # Search for key in current level
+      key_ln = f'{padding}<key>{key}</key>'
+      match (index := try_index(key_ln, head)):
+        # Create a new key
+        case -1:
+          # Always append to end of dictionary
+          if not lines[head].lstrip().startswith('</dict>'):
+            while not lines[head-1].startswith(f'{padding}</'):
+              head += 1
+              if lines[head].startswith(f'{padding}<key>'): head += 1
+              if lines[head].startswith(f'{padding[:-2]}</'): break
+          # Append new entry
+          defaults = ('dict' if not re_match else 'array', '' if is_root_key else None)
+          lns = [f'{padding}{v}' for v in writeSerializedTypes(value, defaults)]
+          lines[head:head] = (entry := [key_ln, *lns])
+          head += len(entry) - 1
+        # Seek end of level
+        case _:
+          if index >= head: head = index + 1
+          for line in lines[head:]:
+            if len(padding) < len(line[:-len(line.lstrip())]): head += 1
+            else: break
+          head += 1
+
+  return lines
