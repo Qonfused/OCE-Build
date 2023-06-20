@@ -165,7 +165,7 @@ def writePlist(lines: list[str]=plist_schema['1.0'],
     config: Dictionary to be written.
 
   Returns:
-    Property list (plist) lines.
+    Property list (plist) populated from dictionary entries.
   """
   def try_index(*args):
     try: return lines.index(*args)

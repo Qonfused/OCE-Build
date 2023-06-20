@@ -5,24 +5,26 @@
 # SPDX-License-Identifier: BSD-3-Clause
 ##
 
+import re
 from shlex import split
+from typing import Literal
 
 from parsers._lib import _updateCursor
-from parsers.dict import nestedGet, nestedSet
+from parsers.dict import flattenDict, nestedGet, nestedSet
 
 
 def parseYAML(lines: list[str],
               config: dict=dict(),
               flags: list[str]=[]):
-  """Parses annotated YAML into a Python dictionary.
+  """Parses YAML (optionally type annotated) into a Python dictionary.
 
   Args:
-    lines: Annotated YAML lines.
+    lines: YAML lines.
     config: Dictionary to be populated.
     flags: List of preprocessor flags.
 
   Returns:
-    Dictionary populated from annotated YAML entries.
+    Dictionary populated from YAML entries.
   """
   cursor = { 'keys': [], 'level': 0, 'indent': 0, 'skip': (def_flag := False) }
   for i,line in enumerate(lines):
@@ -88,3 +90,93 @@ def parseYAML(lines: list[str],
     else: raise Exception(f'Invalid line at position {i}:\n\n{line}')
   
   return config
+
+def writeYAML(lines: list[str]=[],
+              config: dict=dict(),
+              schema: Literal['annotated', 'yaml']='yaml'):
+  """Writes a Python dictionary to YAML.
+  
+  Args:
+    lines: YAML lines.
+    config: Dictionary to be written.
+    schema: Flag to control output schema.
+
+  Returns:
+    YAML lines populated from dictionary entries.
+  """
+  cursor = { 'keys': [], 'indent': 2 }
+  flat_dict = flattenDict(config)
+  # Pre-process and prettify tree indentations
+  trees = []; max_tree_len = 0
+  for keys in flat_dict.keys():
+    # Seek or create head index for current tree level
+    for j, key in enumerate(tree := str(keys).split('.')):
+      # Avoid parsing literal array indices
+      if isinstance(tree[j], int): continue
+      # Insert array indices as additional keys
+      elif (re_match := re.search('(.*)\[([0-9]+)\]', key)):
+        key, idx = re_match.groups()
+        tree[j] = key
+        tree[j+1:j+1] = [int(idx)]
+      
+      # Update trees entries
+      if j == len(tree)-1: trees.append(tree)
+      else: continue
+
+      # Update max tree length
+      if schema == 'annotated':
+        tree_len = cursor['indent']*j + len(f"{key}:")
+        # Update max tree length
+        if max_tree_len < tree_len: max_tree_len = tree_len
+  # Write entries to lines
+  for (tree, (stype, svalue)) in zip(trees, flat_dict.values()):
+    # Seek or create head index for current tree level
+    for j, key in enumerate(tree):
+      # Avoid inserting literal array indices
+      if isinstance(tree[j], int):
+        cursor['keys'].append(key)
+        continue
+      # Avoid inserting duplicate keys
+      elif tree[:j+1] == cursor['keys'][:j+1]:
+        continue
+      
+      padding = (" "*cursor['indent'])*j
+      # Handle first array item
+      if isinstance(tree[j-1], int) and tree[:j] != cursor['keys'][:j]:
+        padding = f'{padding[:-2]}- '
+
+      # Default: Add new dict
+      entry = f'{padding}{key}:'
+      # Add new key entry to last dict
+      if (is_root_key := (j == len(tree)-1)):
+        # Update cursor position
+        cursor['keys'] = tree[:j+1]
+
+        indent = max_tree_len - (cursor['indent']*j + len(f"{key}:"))
+        match schema:
+          case 'annotated':
+            # Parse native types
+            match stype:
+              case 'bool':    stype = 'Boolean'
+              case 'data':    stype = 'Data   '; svalue = f'<{svalue}>'
+              case 'dict':    stype = 'Dict   '; svalue = '(empty)'
+              case 'float':   stype = 'Number '
+              case 'int':     stype = 'Number '
+              case 'list':    stype = 'Array  '; svalue = '(empty)'
+              case 'string':  stype = 'String '; svalue = f'"{svalue}"'
+              case _: stype.rjust(len('       ')).capitalize()
+            # Append value to entry
+            entry += f'{" ".rjust(indent + 1)}{stype} | {svalue}'
+          case 'yaml':
+            # Parse native types
+            match stype:
+              case 'dict':    svalue = ''
+              case 'list':    svalue = ''
+              case 'string':  svalue = f'"{svalue}"'
+              case _:         svalue = str(svalue)
+            # Append value to entry
+            entry += f' {svalue}'.rstrip()
+        
+      lines.append(entry)
+      
+  return lines
