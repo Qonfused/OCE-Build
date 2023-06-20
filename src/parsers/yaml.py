@@ -161,14 +161,16 @@ def writeYAML(lines: list[str]=[],
           case 'annotated':
             # Parse native types
             match stype:
-              case 'bool':    stype = 'Boolean'; svalue = str(svalue).lower()
-              case 'data':    stype = 'Data   '; svalue = f'<{svalue}>'
-              case 'dict':    stype = 'Dict   '; svalue = '(empty)'
-              case 'float':   stype = 'Number '; svalue = str(float(svalue))
-              case 'int':     stype = 'Number '; svalue = str(int(svalue))
-              case 'list':    stype = 'Array  '; svalue = '(empty)'
-              case 'string':  stype = 'String '; svalue = f'"{svalue}"'
-              case _: stype.rjust(len('       ')).capitalize()
+              case 'bool':      stype = 'Boolean'; svalue = str(svalue).lower()
+              case 'data':      stype = 'Data   '; svalue = f'<{svalue}>'
+              case 'dict':      stype = 'Dict   '; svalue = '(empty)'
+              case 'float':     stype = 'Number '; svalue = str(float(svalue))
+              case 'int':       stype = 'Number '; svalue = str(int(svalue))
+              case 'list':      stype = 'Array  '; svalue = '(empty)'
+              case 'string':    stype = 'String '; svalue = f'"{svalue}"'
+              case _:
+                stype = stype.rjust(len('       ')).capitalize()
+                svalue = str(value)
             # Append value to entry
             entry += f'{" ".rjust(indent + 1)}{stype} | {svalue}'
           case 'yaml':
