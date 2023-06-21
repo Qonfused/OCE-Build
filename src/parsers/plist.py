@@ -5,9 +5,11 @@
 # SPDX-License-Identifier: BSD-3-Clause
 ##
 
-import re
+
 from base64 import b64encode, b64decode
 from dateutil.parser import parse
+from typing import List, Literal, Tuple
+import re
 
 from parsers._lib import _updateCursor
 from parsers.dict import flattenDict, nestedGet, nestedSet
@@ -24,11 +26,12 @@ plist_schema = {
   ]
 }
 
-def parseSerializedTypes(stype: str, value: str):
+def parseSerializedTypes(stype: str,
+                         value: str) -> Tuple[str, any] | None:
   """Parse property list types to Python types.
 
   Args:
-    stype: Property list type.
+    stype: Property list type (literal).
     value: Property list value.
 
   Returns:
@@ -49,7 +52,18 @@ def parseSerializedTypes(stype: str, value: str):
   except: pass # De-op
   return entry
 
-def writeSerializedTypes(value, defaults=('dict', None)):
+def writeSerializedTypes(value: Tuple[str, any] | any,
+                         defaults: Tuple[str, any] | any=('dict', None)) -> List[str]:
+  """Parse Python types to property list entries.
+
+  Args:
+    value: Tuple of type (literal) and value.
+    defaults: Fallback tuple of type (literal) and value.
+
+  Returns:
+    A list of property list entries.
+  """
+
   # Extract native type and value
   stype, svalue = defaults
   if svalue is not None:

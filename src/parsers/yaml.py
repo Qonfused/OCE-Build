@@ -13,8 +13,30 @@ from parsers._lib import _updateCursor
 from parsers.dict import flattenDict, nestedGet, nestedSet
 
 
+def parseSerializedTypes(stype: str,
+                         value: str) -> Tuple[str, any] | None:
+  """Parse YAML types to Python types.
+
+  Args:
+    stype: YAML type (literal).
+    value: YAML value.
+
+  Returns:
+    Tuple of parsed type (literal) and value.
+  """
+  raise NotImplementedError() #TODO
+
 def writeSerializedTypes(value: Tuple[str, any] | any,
-                         schema=Literal['annotated', 'yaml']) -> str:
+                         schema=Literal['annotated', 'yaml']) -> Tuple[str, any]:
+  """Parse Python types to YAML types.
+
+  Args:
+    value: Tuple of type (literal) and value.
+    schema: Flag to control output schema.
+
+  Returns:
+    Tuple of parsed type (literal) and value.
+  """
 
   # Unpack native types
   stype, svalue = type(value).__name__, value
@@ -108,6 +130,9 @@ def parseYAML(lines: list[str],
         case 'plist': entry = (tokens[1], ' '.join(tokens[2:]))
         case 'yaml':  entry = ' '.join(tokens[1:])
 
+      # TODO: Parse YAML types to Python types
+      # entry = parseSerializedTypes(...)
+
       # Extract and validate parent tree level
       tree = cursor['keys']
       while len(tree) >= level / max(1, cursor['indent']): tree.pop(-1)
@@ -198,9 +223,9 @@ def writeYAML(lines: list[str]=[],
           padding = f'{padding[:-2]}- '
         # Append value to entry
         stype, svalue = writeSerializedTypes(value, schema)
-        indent = max_tree_len - (cursor['indent']*j + len(f"{key}:"))
         match schema:
           case 'annotated':
+            indent = max_tree_len - (cursor['indent']*j + len(f"{key}:"))
             entry = f'{padding}{key}:{" ".rjust(indent + 1)}{stype} | {svalue}'
           case 'yaml':
             entry = f'{padding}{key}: {svalue}'.rstrip()
