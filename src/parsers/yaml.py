@@ -7,11 +7,57 @@
 
 import re
 from shlex import split
-from typing import Literal
+from typing import Literal, Tuple
 
 from parsers._lib import _updateCursor
 from parsers.dict import flattenDict, nestedGet, nestedSet
 
+
+def writeSerializedTypes(value: Tuple[str, any] | any,
+                         schema=Literal['annotated', 'yaml']) -> str:
+
+  # Unpack native types
+  stype, svalue = type(value).__name__, value
+  if isinstance(value, tuple): stype, svalue = value
+
+  match schema:
+    case 'annotated':
+      # Parse native types
+      match stype:
+        case 'bool':      stype = 'Boolean'; svalue = str(svalue).lower()
+        case 'data':      stype = 'Data   '; svalue = f'<{svalue}>'
+        case 'dict':      stype = 'Dict   '; svalue = '(empty)'
+        case 'float':     stype = 'Number '; svalue = str(float(svalue))
+        case 'int':       stype = 'Number '; svalue = str(int(svalue))
+        case 'list':      stype = 'Array  '; svalue = '(empty)'
+        case 'string':    stype = 'String '; svalue = f'"{svalue}"'
+        case _:
+          stype = stype.rjust(len('       ')).capitalize()
+          svalue = str(value)
+    case 'yaml':
+      # Parse native types
+      match stype:
+        case 'bool':    svalue = str(svalue).lower()
+        case 'dict':    svalue = ''
+        case 'list':    svalue = ''
+        case 'string':  svalue = f'"{svalue}"'
+        case _:         svalue = str(svalue)
+      # Escape control and reserved characters
+      # @see https://symfony.com/doc/current/reference/formats/yaml.html
+      reserve_chars = [':', '{', '}', '[', ']', ',', '&', '*', '#', '?',
+                        '|', '-', '<', '>', '=', '!', '%',' @', '`']
+      control_chars = ['\0', '\x01', '\x02', '\x03', '\x04', '\x05',
+                        '\x06', '\a', '\b', '\t', '\n', '\v', '\f', '\r',
+                        '\x0e', '\x0f', '\x10', '\x11', '\x12', '\x13',
+                        '\x14', '\x15', '\x16', '\x17', '\x18', '\x19',
+                        '\x1a', '\e', '\x1c', '\x1d', '\x1e', '\x1f',
+                        r'\N', r'\_', r'\L', r'\P']
+      if any([c for c in control_chars if c in svalue]):
+        svalue = f'"{svalue}"'
+      elif any([c for c in reserve_chars if c in svalue]):
+        svalue = f'\'{svalue}\''
+  
+  return stype, svalue
 
 def parseYAML(lines: list[str],
               config: dict=dict(),
@@ -106,6 +152,7 @@ def writeYAML(lines: list[str]=[],
   """
   cursor = { 'keys': [], 'indent': 2 }
   flat_dict = flattenDict(config)
+
   # Pre-process and prettify tree indentations
   trees = []; max_tree_len = 0
   for keys in flat_dict.keys():
@@ -128,6 +175,7 @@ def writeYAML(lines: list[str]=[],
         tree_len = cursor['indent']*j + len(f"{key}:")
         # Update max tree length
         if max_tree_len < tree_len: max_tree_len = tree_len
+        
   # Write entries to lines
   for (tree, value) in zip(trees, flat_dict.values()):
     # Seek or create head index for current tree level
@@ -139,65 +187,27 @@ def writeYAML(lines: list[str]=[],
       # Avoid inserting duplicate keys
       elif tree[:j+1] == cursor['keys'][:j+1]:
         continue
-      
-      padding = (" "*cursor['indent'])*j
-      # Handle first array item
-      if isinstance(tree[j-1], int) and tree[:j] != cursor['keys'][:j]:
-        padding = f'{padding[:-2]}- '
 
-      # Default: Add new dict
-      entry = f'{padding}{key}:'
       # Add new key entry to last dict
+      padding = (" "*cursor['indent'])*j
+      entry = None
       if (is_root_key := (j == len(tree)-1)):
-        # Update cursor position
-        cursor['keys'] = tree[:j+1]
-
-        # Unpack native types
-        stype, svalue = type(value).__name__, value
-        if isinstance(value, tuple): stype, svalue = value
-
+        # Handle indentation for first array item
+        if isinstance(tree[j-1], int) and tree[:j] != cursor['keys'][:j]:
+          padding = f'{padding[:-2]}- '
+        # Append value to entry
+        stype, svalue = writeSerializedTypes(value, schema)
         indent = max_tree_len - (cursor['indent']*j + len(f"{key}:"))
         match schema:
           case 'annotated':
-            # Parse native types
-            match stype:
-              case 'bool':      stype = 'Boolean'; svalue = str(svalue).lower()
-              case 'data':      stype = 'Data   '; svalue = f'<{svalue}>'
-              case 'dict':      stype = 'Dict   '; svalue = '(empty)'
-              case 'float':     stype = 'Number '; svalue = str(float(svalue))
-              case 'int':       stype = 'Number '; svalue = str(int(svalue))
-              case 'list':      stype = 'Array  '; svalue = '(empty)'
-              case 'string':    stype = 'String '; svalue = f'"{svalue}"'
-              case _:
-                stype = stype.rjust(len('       ')).capitalize()
-                svalue = str(value)
-            # Append value to entry
-            entry += f'{" ".rjust(indent + 1)}{stype} | {svalue}'
+            entry = f'{padding}{key}:{" ".rjust(indent + 1)}{stype} | {svalue}'
           case 'yaml':
-            # Parse native types
-            match stype:
-              case 'bool':    svalue = str(svalue).lower()
-              case 'dict':    svalue = ''
-              case 'list':    svalue = ''
-              case 'string':  svalue = f'"{svalue}"'
-              case _:         svalue = str(svalue)
-            # Escape control and reserved characters
-            # @see https://symfony.com/doc/current/reference/formats/yaml.html
-            reserve_chars = [':', '{', '}', '[', ']', ',', '&', '*', '#', '?',
-                             '|', '-', '<', '>', '=', '!', '%',' @', '`']
-            control_chars = ['\0', '\x01', '\x02', '\x03', '\x04', '\x05',
-                             '\x06', '\a', '\b', '\t', '\n', '\v', '\f', '\r',
-                             '\x0e', '\x0f', '\x10', '\x11', '\x12', '\x13',
-                             '\x14', '\x15', '\x16', '\x17', '\x18', '\x19',
-                             '\x1a', '\e', '\x1c', '\x1d', '\x1e', '\x1f',
-                             r'\N', r'\_', r'\L', r'\P']
-            if any([c for c in control_chars if c in svalue]):
-              svalue = f'"{svalue}"'
-            elif any([c for c in reserve_chars if c in svalue]):
-              svalue = f'\'{svalue}\''
-            # Append value to entry
-            entry += f' {svalue}'.rstrip()
-        
+            entry = f'{padding}{key}: {svalue}'.rstrip()
+      # Add new dict
+      else: entry = f'{padding}{key}:'
       lines.append(entry)
+
+      # Update cursor position
+      if is_root_key: cursor['keys'] = tree[:j+1]
       
   return lines
