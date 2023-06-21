@@ -5,8 +5,18 @@
 # SPDX-License-Identifier: BSD-3-Clause
 ##
 
+from typing import Dict
 
-def flattenDict(dic: dict):
+
+def flattenDict(dic: dict) -> Dict[str, any]:
+  """Flattens a dictionary.
+
+  Args:
+    dic (dict): The dictionary to flatten.
+
+  Returns:
+    A flattened dictionary
+  """
   flat_dict: dict={}
   def recurse_flatten(v: any, prefix=''):
     match v:

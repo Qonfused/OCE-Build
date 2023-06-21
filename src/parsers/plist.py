@@ -5,11 +5,10 @@
 # SPDX-License-Identifier: BSD-3-Clause
 ##
 
-
 from base64 import b64encode, b64decode
 from dateutil.parser import parse
-from typing import List, Literal, Tuple
 import re
+from typing import List, Tuple
 
 from parsers._lib import _updateCursor
 from parsers.dict import flattenDict, nestedGet, nestedSet
