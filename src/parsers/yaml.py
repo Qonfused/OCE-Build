@@ -9,11 +9,11 @@ import re
 from shlex import split
 from typing import Literal, Tuple
 
-from parsers._lib import _updateCursor
-from parsers.dict import flattenDict, nestedGet, nestedSet
+from parsers._lib import _update_cursor
+from parsers.dict import flatten_dict, nested_get, nested_set
 
 
-def parseSerializedTypes(stype: str,
+def parse_serialized_types(stype: str,
                          value: str) -> Tuple[str, any] | None:
   """Parse YAML types to Python types.
 
@@ -26,7 +26,7 @@ def parseSerializedTypes(stype: str,
   """
   raise NotImplementedError() #TODO
 
-def writeSerializedTypes(value: Tuple[str, any] | any,
+def write_serialized_types(value: Tuple[str, any] | any,
                          schema=Literal['annotated', 'yaml']) -> Tuple[str, any]:
   """Parse Python types to YAML types.
 
@@ -82,7 +82,7 @@ def writeSerializedTypes(value: Tuple[str, any] | any,
   
   return stype, svalue
 
-def parseYAML(lines: list[str],
+def parse_yaml(lines: list[str],
               config: dict=dict(),
               flags: list[str]=[]):
   """Parses YAML (optionally type annotated) into a Python dictionary.
@@ -120,7 +120,7 @@ def parseYAML(lines: list[str],
     level = len(line[:-len(lnorm)])
     # Update cursor position
     if num_tokens == 1 and tokens[0].endswith(':'):
-      _updateCursor(level, key, cursor)
+      _update_cursor(level, key, cursor)
     # Update dictionary values
     elif num_tokens >= 1:
       # Extract schema and entry value
@@ -136,34 +136,34 @@ def parseYAML(lines: list[str],
       # Extract and validate parent tree level
       tree = cursor['keys']
       while len(tree) >= level / max(1, cursor['indent']): tree.pop(-1)
-      prev_value = nestedGet(config, tree)
+      prev_value = nested_get(config, tree)
       
       # Handle initial array values
       if lnorm.startswith('-'):
         obj = { key: entry } if num_tokens > 1 else key
         if isinstance(prev_value, list):
           prev_value.append(obj)
-          nestedSet(config, tree, prev_value)
+          nested_set(config, tree, prev_value)
         else:
-          nestedSet(config, tree, [obj])
+          nested_set(config, tree, [obj])
       else:
         # Handle object and array traversal
         match prev_value:
           case dict() | None:
-            nestedSet(config, [*tree, key], entry)
+            nested_set(config, [*tree, key], entry)
           case list():
             match prev_value[-1]:
               # Add new key to last dictionary in array
               case dict():  prev_value[-1][key] = entry
               # Always append dictionaries to arrays
               case _:       prev_value.append(entry)
-            nestedSet(config, tree, prev_value)
+            nested_set(config, tree, prev_value)
     # Reached invalid line
     else: raise Exception(f'Invalid line at position {i}:\n\n{line}')
   
   return config
 
-def writeYAML(lines: list[str]=[],
+def write_yaml(lines: list[str]=[],
               config: dict=dict(),
               schema: Literal['annotated', 'yaml']='yaml'):
   """Writes a Python dictionary to YAML.
@@ -177,7 +177,7 @@ def writeYAML(lines: list[str]=[],
     YAML lines populated from dictionary entries.
   """
   cursor = { 'keys': [], 'indent': 2 }
-  flat_dict = flattenDict(config)
+  flat_dict = flatten_dict(config)
 
   # Pre-process and prettify tree indentations
   trees = []; max_tree_len = 0
@@ -222,7 +222,7 @@ def writeYAML(lines: list[str]=[],
         if isinstance(tree[j-1], int) and tree[:j] != cursor['keys'][:j]:
           padding = f'{padding[:-2]}- '
         # Append value to entry
-        stype, svalue = writeSerializedTypes(value, schema)
+        stype, svalue = write_serialized_types(value, schema)
         match schema:
           case 'annotated':
             indent = max_tree_len - (cursor['indent']*j + len(f"{key}:"))

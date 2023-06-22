@@ -10,11 +10,11 @@ from dateutil.parser import parse
 import re
 from typing import List, Tuple
 
-from parsers._lib import _updateCursor
-from parsers.dict import flattenDict, nestedGet, nestedSet
+from parsers._lib import _update_cursor
+from parsers.dict import flatten_dict, nested_get, nested_set
 
 
-plist_schema = {
+PLIST_SCHEMA = {
   '1.0': [
     '<?xml version="1.0" encoding="UTF-8"?>',
     '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">',
@@ -25,7 +25,7 @@ plist_schema = {
   ]
 }
 
-def parseSerializedTypes(stype: str,
+def parse_serialized_types(stype: str,
                          value: str) -> Tuple[str, any] | None:
   """Parse property list types to Python types.
 
@@ -51,7 +51,7 @@ def parseSerializedTypes(stype: str,
   except: pass # De-op
   return entry
 
-def writeSerializedTypes(value: Tuple[str, any] | any,
+def write_serialized_types(value: Tuple[str, any] | any,
                          defaults: Tuple[str, any] | any=('dict', None)) -> List[str]:
   """Parse Python types to property list entries.
 
@@ -93,7 +93,7 @@ def writeSerializedTypes(value: Tuple[str, any] | any,
     entry = [f'<{stype}>{svalue}</{stype}>']
   return entry
 
-def parsePlist(lines: list[str],
+def parse_plist(lines: list[str],
                config: dict=dict()):
   """Parses a property list into a Python dictionary.
 
@@ -129,7 +129,7 @@ def parsePlist(lines: list[str],
     # Update cursor position
     if (lnorm := lnorm.rstrip()).endswith('</key>'):
       key = lnorm[len('<key>'):-len('</key>')]
-      _updateCursor(level, key, cursor)
+      _update_cursor(level, key, cursor)
     # Update dictionary values
     elif lnorm.startswith('<'):
       # Attempt single-line extraction of type and value
@@ -150,28 +150,28 @@ def parsePlist(lines: list[str],
       
       # Parse property list types to Python types
       # @see https://www.apple.com/DTDs/PropertyList-1.0.dtd
-      entry = parseSerializedTypes(stype, value)
+      entry = parse_serialized_types(stype, value)
       if entry is None: continue
 
       # Handle object and array traversal
       ptree = tree[:-1] if stype != 'dict' else tree
-      prev_value = nestedGet(config, ptree)
+      prev_value = nested_get(config, ptree)
       match prev_value:
         case dict() | None:
           try:
-            nestedSet(config, tree, entry)
+            nested_set(config, tree, entry)
           except: pass #TODO: Handle pure array entries
         case list():
           match stype:
             # Always append dictionaries to arrays
             case 'dict':
               prev_value.append(entry)
-              nestedSet(config, ptree, prev_value)
+              nested_set(config, ptree, prev_value)
             # Add new key to last dictionary in array
             case _:
               *tree, key = tree
               prev_value[-1][key] = entry
-              nestedSet(config, tree, prev_value)
+              nested_set(config, tree, prev_value)
       # Update cursor position
       cursor['prev_line'] = line
     # Reached invalid line
@@ -180,7 +180,7 @@ def parsePlist(lines: list[str],
 
   return config
 
-def writePlist(lines: list[str]=plist_schema['1.0'],
+def write_plist(lines: list[str]=PLIST_SCHEMA['1.0'],
                config: dict=dict()):
   """Writes a property list from a Python dictionary.
 
@@ -195,7 +195,7 @@ def writePlist(lines: list[str]=plist_schema['1.0'],
     try: return lines.index(*args)
     except: return -1
   cursor = { 'line': 0, 'indent': 2 }
-  for (keys, value) in flattenDict(config).items():
+  for (keys, value) in flatten_dict(config).items():
     # Validate root dicitonary entry
     head = try_index('<dict>')
     if head == -1: raise Exception(f'Invalid property list: No root found.')
@@ -244,7 +244,7 @@ def writePlist(lines: list[str]=plist_schema['1.0'],
               if lines[head].startswith(f'{padding[:-2]}</'): break
           # Append new entry
           defaults = ('dict' if not re_match else 'array', '' if is_root_key else None)
-          lns = [f'{padding}{v}' for v in writeSerializedTypes(value, defaults)]
+          lns = [f'{padding}{v}' for v in write_serialized_types(value, defaults)]
           lines[head:head] = (entry := [key_ln, *lns])
           head += len(entry) - 1
         # Seek end of level

@@ -8,11 +8,11 @@
 from typing import Dict
 
 
-def flattenDict(dic: dict) -> Dict[str, any]:
+def flatten_dict(dic: dict) -> Dict[str, any]:
   """Flattens a dictionary.
 
   Args:
-    dic (dict): The dictionary to flatten.
+    dic: The dictionary to flatten.
 
   Returns:
     A flattened dictionary
@@ -39,12 +39,12 @@ def flattenDict(dic: dict) -> Dict[str, any]:
   recurse_flatten(dic)
   return flat_dict
 
-def nestedGet(dic: dict, keys: list[str]) -> dict | None:
+def nested_get(dic: dict, keys: list[str]) -> dict | None:
   """Retrieves a nested value from a dictionary.
 
   Args:
-    dic (dict): The dictionary to retrieve the value from.
-    keys (list): The keys to traverse the dictionary.
+    dic: The dictionary to retrieve the value from.
+    keys: The keys to traverse the dictionary.
 
   Returns:
     The value at the end of the keys list.
@@ -54,13 +54,13 @@ def nestedGet(dic: dict, keys: list[str]) -> dict | None:
     return dic
   except: return
 
-def nestedSet(dic: dict, keys: list[str], value: any):
+def nested_set(dic: dict, keys: list[str], value: any):
   """Sets a nested value in a dictionary.
 
   Args:
-    dic (dict): The dictionary to set the value in.
-    keys (list): The keys to traverse the dictionary.
-    value (any): The value to set.
+    dic: The dictionary to set the value in.
+    keys: The keys to traverse the dictionary.
+    value: The value to set.
   """
   for key in keys[:-1]:
     if isinstance(dic, dict):
@@ -68,12 +68,12 @@ def nestedSet(dic: dict, keys: list[str], value: any):
     else: return
   dic[keys[-1]] = value
 
-def nestedDel(dic: dict, keys: list[str]):
+def nested_del(dic: dict, keys: list[str]):
   """Deletes a nested value in a dictionary.
 
   Args:
-    dic (dict): The dictionary to delete the value from.
-    keys (list): The keys to traverse the dictionary.
+    dic: The dictionary to delete the value from.
+    keys: The keys to traverse the dictionary.
   """
   for key in keys[:-1]: dic = dic[key]
   del dic[keys[-1]]
