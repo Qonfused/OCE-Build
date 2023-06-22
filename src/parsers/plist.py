@@ -104,8 +104,14 @@ def parsePlist(lines: list[str],
   Returns:
     Dictionary populated from plist entries.
   """
-  cursor = { 'keys': [], 'level': 0, 'indent': 0, 'skip': (def_flag := False) }
-  for i,line in enumerate(lines):
+  cursor = {
+    'keys': [],
+    'level': 0,
+    'indent': 0,
+    'skip': (def_flag := False),
+    'prev_line': None
+  }
+  for line in lines:
     # Skip empty lines
     if len(lnorm := line.lstrip()) == 0:
       continue
@@ -136,7 +142,7 @@ def parsePlist(lines: list[str],
       while len(tree)-1 >= level / max(1, cursor['indent']):
         cursor['level'] -= cursor['indent']
         # Handle object arrays separately
-        if lines[i-1].lstrip().startswith(f'</{stype}>'):
+        if cursor['prev_line'].lstrip().startswith(f'</{stype}>'):
           tree.pop(-1)
         # Handle dictionary keys separately
         else:
@@ -152,7 +158,9 @@ def parsePlist(lines: list[str],
       prev_value = nestedGet(config, ptree)
       match prev_value:
         case dict() | None:
-          nestedSet(config, tree, entry)
+          try:
+            nestedSet(config, tree, entry)
+          except: pass #TODO: Handle pure array entries
         case list():
           match stype:
             # Always append dictionaries to arrays
@@ -164,8 +172,11 @@ def parsePlist(lines: list[str],
               *tree, key = tree
               prev_value[-1][key] = entry
               nestedSet(config, tree, prev_value)
+      # Update cursor position
+      cursor['prev_line'] = line
     # Reached invalid line
-    else: raise Exception(f'Invalid line at position {i}:\n\n{line}')
+    else: pass #TODO: Handle multi-line values
+      # raise Exception(f'Invalid line at position {i}:\n\n{line}')
 
   return config
 
