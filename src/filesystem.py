@@ -41,8 +41,9 @@ def extract_archive(url: str | Request,
       # Extract filename from request headers.
       _, params = parse_header(response.headers.get('Content-Disposition', ''))
       filename = params['filename']
+      extension = "".join(Path(filename).suffixes)
       # Write archive to a temporary file.
-      with NamedTemporaryFile(suffix=Path(filename).suffix) as tmp_file:
+      with NamedTemporaryFile(suffix=extension) as tmp_file:
         tmp_file.write(response.read())
         tmp_file.seek(0)
         # Extract the zip file to the temporary directory.
