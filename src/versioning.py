@@ -32,7 +32,7 @@ def get_version_string(string: str) -> str | None:
   matches = re_search(r'([\d.]+)', string)
   return matches.group(1) if matches else None
 
-def get_version_arr(version: str) -> list[int]:
+def get_version_parts(version: str) -> list[int]:
   """Gets the version parts from a version string.
 
   Args:
@@ -42,9 +42,9 @@ def get_version_arr(version: str) -> list[int]:
     The version parts.
   
   Example:
-    >>> get_version_arr('1.0.0')
+    >>> get_version_parts('1.0.0')
     # -> [1, 0, 0]
-    >>> get_version_arr('latest')
+    >>> get_version_parts('latest')
     # -> None
   """
   parts = get_version_string(version)
@@ -61,8 +61,8 @@ def compare_version(v1: str, v2: str, operator: str) -> bool:
   Returns:
     True if the version satisfies the specifier.
   """
-  v1_arr = get_version_arr(v1)
-  v2_arr = get_version_arr(v2)
+  v1_arr = get_version_parts(v1)
+  v2_arr = get_version_parts(v2)
   if operator == '>':   return v1_arr >  v2_arr
   if operator == '<':   return v1_arr <  v2_arr
   if operator == '>=':  return v1_arr >= v2_arr
@@ -124,15 +124,15 @@ def resolve_version_specifier(versions: list[str],
     case '~':
       filtered = [v for v in sorted_versions
                   if compare_version(v, version_str, operator='>=')
-                  and get_version_arr(v)[0] == get_version_arr(version_str)[0]
-                  and get_version_arr(v)[1] < get_version_arr(version_str)[1]+1]
+                  and get_version_parts(v)[0] == get_version_parts(version_str)[0]
+                  and get_version_parts(v)[1] < get_version_parts(version_str)[1]+1]
       if len(filtered): return filtered[-1]
     # Up to next major
     # e.g. '^1.2.3' -> '>=1.2.3,<2.0.0'
     case '^':
       filtered = [v for v in sorted_versions
                   if compare_version(v, version_str, operator='>=')
-                  and get_version_arr(v)[0] < get_version_arr(version_str)[0]+1]
+                  and get_version_parts(v)[0] < get_version_parts(version_str)[0]+1]
       if len(filtered): return filtered[-1]
     # Direct comparisons
     case '>' | '<' | '>=' | '<=' | '==' | '!=':

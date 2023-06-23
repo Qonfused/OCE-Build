@@ -10,7 +10,7 @@ from dateutil.parser import parse
 import re
 from typing import List, Tuple
 
-from parsers._lib import _update_cursor
+from parsers._lib import update_cursor
 from parsers.dict import flatten_dict, nested_get, nested_set
 
 
@@ -129,7 +129,7 @@ def parse_plist(lines: list[str],
     # Update cursor position
     if (lnorm := lnorm.rstrip()).endswith('</key>'):
       key = lnorm[len('<key>'):-len('</key>')]
-      _update_cursor(level, key, cursor)
+      update_cursor(level, key, cursor)
     # Update dictionary values
     elif lnorm.startswith('<'):
       # Attempt single-line extraction of type and value

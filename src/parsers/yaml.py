@@ -9,7 +9,7 @@ import re
 from shlex import split
 from typing import Literal, Tuple
 
-from parsers._lib import _update_cursor
+from parsers._lib import update_cursor
 from parsers.dict import flatten_dict, nested_get, nested_set
 
 
@@ -120,7 +120,7 @@ def parse_yaml(lines: list[str],
     level = len(line[:-len(lnorm)])
     # Update cursor position
     if num_tokens == 1 and tokens[0].endswith(':'):
-      _update_cursor(level, key, cursor)
+      update_cursor(level, key, cursor)
     # Update dictionary values
     elif num_tokens >= 1:
       # Extract schema and entry value
