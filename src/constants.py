@@ -81,5 +81,5 @@ def github_archive_url(repository: str,
 
 DORTANIA_BUILD_CATALOG = github_file_url('dortania/build-repo', 'config.json', branch='builds')
 
-OC_PKG_URL = github_archive_url('acidanthera/OpenCorePkg', branch='master')
-OC_BIN_URL = github_archive_url('acidanthera/OcBinaryData', branch='master')
+OPENCORE_PACKAGE_URL = github_archive_url('acidanthera/OpenCorePkg', branch='master')
+OPENCORE_BINARY_DATA_URL = github_archive_url('acidanthera/OcBinaryData', branch='master')
