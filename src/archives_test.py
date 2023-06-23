@@ -54,7 +54,7 @@ def test_extract_opencore_archive():
       },
       'EFI': {
         'BOOT': {
-          'BOOTX64.EFI': 'f'
+          'BOOTx64.efi': 'f'
         },
         'OC': {
           'ACPI': '*',
