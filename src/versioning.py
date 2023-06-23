@@ -50,7 +50,7 @@ def get_version_arr(version: str) -> list[int]:
   parts = get_version_string(version)
   return list(map(int, parts.split('.'))) if parts else list()
 
-def _compare_version(v1: str, v2: str, operator: str) -> bool:
+def compare_version(v1: str, v2: str, operator: str) -> bool:
   """Compares a version to the version specifier.
   
   Args:
@@ -123,7 +123,7 @@ def resolve_version_specifier(versions: list[str],
     # e.g. '~1.2.3' -> '>=1.2.3,<1.3.0'
     case '~':
       filtered = [v for v in sorted_versions
-                  if _compare_version(v, version_str, operator='>=')
+                  if compare_version(v, version_str, operator='>=')
                   and get_version_arr(v)[0] == get_version_arr(version_str)[0]
                   and get_version_arr(v)[1] < get_version_arr(version_str)[1]+1]
       if len(filtered): return filtered[-1]
@@ -131,13 +131,13 @@ def resolve_version_specifier(versions: list[str],
     # e.g. '^1.2.3' -> '>=1.2.3,<2.0.0'
     case '^':
       filtered = [v for v in sorted_versions
-                  if _compare_version(v, version_str, operator='>=')
+                  if compare_version(v, version_str, operator='>=')
                   and get_version_arr(v)[0] < get_version_arr(version_str)[0]+1]
       if len(filtered): return filtered[-1]
     # Direct comparisons
     case '>' | '<' | '>=' | '<=' | '==' | '!=':
       filtered = [v for v in sorted_versions
-                  if _compare_version(v, version_str, operator=symbol)]
+                  if compare_version(v, version_str, operator=symbol)]
       if len(filtered): return filtered[-1]
     # Fallthrough
     case _:
@@ -145,7 +145,7 @@ def resolve_version_specifier(versions: list[str],
       # e.g. '1.2.3' -> '==1.2.3'
       if specifier == version_str:
         filtered = [v for v in sorted_versions
-                    if _compare_version(v, version_str, operator='==')]
+                    if compare_version(v, version_str, operator='==')]
         if len(filtered): return filtered[-1]
       # No match
       return None
