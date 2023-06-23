@@ -8,11 +8,13 @@
 from typing import Dict
 
 
-def flatten_dict(dic: dict) -> Dict[str, any]:
+def flatten_dict(dic: dict,
+                 delimiter='.') -> Dict[str, any]:
   """Flattens a dictionary.
 
   Args:
     dic: The dictionary to flatten.
+    delimiter (optional): custom key delimiter.
 
   Returns:
     A flattened dictionary
@@ -25,14 +27,14 @@ def flatten_dict(dic: dict) -> Dict[str, any]:
           flat_dict[prefix[1:]] = ('dict', v)
         else:
           for k, v2 in entries:
-            p2 = "{}.{}".format(prefix, k)
+            p2 = f"{prefix}{delimiter}{k}"
             recurse_flatten(v2, p2)
       case list():
         if not len(v):
           flat_dict[prefix[1:]] = ('list', v)
         else:
           for i, v2 in enumerate(v):
-            p2 = "{}[{}]".format(prefix, i)
+            p2 = f"{prefix}[{k}]"
             recurse_flatten(v2, p2)
       case _:
         flat_dict[prefix[1:]] = v
