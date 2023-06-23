@@ -7,3 +7,6 @@
 # Python artifacts
 **/__pycache__
 **/__test__.py
+
+# Build artifacts
+dist
