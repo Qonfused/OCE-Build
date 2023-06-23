@@ -152,10 +152,10 @@ def extract_opencore_archive(url: str,
 
     # Clone latest additional OpenCore binaries not shipped in the main package
     with extract_archive(OPENCORE_BINARY_DATA_URL) as pkg:
-      for dir in glob(pkg, pattern='*/'):
-        # Clone additional binaries to EFI directory
-        if EFI_DIR.joinpath('OC', dir.name).exists():
-          copytree(dir, EFI_DIR.joinpath('OC'), dirs_exist_ok=True)
+      for dir in glob(EFI_DIR, pattern='**/OC/*/'):
+        extract = glob(pkg, pattern=f'**/{dir.name}/', first=True)
+        if extract and extract.exists():
+          copytree(extract, dir, dirs_exist_ok=True)
     
     # Yield the temporary directory.
     yield Path(tmp_dir)
