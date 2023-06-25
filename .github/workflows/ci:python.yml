@@ -1,4 +1,4 @@
-name: CI:Python
+name: Python CI
 on:
   # Skips build process for changes to only **docs** or **.github** directories.
   push:
@@ -23,43 +23,60 @@ jobs:
   test:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        include:
-          - python_version: "3.10"
-          - python_version: "3.11"
-    name: "Test (python ${{ matrix.python_version }})"
+        python-version: [ "3.8", "3.9", "3.10", "3.11" ]
+        # os: [ubuntu-latest, windows-latest, macos-latest]
+    name: "Test (python ${{ matrix.python-version }})"
     steps:
-      - uses: actions/checkout@v3
-      # Setup Python (faster than using Python container)
-      - name: Setup Python
-        uses: actions/setup-python@v4
+      # Fetches remote repository without --progress option.
+      #
+      # The default behavior of @actions/checkout outputs many noisy lines of
+      # status output in the workflow log, which is problematic for log size.
+      #
+      # Refer to the below PR for updates on this issue:
+      # - https://github.com/actions/checkout/pull/1067
+      - name: Checkout latest repository commit
+        # uses: actions/checkout@v3
+        uses: simonbaird/checkout@no-progress-option
         with:
-          python-version: ${{ matrix.python_version }}
-      # Create and cache pipenv virtual environment
-      - name: Install pipenv
+          show-progress: false
+          # submodules: recursive
+      - name: Install poetry
         run: |
-          python -m pip install --upgrade pip
-          pip install pipenv
-      - name: Install dependencies
+          curl -O -sSL https://install.python-poetry.org/install-poetry.py
+          python install-poetry.py -y --version 1.5.0
+          echo "PATH=${HOME}/.poetry/bin:${PATH}" >> $GITHUB_ENV
+          rm install-poetry.py
+      - name: Setup Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: poetry
+          cache-dependency-path: poetry.lock
+      - name: Setup Poetry environment
         run: |
-          # pipenv install --dev
-          pipenv install python_dateutil coverage pytest
+          # Use the matrix version instead of the default python version (3.8).
+          poetry env use ${{ matrix.python-version }}
+      - name: Install test dependencies
+        run: |
+          poetry install --no-root --only test
       # Run test suites
       - name: Run test suite
         run: |
-          pipenv run coverage run -m pytest -v
+          poetry run pytest --cov=src -vv
         env:
-          COVERAGE_FILE: ".coverage.${{ matrix.python_version }}"
+          COVERAGE_FILE: ".coverage.${{ matrix.python-version }}"
       # Upload coverage data
       - name: Store coverage file
         uses: actions/upload-artifact@v3
         with:
           name: coverage
-          path: .coverage.${{ matrix.python_version }}
+          path: .coverage.${{ matrix.python-version }}
   # Generate coverage branch data and PR comment text
   #
-  # Pushes data to a `python-coverage-comment-action` branch
-  # and posts/edits a comment reporting test coverage.
+  # Updates `python-coverage-comment-action` branch
+  # and edits cached PR comment text reporting test coverage.
   coverage-branch:
     name: Coverage Branch
     runs-on: ubuntu-latest
