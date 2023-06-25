@@ -9,10 +9,10 @@ from graphlib import TopologicalSorter
 from itertools import chain
 from re import search as re_search
 
-from typing import Dict, Generator, Tuple
+from typing import Dict, Generator, List, Tuple, Union
 
 
-def get_version_string(string: str) -> str | None:
+def get_version_string(string: str) -> Union[str, None]:
   """Gets the version string from a version specifier.
 
   Args:
@@ -32,7 +32,7 @@ def get_version_string(string: str) -> str | None:
   matches = re_search(r'([\d.]+)', string)
   return matches.group(1) if matches else None
 
-def get_version_parts(version: str) -> list[int]:
+def get_version_parts(version: str) -> List[int]:
   """Gets the version parts from a version string.
 
   Args:
@@ -71,8 +71,8 @@ def compare_version(v1: str, v2: str, operator: str) -> bool:
   if operator == '!=':  return v1_arr != v2_arr
   return False
 
-def resolve_version_specifier(versions: list[str],
-                              specifier: str) -> str | None:
+def resolve_version_specifier(versions: List[str],
+                              specifier: str) -> Union[str, None]:
   """Resolves a version specifier.
 
   Args:
@@ -150,7 +150,7 @@ def resolve_version_specifier(versions: list[str],
     return None
 
 def get_minimum_version(dependencies: Dict[str, Tuple[str, str]],
-                        library: str) -> Tuple[str, str | None]:
+                        library: str) -> Tuple[str, Union[str, None]]:
   """Gets the minimum required version of a library.
 
   Args:

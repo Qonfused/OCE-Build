@@ -101,16 +101,6 @@ files = [
 test = ["pytest (>=6)"]
 
 [[package]]
-name = "graphlib"
-version = "0.9.5"
-description = "Graph API"
-optional = false
-python-versions = "*"
-files = [
-    {file = "graphlib-0.9.5.tar.gz", hash = "sha256:6b74e169ef0fb92bab15e617f9eb4c60a2d9ad4187cc5e4e4fb24d9601f2437f"},
-]
-
-[[package]]
 name = "iniconfig"
 version = "2.0.0"
 description = "brain-dead simple config-ini parsing"
@@ -268,5 +258,5 @@ files = [
 
 [metadata]
 lock-version = "2.0"
-python-versions = ">=3.8"
-content-hash = "cbec907aa467c389767f34fe1ce8ad916e417b77187c9bc5d221c2fa0c1a0a10"
+python-versions = ">=3.9"
+content-hash = "96fb35f718766229e538b50f28b590401edba2f46dce7d6afd07ac463081e562"

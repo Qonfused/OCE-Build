@@ -13,7 +13,7 @@ from shutil import copytree, rmtree, unpack_archive
 from tempfile import mkdtemp, NamedTemporaryFile
 from urllib.request import urlopen, Request
 
-from typing import Generator, Literal
+from typing import Generator, Literal, Union
 
 from parsers.plist import parse_plist
 from constants import OPENCORE_BINARY_DATA_URL
@@ -21,7 +21,7 @@ from filesystem import move, glob
 
 
 @contextmanager
-def extract_archive(url: str | Request,
+def extract_archive(url: Union[str, Request],
                     persist: bool=False) -> Generator[Path, str, None]:
   """Extracts a file from a URL and yields a temporary extraction directory.
 
@@ -58,7 +58,7 @@ def extract_archive(url: str | Request,
 
 @contextmanager
 def extract_kext_archive(url: str,
-                  persist: bool=False) -> Generator[dict, any, None]:
+                         persist: bool=False) -> Generator[dict, any, None]:
   """Extracts Kexts from a URL and yields a temporary extraction dictionary.
 
   Args:

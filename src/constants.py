@@ -3,6 +3,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 ##
 
+from typing import Optional
+
 
 def github_file_url(repository: str,
                     path: str,
@@ -45,9 +47,9 @@ def github_file_url(repository: str,
     return f'https://{prefix}/{repository}/{stem}{branch}/{path}'
 
 def github_archive_url(repository: str,
-                       branch: str='main',
-                       tag: str=None,
-                       commit: str=None) -> str:
+                       branch: Optional[str]='main',
+                       tag: Optional[str]=None,
+                       commit: Optional[str]=None) -> str:
   """Formats a GitHub archive URL.
 
   Args:

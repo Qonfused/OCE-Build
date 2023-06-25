@@ -5,11 +5,10 @@
 # SPDX-License-Identifier: BSD-3-Clause
 ##
 
-from typing import Dict
+from typing import Dict, List, Union
 
 
-def flatten_dict(dic: dict,
-                 delimiter='.') -> Dict[str, any]:
+def flatten_dict(dic: dict, delimiter: str='.') -> Dict[str, any]:
   """Flattens a dictionary.
 
   Args:
@@ -41,7 +40,7 @@ def flatten_dict(dic: dict,
   recurse_flatten(dic)
   return flat_dict
 
-def nested_get(dic: dict, keys: list[str]) -> dict | None:
+def nested_get(dic: dict, keys: List[str]) -> Union[dict, None]:
   """Retrieves a nested value from a dictionary.
 
   Args:
@@ -56,7 +55,7 @@ def nested_get(dic: dict, keys: list[str]) -> dict | None:
     return dic
   except: return
 
-def nested_set(dic: dict, keys: list[str], value: any):
+def nested_set(dic: dict, keys: List[str], value: any):
   """Sets a nested value in a dictionary.
 
   Args:
@@ -70,7 +69,7 @@ def nested_set(dic: dict, keys: list[str], value: any):
     else: return
   dic[keys[-1]] = value
 
-def nested_del(dic: dict, keys: list[str]):
+def nested_del(dic: dict, keys: List[str]):
   """Deletes a nested value in a dictionary.
 
   Args:

@@ -7,14 +7,14 @@
 
 import re
 from shlex import split
-from typing import Literal, Tuple
+from typing import List, Literal, Tuple, Union
 
 from parsers._lib import update_cursor
 from parsers.dict import flatten_dict, nested_get, nested_set
 
 
 def parse_serialized_types(stype: str,
-                         value: str) -> Tuple[str, any] | None:
+                           value: str) -> Union[Tuple[str, any], None]:
   """Parse YAML types to Python types.
 
   Args:
@@ -26,8 +26,8 @@ def parse_serialized_types(stype: str,
   """
   raise NotImplementedError() #TODO
 
-def write_serialized_types(value: Tuple[str, any] | any,
-                         schema=Literal['annotated', 'yaml']) -> Tuple[str, any]:
+def write_serialized_types(value: Union[Tuple[str, any], any],
+                           schema=Literal['annotated', 'yaml']) -> Tuple[str, any]:
   """Parse Python types to YAML types.
 
   Args:
@@ -79,9 +79,9 @@ def write_serialized_types(value: Tuple[str, any] | any,
   
   return stype, svalue
 
-def parse_yaml(lines: list[str],
-              config: dict=dict(),
-              flags: list[str]=[]):
+def parse_yaml(lines: List[str],
+               config: dict=dict(),
+               flags: List[str]=[]):
   """Parses YAML (optionally type annotated) into a Python dictionary.
 
   Args:
@@ -161,7 +161,7 @@ def parse_yaml(lines: list[str],
   
   return config
 
-def write_yaml(lines: list[str]=[],
+def write_yaml(lines: List[str]=[],
               config: dict=dict(),
               schema: Literal['annotated', 'yaml']='yaml'):
   """Writes a Python dictionary to YAML.

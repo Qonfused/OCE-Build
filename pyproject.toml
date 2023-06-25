@@ -38,15 +38,13 @@ license = "BSD-3-Clause"
 
   # Requirements
   [tool.poetry.dependencies]
-  python = ">=3.8"
-  graphlib = { version = "^0.9", python = "<3.9" }
+  python = ">=3.9"
   
   # [[tool.poetry.group.dev.dependencies]]
   # TODO
 
   # [tool.poetry.group.docs]
   # optional = true
-
   #   [tool.poetry.group.docs.dependencies]
   #   # TODO
 

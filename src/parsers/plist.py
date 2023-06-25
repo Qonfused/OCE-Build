@@ -8,7 +8,7 @@
 from base64 import b64encode, b64decode
 from datetime import datetime
 import re
-from typing import List, Tuple
+from typing import List, Tuple, Union
 
 from parsers._lib import update_cursor
 from parsers.dict import flatten_dict, nested_get, nested_set
@@ -26,7 +26,7 @@ PLIST_SCHEMA = {
 }
 
 def parse_serialized_types(stype: str,
-                           value: str) -> Tuple[str, any] | None:
+                           value: str) -> Union[Tuple[str, any],  None]:
   """Parse property list types to Python types.
 
   Args:
@@ -50,8 +50,9 @@ def parse_serialized_types(stype: str,
   except: pass # De-op
   return entry
 
-def write_serialized_types(value: Tuple[str, any] | any,
-                         defaults: Tuple[str, any] | any=('dict', None)) -> List[str]:
+def write_serialized_types(value: Union[Tuple[str, any], any],
+                           defaults: Union[Tuple[str, any], any]=('dict', None)
+                          ) -> List[str]:
   """Parse Python types to property list entries.
 
   Args:
@@ -93,8 +94,8 @@ def write_serialized_types(value: Tuple[str, any] | any,
 
   return entry
 
-def parse_plist(lines: list[str],
-               config: dict=dict()):
+def parse_plist(lines: List[str],
+                config: dict=dict()):
   """Parses a property list into a Python dictionary.
 
   Args:
@@ -178,8 +179,8 @@ def parse_plist(lines: list[str],
 
   return config
 
-def write_plist(lines: list[str]=PLIST_SCHEMA['1.0'],
-               config: dict=dict()):
+def write_plist(lines: List[str]=PLIST_SCHEMA['1.0'],
+                config: dict=dict()):
   """Writes a property list from a Python dictionary.
 
   Args:

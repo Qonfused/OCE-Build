@@ -22,10 +22,21 @@ jobs:
   # Runs test suite
   test:
     runs-on: ubuntu-latest
+    continue-on-error: ${{ matrix.experimental }}
     strategy:
       fail-fast: false
       matrix:
-        python-version: [ "3.8", "3.9", "3.10", "3.11" ]
+        include:
+          # Stable versions
+          - python-version: "3.9"
+            experimental: false
+          - python-version: "3.10"
+            experimental: false
+          - python-version: "3.11"
+            experimental: false
+          # Experimental versions
+          - python-version: "3.12-dev"
+            experimental: true
         # os: [ubuntu-latest, windows-latest, macos-latest]
     name: "Test (python ${{ matrix.python-version }})"
     steps:
@@ -60,11 +71,11 @@ jobs:
           poetry env use ${{ matrix.python-version }}
       - name: Install test dependencies
         run: |
-          poetry install --no-root --only test
+          poetry install --no-root --with test
       # Run test suites
       - name: Run test suite
         run: |
-          poetry run pytest --cov=src -vv
+          poetry run pytest --cov=src -vvv
         env:
           COVERAGE_FILE: ".coverage.${{ matrix.python-version }}"
       # Upload coverage data
@@ -78,7 +89,7 @@ jobs:
   # Updates `python-coverage-comment-action` branch
   # and edits cached PR comment text reporting test coverage.
   coverage-branch:
-    name: Coverage Branch
+    name: Coverage (python >=3.9)
     runs-on: ubuntu-latest
     needs: test
     permissions:

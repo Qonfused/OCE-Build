@@ -9,10 +9,10 @@ from os import rename as os_rename, PathLike
 from pathlib import Path
 from shutil import move as shutil_move
 
-from typing import Optional
+from typing import List, Optional, Union
 
 
-def rename(path: str | PathLike[str],
+def rename(path: Union[str, PathLike[str]],
            name: str) -> Path:
   """Renames a file or directory.
 
@@ -32,8 +32,8 @@ def rename(path: str | PathLike[str],
   os_rename(path, output_dir)
   return output_dir
 
-def move(src: str | PathLike[str],
-         target: str | PathLike[str],
+def move(src: Union[str, PathLike[str]],
+         target: Union[str, PathLike[str]],
          name: Optional[str]=None) -> Path:
   """Moves a file or directory to a new location.
 
@@ -51,12 +51,12 @@ def move(src: str | PathLike[str],
   dest = Path(target, name if name else Path(src).name)
   if not (parent_dir := dest.parent).is_dir() and str(parent_dir) != '.':
     parent_dir.mkdir(parents=True, exist_ok=True)
-  shutil_move(src, parent_dir if not name else dest)
+  shutil_move(str(src), parent_dir if not name else dest)
   return dest
 
-def glob(directory: str | PathLike[str],
+def glob(directory: Union[str, PathLike[str]],
          pattern: str,
-         first: bool = False) -> list[Path] | Path:
+         first: Optional[bool] = False) -> Union[List[Path], Path]:
   """Returns a list of paths matching the given pattern.
 
   Args:

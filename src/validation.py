@@ -10,14 +10,14 @@ from functools import partial
 from os import PathLike
 from pathlib import Path
 
-from typing import Callable, Literal
+from typing import Callable, Literal, Optional, Union
 
 from parsers.dict import flatten_dict
 
 
 def validate(call: Callable[[], bool],
-             err: Exception | partial[Exception]=Exception,
-             msg: str='Failed {} validation test'):
+             err: Union[Exception, partial[Exception]]=Exception,
+             msg: Optional[str]='Failed {} validation test'):
   """Throws a ValidationError with the given message."""
   result: bool=True
   # Override AssertionError context with ValidationError
@@ -37,7 +37,7 @@ class PathValidationError(Exception):
     self.path = path
     self.kind = kind
 
-def validate_path_tree(path: str | PathLike[str],
+def validate_path_tree(path: Union[str, PathLike[str]],
                        tree: dict,
                        delimiter: str='/') -> Literal[True]:
   """Validates a given path matches a tree schema.
