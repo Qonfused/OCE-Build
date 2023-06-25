@@ -6,7 +6,7 @@
 ##
 
 from base64 import b64encode, b64decode
-from dateutil.parser import parse
+from datetime import datetime
 import re
 from typing import List, Tuple
 
@@ -41,7 +41,7 @@ def parse_serialized_types(stype: str,
     match stype:
       case 'array':   entry = []
       case 'data':    entry = (stype, b64decode(value).hex().upper())
-      case 'date':    entry = (stype, parse(value, fuzzy=True))
+      case 'date':    entry = (stype, datetime.fromisoformat(value.replace("Z", "+00:00")))
       case 'dict':    entry = {}
       case 'real':    entry = ('float', float(value))
       case 'integer': entry = ('int', int(value))
