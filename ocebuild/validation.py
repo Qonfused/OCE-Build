@@ -28,6 +28,7 @@ def validate(call: Callable[[], bool],
     raise err(msg if msg else f'Failed {call.__name__} validation test')
 
 class PathValidationError(Exception):
+  """Indicates a path does not match a given tree schema."""
   def __init__(self,
                message: str,
                name: str,

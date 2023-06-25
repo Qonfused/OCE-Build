@@ -8,16 +8,16 @@
 from cgi import parse_header
 from contextlib import contextmanager
 from pathlib import Path
-from ssl import _create_unverified_context as skip_ssl_verify
 from shutil import copytree, rmtree, unpack_archive
 from tempfile import mkdtemp, NamedTemporaryFile
-from urllib.request import urlopen, Request
+from urllib.request import Request
 
 from typing import Generator, Literal, Union
 
 from filesystem.posix import move, glob
 from parsers.plist import parse_plist
-from constants import OPENCORE_BINARY_DATA_URL
+from versioning.constants import OPENCORE_BINARY_DATA_URL
+from versioning.sources import request
 
 
 @contextmanager
@@ -40,7 +40,7 @@ def extract_archive(url: Union[str, Request],
   """
   tmp_dir = mkdtemp()
   try:
-    with urlopen(url, context=skip_ssl_verify()) as response:
+    with request(url) as response:
       # Extract filename from request headers.
       _, params = parse_header(response.headers.get('Content-Disposition', ''))
       filename = params['filename']
