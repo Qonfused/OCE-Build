@@ -26,7 +26,7 @@ PLIST_SCHEMA = {
 }
 
 def parse_serialized_types(stype: str,
-                         value: str) -> Tuple[str, any] | None:
+                           value: str) -> Tuple[str, any] | None:
   """Parse property list types to Python types.
 
   Args:
@@ -38,16 +38,15 @@ def parse_serialized_types(stype: str,
   """
   entry = None
   try:
-    match stype:
-      case 'array':   entry = []
-      case 'data':    entry = (stype, b64decode(value).hex().upper())
-      case 'date':    entry = (stype, datetime.fromisoformat(value.replace("Z", "+00:00")))
-      case 'dict':    entry = {}
-      case 'real':    entry = ('float', float(value))
-      case 'integer': entry = ('int', int(value))
-      case 'string':  entry = (stype, value)
-      case 'true':    entry = ('bool', True)
-      case 'false':   entry = ('bool', False)
+    if   stype == 'array':    entry = []
+    elif stype == 'data':     entry = b64decode(value.encode()).hex().upper()
+    elif stype == 'date':     entry = (stype, datetime.fromisoformat(value.replace("Z", "+00:00")))
+    elif stype == 'dict':     entry = {}
+    elif stype == 'real':     entry = ('float', float(value))
+    elif stype == 'integer':  entry = ('int', int(value))
+    elif stype == 'string':   entry = ('string', value)
+    elif stype == 'true':     entry = ('bool', True)
+    elif stype == 'false':    entry = ('bool', False)
   except: pass # De-op
   return entry
 
@@ -74,23 +73,24 @@ def write_serialized_types(value: Tuple[str, any] | any,
         if type(svalue) == dict: stype = 'dict'
         if type(svalue) == list: stype = 'array'
     except: pass
+  # Parse entry value
   entry  = None
-  match stype:
-    case 'date':    pass
-    case 'string':  pass
-    # Handle alternate serialized types
-    case 'float':   stype = 'real'
-    case 'int':     stype = 'integer'
-    # Handle alternate serialized values
-    case 'data':    svalue = b64encode(bytes.fromhex(svalue)).decode()
-    # Handle alternate entry schemas
-    case 'bool':
-      entry = [f'<{(stype := str(svalue).lower())}/>']
-    case _:
-      entry = [f'<{stype}>', f'</{stype}>']
+  if   stype == 'date':   pass
+  elif stype == 'string': pass
+  # Handle alternate serialized types
+  elif stype == 'float':  stype = 'real'
+  elif stype == 'int':    stype = 'integer'
+  # Handle alternate serialized values
+  elif stype == 'data':   svalue = b64encode(bytes.fromhex(svalue)).decode()
+  # Handle alternate entry schemas
+  elif stype == 'bool':
+    entry = [f'<{(stype := str(svalue).lower())}/>']
+  else:
+    entry = [f'<{stype}>', f'</{stype}>']
   # Default entry schema
   if entry is None:
     entry = [f'<{stype}>{svalue}</{stype}>']
+
   return entry
 
 def parse_plist(lines: list[str],
@@ -156,22 +156,20 @@ def parse_plist(lines: list[str],
       # Handle object and array traversal
       ptree = tree[:-1] if stype != 'dict' else tree
       prev_value = nested_get(config, ptree)
-      match prev_value:
-        case dict() | None:
-          try:
-            nested_set(config, tree, entry)
-          except: pass #TODO: Handle pure array entries
-        case list():
-          match stype:
-            # Always append dictionaries to arrays
-            case 'dict':
-              prev_value.append(entry)
-              nested_set(config, ptree, prev_value)
-            # Add new key to last dictionary in array
-            case _:
-              *tree, key = tree
-              prev_value[-1][key] = entry
-              nested_set(config, tree, prev_value)
+      if isinstance(prev_value, dict) or prev_value is None:
+        try:
+          nested_set(config, tree, entry)
+        except: pass #TODO: Handle pure array entries
+      elif isinstance(prev_value, list):
+        if stype == 'dict':
+          # Always append dictionaries to arrays
+          prev_value.append(entry)
+          nested_set(config, ptree, prev_value)
+        else:
+          # Add new key to last dictionary in array
+          *tree, key = tree
+          prev_value[-1][key] = entry
+          nested_set(config, tree, prev_value)
       # Update cursor position
       cursor['prev_line'] = line
     # Reached invalid line
@@ -233,26 +231,25 @@ def write_plist(lines: list[str]=PLIST_SCHEMA['1.0'],
       
       # Search for key in current level
       key_ln = f'{padding}<key>{key}</key>'
-      match (index := try_index(key_ln, head)):
+      if (index := try_index(key_ln, head)) == -1:
+        # Always append to end of dictionary
+        if not lines[head].lstrip().startswith('</dict>'):
+          while not lines[head-1].startswith(f'{padding}</'):
+            head += 1
+            if lines[head].startswith(f'{padding}<key>'): head += 1
+            if lines[head].startswith(f'{padding[:-2]}</'): break
+        # Append new entry
+        defaults = ('dict' if not re_match else 'array', '' if is_root_key else None)
+        lns = [f'{padding}{v}' for v in write_serialized_types(value, defaults)]
         # Create a new key
-        case -1:
-          # Always append to end of dictionary
-          if not lines[head].lstrip().startswith('</dict>'):
-            while not lines[head-1].startswith(f'{padding}</'):
-              head += 1
-              if lines[head].startswith(f'{padding}<key>'): head += 1
-              if lines[head].startswith(f'{padding[:-2]}</'): break
-          # Append new entry
-          defaults = ('dict' if not re_match else 'array', '' if is_root_key else None)
-          lns = [f'{padding}{v}' for v in write_serialized_types(value, defaults)]
-          lines[head:head] = (entry := [key_ln, *lns])
-          head += len(entry) - 1
+        lines[head:head] = (entry := [key_ln, *lns])
+        head += len(entry) - 1
+      else:
         # Seek end of level
-        case _:
-          if index >= head: head = index + 1
-          for line in lines[head:]:
-            if len(padding) < len(line[:-len(line.lstrip())]): head += 1
-            else: break
-          head += 1
+        if index >= head: head = index + 1
+        for line in lines[head:]:
+          if len(padding) < len(line[:-len(line.lstrip())]): head += 1
+          else: break
+        head += 1
 
   return lines

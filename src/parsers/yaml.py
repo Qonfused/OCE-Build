@@ -42,43 +42,40 @@ def write_serialized_types(value: Tuple[str, any] | any,
   stype, svalue = type(value).__name__, value
   if isinstance(value, tuple): stype, svalue = value
 
-  match schema:
-    case 'annotated':
-      # Parse native types
-      match stype:
-        case 'bool':      stype = 'Boolean'; svalue = str(svalue).lower()
-        case 'data':      stype = 'Data   '; svalue = f'<{svalue}>'
-        case 'dict':      stype = 'Dict   '; svalue = '(empty)'
-        case 'float':     stype = 'Number '; svalue = str(float(svalue))
-        case 'int':       stype = 'Number '; svalue = str(int(svalue))
-        case 'list':      stype = 'Array  '; svalue = '(empty)'
-        case 'string':    stype = 'String '; svalue = f'"{svalue}"'
-        case _:
-          stype = stype.rjust(len('       ')).capitalize()
-          svalue = str(value)
-    case 'yaml':
-      # Parse native types
-      match stype:
-        case 'bool':    svalue = str(svalue).lower()
-        case 'dict':    svalue = ''
-        case 'list':    svalue = ''
-        case 'string':  svalue = f'"{svalue}"'
-        case _:         svalue = str(svalue)
-      # Escape control and reserved characters
-      # @see https://symfony.com/doc/current/reference/formats/yaml.html
-      reserve_chars = [':',     '{',    '}',    '[',    ']',    ',',    '&',
-                       '*',     '#',    '?',    '|',    '-',    '<',    '>',
-                       '=',     '!',    '%',    '@',    '`']
-      control_chars = ['\0',    '\x01', '\x02', '\x03', '\x04', '\x05', '\x06',
-                       '\a',    '\b',   '\t',   '\n',   '\v',   '\f',   '\r',
-                       '\x0e',  '\x0f', '\x10', '\x11', '\x12', '\x13', '\x14',
-                       '\x15',  '\x16', '\x17', '\x18', '\x19', '\x1a', r'\e',
-                       '\x1c',  '\x1d', '\x1e', '\x1f', r'\N',  r'\_',  r'\L',
-                       r'\P']
-      if any([c for c in control_chars if c in svalue]):
-        svalue = f'"{svalue}"'
-      elif any([c for c in reserve_chars if c in svalue]):
-        svalue = f'\'{svalue}\''
+  if schema == 'annotated':
+    # Parse native types
+    if   stype == 'bool':     stype = 'Boolean'; svalue = str(svalue).lower()
+    elif stype == 'data':     stype = 'Data   '; svalue = f'<{svalue}>'
+    elif stype == 'dict':     stype = 'Dict   '; svalue = '(empty)'
+    elif stype == 'float':    stype = 'Number '; svalue = str(float(svalue))
+    elif stype == 'int':      stype = 'Number '; svalue = str(int(svalue))
+    elif stype == 'list':     stype = 'Array  '; svalue = '(empty)'
+    elif stype == 'string':   stype = 'String '; svalue = f'"{svalue}"'
+    else:
+      stype =         stype.rjust(len('       ')).capitalize()
+      svalue = str(value)
+  elif schema == 'yaml':
+    # Parse native types
+    if   stype == 'bool':     svalue = str(svalue).lower()
+    elif stype == 'dict':     svalue = ''
+    elif stype == 'list':     svalue = ''
+    elif stype == 'string':   svalue = f'"{svalue}"'
+    else:                     svalue = str(svalue)
+    # Escape control and reserved characters
+    # @see https://symfony.com/doc/current/reference/formats/yaml.html
+    reserve_chars = [':',     '{',    '}',    '[',    ']',    ',',    '&',
+                     '*',     '#',    '?',    '|',    '-',    '<',    '>',
+                     '=',     '!',    '%',    '@',    '`']
+    control_chars = ['\0',    '\x01', '\x02', '\x03', '\x04', '\x05', '\x06',
+                     '\a',    '\b',   '\t',   '\n',   '\v',   '\f',   '\r',
+                     '\x0e',  '\x0f', '\x10', '\x11', '\x12', '\x13', '\x14',
+                     '\x15',  '\x16', '\x17', '\x18', '\x19', '\x1a', r'\e',
+                     '\x1c',  '\x1d', '\x1e', '\x1f', r'\N',  r'\_',  r'\L',
+                     r'\P']
+    if any([c for c in control_chars if c in svalue]):
+      svalue = f'"{svalue}"'
+    elif any([c for c in reserve_chars if c in svalue]):
+      svalue = f'\'{svalue}\''
   
   return stype, svalue
 
@@ -111,9 +108,8 @@ def parse_yaml(lines: list[str],
     # Handle preprocessor macros
     if (macro := tokens[0]).startswith('@'):
       flag = tokens[1] if num_tokens == 2 else def_flag
-      match macro:
-        case '@ifdef': cursor['skip'] = flag in flags
-        case '@endif': cursor['skip'] = def_flag
+      if   macro == '@ifdef': cursor['skip'] = flag in flags
+      elif macro == '@endif': cursor['skip'] = def_flag
       continue
     elif cursor['skip']: continue
     
@@ -126,9 +122,10 @@ def parse_yaml(lines: list[str],
       # Extract schema and entry value
       schema = 'plist' if num_tokens >= 3 else 'yaml'
       entry = None
-      match schema:
-        case 'plist': entry = (tokens[1], ' '.join(tokens[2:]))
-        case 'yaml':  entry = ' '.join(tokens[1:])
+      if schema == 'plist':
+        entry = (tokens[1], ' '.join(tokens[2:]))
+      elif schema == 'yaml':
+        entry = ' '.join(tokens[1:])
 
       # TODO: Parse YAML types to Python types
       # entry = parseSerializedTypes(...)
@@ -148,16 +145,17 @@ def parse_yaml(lines: list[str],
           nested_set(config, tree, [obj])
       else:
         # Handle object and array traversal
-        match prev_value:
-          case dict() | None:
-            nested_set(config, [*tree, key], entry)
-          case list():
-            match prev_value[-1]:
-              # Add new key to last dictionary in array
-              case dict():  prev_value[-1][key] = entry
-              # Always append dictionaries to arrays
-              case _:       prev_value.append(entry)
-            nested_set(config, tree, prev_value)
+        if isinstance(prev_value, dict) or prev_value is None:
+          nested_set(config, [*tree, key], entry)
+        elif isinstance(prev_value, list):
+          # Add new key to last dictionary in array
+          if isinstance(prev_value[-1], dict):
+            prev_value[-1][key] = entry
+          # Always append dictionaries to arrays
+          else:
+            prev_value.append(entry)
+          # Update array
+          nested_set(config, tree, prev_value)
     # Reached invalid line
     else: raise Exception(f'Invalid line at position {i}:\n\n{line}')
   
@@ -223,12 +221,11 @@ def write_yaml(lines: list[str]=[],
           padding = f'{padding[:-2]}- '
         # Append value to entry
         stype, svalue = write_serialized_types(value, schema)
-        match schema:
-          case 'annotated':
-            indent = max_tree_len - (cursor['indent']*j + len(f"{key}:"))
-            entry = f'{padding}{key}:{" ".rjust(indent + 1)}{stype} | {svalue}'
-          case 'yaml':
-            entry = f'{padding}{key}: {svalue}'.rstrip()
+        if schema == 'annotated':
+          indent = max_tree_len - (cursor['indent']*j + len(f"{key}:"))
+          entry = f'{padding}{key}:{" ".rjust(indent + 1)}{stype} | {svalue}'
+        elif schema == 'yaml':
+          entry = f'{padding}{key}: {svalue}'.rstrip()
       # Add new dict
       else: entry = f'{padding}{key}:'
       lines.append(entry)

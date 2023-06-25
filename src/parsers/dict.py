@@ -21,23 +21,23 @@ def flatten_dict(dic: dict,
   """
   flat_dict: dict={}
   def recurse_flatten(v: any, prefix=''):
-    match v:
-      case dict():
-        if not len(entries := v.items()):
-          flat_dict[prefix[1:]] = ('dict', v)
-        else:
-          for k, v2 in entries:
-            p2 = f"{prefix}{delimiter}{k}"
-            recurse_flatten(v2, p2)
-      case list():
-        if not len(v):
-          flat_dict[prefix[1:]] = ('list', v)
-        else:
-          for i, v2 in enumerate(v):
-            p2 = f"{prefix}[{k}]"
-            recurse_flatten(v2, p2)
-      case _:
-        flat_dict[prefix[1:]] = v
+    if isinstance(v, dict):
+      if not len(entries := v.items()):
+        flat_dict[prefix[1:]] = ('dict', v)
+      else:
+        for k, v2 in entries:
+          p2 = f"{prefix}{delimiter}{k}"
+          recurse_flatten(v2, p2)
+    elif isinstance(v, list):
+      if not len(v):
+        flat_dict[prefix[1:]] = ('list', v)
+      else:
+        for i, v2 in enumerate(v):
+          p2 = f"{prefix}[{i}]"
+          recurse_flatten(v2, p2)
+    else:
+      flat_dict[prefix[1:]] = v
+
   recurse_flatten(dic)
   return flat_dict
 

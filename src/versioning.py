@@ -118,37 +118,36 @@ def resolve_version_specifier(versions: list[str],
   # Find the version in the sorted list
   version_str = get_version_string(specifier)
   symbol = specifier[:specifier.index(version_str if version_str else '')]
-  match symbol:
-    # Up to next minor
-    # e.g. '~1.2.3' -> '>=1.2.3,<1.3.0'
-    case '~':
+  # Up to next minor
+  # e.g. '~1.2.3' -> '>=1.2.3,<1.3.0'
+  if symbol == '~':
+    filtered = [v for v in sorted_versions
+                if compare_version(v, version_str, operator='>=')
+                and get_version_parts(v)[0] == get_version_parts(version_str)[0]
+                and get_version_parts(v)[1] < get_version_parts(version_str)[1]+1]
+    if len(filtered): return filtered[-1]
+  # Up to next major
+  # e.g. '^1.2.3' -> '>=1.2.3,<2.0.0'
+  elif symbol == '^':
+    filtered = [v for v in sorted_versions
+                if compare_version(v, version_str, operator='>=')
+                and get_version_parts(v)[0] < get_version_parts(version_str)[0]+1]
+    if len(filtered): return filtered[-1]
+  # Direct comparisons
+  elif symbol in ('>', '<', '>=', '<=', '==', '!='):
+    filtered = [v for v in sorted_versions
+                if compare_version(v, version_str, operator=symbol)]
+    if len(filtered): return filtered[-1]
+  # Fallthrough
+  else:
+    # Exact match
+    # e.g. '1.2.3' -> '==1.2.3'
+    if specifier == version_str:
       filtered = [v for v in sorted_versions
-                  if compare_version(v, version_str, operator='>=')
-                  and get_version_parts(v)[0] == get_version_parts(version_str)[0]
-                  and get_version_parts(v)[1] < get_version_parts(version_str)[1]+1]
+                  if compare_version(v, version_str, operator='==')]
       if len(filtered): return filtered[-1]
-    # Up to next major
-    # e.g. '^1.2.3' -> '>=1.2.3,<2.0.0'
-    case '^':
-      filtered = [v for v in sorted_versions
-                  if compare_version(v, version_str, operator='>=')
-                  and get_version_parts(v)[0] < get_version_parts(version_str)[0]+1]
-      if len(filtered): return filtered[-1]
-    # Direct comparisons
-    case '>' | '<' | '>=' | '<=' | '==' | '!=':
-      filtered = [v for v in sorted_versions
-                  if compare_version(v, version_str, operator=symbol)]
-      if len(filtered): return filtered[-1]
-    # Fallthrough
-    case _:
-      # Exact match
-      # e.g. '1.2.3' -> '==1.2.3'
-      if specifier == version_str:
-        filtered = [v for v in sorted_versions
-                    if compare_version(v, version_str, operator='==')]
-        if len(filtered): return filtered[-1]
-      # No match
-      return None
+    # No match
+    return None
 
 def get_minimum_version(dependencies: Dict[str, Tuple[str, str]],
                         library: str) -> Tuple[str, str | None]:

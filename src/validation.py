@@ -67,24 +67,25 @@ def validate_path_tree(path: str | PathLike[str],
       return absolute_path.exists()
     validate(path_exists, err, msg=f"Missing {kind} '{name}' (at {path})")
     # Handle flags
-    match flag:
+    if flag == '*':
       # Verify subdirectory is populated
-      case '*':
-        def is_populated():
-          return len(set(absolute_path.iterdir()))
-        validate(is_populated, err, msg=f"Path '{name}' is empty (at {path})")
-      # Verify path type
-      case 'f' | 'file' | 'd' | 'dir':
-        def is_type():
-          match kind:
-            # Verify path points to a file
-            case 'file':
-              return absolute_path.is_file()
-            # Verify path points to a directory
-            case 'directory':
-              return absolute_path.is_dir()
-        validate(is_type, err, msg=f"Path '{name}' not a {kind} (at {path})")
-      # Invalid flag
-      case _:
-        raise ValueError(f"Invalid flag '{flag}' given for path '{name}' (at {path})")
+      def is_populated():
+        return len(set(absolute_path.iterdir()))
+      validate(is_populated, err, msg=f"Path '{name}' is empty (at {path})")
+    elif flag in ('f', 'file', 'd', 'dir'):
+      # Verify path type matches flag
+      def is_type():
+        if kind == 'file':
+          # Verify path points to a file
+          return absolute_path.is_file()
+        elif kind == 'directory':
+          # Verify path points to a directory
+          return absolute_path.is_dir()
+        else:
+          raise ValueError('Invalid path type given')
+      validate(is_type, err, msg=f"Path '{name}' not a {kind} (at {path})")
+    # Invalid flag
+    else:
+      raise ValueError(f"Invalid flag '{flag}' given for path '{name}' (at {path})")
+
   return True
