@@ -5,12 +5,12 @@
 # SPDX-License-Identifier: BSD-3-Clause
 ##
 
-from typing import Any, Dict, List, Union
+from typing import Dict, List, Union
 
 
 def flatten_dict(dic: dict,
                  delimiter: str='.'
-                 ) -> Dict[str, Any]:
+                 ) -> Dict[str, any]:
   """Flattens a dictionary.
 
   Args:
@@ -21,7 +21,7 @@ def flatten_dict(dic: dict,
     A flattened dictionary
   """
   flat_dict: dict={}
-  def recurse_flatten(v: Any, prefix: str='') -> None:
+  def recurse_flatten(v: any, prefix: str='') -> None:
     if isinstance(v, dict):
       if not len(entries := v.items()):
         flat_dict[prefix[1:]] = ('dict', v)
@@ -61,7 +61,7 @@ def nested_get(dic: dict,
 
 def nested_set(dic: dict,
                keys: List[str],
-               value: Any
+               value: any
                ) -> None:
   """Sets a nested value in a dictionary.
 

@@ -13,7 +13,7 @@ from shutil import copytree, rmtree, unpack_archive
 from tempfile import mkdtemp, NamedTemporaryFile
 from urllib.request import urlopen, Request
 
-from typing import Any, Generator, Literal, Union
+from typing import Generator, Literal, Union
 
 from filesystem.posix import move, glob
 from parsers.plist import parse_plist
@@ -60,7 +60,7 @@ def extract_archive(url: Union[str, Request],
 @contextmanager
 def extract_kext_archive(url: str,
                          persist: bool=False
-                         ) -> Generator[dict, Any, None]:
+                         ) -> Generator[dict, any, None]:
   """Extracts Kexts from a URL and yields a temporary extraction dictionary.
 
   Args:
@@ -127,7 +127,7 @@ def extract_kext_archive(url: str,
 def extract_opencore_archive(url: str,
                              target: Literal['IA32', 'X64']='X64',
                              persist: bool=False
-                             ) -> Generator[Path, Any, None]:
+                             ) -> Generator[Path, any, None]:
   """"""
   tmp_dir = mkdtemp()
   try:

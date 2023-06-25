@@ -96,7 +96,7 @@ def write_serialized_types(value: Union[Tuple[str, any], any],
 
   return entry
 
-def parse_plist(lines: List[str] | TextIOWrapper,
+def parse_plist(lines: Union[List[str], TextIOWrapper],
                 config: dict=dict()
                 ) -> dict:
   """Parses a property list into a Python dictionary.
@@ -194,7 +194,7 @@ def write_plist(lines: List[str]=PLIST_SCHEMA['1.0'],
   Returns:
     Property list (plist) populated from dictionary entries.
   """
-  def try_index(*args: str | int) -> int:
+  def try_index(*args: Union[str, int]) -> int:
     try: return lines.index(*args)
     except: return -1
   cursor = { 'line': 0, 'indent': 2 }
