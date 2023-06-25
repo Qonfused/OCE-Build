@@ -15,9 +15,9 @@ from urllib.request import urlopen, Request
 
 from typing import Generator, Literal, Union
 
+from filesystem.posix import move, glob
 from parsers.plist import parse_plist
 from constants import OPENCORE_BINARY_DATA_URL
-from filesystem import move, glob
 
 
 @contextmanager

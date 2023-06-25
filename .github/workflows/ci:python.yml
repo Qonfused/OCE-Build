@@ -9,14 +9,14 @@ on:
       - '!docs/**'
       - '!.gitattributes'
       - '!.gitignore'
-      - 'src/**'
-  # Enables trigger for pull requests when making changes to **src** directory.
+      - 'ocebuild/**'
+  # Enables trigger for pull requests on making changes to **ocebuild** directory.
   pull_request:
     branches:
       - 'main'
       - 'development'
     paths:
-      - 'src/**'
+      - 'ocebuild/**'
   workflow_dispatch:
 jobs:
   # Runs test suite
@@ -75,7 +75,7 @@ jobs:
       # Run test suites
       - name: Run test suite
         run: |
-          poetry run pytest --cov=src -vvv
+          poetry run pytest --cov=ocebuild -vvv
         env:
           COVERAGE_FILE: ".coverage.${{ matrix.python-version }}"
       # Upload coverage data
@@ -127,8 +127,8 @@ jobs:
             <details>
             <summary>Diff Coverage Details (click to unfold)</summary>
             
-            | (#)              | File (^Test)                                                                                                                                                                                                                                              | Diff (%)                                                                                                                      | Covered Lines                                                                                                         | Missing Lines                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Excluded Lines                                                                                                                                                         | (Total)                                            |
-            | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
+            | (#)              | File (^Test)                                                                                                                                                                                                                                                   | Diff (%)                                                                                                                      | Covered Lines                                                                                                         | Missing Lines                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Excluded Lines                                                                                                                                                         | (Total)                                            |
+            | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
             {% for filename, diff_file_coverage in diff_coverage.files | dictsort -%}
               {%- set list=diff_file_coverage.violation_lines -%}
               {%- set stack={ 'first': None, 'last': None, 'pending': None } -%}
@@ -145,7 +145,7 @@ jobs:
                   {{ output.append(stack['pending']) or "" }}
                 {%- endif -%}
               {%- endfor -%}
-            | {{ loop.index }} | [`{{ filename | replace("src/", "", 1) }}`](https://github.com/${{github.repository}}/blob/${{github.head_ref}}/{{ filename }}) ([^](https://github.com/${{github.repository}}/blob/${{github.head_ref}}/{{ filename | replace(".py", "_test.py", 1) }})) | {{ "%+.0f" | format((coverage.files[filename].info.percent_covered - diff_file_coverage.percent_covered) | round | float) }}% | {{ coverage.files[filename].info.covered_lines }} ({{ coverage.files[filename].info.percent_covered | float | pct }}) | {%- if diff_file_coverage.violation_lines -%}<details><summary>{{ diff_file_coverage.violation_lines | count }} ({{ ((diff_file_coverage.violation_lines | count) / coverage.files[filename].info.num_statements) | float | pct }})</summary>{% set separator = joiner(", ") %}{% for range in output %}{{ separator() }}[`{{ range | replace('L','') | replace('#','') }}`](https://github.com/${{github.repository}}/blob/${{github.head_ref}}/{{ filename ~ range }}){% endfor %}</details>{%- else -%}`None`{%- endif %} | {{ coverage.files[filename].info.excluded_lines }} ({{ (coverage.files[filename].info.excluded_lines / coverage.files[filename].info.num_statements) | float | pct }}) | {{ coverage.files[filename].info.num_statements }} |
+            | {{ loop.index }} | [`{{ filename | replace("ocebuild/", "", 1) }}`](https://github.com/${{github.repository}}/blob/${{github.head_ref}}/{{ filename }}) ([^](https://github.com/${{github.repository}}/blob/${{github.head_ref}}/{{ filename | replace(".py", "_test.py", 1) }})) | {{ "%+.0f" | format((coverage.files[filename].info.percent_covered - diff_file_coverage.percent_covered) | round | float) }}% | {{ coverage.files[filename].info.covered_lines }} ({{ coverage.files[filename].info.percent_covered | float | pct }}) | {%- if diff_file_coverage.violation_lines -%}<details><summary>{{ diff_file_coverage.violation_lines | count }} ({{ ((diff_file_coverage.violation_lines | count) / coverage.files[filename].info.num_statements) | float | pct }})</summary>{% set separator = joiner(", ") %}{% for range in output %}{{ separator() }}[`{{ range | replace('L','') | replace('#','') }}`](https://github.com/${{github.repository}}/blob/${{github.head_ref}}/{{ filename ~ range }}){% endfor %}</details>{%- else -%}`None`{%- endif %} | {{ coverage.files[filename].info.excluded_lines }} ({{ (coverage.files[filename].info.excluded_lines / coverage.files[filename].info.num_statements) | float | pct }}) | {{ coverage.files[filename].info.num_statements }} |
             {% endfor -%}
 
             </details>

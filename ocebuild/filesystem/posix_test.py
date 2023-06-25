@@ -5,11 +5,11 @@
 
 import pytest
 
-from filesystem import *
+from filesystem.posix import *
 
 
 def test_rename(): pass # Not implemented
 
 def test_move(): pass # Not implemented
 
-def test_gllob(): pass # Not implemented
+def test_glob(): pass # Not implemented

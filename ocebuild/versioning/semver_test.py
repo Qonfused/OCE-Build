@@ -4,9 +4,9 @@
 ##
 
 import pytest
-from archives_test import __virtualsmc_archive
 
-from versioning import *
+from filesystem.archives_test import __virtualsmc_archive
+from versioning.semver import *
 
 
 def test_get_version_string(): pass # Not implemented
