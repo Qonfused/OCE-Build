@@ -72,7 +72,8 @@ def compare_version(v1: str, v2: str, operator: str) -> bool:
   return False
 
 def resolve_version_specifier(versions: List[str],
-                              specifier: str) -> Union[str, None]:
+                              specifier: str
+                              ) -> Union[str, None]:
   """Resolves a version specifier.
 
   Args:
@@ -146,11 +147,12 @@ def resolve_version_specifier(versions: List[str],
       filtered = [v for v in sorted_versions
                   if compare_version(v, version_str, operator='==')]
       if len(filtered): return filtered[-1]
-    # No match
-    return None
+  # No match
+  return None
 
 def get_minimum_version(dependencies: Dict[str, Tuple[str, str]],
-                        library: str) -> Tuple[str, Union[str, None]]:
+                        library: str
+                        ) -> Tuple[str, Union[str, None]]:
   """Gets the minimum required version of a library.
 
   Args:

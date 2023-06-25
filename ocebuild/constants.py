@@ -9,9 +9,10 @@ from typing import Optional
 def github_file_url(repository: str,
                     path: str,
                     branch: str='main',
-                    tag: str=None,
-                    commit: str=None,
-                    raw: bool=False) -> str:
+                    tag: Optional[str]=None,
+                    commit: Optional[str]=None,
+                    raw: bool=False
+                    ) -> str:
   """Formats a GitHub file URL.
 
   Args:
@@ -43,13 +44,13 @@ def github_file_url(repository: str,
     return f'https://{prefix}/{repository}/{stem}{commit}/{path}'
   if tag:
     return f'https://{prefix}/{repository}/{stem}{tag}/{path}'
-  if branch:
-    return f'https://{prefix}/{repository}/{stem}{branch}/{path}'
+  return f'https://{prefix}/{repository}/{stem}{branch}/{path}'
 
 def github_archive_url(repository: str,
-                       branch: Optional[str]='main',
+                       branch: str='main',
                        tag: Optional[str]=None,
-                       commit: Optional[str]=None) -> str:
+                       commit: Optional[str]=None
+                       ) -> str:
   """Formats a GitHub archive URL.
 
   Args:
@@ -75,8 +76,7 @@ def github_archive_url(repository: str,
     return f'https://github.com/{repository}/archive/{commit}.tar.gz'
   if tag:
     return f'https://github.com/{repository}/archive/refs/tags/{tag}.tar.gz'
-  if branch:
-    return f'https://github.com/{repository}/archive/refs/heads/{branch}.tar.gz'
+  return f'https://github.com/{repository}/archive/refs/heads/{branch}.tar.gz'
 
 
 DORTANIA_BUILD_CATALOG = github_file_url('dortania/build-repo', 'config.json', branch='builds')

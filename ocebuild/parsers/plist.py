@@ -7,6 +7,7 @@
 
 from base64 import b64encode, b64decode
 from datetime import datetime
+from io import TextIOWrapper
 import re
 from typing import List, Tuple, Union
 
@@ -26,7 +27,8 @@ PLIST_SCHEMA = {
 }
 
 def parse_serialized_types(stype: str,
-                           value: str) -> Union[Tuple[str, any],  None]:
+                           value: str
+                           ) -> Union[Tuple[str, any],  None]:
   """Parse property list types to Python types.
 
   Args:
@@ -52,7 +54,7 @@ def parse_serialized_types(stype: str,
 
 def write_serialized_types(value: Union[Tuple[str, any], any],
                            defaults: Union[Tuple[str, any], any]=('dict', None)
-                          ) -> List[str]:
+                           ) -> List[str]:
   """Parse Python types to property list entries.
 
   Args:
@@ -94,8 +96,9 @@ def write_serialized_types(value: Union[Tuple[str, any], any],
 
   return entry
 
-def parse_plist(lines: List[str],
-                config: dict=dict()):
+def parse_plist(lines: List[str] | TextIOWrapper,
+                config: dict=dict()
+                ) -> dict:
   """Parses a property list into a Python dictionary.
 
   Args:
@@ -180,7 +183,8 @@ def parse_plist(lines: List[str],
   return config
 
 def write_plist(lines: List[str]=PLIST_SCHEMA['1.0'],
-                config: dict=dict()):
+                config: dict=dict()
+                ) -> List[str]:
   """Writes a property list from a Python dictionary.
 
   Args:
@@ -190,7 +194,7 @@ def write_plist(lines: List[str]=PLIST_SCHEMA['1.0'],
   Returns:
     Property list (plist) populated from dictionary entries.
   """
-  def try_index(*args):
+  def try_index(*args: str | int) -> int:
     try: return lines.index(*args)
     except: return -1
   cursor = { 'line': 0, 'indent': 2 }

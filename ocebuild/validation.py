@@ -16,15 +16,16 @@ from parsers.dict import flatten_dict
 
 
 def validate(call: Callable[[], bool],
-             err: Union[Exception, partial[Exception]]=Exception,
-             msg: Optional[str]='Failed {} validation test'):
+             err: Union[Exception, partial[Exception]],
+             msg: Optional[str]
+             ) -> None:
   """Throws a ValidationError with the given message."""
   result: bool=True
   # Override AssertionError context with ValidationError
   with suppress(AssertionError):
-    result: bool=call()
+    result=call()
   if not result:
-    raise err(msg.format(call.__name__))
+    raise err(msg if msg else f'Failed {call.__name__} validation test')
 
 class PathValidationError(Exception):
   def __init__(self,
@@ -39,7 +40,8 @@ class PathValidationError(Exception):
 
 def validate_path_tree(path: Union[str, PathLike[str]],
                        tree: dict,
-                       delimiter: str='/') -> Literal[True]:
+                       delimiter: str='/'
+                       ) -> Literal[True]:
   """Validates a given path matches a tree schema.
   
   Args:
@@ -63,18 +65,18 @@ def validate_path_tree(path: Union[str, PathLike[str]],
       kind = 'file' if flag == 'f' or flag == 'file' else 'directory'
       err = partial(PathValidationError, name=name, kind=kind, path=path)
     # Verify path exists
-    def path_exists():
+    def path_exists() -> bool:
       return absolute_path.exists()
     validate(path_exists, err, msg=f"Missing {kind} '{name}' (at {path})")
     # Handle flags
     if flag == '*':
       # Verify subdirectory is populated
-      def is_populated():
-        return len(set(absolute_path.iterdir()))
+      def is_populated() -> bool:
+        return bool(len(set(absolute_path.iterdir())))
       validate(is_populated, err, msg=f"Path '{name}' is empty (at {path})")
     elif flag in ('f', 'file', 'd', 'dir'):
       # Verify path type matches flag
-      def is_type():
+      def is_type() -> bool:
         if kind == 'file':
           # Verify path points to a file
           return absolute_path.is_file()

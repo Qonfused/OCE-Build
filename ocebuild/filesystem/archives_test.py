@@ -5,7 +5,7 @@
 
 import pytest
 
-from archives import *
+from filesystem.archives import *
 
 
 def test_extract_archive(): pass # Not implemented

@@ -6,7 +6,10 @@
 ##
 
 
-def update_cursor(level: int, key: str, cursor: dict):
+def update_cursor(level: int,
+                  key: str,
+                  cursor: dict
+                  ) -> None:
   """Updates the cursor dictionary.
 
   Args:

@@ -9,11 +9,12 @@ from os import rename as os_rename, PathLike
 from pathlib import Path
 from shutil import move as shutil_move
 
-from typing import List, Optional, Union
+from typing import Generator, Optional, Union
 
 
 def rename(path: Union[str, PathLike[str]],
-           name: str) -> Path:
+           name: str
+           ) -> Path:
   """Renames a file or directory.
 
   Args:
@@ -34,7 +35,8 @@ def rename(path: Union[str, PathLike[str]],
 
 def move(src: Union[str, PathLike[str]],
          target: Union[str, PathLike[str]],
-         name: Optional[str]=None) -> Path:
+         name: Optional[str]=None
+         ) -> Path:
   """Moves a file or directory to a new location.
 
   This is a simple wrapper over shutil's `move` method that
@@ -56,7 +58,8 @@ def move(src: Union[str, PathLike[str]],
 
 def glob(directory: Union[str, PathLike[str]],
          pattern: str,
-         first: Optional[bool] = False) -> Union[List[Path], Path]:
+         first: Optional[bool] = False
+         ) -> Union[Generator[Path, None, None], Path]:
   """Returns a list of paths matching the given pattern.
 
   Args:

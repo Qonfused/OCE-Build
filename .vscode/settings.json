@@ -3,6 +3,7 @@
     "*.lock": "yaml"
   },
   "files.exclude": {
+    "**/.mypy_cache": true,
     "**/.pytest_cache": true,
     "**/__pycache__": true,
     "venv": true,
