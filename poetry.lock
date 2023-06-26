@@ -188,18 +188,7 @@ files = [
     {file = "tomli-2.0.1.tar.gz", hash = "sha256:de526c12914f0c550d15924c62d72abc48d6fe7364aa87328337a31007fe8a4f"},
 ]
 
-[[package]]
-name = "typing-extensions"
-version = "4.6.3"
-description = "Backported and Experimental Type Hints for Python 3.7+"
-optional = false
-python-versions = ">=3.7"
-files = [
-    {file = "typing_extensions-4.6.3-py3-none-any.whl", hash = "sha256:88a4153d8505aabbb4e13aacb7c486c2b4a33ca3b3f807914a9b4c844c471c26"},
-    {file = "typing_extensions-4.6.3.tar.gz", hash = "sha256:d91d5919357fe7f681a9f2b5b4cb2a5f1ef0a1e9f59c4d8ff0d3491e05c0ffd5"},
-]
-
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9"
-content-hash = "518be3acccf4a7ee60049bb34822b895b89a21f1d93b96c3785ccff57f951117"
+content-hash = "3fbfe823b5c993c33f099cb08be970c21ed77aa934c5fff32201fa1bdf7f0213"
