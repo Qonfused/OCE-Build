@@ -36,6 +36,6 @@ def test_parse_yaml():
       assert 'version' in keys
       if 'extract' in keys:
         arr = nested_get(lockfile, [entry, 'extract'])
-        assert isinstance(arr, Union[str, list]) and len(arr)
+        assert (isinstance(arr, str) or isinstance(arr, list)) and len(arr)
 
 def test_write_yaml(): pass # Not implemented
