@@ -5,6 +5,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 ##
 
+from datetime import datetime, timedelta
 from json import load as json_load
 
 from typing import List, Optional, Union
@@ -12,6 +13,24 @@ from typing import List, Optional, Union
 from parsers.dict import nested_get
 from sources._lib import request
 
+
+def github_rate_limit() -> int:
+  """Gets the GitHub API rate limit.
+
+  Returns:
+    Remaining API calls.
+  
+  Raises:
+    Exception: If the rate limit has been exceeded.
+  """
+  rate_limit = request('https://api.github.com/rate_limit').json()
+  if nested_get(rate_limit, ['resources', 'core', 'remaining']) == 0:
+    current_time = datetime.now()
+    reset_time = datetime.fromtimestamp(
+        nested_get(rate_limit, ['resources', 'core', 'reset']))
+    mins = round((reset_time - current_time) / timedelta(minutes=1))
+    raise Exception(f'GitHub rate limit exceeded. Try again in {mins} minutes.')
+  return rate_limit
 
 ################################################################################
 #                     Parameter formatting/retrival functions                  #
@@ -31,6 +50,7 @@ def github_suite_id(repository: str,
   Returns:
     Check suite ID.
   """
+  github_rate_limit()
   suites_url = f'https://api.github.com/repos/{repository}/commits/{commit}/check-suites'
   for suite in request(suites_url).json()['check_suites']:
     check_runs_url = suite['check_runs_url']
@@ -135,6 +155,7 @@ def github_release_url(repository: str,
     >>> github_release_url('foo/bar', tag='v1.0.0')
     # -> "https://github.com/foo/bar/releases/tag/v1.0.0"
   """
+  github_rate_limit()
   try:
     if not tag:
       catalog_url = f'https://api.github.com/repos/{repository}/tags'
@@ -159,6 +180,7 @@ def github_artifacts_url(repository: str,
   Returns:
     URL of the artifacts archive.
   """
+  github_rate_limit()
   try:
     # Get workflow id (if workflow name is provided)
     workflow_id: int=None

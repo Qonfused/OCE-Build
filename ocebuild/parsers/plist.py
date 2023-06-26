@@ -41,7 +41,7 @@ def parse_serialized_types(stype: str,
   entry = None
   try:
     if   stype == 'array':    entry = []
-    elif stype == 'data':     entry = b64decode(value.encode()).hex().upper()
+    elif stype == 'data':     entry = ('data', b64decode(value.encode()).hex().upper())
     elif stype == 'date':     entry = (stype, datetime.fromisoformat(value.replace("Z", "+00:00")))
     elif stype == 'dict':     entry = {}
     elif stype == 'real':     entry = ('float', float(value))
