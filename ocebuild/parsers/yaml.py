@@ -95,7 +95,13 @@ def parse_yaml(lines: List[str],
   Returns:
     Dictionary populated from YAML entries.
   """
-  cursor = { 'keys': [], 'level': 0, 'indent': 0, 'skip': (def_flag := False) }
+  cursor = {
+    'keys': [],
+    'level': 0,
+    'indent': 0,
+    'skip': (def_flag := False),
+    'upshift': False
+  }
   for i,line in enumerate(lines):
     # Skip empty lines
     if len(lnorm := line.lstrip().rstrip()) == 0:
@@ -116,10 +122,22 @@ def parse_yaml(lines: List[str],
       continue
     elif cursor['skip']: continue
     
-    level = len(line[:-len(lnorm)])
+    # Fix non-dict yaml arrays
+    if lnorm.startswith('- ') and ': ' not in lnorm:
+      # Extract correct value from tokens
+      key = tokens[0]
+      cursor['upshift'] = True
+    # Fix for subsequent non-array entries
+    elif cursor['upshift']:
+      # Treat cursor as if it's in the same level as normal dict keys
+      cursor['keys'] = cursor['keys'][:-1]
+      cursor['level'] -= cursor['indent']
+      cursor['upshift'] = False
+    
     # Update cursor position
+    level = len(line[:-len(lnorm)])
     if num_tokens == 1 and tokens[0].endswith(':'):
-      update_cursor(level, key, cursor)
+      update_cursor(level, key, cursor, upshift=1)
     # Update dictionary values
     elif num_tokens >= 1:
       # Extract schema and entry value
@@ -135,7 +153,8 @@ def parse_yaml(lines: List[str],
 
       # Extract and validate parent tree level
       tree = cursor['keys']
-      while len(tree) >= level / max(1, cursor['indent']): tree.pop(-1)
+      while len(tree) > level / max(1, cursor['indent']):
+        tree.pop(-1)
       prev_value = nested_get(config, tree)
       
       # Handle initial array values
