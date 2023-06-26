@@ -16,8 +16,8 @@ from typing import Generator, Literal, Union
 
 from filesystem.posix import move, glob
 from parsers.plist import parse_plist
+from sources._lib import request
 from versioning.constants import OPENCORE_BINARY_DATA_URL
-from versioning.sources import request
 
 
 @contextmanager

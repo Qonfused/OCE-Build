@@ -6,17 +6,12 @@
 ##
 
 from json import load as json_load
-from ssl import _create_unverified_context as skip_ssl_verify
-from urllib.request import urlopen, Request
 
 from typing import List, Optional, Union
 
 from parsers.dict import nested_get
+from sources._lib import request
 
-
-def request(url: Union[str, Request]) -> any:
-  """Simple wrapper over urlopen for skipping SSL verification."""
-  return urlopen(url, context=skip_ssl_verify())
 
 ################################################################################
 #                     Parameter formatting/retrival functions                  #
@@ -37,11 +32,11 @@ def github_suite_id(repository: str,
     Check suite ID.
   """
   suites_url = f'https://api.github.com/repos/{repository}/commits/{commit}/check-suites'
-  for suite in json_load(request(suites_url))['check_suites']:
+  for suite in request(suites_url).json()['check_suites']:
     check_runs_url = suite['check_runs_url']
     if status and suite['status'] != status: continue
     # Enumerate suites for matching workflow ids
-    for run in json_load(request(check_runs_url))['check_runs']:
+    for run in request(check_runs_url).json()['check_runs']:
       if f'/runs/{workflow_id}/jobs/' in run['details_url']:
         return nested_get(run, ['check_suite', 'id'])
   return None
@@ -169,11 +164,11 @@ def github_artifacts_url(repository: str,
     workflow_id: int=None
     if workflow is not None:
       workflows_url = f'https://api.github.com/repos/{repository}/actions/workflows'
-      for w in json_load(request(workflows_url)):
+      for w in request(workflows_url).json():
         if workflow == w['name']: workflow_id = w['id']; break
     # Filter artifact urls
     catalog_url = f'https://api.github.com/repos/{repository}/actions/artifacts'
-    catalog = json_load(request(catalog_url))
+    catalog = request(catalog_url).json()
     for workflow_run in catalog['artifacts']:
       id = workflow_run['id']
       w_id = nested_get(workflow_run, ['workflow_run', 'id'])

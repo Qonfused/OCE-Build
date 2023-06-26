@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 ##
 
-from versioning.sources import github_archive_url, github_file_url
+from sources.github import github_archive_url, github_file_url
 
 
 DORTANIA_CATALOG_URL = github_file_url('dortania/build-repo', 'config.json', branch='builds')
