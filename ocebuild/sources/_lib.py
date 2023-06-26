@@ -30,11 +30,17 @@ class RequestWrapper():
   def __getattr__(self, attr):
     return getattr(self._wrapped_response, attr)
 
-  def json(self, *args, **kargs) -> any:
+  def json(self,
+           *args: tuple,
+           **kargs: dict[str, any]
+           ) -> any:
     """Return the response as JSON."""
     return json_load(self._wrapped_response, *args, **kargs)
   
-  def text(self, *args, **kargs) -> str:
+  def text(self,
+           *args: tuple,
+           **kargs: dict[str, any]
+           ) -> TextIOWrapper:
     """Return the response as text."""
     return TextIOWrapper(self._wrapped_response, *args, **kargs)
 

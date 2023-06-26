@@ -39,6 +39,7 @@ license = "BSD-3-Clause"
   # Requirements
   [tool.poetry.dependencies]
   python = ">=3.9"
+  typing-extensions = { version = "^4.6.0", python = ">=3.7,<3.101" }
   
   # [[tool.poetry.group.dev.dependencies]]
   # TODO
@@ -51,7 +52,6 @@ license = "BSD-3-Clause"
   [tool.poetry.group.test.dependencies]
   pytest = "^7.0.1"
   pytest-cov = ">=3,<5"
-  mypy = ">=0.990,<1.4"
 
   # [tool.poetry.scripts]
   # # TODO
