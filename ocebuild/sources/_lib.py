@@ -10,6 +10,7 @@ from __future__ import annotations
 from io import TextIOWrapper
 from json import load as json_load
 from ssl import _create_unverified_context as skip_ssl_verify
+from urllib.error import HTTPError
 from urllib.request import urlopen, Request
 
 from typing import Union
@@ -30,20 +31,17 @@ class RequestWrapper():
   def __getattr__(self, attr):
     return getattr(self._wrapped_response, attr)
 
-  def json(self,
-           *args: tuple,
-           **kargs: dict[str, any]
-           ) -> any:
+  def json(self, *args, **kargs) -> any:
     """Return the response as JSON."""
     return json_load(self._wrapped_response, *args, **kargs)
   
-  def text(self,
-           *args: tuple,
-           **kargs: dict[str, any]
-           ) -> TextIOWrapper:
+  def text(self, *args, **kargs) -> TextIOWrapper:
     """Return the response as text."""
     return TextIOWrapper(self._wrapped_response, *args, **kargs)
 
 def request(url: Union[str, Request]) -> any:
   """Simple wrapper over urlopen for skipping SSL verification."""
-  return RequestWrapper(urlopen(url, context=skip_ssl_verify()))
+  try:
+    return RequestWrapper(urlopen(url, context=skip_ssl_verify()))
+  except HTTPError as e:
+    raise e
