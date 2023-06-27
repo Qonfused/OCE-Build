@@ -7,9 +7,10 @@
 
 from graphlib import TopologicalSorter
 from itertools import chain
-from re import search as re_search
 
 from typing import Dict, Generator, List, Tuple, Union
+
+from parsers.regex import re_search
 
 
 def get_version_string(string: str) -> Union[str, None]:
@@ -29,8 +30,7 @@ def get_version_string(string: str) -> Union[str, None]:
     >>> get_version_string('latest')
     # -> None
   """
-  matches = re_search(r'([\d.]+)', string)
-  return matches.group(1) if matches else None
+  return re_search(r'([\d.]+)', string, group=1)
 
 def get_version_parts(version: str) -> List[int]:
   """Gets the version parts from a version string.

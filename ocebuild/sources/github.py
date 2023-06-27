@@ -213,9 +213,8 @@ def github_release_url(repository: str,
   
   if not tag:
     try:
-      tags_endpoint = f'/repos/{repository}/tags'
-      with github_api_request(tags_endpoint).json() as tags_catalog:
-        tag = tags_catalog[0]['name']
+      tags_catalog = github_api_request(f'/repos/{repository}/tags').json()
+      tag = tags_catalog[0]['name']
     except:
       if not github_rate_limit(raise_error=True): raise
   return f'https://github.com/{repository}/releases/tag/{tag}'
