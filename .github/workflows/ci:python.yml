@@ -20,7 +20,7 @@ on:
   workflow_dispatch:
 jobs:
   # Runs test suite
-  test:
+  tests:
     runs-on: ubuntu-latest
     continue-on-error: ${{ matrix.experimental }}
     strategy:
@@ -84,6 +84,19 @@ jobs:
         with:
           name: coverage
           path: .coverage.${{ matrix.python-version }}
+  # Verify python matrix results for branch protection
+  # @see https://github.com/orgs/community/discussions/33579#discussioncomment-3796858
+  check:
+    name: Validating test runs (python >=3.9,<3.12)
+    if: always()
+    needs:
+    - tests
+    runs-on: ubuntu-latest
+    steps:
+    - name: Decide whether the needed jobs succeeded or failed
+      uses: re-actors/alls-green@release/v1
+      with:
+        jobs: ${{ toJSON(needs) }}
   # Generate coverage branch data and PR comment text
   #
   # Updates `python-coverage-comment-action` branch
@@ -91,7 +104,7 @@ jobs:
   coverage-branch:
     name: Coverage (python >=3.9)
     runs-on: ubuntu-latest
-    needs: test
+    needs: tests
     permissions:
       pull-requests: write
       contents: write
