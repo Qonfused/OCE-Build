@@ -50,11 +50,11 @@ def validate_path_tree(path: Union[str, PathLike[str]],
   root_dir = Path(path)
   for tree, flag in flatten_dict(tree, delimiter).items():
     # Create error partial for re-use
-    with root_dir.joinpath(*tree.split('/')) as absolute_path:
-      name = absolute_path.name
-      path = str(absolute_path)[len(str(root_dir))+1:]
-      kind = 'file' if flag == 'f' or flag == 'file' else 'directory'
-      err = partial(PathValidationError, name=name, kind=kind, path=path)
+    absolute_path = root_dir.joinpath(*tree.split('/'))
+    name = absolute_path.name
+    path = str(absolute_path)[len(str(root_dir))+1:]
+    kind = 'file' if flag == 'f' or flag == 'file' else 'directory'
+    err = partial(PathValidationError, name=name, kind=kind, path=path)
     # Verify path exists
     def path_exists() -> bool:
       return absolute_path.exists()

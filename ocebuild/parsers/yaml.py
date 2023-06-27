@@ -215,7 +215,7 @@ def write_yaml(config: dict,
       # Avoid parsing literal array indices
       if isinstance(tree[j], int): continue
       # Insert array indices as additional keys
-      elif (re_match := re.search('(.*)\[([0-9]+)\]', key)):
+      elif (re_match := re.search(r'(.*)\[([0-9]+)\]', key)):
         key, idx = re_match.groups()
         tree[j] = key
         tree[j+1:j+1] = [int(idx)]

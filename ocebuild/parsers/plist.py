@@ -139,7 +139,7 @@ def parse_plist(lines: Union[List[str], TextIOWrapper],
     # Update dictionary values
     elif lnorm.startswith('<'):
       # Attempt single-line extraction of type and value
-      stype = re.findall('<([a-z]+)\/?>', lnorm, re.IGNORECASE)[0]
+      stype = re.findall('<([a-z]+)/?>', lnorm, re.IGNORECASE)[0]
       value = re.findall('<[a-z]+>(.*)</[a-z]+>', lnorm, re.IGNORECASE)
       if len(value): value = value[0]
 
@@ -233,7 +233,7 @@ def write_plist(config: dict,
         # Seek to end of entry
         continue
       # Insert array indices as additional keys
-      elif (re_match := re.search('(.*)\[([0-9]+)\]', key)):
+      elif (re_match := re.search(r'(.*)\[([0-9]+)\]', key)):
         key, idx = re_match.groups()
         tree[j] = key
         tree[j+1:j+1] = [int(idx)]

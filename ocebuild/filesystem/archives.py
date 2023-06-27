@@ -5,7 +5,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 ##
 
-from cgi import parse_header
 from contextlib import contextmanager
 from pathlib import Path
 from shutil import copytree, rmtree, unpack_archive
@@ -16,6 +15,7 @@ from typing import Generator, Literal, Union
 
 from filesystem.posix import move, glob
 from parsers.plist import parse_plist
+from parsers.regex import re_match
 from sources._lib import request
 from versioning.constants import OPENCORE_BINARY_DATA_URL
 
@@ -44,8 +44,9 @@ def extract_archive(url: Union[str, Request],
     #      otherwise parse and extract from an archive url.
     with request(url) as response:
       # Extract filename from request headers.
-      _, params = parse_header(response.headers.get('Content-Disposition', ''))
-      filename = params['filename']
+      filename = re_match(pattern=r'^attachment; filename="?(.*)"?;?$',
+                          string=response.headers.get('Content-Disposition'),
+                          group=1)
       extension = "".join(Path(filename).suffixes)
       # Write archive to a temporary file.
       with NamedTemporaryFile(suffix=extension) as tmp_file:

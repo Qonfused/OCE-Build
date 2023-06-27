@@ -15,11 +15,13 @@ def test_write_serialized_types(): pass # Not implemented
 
 def test_parse_yaml():
   # Verify no list mutability pollution
+  parse_yaml(lines=['#foo'], config={'foo': 'bar'}, flags=['foo'])
   assert not parse_yaml(lines=[])
   assert not parse_yaml(lines=[], config={}, flags=[])
-  # Validate parsing List[str] and TextIOWrapper inputs
+  # Validate parsing List[str] input
   file = open('example/build.lock', 'r', encoding='UTF-8')
   assert parse_yaml(file)
+  # Validate parsing TextIOWrapper input
   file = open('example/build.lock', 'r', encoding='UTF-8')
   lockfile = parse_yaml(lines=[l.rstrip() for l in file])
   assert lockfile

@@ -10,6 +10,6 @@ import pytest
 
 def test_validation(): pass # Not implemented
 
-def test_PathValidationError(): pass # Not implemente
+def test_PathValidationError(): pass # Not implemented
 
 def test_validate_path_tree(): pass # Not implemented

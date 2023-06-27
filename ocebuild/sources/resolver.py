@@ -35,11 +35,11 @@ class BaseResolver():
     self_attr = super().__getattribute__(name)
     try:
       # Return the instantiated subclass attribute (if either exists)
-      with super().__getattribute__('__cls__') as cls_ref:
-        cls_attr = cls_ref.__getattribute__(name)
-        # Only return attribute if not overridden
-        assert signature(self_attr) == signature(cls_attr)
-        return cls_attr
+      cls_ref = super().__getattribute__('__cls__')
+      cls_attr = cls_ref.__getattribute__(name)
+      # Only return attribute if not overridden
+      assert signature(self_attr) == signature(cls_attr)
+      return cls_attr
     # Return the class attribute (if either exists)
     except:
       return self_attr
