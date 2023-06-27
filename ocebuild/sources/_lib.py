@@ -39,9 +39,10 @@ class RequestWrapper():
     """Return the response as text."""
     return TextIOWrapper(self._wrapped_response, *args, **kargs)
 
-def request(url: Union[str, Request]) -> any:
+def request(url: Union[str, Request], *args, **kwargs) -> any:
   """Simple wrapper over urlopen for skipping SSL verification."""
   try:
-    return RequestWrapper(urlopen(url, context=skip_ssl_verify()))
+    response = urlopen(url, context=skip_ssl_verify(), *args, **kwargs)
+    return RequestWrapper(response)
   except HTTPError as e:
     raise e

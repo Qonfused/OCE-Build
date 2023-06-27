@@ -8,14 +8,30 @@
 from datetime import datetime, timedelta
 from json import load as json_load
 from functools import partial
+from urllib.request import Request
 
 from typing import List, Optional, Union
 
-from errors.stacktrace import disable_exception_traceback
+from errors._lib import disable_exception_traceback
 from errors.types import GitHubRateLimit
 from parsers.dict import nested_get
 from sources._lib import request
+from constants import ENV
 
+
+def github_api_request(endpoint: str) -> any:
+  """Gets a GitHub API request.
+
+  Args:
+    endpoint: GitHub API endpoint.
+
+  Returns:
+    API response.
+  """
+  req = Request(f'https://api.github.com{endpoint}')
+  if ENV.has('GITHUB_TOKEN'):
+    req.add_header('Authorization', f'Bearer {ENV.GITHUB_TOKEN}')
+  return request(url=f'https://api.github.com{endpoint}')
 
 ################################################################################
 #                               API Request Guards                             #
@@ -34,8 +50,10 @@ def github_rate_limit(kind: str='core', raise_error: float=False) -> int:
   Raises:
     Exception: If the rate limit has been exceeded.
   """
-  rate_limit = request('https://api.github.com/rate_limit').json()
-  if not raise_error: return rate_limit
+  rate_limit = github_api_request('/rate_limit').json()
+  if not raise_error:
+    if kind: return nested_get(rate_limit, ['resources', kind])
+    return rate_limit
   elif nested_get(rate_limit, ['resources', kind, 'remaining']) == 0:
     current_time = datetime.now()
     reset_time = datetime.fromtimestamp(
@@ -70,8 +88,8 @@ def github_suite_id(repository: str,
     Check suite ID.
   """
   try:
-    suites_url = f'https://api.github.com/repos/{repository}/commits/{commit}/check-suites'
-    for suite in request(suites_url).json()['check_suites']:
+    suites_endpoint = f'/repos/{repository}/commits/{commit}/check-suites'
+    for suite in github_api_request(suites_endpoint).json()['check_suites']:
       check_runs_url = suite['check_runs_url']
       if status and suite['status'] != status: continue
       # Enumerate suites for matching workflow ids
@@ -93,8 +111,8 @@ def github_tag_names(repository: str) -> List[str]:
     List of repository tags.
   """
   try:
-    tags_url = f"https://api.github.com/repos/{repository}/tags"
-    return [tag['name'] for tag in request(tags_url).json()]
+    tags_endpoint = f"/repos/{repository}/tags"
+    return [tag['name'] for tag in github_api_request(tags_endpoint).json()]
   except:
     if not github_rate_limit(raise_error=True): raise
 
@@ -195,8 +213,8 @@ def github_release_url(repository: str,
   
   if not tag:
     try:
-      catalog_url = f'https://api.github.com/repos/{repository}/tags'
-      with json_load(request(catalog_url)) as tags_catalog:
+      tags_endpoint = f'/repos/{repository}/tags'
+      with github_api_request(tags_endpoint).json() as tags_catalog:
         tag = tags_catalog[0]['name']
     except:
       if not github_rate_limit(raise_error=True): raise
@@ -222,12 +240,12 @@ def github_artifacts_url(repository: str,
     # Get workflow id (if workflow name is provided)
     workflow_id: int=None
     if workflow is not None:
-      workflows_url = f'https://api.github.com/repos/{repository}/actions/workflows'
-      for w in request(workflows_url).json():
+      workflows_endpoint = f'/repos/{repository}/actions/workflows'
+      for w in github_api_request(workflows_endpoint).json():
         if workflow == w['name']: workflow_id = w['id']; break
     # Filter artifact urls
-    catalog_url = f'https://api.github.com/repos/{repository}/actions/artifacts'
-    catalog = request(catalog_url).json()
+    artifacts_endpoint = f'/repos/{repository}/actions/artifacts'
+    catalog = github_api_request(artifacts_endpoint).json()
     for workflow_run in catalog['artifacts']:
       id = workflow_run['id']
       w_id = nested_get(workflow_run, ['workflow_run', 'id'])
