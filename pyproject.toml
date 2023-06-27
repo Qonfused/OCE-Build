@@ -39,6 +39,7 @@ license = "BSD-3-Clause"
   # Requirements
   [tool.poetry.dependencies]
   python = ">=3.9"
+  packaging = "^23.0"
   
   # [[tool.poetry.group.dev.dependencies]]
   # TODO

@@ -6,8 +6,7 @@
 ##
 
 from inspect import signature
-from pathlib import Path
-
+from pathlib import Path, PurePath
 from typing import Any, Generator, Tuple, TypeVar
 
 from sources.github import *
@@ -34,11 +33,15 @@ class BaseResolver():
     """Retrieves from the instantiated class or subclass."""
     self_attr = super().__getattribute__(name)
     try:
-      # Return the instantiated subclass attribute (if either exists)
+      # Get the uninstantiated class representation
+      class_repr = super().__getattribute__('__class__')
+      # Get the instantiated subclass attribute (if either exists)
       cls_ref = super().__getattribute__('__cls__')
       cls_attr = cls_ref.__getattribute__(name)
       # Only return attribute if not overridden
+      assert not class_repr.__getattribute__(name)
       assert signature(self_attr) == signature(cls_attr)
+      # Return class attribute
       return cls_attr
     # Return the class attribute (if either exists)
     except:
@@ -54,6 +57,10 @@ class BaseResolver():
     """Returns only public parameters in `__iter__` calls."""
     for k,v in self.__parameters__.items():
       if v is not None: yield k,v
+
+  def __repr__(self: TBaseResolver) -> str:
+    """Returns a string representation of the resolver."""
+    return f"{self.__class__.__name__}({self.__parameters__})"
 
   def __str__(self: TBaseResolver) -> str:
     """Aliases `__str__` calls to `resolve()` for convenience."""
@@ -129,10 +136,17 @@ class PathResolver(BaseResolver, cls := type(Path())):
     super().__init__(self, *args, **kwargs)
     # Instantiates a new Path subclass using the `__new__` method.
     self.__cls__ = super().__new__(cls, path, *args, **kwargs)
+  
+  def __getattribute__(self: TPathResolver, name: str) -> Any:
+    """Overrides class and subclass methods to include PurePath."""
+    try:
+      return super().__getattribute__(name)
+    except AttributeError:
+      __cls__ = super().__getattribute__('__cls__')
+      return PurePath(__cls__).__getattribute__(name)
 
-  def resolve(self: TPathResolver) -> TPathResolver:
+  def resolve(self: TPathResolver, strict: bool = False) -> cls:
     """Returns a filepath based on the class parameters."""
-    print('side effect')
-    resolved_path = self.__cls__.resolve()
+    resolved_path = self.__cls__.resolve(strict)
     #TODO: Handle additional path type verifications here
     return resolved_path
