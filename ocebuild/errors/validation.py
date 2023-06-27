@@ -12,7 +12,7 @@ from pathlib import Path
 
 from typing import Callable, Literal, Optional, Union
 
-from errors.stacktrace import disable_exception_traceback
+from errors._lib import disable_exception_traceback
 from errors.types import PathValidationError
 from parsers.dict import flatten_dict
 
