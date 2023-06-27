@@ -7,30 +7,49 @@
 
 from datetime import datetime, timedelta
 from json import load as json_load
+from functools import partial
 
 from typing import List, Optional, Union
 
+from errors.stacktrace import disable_exception_traceback
+from errors.types import GitHubRateLimit
 from parsers.dict import nested_get
 from sources._lib import request
 
 
-def github_rate_limit() -> int:
+################################################################################
+#                               API Request Guards                             #
+################################################################################
+
+def github_rate_limit(kind: str='core', raise_error: float=False) -> int:
   """Gets the GitHub API rate limit.
 
+  Args:
+    kind: The kind of GitHub API request to query.
+    raise_error: Raise an exception if the rate limit has been exceeded.
+
   Returns:
-    Remaining API calls.
+    Remaining API calls allowed.
   
   Raises:
     Exception: If the rate limit has been exceeded.
   """
   rate_limit = request('https://api.github.com/rate_limit').json()
-  if nested_get(rate_limit, ['resources', 'core', 'remaining']) == 0:
+  if not raise_error: return rate_limit
+  elif nested_get(rate_limit, ['resources', kind, 'remaining']) == 0:
     current_time = datetime.now()
     reset_time = datetime.fromtimestamp(
-        nested_get(rate_limit, ['resources', 'core', 'reset']))
-    mins = round((reset_time - current_time) / timedelta(minutes=1))
-    raise Exception(f'GitHub rate limit exceeded. Try again in {mins} minutes.')
-  return rate_limit
+        nested_get(rate_limit, ['resources', kind, 'reset']))
+    # Format remaining time in a friendly way for error message
+    msg = partial('{} requests exceeded. Try again in {} {}.'.format,
+                  kind.capitalize())
+    if (mins := round((reset_time - current_time) / timedelta(minutes=1))):
+      msg = msg(mins, 'minutes' if mins != 1 else 'minute')
+    elif (secs := round((reset_time - current_time) / timedelta(seconds=1))):
+      msg = msg(secs, 'seconds' if secs != 1 else 'second')
+    # Raise error without stacktrace
+    with disable_exception_traceback():
+      raise GitHubRateLimit(msg, rate_limit)
 
 ################################################################################
 #                     Parameter formatting/retrival functions                  #
@@ -50,16 +69,34 @@ def github_suite_id(repository: str,
   Returns:
     Check suite ID.
   """
-  github_rate_limit()
-  suites_url = f'https://api.github.com/repos/{repository}/commits/{commit}/check-suites'
-  for suite in request(suites_url).json()['check_suites']:
-    check_runs_url = suite['check_runs_url']
-    if status and suite['status'] != status: continue
-    # Enumerate suites for matching workflow ids
-    for run in request(check_runs_url).json()['check_runs']:
-      if f'/runs/{workflow_id}/jobs/' in run['details_url']:
-        return nested_get(run, ['check_suite', 'id'])
-  return None
+  try:
+    suites_url = f'https://api.github.com/repos/{repository}/commits/{commit}/check-suites'
+    for suite in request(suites_url).json()['check_suites']:
+      check_runs_url = suite['check_runs_url']
+      if status and suite['status'] != status: continue
+      # Enumerate suites for matching workflow ids
+      for run in request(check_runs_url).json()['check_runs']:
+        if f'/runs/{workflow_id}/jobs/' in run['details_url']:
+          return nested_get(run, ['check_suite', 'id'])
+    # No matching suite found
+    return None
+  except:
+    if not github_rate_limit(raise_error=True): raise
+
+def github_tag_names(repository: str) -> List[str]:
+  """Returns a list of all repository tags.
+
+  Args:
+    repository: GitHub repository name.
+
+  Returns:
+    List of repository tags.
+  """
+  try:
+    tags_url = f"https://api.github.com/repos/{repository}/tags"
+    return [tag['name'] for tag in request(tags_url).json()]
+  except:
+    if not github_rate_limit(raise_error=True): raise
 
 ################################################################################
 #                        URL formatting/retrieval functions                    #
@@ -155,20 +192,21 @@ def github_release_url(repository: str,
     >>> github_release_url('foo/bar', tag='v1.0.0')
     # -> "https://github.com/foo/bar/releases/tag/v1.0.0"
   """
-  github_rate_limit()
-  try:
-    if not tag:
+  
+  if not tag:
+    try:
       catalog_url = f'https://api.github.com/repos/{repository}/tags'
       with json_load(request(catalog_url)) as tags_catalog:
         tag = tags_catalog[0]['name']
-  finally:
-    return f'https://github.com/{repository}/releases/tag/{tag}'
+    except:
+      if not github_rate_limit(raise_error=True): raise
+  return f'https://github.com/{repository}/releases/tag/{tag}'
 
 def github_artifacts_url(repository: str,
                          branch: Optional[str]=None,
                          workflow: Optional[str]=None,
                          commit: Optional[str]=None
-                         ) -> Union[List[str], None]:
+                         ) -> Union[str, None]:
   """Formats a GitHub artifacts URL.
 
   Args:
@@ -180,7 +218,6 @@ def github_artifacts_url(repository: str,
   Returns:
     URL of the artifacts archive.
   """
-  github_rate_limit()
   try:
     # Get workflow id (if workflow name is provided)
     workflow_id: int=None
@@ -201,7 +238,8 @@ def github_artifacts_url(repository: str,
       if workflow_id and workflow_id != w_id: continue
       if commit and commit != head_sha: continue
       # Return the first matching artifact url
-      if (suite_id := github_suite_id(repository, commit, w_id)):
+      if (suite_id := github_suite_id(repository, head_sha, w_id)):
         return f'https://github.com/{repository}/suites/{suite_id}/artifacts/{id}'
-  except: pass
+  except:
+    if not github_rate_limit(raise_error=True): raise
   return None

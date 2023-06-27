@@ -5,6 +5,7 @@
 
 import pytest
 
+from errors.validation import validate_path_tree
 from filesystem.archives import *
 
 
@@ -46,7 +47,6 @@ def test_extract_opencore_archive():
   
   with extract_opencore_archive(url) as pkg:
     # Verify tree structure exists
-    from validation import validate_path_tree
     efi_tree = {
       'Docs': {
         'Changelog.md': 'f',

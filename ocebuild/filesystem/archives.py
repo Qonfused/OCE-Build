@@ -40,6 +40,8 @@ def extract_archive(url: Union[str, Request],
   """
   tmp_dir = mkdtemp()
   try:
+    #TODO: If github file url, test `raw.githubusercontent` redirect,
+    #      otherwise parse and extract from an archive url.
     with request(url) as response:
       # Extract filename from request headers.
       _, params = parse_header(response.headers.get('Content-Disposition', ''))

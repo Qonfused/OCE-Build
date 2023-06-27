@@ -12,6 +12,8 @@ from pathlib import Path
 
 from typing import Callable, Literal, Optional, Union
 
+from errors.stacktrace import disable_exception_traceback
+from errors.types import PathValidationError
 from parsers.dict import flatten_dict
 
 
@@ -22,22 +24,10 @@ def validate(call: Callable[[], bool],
   """Throws a ValidationError with the given message."""
   result: bool=True
   # Override AssertionError context with ValidationError
-  with suppress(AssertionError):
-    result=call()
+  with suppress(AssertionError): result=call()
   if not result:
-    raise err(msg if msg else f'Failed {call.__name__} validation test')
-
-class PathValidationError(Exception):
-  """Indicates a path does not match a given tree schema."""
-  def __init__(self,
-               message: str,
-               name: str,
-               path: str,
-               kind: str):
-    super().__init__(message)
-    self.name = name
-    self.path = path
-    self.kind = kind
+    with disable_exception_traceback():
+      raise err(msg if msg else f'Failed {call.__name__} validation test')
 
 def validate_path_tree(path: Union[str, PathLike[str]],
                        tree: dict,
