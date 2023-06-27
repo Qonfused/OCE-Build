@@ -14,25 +14,26 @@ def test_parse_serialized_types(): pass # Not implemented
 def test_write_serialized_types(): pass # Not implemented
 
 def test_parse_yaml():
-  from sources._lib import request
-  from sources.github import github_file_url
-
-  url = github_file_url('Qonfused/ASUS-ZenBook-Duo-14-UX481-Hackintosh',
-                        path='src/build.lock',
-                        raw=True)
-  with request(url).text(encoding='utf-8') as file:
-    lockfile = parse_yaml([l.rstrip() for l in file])
-    for entry in lockfile:
-      # Enumerate entry keys
-      keys = lockfile[entry].keys()
-      for k in keys:
-        assert nested_get(lockfile, [entry, k]) is not None
-      assert 'checksum' in keys
-      assert 'resolution' in keys
-      assert 'url' in keys
-      assert 'version' in keys
-      if 'extract' in keys:
-        arr = nested_get(lockfile, [entry, 'extract'])
-        assert (isinstance(arr, str) or isinstance(arr, list)) and len(arr)
+  # Verify no list mutability pollution
+  assert not parse_yaml(lines=[])
+  assert not parse_yaml(lines=[], config={}, flags=[])
+  # Validate parsing List[str] and TextIOWrapper inputs
+  file = open('example/build.lock', 'r', encoding='UTF-8')
+  assert parse_yaml(file)
+  file = open('example/build.lock', 'r', encoding='UTF-8')
+  lockfile = parse_yaml(lines=[l.rstrip() for l in file])
+  assert lockfile
+  # Validate known lockfile schema
+  for entry in lockfile:
+    keys = lockfile[entry].keys()
+    for k in keys:
+      assert nested_get(lockfile, [entry, k]) is not None
+    assert 'checksum' in keys
+    assert 'resolution' in keys
+    assert 'url' in keys
+    assert 'version' in keys
+    if 'extract' in keys:
+      arr = nested_get(lockfile, [entry, 'extract'])
+      assert (isinstance(arr, str) or isinstance(arr, list)) and len(arr)
 
 def test_write_yaml(): pass # Not implemented

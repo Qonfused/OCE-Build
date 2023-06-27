@@ -7,7 +7,7 @@
 
 import re
 from shlex import split
-from typing import List, Literal, Tuple, Union
+from typing import List, Literal, Optional, Tuple, Union
 
 from parsers._lib import update_cursor
 from parsers.dict import flatten_dict, nested_get, nested_set
@@ -82,8 +82,8 @@ def write_serialized_types(value: Union[Tuple[str, any], any],
   return stype, svalue
 
 def parse_yaml(lines: List[str],
-               config: dict=dict(),
-               flags: List[str]=[]
+               config: Optional[dict]=None,
+               flags: Optional[List[str]]=None
                ) -> dict:
   """Parses YAML (optionally type annotated) into a Python dictionary.
 
@@ -95,6 +95,10 @@ def parse_yaml(lines: List[str],
   Returns:
     Dictionary populated from YAML entries.
   """
+  if config is None: config = dict()
+  if flags is None: flags = []
+  
+  i = 0
   cursor = {
     'keys': [],
     'level': 0,
@@ -102,9 +106,10 @@ def parse_yaml(lines: List[str],
     'skip': (def_flag := False),
     'upshift': False
   }
-  for i,line in enumerate(lines):
+  for _line in lines:
+    i += 1; line = _line.rstrip()
     # Skip empty lines
-    if len(lnorm := line.lstrip().rstrip()) == 0:
+    if len(lnorm := line.lstrip()) == 0:
       continue
     # Check if first non-whitespace character is a comment
     if lnorm.startswith('#'):
@@ -183,8 +188,8 @@ def parse_yaml(lines: List[str],
   
   return config
 
-def write_yaml(lines: List[str]=[],
-               config: dict=dict(),
+def write_yaml(config: dict,
+               lines: Optional[List[str]]=None,
                schema: Literal['annotated', 'yaml']='yaml'
                ) -> List[str]:
   """Writes a Python dictionary to YAML.
@@ -197,6 +202,8 @@ def write_yaml(lines: List[str]=[],
   Returns:
     YAML lines populated from dictionary entries.
   """
+  if lines is None: lines = []
+
   cursor = { 'keys': [], 'indent': 2 }
   flat_dict = flatten_dict(config)
 

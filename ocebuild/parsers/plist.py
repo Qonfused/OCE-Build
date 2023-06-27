@@ -9,7 +9,7 @@ from base64 import b64encode, b64decode
 from datetime import datetime
 from io import TextIOWrapper
 import re
-from typing import List, Tuple, Union
+from typing import List, Optional, Tuple, Union
 
 from parsers._lib import update_cursor
 from parsers.dict import flatten_dict, nested_get, nested_set
@@ -97,7 +97,7 @@ def write_serialized_types(value: Union[Tuple[str, any], any],
   return entry
 
 def parse_plist(lines: Union[List[str], TextIOWrapper],
-                config: dict=dict()
+                config: Optional[dict]=None
                 ) -> dict:
   """Parses a property list into a Python dictionary.
 
@@ -108,6 +108,8 @@ def parse_plist(lines: Union[List[str], TextIOWrapper],
   Returns:
     Dictionary populated from plist entries.
   """
+  if config is None: config = dict()
+
   cursor = {
     'keys': [],
     'level': 0,
@@ -182,8 +184,8 @@ def parse_plist(lines: Union[List[str], TextIOWrapper],
 
   return config
 
-def write_plist(lines: List[str]=PLIST_SCHEMA['1.0'],
-                config: dict=dict()
+def write_plist(config: dict,
+                lines: Optional[List[str]]=None,
                 ) -> List[str]:
   """Writes a property list from a Python dictionary.
 
@@ -194,6 +196,8 @@ def write_plist(lines: List[str]=PLIST_SCHEMA['1.0'],
   Returns:
     Property list (plist) populated from dictionary entries.
   """
+  if lines is None: lines = PLIST_SCHEMA['1.0']
+
   def try_index(*args: Union[str, int]) -> int:
     try: return lines.index(*args)
     except: return -1
