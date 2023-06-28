@@ -117,21 +117,17 @@ jobs:
       uses: re-actors/alls-green@release/v1
       with:
         jobs: ${{ toJSON(needs) }}
-    - name: Set final commit status
-      run: |
-        curl --request POST \
-        --url https://api.github.com/repos/${{ github.repository }}/statuses/${{ github.event.pull_request.head.sha || github.sha }} \
-        --header 'authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' \
-        --header 'content-type: application/json' \
-        --data '{
-            "state": "${{ job.status }}",
-            "description": "Updated status to reflect required python tests.",
-            "context": "ci:python"
-          }'
-    # - name: Ensure commit status matches job status.
-    #   uses: ouzi-dev/commit-status-updater@v2
-    #   with:
-    #     status: "${{ job.status }}"
+    # - name: Set final commit status
+    #   run: |
+    #     curl --request POST \
+    #     --url https://api.github.com/repos/${{ github.repository }}/statuses/${{ github.event.pull_request.head.sha || github.sha }} \
+    #     --header 'authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' \
+    #     --header 'content-type: application/json' \
+    #     --data '{
+    #         "state": "${{ job.status }}",
+    #         "description": "Updated status to reflect required python tests.",
+    #         "context": "ci:python"
+    #       }'
   # Generate coverage branch data and PR comment text
   #
   # Updates `python-coverage-comment-action` branch
