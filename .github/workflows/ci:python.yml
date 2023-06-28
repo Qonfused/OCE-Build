@@ -27,17 +27,17 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # # Stable versions
-          # - python-version: "3.9"
-          #   experimental: false
-          # - python-version: "3.10"
-          #   experimental: false
-          # - python-version: "3.11"
-          #   experimental: false
+          # Stable versions
+          - python-version: "3.9"
+            experimental: false
+          - python-version: "3.10"
+            experimental: false
+          - python-version: "3.11"
+            experimental: false
           # Experimental versions
           # @see https://raw.githubusercontent.com/actions/python-versions/main/versions-manifest.json
           - python-version: "3.12-dev"
-            python-min-version: "3.12"
+            python-min-version: "3.12.0rc1"
             experimental: true
         # os: [ubuntu-latest, windows-latest, macos-latest]
     name: "Test (python ${{ matrix.python-version }})"
