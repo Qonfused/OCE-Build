@@ -102,7 +102,7 @@ class PathResolver(BaseResolver, cls := type(Path())):
     # Ensure MRO is cooperative with subclassing
     super(PathResolver, self).__init__()
     # Instantiates internal resolver properties
-    super(BaseResolver, self).__init__(self, *args, **kwargs)
+    super().__init__(self, *args, **kwargs)
 
     # Public properties
     self.path = path
