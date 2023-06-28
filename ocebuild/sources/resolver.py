@@ -106,9 +106,9 @@ class PathResolver(BaseResolver, cls := type(Path())):
 
     # Public properties
     self.path = path
-    self.value = 'this will disappear'
 
     # Attempt to subclass pathlib.Path directly - Python 3.12+
+    # @see https://github.com/Qonfused/OCE-Build/pull/4#issuecomment-1611019621
     try:
       super(cls, self).__init__(path, *args)
     # Instantiates a new Path subclass using the `__new__` method.
