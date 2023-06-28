@@ -142,7 +142,7 @@ class PathResolver(BaseResolver, cls := type(Path())):
     # Fall back to calling initialized `__cls__` subclass
     elif '__cls__' in dir(self):
       resolved_path = self.__cls__.resolve(strict)
-    # Fall backt to calling re-initialized cls subclass
+    # Fall back to initializing and calling a new cls subclass
     else:
       resolved_path = cls(self.path).resolve()
     
