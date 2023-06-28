@@ -94,6 +94,7 @@ jobs:
           poetry run pytest --cov=ocebuild -vvv
         env:
           COVERAGE_FILE: ".coverage.${{ matrix.python-version }}"
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       # Upload coverage data
       - name: Store coverage file
         if: steps.python-pytest.outcome != 'failure'
