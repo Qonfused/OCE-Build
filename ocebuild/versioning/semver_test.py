@@ -5,13 +5,35 @@
 
 import pytest
 
+from packaging import version as vpkg
+
 from filesystem.archives_test import __virtualsmc_archive
 from versioning.semver import *
 
 
-def test_get_version_string(): pass # Not implemented
+def test_get_version_str():
+  # Validate semver strings
+  version = '1.0.0'
+  expected = version
+  for symbol in reversed([*SEMVER_SYMBOLS, *COMPARISON_SYMBOLS]):
+    assert get_version_str(f'{symbol}{version}') == expected
+  # Validate fallthrough cases
+  assert get_version_str(version) == expected
+  assert get_version_str('latest') == 'latest'
+  assert get_version_str('oldest') == 'oldest'
+  assert get_version_str('foo') == 'foo'
 
-def test_get_version_parts(): pass # Not implemented
+def test_get_version():
+  # Validate semver strings
+  version = '1.0.0'
+  expected = vpkg.Version(version)
+  for symbol in reversed([*SEMVER_SYMBOLS, *COMPARISON_SYMBOLS]):
+    assert get_version(f'{symbol}{version}') == expected
+  # Validate fallthrough cases
+  assert get_version(version) == expected
+  assert not get_version('latest')
+  assert not get_version('oldest')
+  assert not get_version('foo')
 
 def test_compare_version(): pass # Not implemented
 

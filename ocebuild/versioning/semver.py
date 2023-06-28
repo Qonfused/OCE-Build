@@ -7,13 +7,15 @@
 
 from graphlib import TopologicalSorter
 from itertools import chain
+from packaging import version as vpkg
 
 from typing import Dict, Generator, List, Tuple, Union
 
-from parsers.regex import re_search
 
+SEMVER_SYMBOLS      = ('~', '^')
+COMPARISON_SYMBOLS  = ('>', '<', '>=', '<=', '==', '!=')
 
-def get_version_string(string: str) -> Union[str, None]:
+def get_version_str(string: str) -> Union[str, None]:
   """Gets the version string from a version specifier.
 
   Args:
@@ -26,31 +28,41 @@ def get_version_string(string: str) -> Union[str, None]:
     >>> get_version_string('^1.0.0')
     # -> '1.0.0'
     >>> get_version_string('1.0.0')
-    # -> '1.0.0'
+    # ->'1.0.0'
     >>> get_version_string('latest')
     # -> None
   """
-  return re_search(r'([\d.]+)', string, group=1)
+  # return re_search(r'([\d.]+)', string, group=1)
+  for symbol in reversed([*SEMVER_SYMBOLS, *COMPARISON_SYMBOLS]):
+    if symbol in string[:len(symbol)]:
+      return string[len(symbol):]
+  return string
 
-def get_version_parts(version: str) -> List[int]:
-  """Gets the version parts from a version string.
+def get_version(string: str) -> Union[vpkg.Version, None]:
+  """Gets the version class from a version specifier.
 
   Args:
-    version: The version string.
+    string: The version class.
 
   Returns:
-    The version parts.
+    The version string.
   
   Example:
-    >>> get_version_parts('1.0.0')
-    # -> [1, 0, 0]
-    >>> get_version_parts('latest')
+    >>> get_version('^1.0.0')
+    # -> <Version('1.0.0')>
+    >>> get_version('1.0.0')
+    # -> <Version('1.0.0')>
+    >>> get_version('latest')
     # -> None
   """
-  parts = get_version_string(version)
-  return list(map(int, parts.split('.'))) if parts else list()
+  try:
+    return vpkg.parse(get_version_str(string))
+  except: pass
 
-def compare_version(v1: str, v2: str, operator: str) -> bool:
+def compare_version(v1: Union[str, vpkg.Version],
+                    v2: Union[str, vpkg.Version],
+                    operator: str
+                    ) -> bool:
   """Compares a version to the version specifier.
   
   Args:
@@ -61,8 +73,8 @@ def compare_version(v1: str, v2: str, operator: str) -> bool:
   Returns:
     True if the version satisfies the specifier.
   """
-  v1_arr = get_version_parts(v1)
-  v2_arr = get_version_parts(v2)
+  v1_arr = get_version(v1) if isinstance(v1, str) else v1
+  v2_arr = get_version(v2) if isinstance(v2, str) else v2
   if operator == '>':   return v1_arr >  v2_arr
   if operator == '<':   return v1_arr <  v2_arr
   if operator == '>=':  return v1_arr >= v2_arr
@@ -110,43 +122,46 @@ def resolve_version_specifier(versions: List[str],
     # -> None
   """
   # Sort available versions
-  sorted_versions = list(set(get_version_string(v) for v in versions))
-  sorted_versions.sort(key=lambda s: list(map(int, s.split('.'))))
+  sorted_versions = sorted(set(get_version(v) for v in versions if v))
   # Handle named specifiers
-  if specifier == 'latest': return sorted_versions[-1]
-  if specifier == 'oldest': return sorted_versions[0]
+  if specifier == 'latest': return str(sorted_versions[-1])
+  if specifier == 'oldest': return str(sorted_versions[0])
   
   # Find the version in the sorted list
-  version_str = get_version_string(specifier)
+  version_str = get_version_str(specifier)
+  version = get_version(version_str)
+  if not version: return None
+
+  # Parse semver symbols
   symbol = specifier[:specifier.index(version_str if version_str else '')]
   # Up to next minor
   # e.g. '~1.2.3' -> '>=1.2.3,<1.3.0'
   if symbol == '~':
     filtered = [v for v in sorted_versions
-                if compare_version(v, version_str, operator='>=')
-                and get_version_parts(v)[0] == get_version_parts(version_str)[0]
-                and get_version_parts(v)[1] < get_version_parts(version_str)[1]+1]
-    if len(filtered): return filtered[-1]
+                if compare_version(v, version, operator='>=')
+                  and v.major == version.major
+                  and v.minor < version.minor+1]
+    if len(filtered): return str(filtered[-1])
   # Up to next major
   # e.g. '^1.2.3' -> '>=1.2.3,<2.0.0'
   elif symbol == '^':
     filtered = [v for v in sorted_versions
-                if compare_version(v, version_str, operator='>=')
-                and get_version_parts(v)[0] < get_version_parts(version_str)[0]+1]
-    if len(filtered): return filtered[-1]
+                if compare_version(v, version, operator='>=')
+                  and v.major < version.major+1]
+    if len(filtered): return str(filtered[-1])
   # Direct comparisons
-  elif symbol in ('>', '<', '>=', '<=', '==', '!='):
+  elif symbol in COMPARISON_SYMBOLS:
     filtered = [v for v in sorted_versions
-                if compare_version(v, version_str, operator=symbol)]
-    if len(filtered): return filtered[-1]
+                if compare_version(v, version, operator=symbol)]
+    if len(filtered): return str(filtered[-1])
   # Fallthrough
   else:
     # Exact match
     # e.g. '1.2.3' -> '==1.2.3'
     if specifier == version_str:
       filtered = [v for v in sorted_versions
-                  if compare_version(v, version_str, operator='==')]
-      if len(filtered): return filtered[-1]
+                  if compare_version(v, version, operator='==')]
+      if len(filtered): return str(filtered[-1])
   # No match
   return None
 
@@ -177,8 +192,8 @@ def get_minimum_version(dependencies: Dict[str, Tuple[str, str]],
   """
   versions = set(k[1] for k in list(chain(*dependencies.values()))
                  if k[0] == library)
-  (versions := list(versions)).sort(key=lambda s: list(map(int, s.split('.'))))
-  return (library, f'^{versions[-1]}' if len(versions) else None)
+  (versions := list(versions)).sort(key=lambda v: vpkg.Version(v))
+  return (library, f'^{str(versions[-1])}' if len(versions) else None)
 
 def sort_dependencies(dependencies: Dict[str, Tuple[str, str]],
                      ) -> Generator[Tuple[str, str], any, None]:
