@@ -19,7 +19,9 @@ from sources._lib import request
 from constants import ENV
 
 
-def github_api_request(endpoint: str) -> any:
+def github_api_request(endpoint: Optional[str]=None,
+                       url: Optional[str]=None
+                       ) -> any:
   """Gets a GitHub API request.
 
   Args:
@@ -28,10 +30,10 @@ def github_api_request(endpoint: str) -> any:
   Returns:
     API response.
   """
-  req = Request(f'https://api.github.com{endpoint}')
+  req = Request(f'https://api.github.com{endpoint}' if not url else url)
   if ENV.has('GITHUB_TOKEN'):
-    req.add_header('Authorization', f'Bearer {ENV.GITHUB_TOKEN}')
-  return request(url=f'https://api.github.com{endpoint}')
+    req.add_header('Authorization', f'token {ENV.GITHUB_TOKEN}')
+  return request(req)
 
 ################################################################################
 #                               API Request Guards                             #
@@ -93,7 +95,7 @@ def github_suite_id(repository: str,
       check_runs_url = suite['check_runs_url']
       if status and suite['status'] != status: continue
       # Enumerate suites for matching workflow ids
-      for run in request(check_runs_url).json()['check_runs']:
+      for run in github_api_request(url=check_runs_url).json()['check_runs']:
         if f'/runs/{workflow_id}/jobs/' in run['details_url']:
           return nested_get(run, ['check_suite', 'id'])
     # No matching suite found

@@ -10,8 +10,13 @@ from typing import Union
 
 class EnvironWrapper:
   """Simple class to securely read environment variables."""
+
   def __init__(self):
-    self.__signature__ = 'SECURE'
+    # Attempt to load environmental variables from a dotfile
+    try:
+      from dotenv import load_dotenv #type: ignore (PEP 484)
+      load_dotenv()
+    except: pass
 
   def has(self, token: str) -> bool:
     """Checks if the given environment variable is set."""

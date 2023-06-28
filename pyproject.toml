@@ -41,8 +41,8 @@ license = "BSD-3-Clause"
   python = ">=3.9"
   packaging = "^23.0"
   
-  # [[tool.poetry.group.dev.dependencies]]
-  # TODO
+  [tool.poetry.group.dev.dependencies]
+  python-dotenv = "^1.0.0"
 
   # [tool.poetry.group.docs]
   # optional = true
