@@ -36,9 +36,8 @@ jobs:
           #   experimental: false
           # Experimental versions
           # @see https://raw.githubusercontent.com/actions/python-versions/main/versions-manifest.json
-          - python-version: "3.9"
-          # - python-version: "3.12-dev"
-            # python-min-version: "3.12.0a7"
+          - python-version: "3.12-dev"
+            python-min-version: "3.12"
             experimental: true
         # os: [ubuntu-latest, windows-latest, macos-latest]
     name: "Test (python ${{ matrix.python-version }})"

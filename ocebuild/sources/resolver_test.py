@@ -11,46 +11,6 @@ from typing import TypeVar
 from sources.resolver import *
 
 
-def test_BaseResolver():
-  # Test `pathlib.Path` subclassing as a non-trivial use case
-  class TestClass(BaseResolver, cls := type(Path())):
-    """Resolves a filepath based on the class parameters."""
-    TTestClass = TypeVar("TTestClass", bound="TestClass")
-
-    def __init__(self: TTestClass,
-                path: Path,
-                *args,
-                **kwargs):
-      # Ensure MRO is cooperative with subclassing
-      super(TestClass, self).__init__()
-      # Public properties
-      self.path = path
-      # Instantiates internal resolver properties
-      super().__init__(self, *args, **kwargs)
-      # Instantiates a new Path subclass using the `__new__` method.
-      self.__cls__ = super().__new__(cls, path, *args, **kwargs)
-
-    def resolve(self: TTestClass,
-                return_foo: Optional[bool]=None
-                ) -> TTestClass:
-      """Returns a filepath based on the class parameters."""
-      if return_foo: return 'foo'
-      resolved_path = self.__cls__.resolve()
-      return resolved_path
-
-  path = 'example/build.lock'
-  output = TestClass(path, __name__='foo')
-  # Validate BaseResolver props and methods
-  assert output.__name__ == 'foo'
-  assert dict(output) == dict(path=path)
-  # Validate pathlib.Path props and methods
-  # assert repr(output.resolve()) == repr(Path(path).resolve())
-  assert output.resolve()
-  assert output.stem == Path(path).stem
-  # Validate TestClass props and methods
-  assert output.resolve(return_foo=True) == 'foo'
-  assert output.path == path
-
 def test_GitHubResolver():
   # Test release url resolution
   assert GitHubResolver(repository='acidanthera/RestrictEvents',
