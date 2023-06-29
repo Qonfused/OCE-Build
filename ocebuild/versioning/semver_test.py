@@ -7,7 +7,7 @@ import pytest
 
 from packaging import version as vpkg
 
-from filesystem.archives_test import __virtualsmc_archive
+from pipeline.kexts_test import __virtualsmc_archive
 from versioning.semver import *
 
 
