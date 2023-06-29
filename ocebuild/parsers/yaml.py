@@ -83,20 +83,23 @@ def write_serialized_types(value: Union[Tuple[str, any], any],
 
 def parse_yaml(lines: List[str],
                config: Optional[dict]=None,
-               flags: Optional[List[str]]=None
-               ) -> dict:
+               flags: Optional[List[str]]=None,
+               frontmatter: bool=False
+               ) -> Union[dict, Tuple[dict, dict]]:
   """Parses YAML (optionally type annotated) into a Python dictionary.
 
   Args:
     lines: YAML lines.
     config: Dictionary to be populated.
     flags: List of preprocessor flags.
+    frontmatter: 
 
   Returns:
     Dictionary populated from YAML entries.
   """
   if config is None: config = dict()
   if flags is None: flags = []
+  frontmatter_dict: Optional[dict]=dict()
   
   i = 0
   cursor = {
@@ -104,7 +107,8 @@ def parse_yaml(lines: List[str],
     'level': 0,
     'indent': 0,
     'skip': (def_flag := False),
-    'upshift': False
+    'upshift': False,
+    'is_frontmatter': False
   }
   for _line in lines:
     i += 1; line = _line.rstrip()
@@ -114,25 +118,56 @@ def parse_yaml(lines: List[str],
     # Check if first non-whitespace character is a comment
     if lnorm.startswith('#'):
       continue
+    # Check if crossing frontmatter
+    if lnorm.startswith('---'):
+      cursor['is_frontmatter'] = not cursor['is_frontmatter']
+      continue
 
     # Extract tokens from line
     tokens = [p for p in split(lnorm) if (p != '|' and p != '-')]
     key = tokens[0][:-1] if (num_tokens := len(tokens)) else None
+    def get_schema(schema: Literal['plist', 'yaml']) -> Union[Tuple[str, str], str]:
+      if schema == 'plist':
+        return (tokens[1], ' '.join(tokens[2:]))
+      elif schema == 'yaml':
+        return ' '.join(tokens[1:])
+    
+    # Handle parsing frontmatter variables
+    if frontmatter and cursor['is_frontmatter']:
+      frontmatter_dict[key] = get_schema('yaml')
+      continue
+    # def get_frontmatter():
+    #   """Replaces variables with frontmatter values"""
 
     # Handle preprocessor macros
     if (macro := tokens[0]).startswith('@'):
       flag = tokens[1] if num_tokens == 2 else def_flag
-      if   macro == '@ifdef': cursor['skip'] = flag in flags
-      elif macro == '@endif': cursor['skip'] = def_flag
+      # Check if flag exists
+      if   macro == '@ifdef':
+        cursor['skip'] = (flag in flags) \
+                      or (flag in frontmatter)
+      elif macro == '@ifndef':
+        cursor['skip'] = (flag not in flags) \
+                     and (flag not in frontmatter)
+      # Check if flag meets conditional
+      # elif macro == '@if':
+      # elif macro == '@elif':
+      # Switch macro skip
+      elif macro == '@else':
+        cursor['skip'] = not cursor['skip']
+      # End macro checking scope
+      elif macro == '@endif':
+        cursor['skip'] = def_flag
       continue
+    # Skip through macro checking scope
     elif cursor['skip']: continue
     
-    # Fix non-dict yaml arrays
+    # Handle non-dict yaml arrays
     if lnorm.startswith('- ') and ': ' not in lnorm:
       # Extract correct value from tokens
       key = tokens[0]
       cursor['upshift'] = True
-    # Fix for subsequent non-array entries
+    # Fix subsequent non-array entries
     elif cursor['upshift']:
       # Treat cursor as if it's in the same level as normal dict keys
       cursor['keys'] = cursor['keys'][:-1]
@@ -147,11 +182,7 @@ def parse_yaml(lines: List[str],
     elif num_tokens >= 1:
       # Extract schema and entry value
       schema = 'plist' if num_tokens >= 3 else 'yaml'
-      entry = None
-      if schema == 'plist':
-        entry = (tokens[1], ' '.join(tokens[2:]))
-      elif schema == 'yaml':
-        entry = ' '.join(tokens[1:])
+      entry = get_schema(schema)
 
       # TODO: Parse YAML types to Python types
       # entry = parseSerializedTypes(...)
@@ -186,7 +217,7 @@ def parse_yaml(lines: List[str],
     # Reached invalid line
     else: raise Exception(f'Invalid line at position {i}:\n\n{line}')
   
-  return config
+  return config if not len(frontmatter_dict) else (config, frontmatter_dict)
 
 def write_yaml(config: dict,
                lines: Optional[List[str]]=None,

@@ -1,7 +1,7 @@
-# ---
-# oc-version: latest
-# oc-build: DEBUG
-# ---
+---
+oc-version: latest
+oc-build: DEBUG
+---
 ACPI:
   SSDT-PNLF: "*"
 Drivers:
