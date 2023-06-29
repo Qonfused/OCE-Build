@@ -79,7 +79,7 @@ jobs:
       
       - name: Install dependencies
         run: |
-          poetry install --no-root --with test 
+          poetry install -n --no-root --with test 
       # Verify installed python version in poetry virtualenv
       - name: Validate experimental python versions
         id: validate-experimental
