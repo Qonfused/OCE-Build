@@ -28,7 +28,7 @@ def parse_serialized_types(stype: str,
   raise NotImplementedError() #TODO
 
 def write_serialized_types(value: Union[Tuple[str, any], any],
-                           schema=Literal['annotated', 'yaml']
+                           schema: Literal['annotated', 'yaml']='yaml'
                            ) -> Tuple[str, any]:
   """Parse Python types to YAML types.
 
@@ -45,8 +45,10 @@ def write_serialized_types(value: Union[Tuple[str, any], any],
   if isinstance(value, tuple): stype, svalue = value
 
   if schema == 'annotated':
+    print('..', stype, svalue)
     # Parse native types
-    if   stype == 'bool':     stype = 'Boolean'; svalue = str(svalue).lower()
+    if   stype == 'date':     stype = 'Date   '; svalue = str(svalue).replace(' ', 'T').replace('+00:00', 'Z')
+    elif stype == 'bool':     stype = 'Boolean'; svalue = str(svalue).lower()
     elif stype == 'data':     stype = 'Data   '; svalue = f'<{svalue}>'
     elif stype == 'dict':     stype = 'Dict   '; svalue = '(empty)'
     elif stype == 'float':    stype = 'Number '; svalue = str(float(svalue))
@@ -55,7 +57,8 @@ def write_serialized_types(value: Union[Tuple[str, any], any],
     elif stype == 'string':   stype = 'String '; svalue = f'"{svalue}"'
     else:
       stype =         stype.rjust(len('       ')).capitalize()
-      svalue = str(value)
+      svalue = str(value if not isinstance(value, tuple) else value[1])
+    # print(stype, svalue)
   elif schema == 'yaml':
     # Parse native types
     if   stype == 'bool':     svalue = str(svalue).lower()
@@ -133,22 +136,24 @@ def parse_yaml(lines: List[str],
         return ' '.join(tokens[1:])
     
     # Handle parsing frontmatter variables
-    if frontmatter and cursor['is_frontmatter']:
+    if cursor['is_frontmatter']:
       frontmatter_dict[key] = get_schema('yaml')
       continue
     # def get_frontmatter():
     #   """Replaces variables with frontmatter values"""
 
     # Handle preprocessor macros
-    if (macro := tokens[0]).startswith('@'):
+    if (macro := tokens[0][:-1]).startswith('@'):
       flag = tokens[1] if num_tokens == 2 else def_flag
       # Check if flag exists
       if   macro == '@ifdef':
-        cursor['skip'] = (flag in flags) \
-                      or (flag in frontmatter)
+        is_defined = (flag in flags) \
+                  or (flag in frontmatter_dict)
+        cursor['skip'] = not is_defined
       elif macro == '@ifndef':
-        cursor['skip'] = (flag not in flags) \
-                     and (flag not in frontmatter)
+        is_not_defined = (flag not in flags) \
+                     and (flag not in frontmatter_dict)
+        cursor['skip'] = not is_not_defined
       # Check if flag meets conditional
       # elif macro == '@if':
       # elif macro == '@elif':
@@ -217,7 +222,8 @@ def parse_yaml(lines: List[str],
     # Reached invalid line
     else: raise Exception(f'Invalid line at position {i}:\n\n{line}')
   
-  return config if not len(frontmatter_dict) else (config, frontmatter_dict)
+  if frontmatter: return config, frontmatter_dict
+  return config
 
 def write_yaml(config: dict,
                lines: Optional[List[str]]=None,

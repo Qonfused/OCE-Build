@@ -10,45 +10,47 @@ from datetime import datetime, timezone
 from parsers.plist import *
 
 
-plist_dummy_types = [
-  [('array',  []), []],
-  [('data', 'AQ=='), ('data', '01')],
-  [('date', '2020-01-01T00:00:00Z'), ('date', datetime(2020, 1, 1, 0, 0, tzinfo=timezone.utc))],
-  [('dict', {}), {}],
-  [('real', '1.0'), ('float', 1.0)],
-  [('integer',  '1'), ('int', 1)],
-  [('string', 'Foo'), ('string', 'Foo')],
-  [('true', ''), ('bool', True)],
-  [('false', ''), ('bool', False)],
-]
-
 def test_parse_serialized_types():
-  for input, expected in plist_dummy_types:
-    assert parse_serialized_types(*input) == expected
+  assert parse_serialized_types(*('array', [])) == \
+    []
+  assert parse_serialized_types(*('data', 'AQ==')) == \
+    ('data', '01')
+  assert parse_serialized_types('date', '2020-01-01T00:00:00Z') == \
+    ('date', datetime(2020, 1, 1, 0, 0, tzinfo=timezone.utc))
+  assert parse_serialized_types('dict', {}) == \
+    {}
+  assert parse_serialized_types('real', '1.0') == \
+    ('float', 1.0)
+  assert parse_serialized_types('integer',  '1') == \
+    ('int', 1)
+  assert parse_serialized_types('string', 'Foo') == \
+    ('string', 'Foo')
+  assert parse_serialized_types('true', '') == \
+    ('bool', True)
+  assert parse_serialized_types('false', '') == \
+    ('bool', False)
   
 def test_write_serialized_types():
-  pass
-  # for (stype, svalue), input in plist_dummy_types:
-  #   if len(input) == 1: input = (None, input)
-  #   if stype == 'array':
-  #     defaults = ('array', None)
-  #     expected = [f'<array>', f'</array>']
-  #     assert write_serialized_types(input, defaults) == expected
-  #   else:
-  #     expected = None
-  #     if stype == 'bool':
-  #       expected = [f'<{(stype := str(svalue).lower())}/>']
-  #       assert write_serialized_types(input) == expected
-  #     elif stype == 'dict':
-  #       expected = [f'<dict>', f'</dict>']
-  #       assert write_serialized_types(input) == expected
-  #     else:
-  #       expected = [f'<{stype}>', f'</{stype}>']
-  #       assert write_serialized_types(input) == expected
-  #     # Default entry schema
-  #     if expected is None:
-  #       expected = [f'<{stype}>{svalue}</{stype}>']
-  #     assert write_serialized_types(input, defaults) == expected
+  mock_default = ('dict', '')
+  assert write_serialized_types([], defaults=('array', None)) == \
+    ['<array>', '</array>']
+  assert write_serialized_types(('data', '01'), mock_default) == \
+    ['<data>AQ==</data>']
+  assert write_serialized_types(('date', datetime(2020, 1, 1, 0, 0, tzinfo=timezone.utc)),
+                                mock_default) == \
+    ['<date>2020-01-01T00:00:00Z</date>']
+  assert write_serialized_types({}, defaults=('dict', None)) == \
+    ['<dict>', '</dict>']
+  assert write_serialized_types(('float', 1.0), mock_default) == \
+    ['<real>1.0</real>']
+  assert write_serialized_types(('int', 1), mock_default) == \
+    ['<integer>1</integer>']
+  assert write_serialized_types(('string', 'Foo'), mock_default) == \
+    ['<string>Foo</string>']
+  assert write_serialized_types(('bool', True), mock_default) == \
+    ['<true/>']
+  assert write_serialized_types(('bool', False), mock_default) == \
+    ['<false/>']
 
 def test_parse_plist():
   from sources._lib import request

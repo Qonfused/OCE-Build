@@ -35,7 +35,38 @@ def test_get_version():
   assert not get_version('oldest')
   assert not get_version('foo')
 
-def test_compare_version(): pass # Not implemented
+def test_compare_version():
+  version_a = '1.0.0'
+  version_b = '2.0.0'
+
+  # Test comparisons
+  assert not compare_version(version_a, version_b, '>')
+  assert     compare_version(version_b, version_a, '>')
+
+  assert     compare_version(version_a, version_b, '<')
+  assert not compare_version(version_b, version_a, '<')
+
+  assert not compare_version(version_a, version_b, '>=') # >
+  assert     compare_version(version_a, version_a, '>=') # ==
+  assert     compare_version(version_b, version_a, '>=') # >
+  assert     compare_version(version_b, version_b, '>=') # ==
+
+  assert     compare_version(version_a, version_b, '<=') # <
+  assert     compare_version(version_a, version_a, '<=') # ==
+  assert not compare_version(version_b, version_a, '<=') # <
+  assert     compare_version(version_b, version_b, '<=') # ==
+
+  assert not compare_version(version_a, version_b, '==')
+  assert     compare_version(version_a, version_a, '==')
+  assert not compare_version(version_b, version_a, '==')
+  assert     compare_version(version_b, version_b, '==')
+
+  assert     compare_version(version_a, version_b, '!=')
+  assert not compare_version(version_a, version_a, '!=')
+  assert     compare_version(version_b, version_a, '!=')
+  assert not compare_version(version_b, version_b, '!=')
+
+  assert not compare_version(version_a, version_b, '~')
 
 def test_resolve_version_specifier():
   versions = ['1.2.2', '1.2.3', '1.2.4', '1.3.0', '1.3.1', '2.0.0']
@@ -66,6 +97,7 @@ def test_resolve_version_specifier():
 
   # Fallthrough
   assert resolve_version_specifier(versions, 'foo') == None
+  assert resolve_version_specifier([], '1.2.3') == None
 
 def test_get_minimum_version(): pass # Not implemented
 

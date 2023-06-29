@@ -41,8 +41,5 @@ class RequestWrapper():
 
 def request(url: Union[str, Request], *args, **kwargs) -> any:
   """Simple wrapper over urlopen for skipping SSL verification."""
-  try:
-    response = urlopen(url, context=skip_ssl_verify(), *args, **kwargs)
-    return RequestWrapper(response)
-  except HTTPError as e:
-    raise e
+  response = urlopen(url, context=skip_ssl_verify(), *args, **kwargs)
+  return RequestWrapper(response)

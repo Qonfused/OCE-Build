@@ -16,7 +16,7 @@ class __EnvironWrapper:
     try:
       from dotenv import load_dotenv #type: ignore (PEP 484)
       load_dotenv()
-    except: pass
+    except: pass #pragma no cover
 
   def has(self, token: str) -> bool:
     """Checks if the given environment variable is set."""

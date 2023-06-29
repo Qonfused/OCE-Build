@@ -59,20 +59,33 @@ license = "BSD-3-Clause"
   # # TODO
 
 [tool.pytest.ini_options]
-addopts = "-rfEX --strict-markers"
+addopts = "--cov=ocebuild -rfEX --strict-markers"
+norecursedirs = [ "dist", "docs", "example", "scripts" ]
 python_files = [ "*_test.py" ]
 python_functions = [ "test_*" ]
 
 [tool.coverage.run]
 relative_files = true
+source = ["ocebuild/*"]
 omit = [ "*_test.py", "**/errors/*" ]
 
-[tool.mypy]
-disallow_untyped_defs = true
-show_error_codes = true
-no_implicit_optional = true
-warn_redundant_casts = true
-warn_return_any = true
-warn_unused_ignores = true
-exclude = [ "docs", "scripts", "_test\\.py$" ]
-ignore_missing_imports = true
+[tool.coverage.report]
+exclude_also = [
+  # Don't complain about missing debug-only code:
+  "def __repr__",
+  "if self\\.debug",
+  # Don't complain if tests don't hit defensive assertion code:
+  "raise AssertionError",
+  "raise NotImplementedError",
+  "raise ValidatonError",
+  "raise PathValidationError",
+  # Don't complain if non-runnable code isn't run:
+  "if 0:",
+  "if __name__ == .__main__.:",
+  # Don't complain about abstract methods, they aren't run:
+  "@(abc\\.)?abstractmethod"
+]
+show_missing = true
+skip_covered = true
+skip_empty = true
+sort = "-Miss"

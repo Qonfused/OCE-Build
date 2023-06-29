@@ -70,6 +70,7 @@ def write_serialized_types(value: Union[Tuple[str, any], any],
   if svalue is not None:
     stype  = value[0] if isinstance(value, tuple) else 'string'
     svalue = value[1] if isinstance(value, tuple) else ''
+  
     # Handle empty entries
     try:
       if not len(svalue):
@@ -78,7 +79,7 @@ def write_serialized_types(value: Union[Tuple[str, any], any],
     except: pass
   # Parse entry value
   entry  = None
-  if   stype == 'date':   pass
+  if   stype == 'date':   svalue = str(svalue).replace(' ', 'T').replace('+00:00', 'Z')
   elif stype == 'string': pass
   # Handle alternate serialized types
   elif stype == 'float':  stype = 'real'
