@@ -9,6 +9,7 @@ from inspect import signature
 from pathlib import Path
 from typing import Any, Generator, Tuple, TypeVar
 
+from sources.dortania import *
 from sources.github import *
 from versioning.semver import resolve_version_specifier
 
@@ -50,7 +51,7 @@ class BaseResolver():
 
 class GitHubResolver(BaseResolver):
   """Resolves a GitHub URL based on the class parameters."""
-  TGitHubResolver= TypeVar("TGitHubResolver", bound="GitHubResolver")
+  TGitHubResolver = TypeVar("TGitHubResolver", bound="GitHubResolver")
 
   def __init__(self: TGitHubResolver,
                repository: str,
@@ -76,7 +77,7 @@ class GitHubResolver(BaseResolver):
   
   def resolve(self: TGitHubResolver) -> str:
     """Returns a URL based on the class parameters."""
-    params=dict(self)
+    params = dict(self)
     # Resolve version tag
     if self.has_any('tag'):
       tags = github_tag_names(repository=params['repository'])
@@ -90,6 +91,35 @@ class GitHubResolver(BaseResolver):
       return github_artifacts_url(**params)
     # Return the latest release (default) or by tag
     return github_release_url(**params)
+
+class DortaniaResolver(BaseResolver):
+  """Resolves a Dortania build URL based on the class parameters."""
+  TDortaniaResolver = TypeVar("TDortaniaResolver", bound="DortaniaResolver")
+
+  def __init__(self: TDortaniaResolver,
+               commit: Optional[str]=None,
+               *args,
+               **kwargs):
+    # Ensure MRO is cooperative with subclassing
+    super(DortaniaResolver, self).__init__()
+    # Instantiates internal resolver properties
+    super().__init__(self, *args, **kwargs)
+
+    # Public properties
+    self.commit = commit
+
+  def resolve(self: TDortaniaResolver) -> str:
+    """Returns a URL based on the class parameters."""
+    plugin = self.__name__
+    params = dict(self)
+    # Resolve build commit sha
+    commit_sha: str
+    if self.has_any('commit'):
+      commit_sha = params['commit']
+    else:
+      commit_sha = get_latest_sha(plugin)
+    # Return the latest build (default) or by commit sha
+    return dortania_release_url(plugin, commit=commit_sha)
 
 class PathResolver(BaseResolver, cls := type(Path())):
   """Resolves a filepath based on the class parameters."""

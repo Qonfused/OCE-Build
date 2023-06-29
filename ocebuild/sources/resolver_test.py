@@ -32,6 +32,8 @@ def test_GitHubResolver():
   # Test latest release url resolution
   assert GitHubResolver(repository='acidanthera/RestrictEvents').resolve()
 
+def test_DortaniaResolver(): pass # Not implemented
+
 def test_PathResolver():
   cls = type(Path())
 
