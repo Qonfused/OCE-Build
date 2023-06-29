@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Dict, Optional, Union
 
 from parsers.regex import re_match, re_search
-from sources.resolver import GitHubResolver, PathResolver
+from sources.resolver import GitHubResolver, DortaniaResolver, PathResolver
 
 
 def parse_specifier(name: str,
@@ -55,3 +55,10 @@ def parse_specifier(name: str,
   if (filepath := Path(specifier)).exists():
     parameters['path'] = filepath
     return PathResolver(**parameters, **resolver_props)
+  
+  # Specifier points to a Dortania build (or latest)
+  if isinstance(entry, dict):
+    params = ('commit')
+    for k in params:
+      if k in entry: parameters[k] = entry[k]
+  return DortaniaResolver(**parameters, **resolver_props)
