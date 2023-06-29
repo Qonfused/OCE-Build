@@ -8,13 +8,14 @@
 from contextlib import suppress
 from functools import partial
 from os import PathLike
-from pathlib import Path
 
 from typing import Callable, Literal, Optional, Tuple, Union
 
 from errors._lib import disable_exception_traceback
 from errors.types import PathValidationError
 from parsers.dict import flatten_dict
+from sources.resolver import PathResolver
+
 
 def validate(call: Callable[[], bool],
              err: Union[Exception, Callable[[Tuple[any, ...]], Exception]],
@@ -46,7 +47,7 @@ def validate_path_tree(path: Union[str, "PathLike[str]"],
     True if the path matches the tree schema.
   """
   # Verify path exists
-  root_dir = Path(path)
+  root_dir = PathResolver(path)
   for tree, flag in flatten_dict(tree, delimiter).items():
     # Create error partial for re-use
     absolute_path = root_dir.joinpath(*tree.split('/'))
