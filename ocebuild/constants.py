@@ -8,7 +8,7 @@ from os import environ as os_environ
 from typing import Union
 
 
-class EnvironWrapper:
+class __EnvironWrapper:
   """Simple class to securely read environment variables."""
 
   def __init__(self):
@@ -35,4 +35,4 @@ class EnvironWrapper:
     """
     return os_environ.get('GITHUB_TOKEN')
 
-ENV = EnvironWrapper()
+ENV = __EnvironWrapper()
