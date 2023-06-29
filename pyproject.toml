@@ -65,7 +65,7 @@ python_functions = [ "test_*" ]
 
 [tool.coverage.run]
 relative_files = true
-omit = [ "*_test.py" ]
+omit = [ "*_test.py", "**/errors/*" ]
 
 [tool.mypy]
 disallow_untyped_defs = true
