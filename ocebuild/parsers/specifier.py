@@ -14,7 +14,7 @@ from sources.resolver import GitHubResolver, PathResolver
 
 
 def parse_specifier(name: str,
-                    entry: Union[str, dict[str, any]]
+                    entry: Union[str, Dict[str, any]]
                     ) -> Union[GitHubResolver, Path, None]:
   """"""
   specifier = entry['specifier'] if isinstance(entry, dict) else entry
