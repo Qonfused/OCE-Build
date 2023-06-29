@@ -12,7 +12,7 @@ from shutil import move as shutil_move
 from typing import Generator, Optional, Union
 
 
-def rename(path: Union[str, PathLike[str]],
+def rename(path: Union[str, "PathLike[str]"],
            name: str
            ) -> Path:
   """Renames a file or directory.
@@ -33,8 +33,8 @@ def rename(path: Union[str, PathLike[str]],
   os_rename(path, output_dir)
   return output_dir
 
-def move(src: Union[str, PathLike[str]],
-         target: Union[str, PathLike[str]],
+def move(src: Union[str, "PathLike[str]"],
+         target: Union[str, "PathLike[str]"],
          name: Optional[str]=None
          ) -> Path:
   """Moves a file or directory to a new location.
@@ -56,7 +56,7 @@ def move(src: Union[str, PathLike[str]],
   shutil_move(str(src), parent_dir if not name else dest)
   return dest
 
-def glob(directory: Union[str, PathLike[str]],
+def glob(directory: Union[str, "PathLike[str]"],
          pattern: str,
          first: Optional[bool] = False
          ) -> Union[Generator[Path, None, None], Path]:

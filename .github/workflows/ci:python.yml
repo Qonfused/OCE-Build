@@ -27,6 +27,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          # Legacy versions
+          # @see https://endoflife.date/python
+          - python-version: "3.8"
+            experimental: false
           # Stable versions
           - python-version: "3.9"
             experimental: false
@@ -90,6 +94,7 @@ jobs:
       - name: Run test suite
         id: python-pytest
         if: steps.validate-experimental.outcome != 'failure'
+        continue-on-error: ${{ matrix.experimental }}
         run: |
           poetry run pytest --cov=ocebuild -vvv
         env:
@@ -105,7 +110,7 @@ jobs:
   # Verify python matrix results for branch protection
   # @see https://github.com/orgs/community/discussions/33579#discussioncomment-3796858
   check:
-    name: Validating test runs (python >=3.9,<3.12)
+    name: Validating test runs (python >=3.8,<3.12)
     if: always()
     needs:
     - tests

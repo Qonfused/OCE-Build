@@ -10,15 +10,14 @@ from functools import partial
 from os import PathLike
 from pathlib import Path
 
-from typing import Callable, Literal, Optional, Union
+from typing import Callable, Literal, Optional, Tuple, Union
 
 from errors._lib import disable_exception_traceback
 from errors.types import PathValidationError
 from parsers.dict import flatten_dict
 
-
 def validate(call: Callable[[], bool],
-             err: Union[Exception, partial[Exception]],
+             err: Union[Exception, Callable[[Tuple[any, ...]], Exception]],
              msg: Optional[str]
              ) -> None:
   """Throws a ValidationError with the given message."""
@@ -29,7 +28,7 @@ def validate(call: Callable[[], bool],
     with disable_exception_traceback():
       raise err(msg if msg else f'Failed {call.__name__} validation test')
 
-def validate_path_tree(path: Union[str, PathLike[str]],
+def validate_path_tree(path: Union[str, "PathLike[str]"],
                        tree: dict,
                        delimiter: str='/'
                        ) -> Literal[True]:
