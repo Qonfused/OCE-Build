@@ -9,14 +9,19 @@ from datetime import datetime, timezone
 
 from typing import Optional
 
-from parsers.dict import nested_get
-from sources._lib import request
-from sources.github import github_file_url, github_release_url
+from ocebuild.parsers.dict import nested_get
+from ocebuild.sources._lib import request
+from ocebuild.sources.github import github_file_url, github_release_url
 
 
 DORTANIA_LAST_UPDATED: datetime
+"""The last time the Dortania build catalog was updated."""
+
 DORTANIA_LATEST_BUILDS: dict
+"""The latest Dortania build catalog."""
+
 DORTANIA_LISTED_BUILDS: dict
+"""Available plugins in the Dortania build catalog."""
 
 ################################################################################
 #                               API Request Guards                             #

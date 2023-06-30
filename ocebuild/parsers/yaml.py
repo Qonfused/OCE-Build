@@ -9,8 +9,8 @@ import re
 from shlex import split
 from typing import List, Literal, Optional, Tuple, Union
 
-from parsers._lib import update_cursor
-from parsers.dict import flatten_dict, nested_get, nested_set
+from ocebuild.parsers._lib import update_cursor
+from ocebuild.parsers.dict import flatten_dict, nested_get, nested_set
 
 
 def parse_serialized_types(stype: str,

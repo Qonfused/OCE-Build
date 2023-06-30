@@ -11,8 +11,8 @@ from io import TextIOWrapper
 import re
 from typing import List, Optional, Tuple, Union
 
-from parsers._lib import update_cursor
-from parsers.dict import flatten_dict, nested_get, nested_set
+from ocebuild.parsers._lib import update_cursor
+from ocebuild.parsers.dict import flatten_dict, nested_get, nested_set
 
 
 PLIST_SCHEMA = {
@@ -25,6 +25,9 @@ PLIST_SCHEMA = {
     '</plist>'
   ]
 }
+"""Base Apple property list schemas.
+@see https://www.apple.com/DTDs/PropertyList-1.0.dtd
+"""
 
 def parse_serialized_types(stype: str,
                            value: str

@@ -5,7 +5,7 @@
 
 import pytest
 
-from pipeline.kexts import *
+from ocebuild.pipeline.kexts import *
 
 
 @pytest.fixture

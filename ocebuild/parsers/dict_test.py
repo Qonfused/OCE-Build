@@ -5,7 +5,7 @@
 
 import pytest
 
-from parsers.dict import *
+from ocebuild.parsers.dict import *
 
 
 def test_flatten_dict(): pass # Not implemented

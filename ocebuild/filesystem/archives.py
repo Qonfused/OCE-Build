@@ -12,9 +12,9 @@ from urllib.request import Request
 
 from typing import Generator, Union
 
-from parsers.regex import re_match
-from sources._lib import request
-from sources.resolver import PathResolver
+from ocebuild.parsers.regex import re_match
+from ocebuild.sources._lib import request
+from ocebuild.sources.resolver import PathResolver
 
 
 @contextmanager

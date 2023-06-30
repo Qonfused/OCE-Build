@@ -11,10 +11,10 @@ from os import PathLike
 
 from typing import Callable, Literal, Optional, Tuple, Union
 
-from errors._lib import disable_exception_traceback
-from errors.types import PathValidationError
-from parsers.dict import flatten_dict
-from sources.resolver import PathResolver
+from ocebuild.errors._lib import disable_exception_traceback
+from ocebuild.errors.types import PathValidationError
+from ocebuild.parsers.dict import flatten_dict
+from ocebuild.sources.resolver import PathResolver
 
 
 def validate(call: Callable[[], bool],

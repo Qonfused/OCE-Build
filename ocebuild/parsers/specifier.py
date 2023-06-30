@@ -5,12 +5,11 @@
 # SPDX-License-Identifier: BSD-3-Clause
 ##
 
-from pathlib import Path
-
 from typing import Dict, Optional, Union
 
-from parsers.regex import re_match, re_search
-from sources.resolver import GitHubResolver, DortaniaResolver, PathResolver
+from ocebuild.parsers.regex import re_match, re_search
+from ocebuild.sources.resolver import GitHubResolver, DortaniaResolver, PathResolver
+
 
 
 def parse_specifier(name: str,

@@ -8,11 +8,11 @@
 from contextlib import contextmanager
 from shutil import rmtree
 
-from typing import Generator
+from typing import Generator, Literal, Union
 
-from filesystem.archives import extract_archive
-from parsers.plist import parse_plist
-from sources.resolver import PathResolver
+from ocebuild.filesystem.archives import extract_archive
+from ocebuild.parsers.plist import parse_plist
+from ocebuild.sources.resolver import GitHubResolver, DortaniaResolver, PathResolver
 
 
 @contextmanager
@@ -60,10 +60,10 @@ def extract_kext_archive(url: str,
           version = plist['CFBundleVersion'][1]
           executable = plist['CFBundleExecutable'][1]
           libraries = { k:v[1] for k,v in plist['OSBundleLibraries'].items()
-                          # Ignore self-dependencies
-                      if (not k == identifier and
-                          # Ignore Apple-provided libraries
-                          not k.startswith('com.apple.')) }
+                            # Ignore self-dependencies
+                        if (not k == identifier and
+                            # Ignore Apple-provided libraries
+                            not k.startswith('com.apple.')) }
           # Cleanup
           del plist
         # Update kext dictionary

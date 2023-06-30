@@ -5,7 +5,7 @@
 
 import pytest
 
-from filesystem.archives import *
+from ocebuild.filesystem.archives import *
 
 
 def test_extract_archive(): pass # Not implemented

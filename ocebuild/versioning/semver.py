@@ -13,7 +13,10 @@ from typing import Dict, Generator, List, Tuple, Union
 
 
 SEMVER_SYMBOLS      = ('~', '^')
+"""Semantic versioning range symbols."""
+
 COMPARISON_SYMBOLS  = ('>', '<', '>=', '<=', '==', '!=')
+"""Version comparison symbols."""
 
 def get_version_str(string: str) -> Union[str, None]:
   """Gets the version string from a version specifier.

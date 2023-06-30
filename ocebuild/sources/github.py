@@ -6,17 +6,16 @@
 ##
 
 from datetime import datetime, timedelta
-from json import load as json_load
 from functools import partial
 from urllib.request import Request
 
 from typing import List, Optional, Union
 
-from errors._lib import disable_exception_traceback
-from errors.types import GitHubRateLimit
-from parsers.dict import nested_get
-from sources._lib import request
-from constants import ENV
+from ocebuild.errors._lib import disable_exception_traceback
+from ocebuild.errors.types import GitHubRateLimit
+from ocebuild.parsers.dict import nested_get
+from ocebuild.sources._lib import request
+from ocebuild.constants import ENV
 
 
 def github_api_request(endpoint: Optional[str]=None,

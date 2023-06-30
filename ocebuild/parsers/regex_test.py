@@ -5,5 +5,5 @@
 
 import pytest
 
-from parsers.regex import *
+from ocebuild.parsers.regex import *
 

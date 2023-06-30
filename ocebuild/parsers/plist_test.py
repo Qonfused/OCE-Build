@@ -7,7 +7,9 @@ import pytest
 
 from datetime import datetime, timezone
 
-from parsers.plist import *
+from ocebuild.parsers.plist import *
+from ocebuild.sources._lib import request
+from ocebuild.sources.github import github_file_url
 
 
 def test_parse_serialized_types():
@@ -53,9 +55,6 @@ def test_write_serialized_types():
     ['<false/>']
 
 def test_parse_plist():
-  from sources._lib import request
-  from sources.github import github_file_url
-
   url = github_file_url('acidanthera/OpenCorePkg',
                         path='Docs/Sample.plist',
                         branch='master',

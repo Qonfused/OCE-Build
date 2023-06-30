@@ -5,7 +5,7 @@
 
 import pytest
 
-from filesystem.posix import *
+from ocebuild.filesystem.posix import *
 
 
 def test_rename(): pass # Not implemented

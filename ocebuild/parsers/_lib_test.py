@@ -5,7 +5,7 @@
 
 import pytest
 
-from parsers._lib import *
+from ocebuild.parsers._lib import *
 
 
 def test_update_cursor(): pass # Not implemented

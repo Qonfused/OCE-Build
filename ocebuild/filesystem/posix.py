@@ -10,7 +10,7 @@ from shutil import move as shutil_move
 
 from typing import Generator, List, Optional, Union
 
-from sources.resolver import PathResolver
+from ocebuild.sources.resolver import PathResolver
 
 
 def rename(path: Union[str, "PathLike[str]"],

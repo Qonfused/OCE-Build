@@ -5,8 +5,8 @@
 
 import pytest
 
-from errors.validation import validate_path_tree
-from pipeline.opencore import *
+from ocebuild.errors.validation import validate_path_tree
+from ocebuild.pipeline.opencore import *
 
 
 def test_extract_opencore_archive():

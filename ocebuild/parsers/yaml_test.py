@@ -7,8 +7,8 @@ import pytest
 
 from datetime import datetime, timezone
 
-from parsers.dict import nested_get
-from parsers.yaml import *
+from ocebuild.parsers.dict import nested_get
+from ocebuild.parsers.yaml import *
 
 
 def test_parse_serialized_types(): pass # Not implemented

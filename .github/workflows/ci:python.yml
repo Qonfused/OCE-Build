@@ -72,14 +72,6 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: poetry
           cache-dependency-path: poetry.lock
-      - name: Setup Poetry environment
-        run: |
-          # Use the matrix version instead of the default python version (3.8).
-          poetry env use ${{ matrix.python-version }}
-      
-      - name: Install dependencies
-        run: |
-          poetry install -n --no-root --with test 
       # Verify installed python version in poetry virtualenv
       - name: Validate experimental python versions
         id: validate-experimental
@@ -87,16 +79,23 @@ jobs:
         continue-on-error: true
         run: |
           # Exists with exit code 1 if not within specified range
-          poetry run python3 .github/scripts/compare-version.py \
+          poetry run python3 scripts/lib/compare-version.py \
             --min "${{ matrix.python-min-version }}" \
             --max "${{ matrix.python-max-version }}"
+      # Setup Poetry virtual environment
+      - name: Use matrix python version in Poetry virtualenv
+        run: |
+          poetry env use ${{ matrix.python-version }}
+      - name: Install Poetry plugins and project dependencies
+        run: |
+          bash scripts/poetry.sh
       # Run test suites
       - name: Run test suite
         id: python-pytest
         if: steps.validate-experimental.outcome != 'failure'
         continue-on-error: ${{ matrix.experimental }}
         run: |
-          poetry run pytest -vvv
+          poetry test -vvv
         env:
           COVERAGE_FILE: ".coverage.${{ matrix.python-version }}"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

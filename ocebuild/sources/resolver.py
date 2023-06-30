@@ -9,9 +9,9 @@ from inspect import signature
 from pathlib import Path
 from typing import Any, Generator, Tuple, TypeVar
 
-from sources.dortania import *
-from sources.github import *
-from versioning.semver import resolve_version_specifier
+from ocebuild.sources.dortania import *
+from ocebuild.sources.github import *
+from ocebuild.versioning.semver import resolve_version_specifier
 
 
 class BaseResolver():
@@ -162,9 +162,26 @@ class PathResolver(BaseResolver, cls := type(Path())):
     # Return the class attribute (if it exists)
     except:
       return self_attr
+
+  def glob(self: TPathResolver, pattern: str) -> Generator[TPathResolver, any, None]:
+    """Iterates from a directory or from a file's parent directory."""
+    glob_iter = None
+    if self.resolve().is_file():
+      glob_iter = self.resolve().parent.glob(pattern)
+    else:
+      glob_iter = self.resolve().glob(pattern)
+    # Re-initialize PathResolver instances
+    return (PathResolver(p) for p in glob_iter)
+
+  def relative(self: TPathResolver, path: Union[str, TPathResolver]) -> str:
+    """Resolves a relative representation from a path."""
+    parent_dir = cls(path).resolve()
+    if self.resolve().is_file():
+      parent_dir = parent_dir.parent
+    return self.relative_to(parent_dir).as_posix().__str__()
   
   def resolve(self: TPathResolver, strict: bool = False) -> cls:
-    """Returns a filepath based on the class parameters."""
+    """Resolves a filepath based on the class parameters."""
     resolved_path: cls
     # Check if path has called the `__init__` method - Python 3.12+
     if '_raw_paths' in dir(self):

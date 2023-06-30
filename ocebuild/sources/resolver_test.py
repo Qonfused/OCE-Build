@@ -6,9 +6,8 @@
 import pytest
 
 from pathlib import Path
-from typing import TypeVar
 
-from sources.resolver import *
+from ocebuild.sources.resolver import *
 
 
 def test_GitHubResolver():

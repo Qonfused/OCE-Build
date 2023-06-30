@@ -21,5 +21,24 @@ While this project is primarily intended to be used for unsupported Macs using [
     - [x] Support for building DSL source into compiled AML
     - [ ] Compile options with external refs and patches
 
+## Development
+
+#### Installing Poetry
+
+Windows users:
+```powershell
+(Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | py -
+```
+
+macOS, Linux (including WSL2):
+```shell
+curl -sSL https://install.python-poetry.org | python3 -
+```
+
+Setup the poetry environment and dependencies:
+```shell
+bash scripts/poetry.sh
+```
+
 ## License
 [BSD 3-Clause License](https://github.com/Qonfused/OCE-Build/blob/main/LICENSE).

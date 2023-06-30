@@ -3,4 +3,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 ##
 
-"""This empty file is needed to be recognized as a package by the setuptools."""
+from ocebuild.parsers.dict import *
+from ocebuild.parsers.plist import *
+from ocebuild.parsers.regex import *
+from ocebuild.parsers.specifier import *
+from ocebuild.parsers.yaml import *

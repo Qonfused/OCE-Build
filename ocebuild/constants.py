@@ -36,3 +36,4 @@ class __EnvironWrapper:
     return os_environ.get('GITHUB_TOKEN')
 
 ENV = __EnvironWrapper()
+"""Initialized wrapper to securely handle environmental variables."""

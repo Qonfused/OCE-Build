@@ -11,10 +11,10 @@ from tempfile import mkdtemp
 
 from typing import Generator, Literal
 
-from filesystem.archives import extract_archive
-from filesystem.posix import move, glob
-from sources.github import github_archive_url
-from sources.resolver import PathResolver
+from ocebuild.filesystem.archives import extract_archive
+from ocebuild.filesystem.posix import move, glob
+from ocebuild.sources.github import github_archive_url
+from ocebuild.sources.resolver import PathResolver
 
 
 OPENCORE_BINARY_DATA_URL = github_archive_url('acidanthera/OcBinaryData',
