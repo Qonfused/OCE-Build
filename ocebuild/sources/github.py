@@ -117,6 +117,20 @@ def github_tag_names(repository: str) -> List[str]:
   except:
     if not github_rate_limit(raise_error=True): raise
 
+def github_release_catalog(url: str) -> dict:
+  """Gets the catalog entry for a given release.
+
+  Args:
+    url: GitHub release catalog URL.
+
+  Returns:
+    Release catalog.
+  """
+  try:
+    return github_api_request(url.replace('https://github.com', '/repos')).json()
+  except:
+    if not github_rate_limit(raise_error=True): raise
+
 ################################################################################
 #                        URL formatting/retrieval functions                    #
 ################################################################################
