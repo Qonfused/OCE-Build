@@ -224,6 +224,8 @@ def sort_dependencies(dependencies: Dict[str, Tuple[str, str]],
     yield get_minimum_version(dependencies, library)
 
 __all__ = [
+  "SEMVER_SYMBOLS",
+  "COMPARISON_SYMBOLS",
   "get_version_str",
   "get_version",
   "compare_version",

@@ -267,6 +267,7 @@ def write_plist(config: dict,
   return lines
 
 __all__ = [
+  "PLIST_SCHEMA",
   "parse_serialized_types",
   "write_serialized_types",
   "parse_plist",

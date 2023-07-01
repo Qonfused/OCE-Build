@@ -7,7 +7,7 @@
 """Regenerates implicit namespace and package-level module exports.."""
 
 from importlib import import_module
-from inspect import getdoc
+from inspect import getdoc, signature
 
 from typing import List
 
@@ -48,14 +48,18 @@ def recurse_modules(entrypoint: str) -> List[str]:
 def get_public_exports(module_path: str) -> List[str]:
   """Returns a list of public API exports from a module."""
   module = import_module(module_path)
+  # print(module.__loader__.__dict__)
+  # return None
   exports: List[str] = []
   for s in module.__dir__():
     # Skip explicitly marked internals
     if s.startswith('_'): continue
     # Remove external module imports
     export = module.__getattribute__(s)
+    if hasattr(export, '__loader__'): continue
     try: assert export.__module__ == module_path
-    except: continue
+    except AssertionError: continue
+    except AttributeError: pass
     # Skip exports marked as internal
     if (docstring := getdoc(export)):
       internal_annotations = ('@internal', '@private')

@@ -8,7 +8,7 @@
 ################################################################################
 
 [tool.poe.tasks.bump-version]
-script  = "ci.bump-version:_main"
+script  = "ci.bump_version:_main"
 help    = "[CI] Bumps the project version using the given semver string."
 
   [[tool.poe.tasks.bump-version.args]]
@@ -44,7 +44,7 @@ help    = "[CI] Bumps the project version using the given semver string."
 ################################################################################
 
 [tool.poe.tasks.compare-version]
-script  = "ci.compare-version:_main"
+script  = "ci.compare_version:_main"
 help    = "[CI] Compares a python version against a set of min/max constraints."
 
   [[tool.poe.tasks.compare-version.args]]
@@ -68,5 +68,5 @@ help    = "[CI] Compares a python version against a set of min/max constraints."
 ################################################################################
 
 [tool.poe.tasks.resolve-modules]
-script  = "ci.resolve-modules:_main"
+script  = "ci.resolve_modules:_main"
 help    = "[CI] Regenerates implicit namespace and package-level module exports."

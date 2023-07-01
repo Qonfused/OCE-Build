@@ -7,6 +7,7 @@ import pytest
 
 from datetime import datetime, timezone
 
+from ocebuild.parsers.dict import nested_get
 from ocebuild.parsers.plist import *
 from ocebuild.sources._lib import request
 from ocebuild.sources.github import github_file_url
