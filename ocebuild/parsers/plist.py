@@ -28,7 +28,7 @@ PLIST_SCHEMA = {
 @see https://www.apple.com/DTDs/PropertyList-1.0.dtd
 """
 
-def parse_serialized_types(stype: str,
+def parse_plist_types(stype: str,
                            value: str
                            ) -> Union[Tuple[str, any],  None]:
   """Parse property list types to Python types.
@@ -54,7 +54,7 @@ def parse_serialized_types(stype: str,
   except: pass # De-op
   return entry
 
-def write_serialized_types(value: Union[Tuple[str, any], any],
+def write_plist_types(value: Union[Tuple[str, any], any],
                            defaults: Union[Tuple[str, any], any]=('dict', None)
                            ) -> List[str]:
   """Parse Python types to property list entries.
@@ -159,7 +159,7 @@ def parse_plist(lines: Union[List[str], TextIOWrapper],
       
       # Parse property list types to Python types
       # @see https://www.apple.com/DTDs/PropertyList-1.0.dtd
-      entry = parse_serialized_types(stype, value)
+      entry = parse_plist_types(stype, value)
       if entry is None: continue
 
       # Handle object and array traversal
@@ -252,7 +252,7 @@ def write_plist(config: dict,
             if lines[head].startswith(f'{padding[:-2]}</'): break
         # Append new entry
         defaults = ('dict' if not re_match else 'array', '' if is_root_key else None)
-        lns = [f'{padding}{v}' for v in write_serialized_types(value, defaults)]
+        lns = [f'{padding}{v}' for v in write_plist_types(value, defaults)]
         # Create a new key
         lines[head:head] = (entry := [key_ln, *lns])
         head += len(entry) - 1
@@ -268,8 +268,8 @@ def write_plist(config: dict,
 
 __all__ = [
   "PLIST_SCHEMA",
-  "parse_serialized_types",
-  "write_serialized_types",
+  "parse_plist_types",
+  "write_plist_types",
   "parse_plist",
   "write_plist"
 ]

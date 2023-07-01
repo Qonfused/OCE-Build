@@ -12,7 +12,7 @@ from ocebuild.parsers._lib import update_cursor
 from ocebuild.parsers.dict import flatten_dict, nested_get, nested_set
 
 
-def parse_serialized_types(stype: str,
+def parse_yaml_types(stype: str,
                            value: str
                            ) -> Union[Tuple[str, any], None]:
   """Parse YAML types to Python types.
@@ -26,7 +26,7 @@ def parse_serialized_types(stype: str,
   """
   raise NotImplementedError() #TODO
 
-def write_serialized_types(value: Union[Tuple[str, any], any],
+def write_yaml_types(value: Union[Tuple[str, any], any],
                            schema: Literal['annotated', 'yaml']='yaml'
                            ) -> Tuple[str, any]:
   """Parse Python types to YAML types.
@@ -286,7 +286,7 @@ def write_yaml(config: dict,
         if isinstance(tree[j-1], int) and tree[:j] != cursor['keys'][:j]:
           padding = f'{padding[:-2]}- '
         # Append value to entry
-        stype, svalue = write_serialized_types(value, schema)
+        stype, svalue = write_yaml_types(value, schema)
         if schema == 'annotated':
           indent = max_tree_len - (cursor['indent']*j + len(f"{key}:"))
           entry = f'{padding}{key}:{" ".rjust(indent + 1)}{stype} | {svalue}'
@@ -302,8 +302,8 @@ def write_yaml(config: dict,
   return lines
 
 __all__ = [
-  "parse_serialized_types",
-  "write_serialized_types",
+  "parse_yaml_types",
+  "write_yaml_types",
   "parse_yaml",
   "write_yaml"
 ]

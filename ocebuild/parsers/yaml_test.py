@@ -11,35 +11,35 @@ from ocebuild.parsers.dict import nested_get
 from ocebuild.parsers.yaml import *
 
 
-def test_parse_serialized_types(): pass # Not implemented
+def test_parse_yaml_types(): pass # Not implemented
 
-def test_write_serialized_types():
+def test_write_yaml_types():
   # Handle annotated schema
-  assert write_serialized_types([],
+  assert write_yaml_types([],
                                 schema='annotated') == \
     ('Array  ', '(empty)')
-  assert write_serialized_types(('data', '01'),
+  assert write_yaml_types(('data', '01'),
                                 schema='annotated') == \
     ('Data   ', '<01>')
-  assert write_serialized_types(('date', datetime(2020, 1, 1, 0, 0, tzinfo=timezone.utc)),
+  assert write_yaml_types(('date', datetime(2020, 1, 1, 0, 0, tzinfo=timezone.utc)),
                                 schema='annotated') == \
     ('Date   ', "2020-01-01T00:00:00Z")
-  assert write_serialized_types({},
+  assert write_yaml_types({},
                                 schema='annotated') == \
     ('Dict   ', '(empty)')
-  assert write_serialized_types(('float', 1.0),
+  assert write_yaml_types(('float', 1.0),
                                 schema='annotated') == \
     ('Number ', '1.0')
-  assert write_serialized_types(('int', 1),
+  assert write_yaml_types(('int', 1),
                                 schema='annotated') == \
     ('Number ', '1')
-  assert write_serialized_types(('string', 'Foo'),
+  assert write_yaml_types(('string', 'Foo'),
                                 schema='annotated') == \
     ('String ', '"Foo"')
-  assert write_serialized_types(('bool', True),
+  assert write_yaml_types(('bool', True),
                                 schema='annotated') == \
     ('Boolean', 'true')
-  assert write_serialized_types(('bool', False),
+  assert write_yaml_types(('bool', False),
                                 schema='annotated') == \
     ('Boolean', 'false')
 
