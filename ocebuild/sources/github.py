@@ -10,8 +10,7 @@ from urllib.request import Request
 
 from typing import List, Optional, Union
 
-from ocebuild.errors._lib import disable_exception_traceback
-from ocebuild.errors.types import GitHubRateLimit
+from ocebuild.errors import disable_exception_traceback, GitHubRateLimit
 from ocebuild.parsers.dict import nested_get
 from ocebuild.sources._lib import request
 from ocebuild.constants import ENV
@@ -70,7 +69,7 @@ def github_rate_limit(kind: str='core', raise_error: float=False) -> int:
       raise GitHubRateLimit(msg, rate_limit)
 
 ################################################################################
-#                     Parameter formatting/retrival functions                  #
+#                     Parameter formatting/retrieval functions                 #
 ################################################################################
 
 def github_suite_id(repository: str,
@@ -274,6 +273,7 @@ def github_artifacts_url(repository: str,
   except:
     if not github_rate_limit(raise_error=True): raise
   return None
+
 
 __all__ = [
   "github_api_request",

@@ -34,6 +34,7 @@ def re_search(pattern, string,
     return match.group(group)
   return None
 
+
 __all__ = [
   "re_match",
   "re_search"

@@ -266,6 +266,7 @@ def write_plist(config: dict,
 
   return lines
 
+
 __all__ = [
   "PLIST_SCHEMA",
   "parse_plist_types",

@@ -54,4 +54,5 @@ if __name__ == "__main__":
                  max_version=args.max_version)
   exit(int(not result))
 
+
 __all__ = []

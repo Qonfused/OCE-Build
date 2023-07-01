@@ -110,7 +110,6 @@ def _main(**kwargs) -> None:
 
   print(f"Bumped version from '{__version__}' to '{version_str}'")
 
-
 if __name__ == "__main__":
   parser = ArgumentParser()
   parser.add_argument('--major',
@@ -134,6 +133,7 @@ if __name__ == "__main__":
         patch=args.patch,
         pre_release=args.pre_release,
         build=args.build)
+
 
 __all__ = [
   "version",

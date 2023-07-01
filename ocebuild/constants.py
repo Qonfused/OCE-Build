@@ -39,6 +39,7 @@ class __EnvironWrapper:
 ENV = __EnvironWrapper()
 """Initialized wrapper to securely handle environmental variables."""
 
+
 __all__ = [
   "ENV"
 ]

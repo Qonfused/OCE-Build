@@ -24,3 +24,9 @@ class PathValidationError(Exception):
     self.name = name
     self.path = path
     self.kind = kind
+
+
+__all__ = [
+  "GitHubRateLimit",
+  "PathValidationError"
+]

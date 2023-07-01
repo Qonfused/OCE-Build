@@ -58,6 +58,7 @@ def move(src: Union[str, "PathLike[str]"],
 
 def glob(directory: Union[str, "PathLike[str]"],
          pattern: str,
+         include: Optional[Union[str, List[str]]]=None,
          exclude: Optional[Union[str, List[str]]]=None,
          first: Optional[bool] = False
          ) -> Union[Generator[PathResolver, None, None], PathResolver]:
@@ -66,6 +67,7 @@ def glob(directory: Union[str, "PathLike[str]"],
   Args:
     directory: Directory to search.
     pattern: Glob pattern.
+    include: A glob pattern or list of glob patterns to include.
     exclude: A glob pattern or list of glob patterns to exclude.
     first (Optional): Whether to return only the first match.
 
@@ -74,6 +76,12 @@ def glob(directory: Union[str, "PathLike[str]"],
     Instead returns the first matching path if `first` is `True`.
   """
   matches = list(PathResolver(directory).glob(pattern))
+  if include is not None:
+    if isinstance(include, str): include = [include]
+    include_matches = set()
+    for s in include:
+      include_matches |= set(PathResolver(directory).glob(s))
+    matches = list((*set(matches), *include_matches))
   if exclude is not None:
     if isinstance(exclude, str): exclude = [exclude]
     exclude_matches = set()
@@ -81,6 +89,7 @@ def glob(directory: Union[str, "PathLike[str]"],
       exclude_matches |= set(PathResolver(directory).glob(s))
     matches = list(set(matches) - exclude_matches)
   return matches[0] if first and len(matches) else matches
+
 
 __all__ = [
   "rename",

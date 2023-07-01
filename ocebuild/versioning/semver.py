@@ -223,6 +223,7 @@ def sort_dependencies(dependencies: Dict[str, Tuple[str, str]],
   for library in TopologicalSorter(dependency_tree).static_order():
     yield get_minimum_version(dependencies, library)
 
+
 __all__ = [
   "SEMVER_SYMBOLS",
   "COMPARISON_SYMBOLS",

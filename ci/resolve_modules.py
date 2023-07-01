@@ -64,6 +64,7 @@ def recurse_modules(entrypoint: Union[str, PathResolver]) -> List[str]:
   patterns = map(lambda f: PathResolver(f).relative(entrypoint),
                  glob(entrypoint,
                       pattern='[!_]*.py',
+                      include='_lib.py',
                       exclude='*_test.py'))
 
   modules = sorted(map(lambda m: m[:-len('.py')], patterns))
@@ -190,7 +191,7 @@ def generate_api_exports(filepath: Union[str, PathResolver],
     if public_exports:
       file_text = file_text.replace(public_exports, replacement_text)
     else:
-      file_text += f'\n{replacement_text}\n'
+      file_text += f'\n\n{replacement_text}\n'
     # Write to file
     PathResolver(filepath).write_text(file_text, encoding='UTF-8')
 
@@ -214,18 +215,22 @@ def _main(entrypoint: Optional[str]=None
 
     # Enumerate each module in the package
     for tree in recurse_modules(package.parent):
-      # Add implicit package imports
-      module_path = f'{ptree}{".".join(tree.split("/"))}'
-      package_lines.append(f'from {module_path} import *')
-      # Add explicit public API exports
       filepath = f'{package.parents[1].joinpath(tree)}.py'
-      generate_api_exports(filepath, module_path)
+      module_path = f'{ptree}{".".join(tree.split("/"))}'
+      with open(filepath, 'r', encoding='UTF-8') as module_file:
+        f_pragma_line =  module_file.readline()
+        if not f_pragma_line.startswith('#pragma'): f_pragma_line = ''
+        # Add implicit package imports
+        if not 'no-implicit' in f_pragma_line:
+          package_lines.append(f'from {module_path} import *')
+        # Add explicit public API exports
+        if not 'preserve-exports' in f_pragma_line:
+          generate_api_exports(filepath, module_path)
 
     # Update package file
     if not 'no-implicit' in pragma_line:
       package_text = '\n'.join(package_lines)
       PathResolver(package).write_text(package_text, encoding='UTF-8')
-
 
 if __name__ == '__main__':
   parser = ArgumentParser()
@@ -235,6 +240,7 @@ if __name__ == '__main__':
   args = parser.parse_args()
 
   _main(entrypoint=args.entrypoint)
+
 
 __all__ = [
   "PRAGMA_FLAGS",

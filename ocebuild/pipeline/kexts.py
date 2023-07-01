@@ -13,7 +13,7 @@ from ocebuild.filesystem.archives import extract_archive
 from ocebuild.parsers.dict import nested_get
 from ocebuild.parsers.plist import parse_plist
 from ocebuild.sources.github import github_release_catalog
-from ocebuild.sources.resolver import GitHubResolver, DortaniaResolver, PathResolver
+from ocebuild.sources.resolver import *
 
 
 @contextmanager
@@ -111,6 +111,7 @@ def extract_kext_release(resolver: Union[GitHubResolver, DortaniaResolver],
   #
   elif arr := list(filter(lambda a: has_name(a) and not has_build(a), assets)):
     pass
+
 
 __all__ = [
   "extract_kext_archive",

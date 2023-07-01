@@ -1,3 +1,5 @@
+#pragma no-implicit
+
 ## @file
 # Copyright (c) 2023, Cory Bennett. All rights reserved.
 # SPDX-License-Identifier: BSD-3-Clause
@@ -81,3 +83,9 @@ def validate_path_tree(path: Union[str, "PathLike[str]"],
       raise ValueError(f"Invalid flag '{flag}' given for path '{name}' (at {path})")
 
   return True
+
+
+__all__ = [
+  "validate",
+  "validate_path_tree"
+]

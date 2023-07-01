@@ -301,6 +301,7 @@ def write_yaml(config: dict,
       
   return lines
 
+
 __all__ = [
   "parse_yaml_types",
   "write_yaml_types",

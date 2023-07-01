@@ -87,6 +87,7 @@ def dortania_release_url(plugin: str,
   return github_release_url(repository='dortania/build-repo',
                             tag=f'{plugin}{commit[:7]}')
 
+
 __all__ = [
   "is_latest_build",
   "has_build",

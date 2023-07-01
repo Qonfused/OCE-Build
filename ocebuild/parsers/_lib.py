@@ -32,3 +32,8 @@ def update_cursor(level: int,
   # Update cursor
   cursor['level'] = level
   cursor['indent'] = max(bias, level / max(1,(len(cursor['keys']) - upshift)))
+
+
+__all__ = [
+  "update_cursor"
+]

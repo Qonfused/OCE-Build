@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 ##
 
+from ocebuild.parsers._lib import *
 from ocebuild.parsers.dict import *
 from ocebuild.parsers.plist import *
 from ocebuild.parsers.regex import *

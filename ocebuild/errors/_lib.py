@@ -15,3 +15,8 @@ def disable_exception_traceback(tracebacklimit: int=0):
   sys.tracebacklimit = tracebacklimit
   yield
   sys.tracebacklimit = default_value
+
+
+__all__ = [
+  "disable_exception_traceback"
+]

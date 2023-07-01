@@ -14,7 +14,11 @@ from ocebuild.versioning.semver import resolve_version_specifier
 
 
 class BaseResolver():
-  """Base resolver class implementing overrides."""
+  """Base resolver class implementing overrides.
+
+  This class is used to store custom specifier methods and metadata.
+  @internal
+  """
   TBaseResolver = TypeVar("TBaseResolver", bound="BaseResolver")
 
   def __init__(self: TBaseResolver,
@@ -195,8 +199,8 @@ class PathResolver(BaseResolver, cls := type(Path())):
     #TODO: Handle additional path type verifications here
     return resolved_path
 
+
 __all__ = [
-  "BaseResolver",
   "GitHubResolver",
   "DortaniaResolver",
   "PathResolver"

@@ -56,6 +56,7 @@ def extract_archive(url: Union[str, Request],
     # Cleanup after context exits
     if not persist: rmtree(tmp_dir)
 
+
 __all__ = [
   "extract_archive"
 ]

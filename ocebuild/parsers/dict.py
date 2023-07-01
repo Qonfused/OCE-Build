@@ -87,6 +87,7 @@ def nested_del(dic: dict,
   for key in keys[:-1]: dic = dic[key]
   del dic[keys[-1]]
 
+
 __all__ = [
   "flatten_dict",
   "nested_get",

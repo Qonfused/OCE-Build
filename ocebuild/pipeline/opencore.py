@@ -62,6 +62,7 @@ def extract_opencore_archive(url: str,
     # Cleanup after context exits
     if not persist: rmtree(tmp_dir)
 
+
 __all__ = [
   "OPENCORE_BINARY_DATA_URL",
   "extract_opencore_archive"

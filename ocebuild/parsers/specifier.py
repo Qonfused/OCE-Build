@@ -65,6 +65,7 @@ def parse_specifier(name: str,
   parameters = parse_semver_params(entry, specifier, parameters)
   return DortaniaResolver(**parameters, **resolver_props)
 
+
 __all__ = [
   "parse_semver_params",
   "parse_specifier"
