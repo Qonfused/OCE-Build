@@ -12,3 +12,8 @@ PROJECT_ROOT = PathResolver(__file__).parents[1]
 
 PROJECT_ENTRYPOINT = PathResolver(__file__).parent
 """The project's import entrypoint."""
+
+__all__ = [
+  "PROJECT_ROOT",
+  "PROJECT_ENTRYPOINT"
+]

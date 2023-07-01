@@ -7,6 +7,9 @@
 """Regenerates implicit namespace and package-level module exports.."""
 
 from argparse import ArgumentParser
+from ast import parse
+from ast import Import, ImportFrom
+from ast import Assign, FunctionDef, AsyncFunctionDef, ClassDef
 from importlib import import_module
 from inspect import getdoc
 
@@ -15,7 +18,6 @@ from typing import List, Optional, Union
 from ocebuild.filesystem.posix import glob
 from ocebuild.parsers.regex import re_search
 from ocebuild.sources.resolver import PathResolver
-from ocebuild import __file__
 
 from ci import PROJECT_ROOT, PROJECT_ENTRYPOINT
 
@@ -27,6 +29,20 @@ PRAGMA_FLAGS = [
   'preserve-exports'
 ]
 """Flags to control module export generation."""
+
+AST_TYPES_IMPORTS = [
+  Import,
+  ImportFrom
+]
+"""Types of AST nodes that represent imports."""
+
+AST_TYPES_STMTS = [
+  Assign,
+  FunctionDef,
+  AsyncFunctionDef,
+  ClassDef
+]
+"""Types of AST nodes that represent statements."""
 
 def _get_parent_tree(package: Union[str, PathResolver]) -> str:
   """Returns the parent tree of a package."""
@@ -53,11 +69,26 @@ def recurse_modules(entrypoint: Union[str, PathResolver]) -> List[str]:
   modules = sorted(map(lambda m: m[:-len('.py')], patterns))
   return modules
 
-def get_public_exports(module_path: str) -> List[str]:
+def get_local_statements(filepath: Union[str, PathResolver]) -> List[str]:
+  """Returns a list of local statements from a file."""
+  is_import = lambda n: any([ isinstance(n, t) for t in AST_TYPES_IMPORTS ])
+  is_def = lambda n: any([ isinstance(n, t) for t in AST_TYPES_STMTS ])
+
+  names: List[str]=[]
+  body = parse(open(filepath, 'r').read()).body
+  local_stmts = [n for n in body if is_def(n) and not is_import(n)]
+  for s in local_stmts:
+    if isinstance(s, Assign): names += list(map(lambda n: n.id, s.targets))
+    else: names.append(s.name)
+
+  return names
+
+def get_public_exports(filepath: Union[str, PathResolver],
+                       module_path: str
+                       ) -> List[str]:
   """Returns a list of public API exports from a module."""
   module = import_module(module_path)
-  # print(module.__loader__.__dict__)
-  # return None
+  statements = get_local_statements(filepath)
   exports: List[str] = []
   for s in module.__dir__():
     # Skip explicitly marked internals
@@ -66,7 +97,8 @@ def get_public_exports(module_path: str) -> List[str]:
     export = module.__getattribute__(s)
     if hasattr(export, '__loader__'): continue
     try: assert export.__module__ == module_path
-    except AssertionError: continue
+    except AssertionError:
+      if s not in statements: continue
     except AttributeError: pass
     # Skip exports marked as internal
     if (docstring := getdoc(export)):
@@ -116,7 +148,7 @@ def generate_api_exports(filepath: Union[str, PathResolver],
                          module_path: str
                          ) -> None:
   """Generates a module's API exports."""
-  module_exports = get_public_exports(module_path)
+  module_exports = get_public_exports(filepath, module_path)
   with open(filepath, 'r', encoding='UTF-8') as module_file:
     file_text = module_file.read()
     # Handle preprocessor flags
@@ -157,9 +189,7 @@ def _main(entrypoint: Optional[str]=None
     # Filter package file SPDX headers
     package_lines = get_file_header(package)
     if not len(package_lines): continue
-    # Handle preprocessor flags
-    elif (pragma_line := package_lines[0]).startswith('#pragma'):
-      if 'no-implicit' in pragma_line: package_lines = []; break
+    pragma_line = package_lines[0] if '#pragma' in package_lines[0] else ''
 
     # Enumerate each module in the package
     for tree in recurse_modules(package.parent):
@@ -171,8 +201,9 @@ def _main(entrypoint: Optional[str]=None
       generate_api_exports(filepath, module_path)
 
     # Update package file
-    package_text = '\n'.join(package_lines)
-    PathResolver(package).write_text(package_text, encoding='UTF-8')
+    if not 'no-implicit' in pragma_line:
+      package_text = '\n'.join(package_lines)
+      PathResolver(package).write_text(package_text, encoding='UTF-8')
 
 
 if __name__ == '__main__':
@@ -183,3 +214,15 @@ if __name__ == '__main__':
   args = parser.parse_args()
 
   _main(entrypoint=args.entrypoint)
+
+__all__ = [
+  "PRAGMA_FLAGS",
+  "AST_TYPES_IMPORTS",
+  "AST_TYPES_STMTS",
+  "recurse_packages",
+  "recurse_modules",
+  "get_local_statements",
+  "get_public_exports",
+  "get_file_header",
+  "generate_api_exports"
+]

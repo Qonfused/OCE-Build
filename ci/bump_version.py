@@ -134,3 +134,9 @@ if __name__ == "__main__":
         patch=args.patch,
         pre_release=args.pre_release,
         build=args.build)
+
+__all__ = [
+  "version",
+  "bump_version",
+  "format_version"
+]
