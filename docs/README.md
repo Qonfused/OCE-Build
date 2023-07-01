@@ -25,19 +25,14 @@ While this project is primarily intended to be used for unsupported Macs using [
 
 #### Installing Poetry
 
-Windows users:
-```powershell
-(Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | py -
+Install the poetry package manager:
+```shell
+bash scripts/install-poetry.sh
 ```
 
-macOS, Linux (including WSL2):
+Setup the poetry environment and project dependencies:
 ```shell
-curl -sSL https://install.python-poetry.org | python3 -
-```
-
-Setup the poetry environment and dependencies:
-```shell
-bash scripts/poetry.sh
+bash scripts/setup-poetry.sh
 ```
 
 ## License

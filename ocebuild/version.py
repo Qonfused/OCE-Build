@@ -13,4 +13,4 @@ _BUILD         = 0
 
 # Export the OCE Build version string.
 __version__    = '0.0.0-dev'
-__all__ = ["__version__"] #pragma preserve-exports
+__all__        = ["__version__"] #pragma preserve-exports

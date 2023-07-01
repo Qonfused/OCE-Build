@@ -62,10 +62,8 @@ jobs:
       # Setup python virtual environment
       - name: Install poetry
         run: |
-          curl -O -sSL https://install.python-poetry.org/install-poetry.py
-          python install-poetry.py -y --version 1.5.0
+          bash scripts/install-poetry.sh
           echo "PATH=${HOME}/.poetry/bin:${PATH}" >> $GITHUB_ENV
-          rm install-poetry.py
       - name: Setup Python ${{ matrix.python-version }}
         uses: actions/setup-python@v3
         with:
@@ -86,9 +84,9 @@ jobs:
       - name: Use matrix python version in Poetry virtualenv
         run: |
           poetry env use ${{ matrix.python-version }}
-      - name: Install Poetry plugins and project dependencies
+      - name: Setup Poetry plugins and project dependencies
         run: |
-          bash scripts/poetry.sh
+          bash scripts/setup-poetry.sh
       # Run test suites
       - name: Run test suite
         id: python-pytest
