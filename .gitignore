@@ -1,14 +1,22 @@
 .*
 .env
 !/.github
-.github/tmp
 !/.vscode
 !/.gitattributes
 !/.gitignore
 
-# Python artifacts
-**/__pycache__
-**/__test__.py
-
 # Build artifacts
-dist
+dist/
+
+# Debug files
+*.dSYM/
+*.su
+*.idb
+*.pdb
+
+# Python artifacts
+__pycache__/
+*.pyc
+
+# Sphinx documentation
+docs/_build/
