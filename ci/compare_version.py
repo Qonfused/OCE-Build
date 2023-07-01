@@ -14,21 +14,18 @@ from packaging import version as pkgv
 from typing import Optional
 
 
-def _main(python_version: Optional[str]=None,
-          min_version: Optional[str]=None,
-          max_version: Optional[str]=None
-          ):
+def _main(**kwargs) -> bool:
   # Get the current python version from virtenv
-  version = python_version
+  version = kwargs.python_version
   if not version: version = platform_version()
   print(  f'python version: {version}')
 
   # Compare against min/max version (if provided)
   result: bool=True
-  if (min_version):
+  if (min_version := kwargs.min_version):
     print(f'min version:    {min_version}')
     result = pkgv.parse(min_version) <= pkgv.parse(version)
-  if (max_version):
+  if (max_version := kwargs.max_version):
     print(f'max version:    {max_version}')
     result = pkgv.parse(max_version) >= pkgv.parse(version)
   
@@ -50,6 +47,6 @@ if __name__ == "__main__":
   args = parser.parse_args()
 
   result = _main(python_version=args.python_version,
-                min_version=args.min_version,
-                max_version=args.max_version)
+                 min_version=args.min_version,
+                 max_version=args.max_version)
   exit(int(not result))

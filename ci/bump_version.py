@@ -68,7 +68,7 @@ def format_version(version: SimpleNamespace) -> str:
   return base_semver
 
 
-def _main(**kwargs):
+def _main(**kwargs) -> None:
   # Bump the project version
   version_str = bump_version(**kwargs)
 
@@ -130,7 +130,7 @@ if __name__ == "__main__":
   args = parser.parse_args()
 
   _main(major=args.major,
-       minor=args.minor,
-       patch=args.patch,
-       pre_release=args.pre_release,
-       build=args.build)
+        minor=args.minor,
+        patch=args.patch,
+        pre_release=args.pre_release,
+        build=args.build)

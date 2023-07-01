@@ -70,3 +70,9 @@ help    = "[CI] Compares a python version against a set of min/max constraints."
 [tool.poe.tasks.resolve-modules]
 script  = "ci.resolve_modules:_main"
 help    = "[CI] Regenerates implicit namespace and package-level module exports."
+
+[[tool.poe.tasks.resolve-modules.args]]
+  name = "entrypoint"
+  options = ["--entrypoint", "--package-entrypoint"]
+  type = "string"
+  help = "The entrypoint to resolve modules for. (Default: ocebuild entrypoint)"

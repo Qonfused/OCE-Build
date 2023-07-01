@@ -6,10 +6,11 @@
 ##
 """Regenerates implicit namespace and package-level module exports.."""
 
+from argparse import ArgumentParser
 from importlib import import_module
-from inspect import getdoc, signature
+from inspect import getdoc
 
-from typing import List
+from typing import List, Optional, Union
 
 from ocebuild.filesystem.posix import glob
 from ocebuild.parsers.regex import re_search
@@ -22,12 +23,19 @@ from ci import PROJECT_ROOT, PROJECT_ENTRYPOINT
 PRAGMA_FLAGS = [
   # Skips creating implicit module exports (`from module.submodule import *``)
   'no-implicit',
-  # Skips creatiing explicit public API exports (`__all__ = ["foo", "bar"]`)
+  # Skips creating explicit public API exports (`__all__ = ["foo", "bar"]`)
   'preserve-exports'
 ]
 """Flags to control module export generation."""
 
-def recurse_packages(entrypoint: str) -> List[str]:
+def _get_parent_tree(package: Union[str, PathResolver]) -> str:
+  """Returns the parent tree of a package."""
+  ptree = PathResolver(package).relative_to(PROJECT_ROOT).parents[1].__str__()
+  if ptree == '.': ptree = ''
+  else: ptree += '.'
+  return ptree
+
+def recurse_packages(entrypoint: Union[str, PathResolver]) -> List[str]:
   """Returns a list of all project packages recursively."""
   patterns = map(lambda f: PathResolver(f).resolve(),
                  glob(entrypoint, pattern='**/__init__.py'))
@@ -35,7 +43,7 @@ def recurse_packages(entrypoint: str) -> List[str]:
   packages = sorted(patterns)
   return packages
 
-def recurse_modules(entrypoint: str) -> List[str]:
+def recurse_modules(entrypoint: Union[str, PathResolver]) -> List[str]:
   """Returns a list of all project modules recursively."""
   patterns = map(lambda f: PathResolver(f).relative(entrypoint),
                  glob(entrypoint,
@@ -68,66 +76,110 @@ def get_public_exports(module_path: str) -> List[str]:
     exports.append(s)
   return exports
 
+def get_file_header(filepath: Union[str, PathResolver]):
+  """Retrieves the file header from a file."""
+  lines: List[str] = []
+  with open(filepath, 'r', encoding='UTF-8') as init_file:
+    has_pragma_line = False
+    is_spdx_header = False
+    is_docstring = False
+    for raw_line in init_file.readlines():
+      line = raw_line.strip('\n')
+      # Mark and preserve SPDX headers
+      if not is_spdx_header and line.startswith('## @file'):
+        is_spdx_header = True
+      elif is_spdx_header and line.startswith('#'): pass
+      # Handle additional inclusions
+      else:
+        is_spdx_header = False
+        # Preserve module docstrings
+        if not is_docstring and line.startswith('"""'):
+          # Only mark multi-line docstrings
+          if not line.endswith('""""') or line.rstrip() == '"""':
+            is_docstring = True
+        elif is_docstring and line.endswith('"""'):
+          is_docstring = False
+        # Preserve preprocessor flags
+        elif not has_pragma_line and line.startswith('#pragma'):
+          has_pragma_line = True
+        # Preserve header linebreaks
+        elif not len(line): pass
+        # Skip all other lines
+        elif not all([is_spdx_header, is_docstring]):
+          break
+        else:
+          continue
+      lines.append(line)
+  return lines
 
-def _main():
+def generate_api_exports(filepath: Union[str, PathResolver],
+                         module_path: str
+                         ) -> None:
+  """Generates a module's API exports."""
+  module_exports = get_public_exports(module_path)
+  with open(filepath, 'r', encoding='UTF-8') as module_file:
+    file_text = module_file.read()
+    # Handle preprocessor flags
+    preprocessor_flags = re_search(r'\#pragma\s?(.*)$', file_text,
+                                    group=1,
+                                    multiline=True)
+    if preprocessor_flags:
+      if 'preserve-exports' in preprocessor_flags: return
+    # Extract `__all__` exports line
+    public_exports = re_search(r'(?s)^__all__ = \[(.*?)\]$', file_text,
+                                multiline=True)
+    # Generate replacement text
+    replacement_entries = ',\n'.join(map(lambda e: f'  "{e}"',
+                                         module_exports))
+    replacement_text = f'__all__ = [\n{replacement_entries}\n]'
+    if not len(replacement_entries):
+      replacement_text = '__all__ = []'
+    # Replace text
+    if public_exports:
+      file_text = file_text.replace(public_exports, replacement_text)
+    else:
+      file_text += f'\n{replacement_text}\n'
+    # Write to file
+    PathResolver(filepath).write_text(file_text, encoding='UTF-8')
+
+
+def _main(entrypoint: Optional[str]=None
+          ) -> None:
+  # Extract project entrypoint or default to project entrypoint
+  if entrypoint: entrypoint = PROJECT_ROOT.joinpath(entrypoint)
+  if not entrypoint: entrypoint = PROJECT_ENTRYPOINT
+
   # Enumerate each package
-  for package in recurse_packages(PROJECT_ENTRYPOINT):
+  for package in recurse_packages(entrypoint):
     # Get parent tree/namespace
-    ptree = PathResolver(package).relative_to(PROJECT_ROOT).parents[1].__str__()
-    if ptree == '.': ptree = ''
-    else: ptree += '.'
+    ptree = _get_parent_tree(package)
 
     # Filter package file SPDX headers
-    lines: List[str] = []
-    with open(package, 'r', encoding='UTF-8') as init_file:
-      for raw_line in init_file.readlines():
-        line = raw_line.strip('\n')
-        # Handle preprocessor flags
-        if line.startswith('#pragma'):
-          if 'no-implicit' in line:
-            lines = []; break
-        # Preserve root comments and docstrings
-        if not line.startswith('#') and not line.startswith('"""'):
-          continue
-        lines.append(line)
-    # Validate filtered output
-    if not len(lines): continue
-    else: lines.append('') # Add linebreak
+    package_lines = get_file_header(package)
+    if not len(package_lines): continue
+    # Handle preprocessor flags
+    elif (pragma_line := package_lines[0]).startswith('#pragma'):
+      if 'no-implicit' in pragma_line: package_lines = []; break
 
     # Enumerate each module in the package
     for tree in recurse_modules(package.parent):
       # Add implicit package imports
       module_path = f'{ptree}{".".join(tree.split("/"))}'
-      lines.append(f'from {module_path} import *')
+      package_lines.append(f'from {module_path} import *')
       # Add explicit public API exports
-      module_exports = get_public_exports(module_path)
       filepath = f'{package.parents[1].joinpath(tree)}.py'
-      with open(filepath, 'r', encoding='UTF-8') as module_file:
-        file_text = module_file.read()
-        # Handle preprocessor flags
-        preprocessor_flags = re_search(r'\#pragma\s?(.*)$', file_text,
-                                       group=1,
-                                       multiline=True)
-        if preprocessor_flags:
-          if 'preserve-exports' in preprocessor_flags: continue
-        # Extract `__all__` exports line
-        public_exports = re_search(r'(?s)^__all__ = \[(.*?)\]$', file_text,
-                                   multiline=True)
-        # Replace text
-        replacement_entries = ',\n'.join(map(lambda e: f'  "{e}"',
-                                             module_exports))
-        replacement_text = f'__all__ = [\n{replacement_entries}\n]'
-        if public_exports:
-          file_text = file_text.replace(public_exports, replacement_text)
-        else:
-          file_text += f'\n{replacement_text}\n'
-        # Write to file
-        PathResolver(filepath).write_text(file_text, encoding='UTF-8')
+      generate_api_exports(filepath, module_path)
 
     # Update package file
-    file_text = '\n'.join(lines)
-    PathResolver(package).write_text(file_text, encoding='UTF-8')
+    package_text = '\n'.join(package_lines)
+    PathResolver(package).write_text(package_text, encoding='UTF-8')
 
 
 if __name__ == '__main__':
-  _main()
+  parser = ArgumentParser()
+  parser.add_argument(["--entrypoint"],
+                      dest='entrypoint',
+                      help='The entrypoint to resolve modules for.')
+  args = parser.parse_args()
+
+  _main(entrypoint=args.entrypoint)
