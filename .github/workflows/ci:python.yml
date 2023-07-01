@@ -79,7 +79,7 @@ jobs:
         continue-on-error: true
         run: |
           # Exists with exit code 1 if not within specified range
-          poetry run python3 scripts/lib/compare-version.py \
+          poetry run poe compare-version \
             --min "${{ matrix.python-min-version }}" \
             --max "${{ matrix.python-max-version }}"
       # Setup Poetry virtual environment

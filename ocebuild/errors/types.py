@@ -1,9 +1,8 @@
 ## @file
-# Validation methods used for testing and at runtime.
-#
 # Copyright (c) 2023, Cory Bennett. All rights reserved.
 # SPDX-License-Identifier: BSD-3-Clause
 ##
+"""Validation methods used for testing and at runtime."""
 
 
 class GitHubRateLimit(Exception):

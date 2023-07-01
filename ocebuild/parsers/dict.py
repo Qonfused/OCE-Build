@@ -1,9 +1,8 @@
 ## @file
-# Dictionary helper functions.
-#
 # Copyright (c) 2023, Cory Bennett. All rights reserved.
 # SPDX-License-Identifier: BSD-3-Clause
 ##
+"""Dictionary helper functions."""
 
 from typing import Dict, List, Union
 
@@ -87,3 +86,10 @@ def nested_del(dic: dict,
   """
   for key in keys[:-1]: dic = dic[key]
   del dic[keys[-1]]
+
+__all__ = [
+  "flatten_dict",
+  "nested_get",
+  "nested_set",
+  "nested_del"
+]

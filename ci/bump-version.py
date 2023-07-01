@@ -1,9 +1,10 @@
+#!/usr/bin/env python3
+
 ## @file
-# Bumps the project version.
-# 
 # Copyright (c) 2023, Cory Bennett. All rights reserved.
 # SPDX-License-Identifier: BSD-3-Clause
 ##
+"""Bumps the project version using the given semver string."""
 
 from argparse import ArgumentParser
 
@@ -15,7 +16,7 @@ from ocebuild.sources.resolver import PathResolver
 from ocebuild.version import __file__ as __version_file__, __version__
 from ocebuild.version import _MAJOR_VERSION, _MINOR_VERSION, _PATCH_VERSION, _PRE_RELEASE, _BUILD
 
-from lib._lib import PROJECT_ROOT
+from ci import PROJECT_ROOT
 
 
 version = SimpleNamespace(major=int(_MAJOR_VERSION),
@@ -67,7 +68,7 @@ def format_version(version: SimpleNamespace) -> str:
   return base_semver
 
 
-def main(**kwargs):
+def _main(**kwargs):
   # Bump the project version
   version_str = bump_version(**kwargs)
 
@@ -128,7 +129,7 @@ if __name__ == "__main__":
                       help='Bumps the version build.')
   args = parser.parse_args()
 
-  main(major=args.major,
+  _main(major=args.major,
        minor=args.minor,
        patch=args.patch,
        pre_release=args.pre_release,

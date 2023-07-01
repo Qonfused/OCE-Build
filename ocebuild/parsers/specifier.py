@@ -1,9 +1,8 @@
 ## @file
-# Custom specifier resolver classes and methods.
-#
 # Copyright (c) 2023, Cory Bennett. All rights reserved.
 # SPDX-License-Identifier: BSD-3-Clause
 ##
+"""Custom specifier resolver classes and methods."""
 
 from typing import Dict, Optional, Union
 
@@ -65,3 +64,8 @@ def parse_specifier(name: str,
   # Specifier points to a Dortania build (or latest)
   parameters = parse_semver_params(entry, specifier, parameters)
   return DortaniaResolver(**parameters, **resolver_props)
+
+__all__ = [
+  "parse_semver_params",
+  "parse_specifier"
+]

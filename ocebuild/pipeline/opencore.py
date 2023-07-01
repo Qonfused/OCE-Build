@@ -1,9 +1,8 @@
 ## @file
-# Methods for retrieving and handling OpenCore packages.
-#
 # Copyright (c) 2023, Cory Bennett. All rights reserved.
 # SPDX-License-Identifier: BSD-3-Clause
 ##
+"""# Methods for retrieving and handling OpenCore packages."""
 
 from contextlib import contextmanager
 from shutil import copytree, rmtree
@@ -62,3 +61,7 @@ def extract_opencore_archive(url: str,
   finally:
     # Cleanup after context exits
     if not persist: rmtree(tmp_dir)
+
+__all__ = [
+  "extract_opencore_archive"
+]

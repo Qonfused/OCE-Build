@@ -1,6 +1,6 @@
 [tool.poetry]
 name          = "ocebuild"
-version       = "0.0.0-rc.1"
+version       = "0.0.0-dev"
 description   = "Portable OpenCore EFI dependency & build manager."
 authors       = [ "Cory Bennett <csquaredbennett@gmail.com>" ]
 readme        = "docs/README.md"
@@ -53,45 +53,12 @@ pytest-cov  = ">=3,<5"
 ################################################################################
 
 [tool.poe]
+include = [ "ci/tasks.toml" ]
 poetry_command = "" # Run tasks via `poetry <task>` with the poethepoet plugin.
 
 [tool.poe.tasks.test]
 cmd     = "pytest --cov=ocebuild"
 help    = "Runs project tests with a short coverage report."
-
-[tool.poe.tasks.bump-version]
-script  = "scripts.bump-version:main"
-help    = "Bumps the project version using the given semver string."
-
-  [[tool.poe.tasks.bump-version.args]]
-  name = "major"
-  options = ["--major"]
-  type = "boolean"
-  help = "Bumps the version major."
-
-  [[tool.poe.tasks.bump-version.args]]
-  name = "minor"
-  options = ["--minor"]
-  type = "boolean"
-  help = "Bumps the version minor."
-
-  [[tool.poe.tasks.bump-version.args]]
-  name = "patch"
-  options = ["--patch"]
-  type = "boolean"
-  help = "Bumps the version patch."
-
-  [[tool.poe.tasks.bump-version.args]]
-  name = "pre_release"
-  options = ["--pre-release"]
-  type = "string"
-  help = "Sets the version pre-release."
-
-  [[tool.poe.tasks.bump-version.args]]
-  name = "build"
-  options = ["--build"]
-  type = "boolean"
-  help = "Bumps the version build."
 
 ################################################################################
 #                               Test Configuration                             #

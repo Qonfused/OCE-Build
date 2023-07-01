@@ -1,9 +1,8 @@
 ## @file
-# Methods for sorting and handling versioning.
-#
 # Copyright (c) 2023, Cory Bennett. All rights reserved.
 # SPDX-License-Identifier: BSD-3-Clause
 ##
+"""Methods for sorting and handling versioning."""
 
 from graphlib import TopologicalSorter
 from itertools import chain
@@ -223,3 +222,12 @@ def sort_dependencies(dependencies: Dict[str, Tuple[str, str]],
   dependency_tree = { k: set(v[0] for v in t) for k,t in dependencies.items() }
   for library in TopologicalSorter(dependency_tree).static_order():
     yield get_minimum_version(dependencies, library)
+
+__all__ = [
+  "get_version_str",
+  "get_version",
+  "compare_version",
+  "resolve_version_specifier",
+  "get_minimum_version",
+  "sort_dependencies"
+]

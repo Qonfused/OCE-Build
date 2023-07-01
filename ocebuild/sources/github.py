@@ -1,9 +1,8 @@
 ## @file
-# Methods for formatting and retrieving GitHub source URLs.
-#
 # Copyright (c) 2023, Cory Bennett. All rights reserved.
 # SPDX-License-Identifier: BSD-3-Clause
 ##
+"""Methods for formatting and retrieving GitHub source URLs."""
 
 from datetime import datetime, timedelta
 from functools import partial
@@ -275,3 +274,15 @@ def github_artifacts_url(repository: str,
   except:
     if not github_rate_limit(raise_error=True): raise
   return None
+
+__all__ = [
+  "github_api_request",
+  "github_rate_limit",
+  "github_suite_id",
+  "github_tag_names",
+  "github_release_catalog",
+  "github_file_url",
+  "github_archive_url",
+  "github_release_url",
+  "github_artifacts_url"
+]

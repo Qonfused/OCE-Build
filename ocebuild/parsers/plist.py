@@ -1,9 +1,8 @@
 ## @file
-# Parser for converting property list to a Python dictionary.
-#
 # Copyright (c) 2023, Cory Bennett. All rights reserved.
 # SPDX-License-Identifier: BSD-3-Clause
 ##
+"""Parser for converting property list to a Python dictionary."""
 
 from base64 import b64encode, b64decode
 from datetime import datetime
@@ -266,3 +265,10 @@ def write_plist(config: dict,
         head += 1
 
   return lines
+
+__all__ = [
+  "parse_serialized_types",
+  "write_serialized_types",
+  "parse_plist",
+  "write_plist"
+]

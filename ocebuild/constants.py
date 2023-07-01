@@ -2,6 +2,7 @@
 # Copyright (c) 2023, Cory Bennett. All rights reserved.
 # SPDX-License-Identifier: BSD-3-Clause
 ##
+"""Global constants for OCE Build."""
 
 from os import environ as os_environ
 
@@ -37,3 +38,7 @@ class __EnvironWrapper:
 
 ENV = __EnvironWrapper()
 """Initialized wrapper to securely handle environmental variables."""
+
+__all__ = [
+  "ENV"
+]

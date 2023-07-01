@@ -5,7 +5,7 @@
   "files.exclude": {
     "**/.pytest_cache": true,
     "**/__pycache__": true,
-    ".coverage": true,
+    ".coverage*": true,
     "venv": true,
     // Hide test files
     // "**/*_test.py": { "when": "$(basename).py" }

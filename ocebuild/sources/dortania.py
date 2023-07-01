@@ -1,9 +1,8 @@
 ## @file
-# Methods for formatting and retrieving Dortania source URLs.
-#
 # Copyright (c) 2023, Cory Bennett. All rights reserved.
 # SPDX-License-Identifier: BSD-3-Clause
 ##
+"""Methods for formatting and retrieving Dortania source URLs."""
 
 from datetime import datetime, timezone
 
@@ -87,3 +86,11 @@ def dortania_release_url(plugin: str,
   if not commit: commit = get_latest_sha(plugin)
   return github_release_url(repository='dortania/build-repo',
                             tag=f'{plugin}{commit[:7]}')
+
+__all__ = [
+  "is_latest_build",
+  "has_build",
+  "get_latest_sha",
+  "dortania_file_url",
+  "dortania_release_url"
+]

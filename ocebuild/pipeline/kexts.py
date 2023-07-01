@@ -1,9 +1,8 @@
 ## @file
-# Methods for retrieving and handling Kext packages.
-#
 # Copyright (c) 2023, Cory Bennett. All rights reserved.
 # SPDX-License-Identifier: BSD-3-Clause
 ##
+"""Methods for retrieving and handling Kext packages."""
 
 from contextlib import contextmanager
 from shutil import rmtree
@@ -112,3 +111,8 @@ def extract_kext_release(resolver: Union[GitHubResolver, DortaniaResolver],
   #
   elif arr := list(filter(lambda a: has_name(a) and not has_build(a), assets)):
     pass
+
+__all__ = [
+  "extract_kext_archive",
+  "extract_kext_release"
+]

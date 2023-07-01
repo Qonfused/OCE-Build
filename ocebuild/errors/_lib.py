@@ -1,9 +1,8 @@
 ## @file
-# Stacktrace introspection methods used for testing and at runtime.
-#
 # Copyright (c) 2023, Cory Bennett. All rights reserved.
 # SPDX-License-Identifier: BSD-3-Clause
 ##
+"""Stacktrace introspection methods used for testing and at runtime."""
 
 import sys
 from contextlib import contextmanager

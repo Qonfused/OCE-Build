@@ -1,13 +1,12 @@
 ## @file
-# Custom specifier resolver classes and methods.
-#
 # Copyright (c) 2023, Cory Bennett. All rights reserved.
 # SPDX-License-Identifier: BSD-3-Clause
 ##
+"""Custom specifier resolver classes and methods."""
 
 from inspect import signature
 from pathlib import Path
-from typing import Any, Generator, Tuple, TypeVar
+from typing import Any, Generator, Optional, Tuple, TypeVar, Union
 
 from ocebuild.sources.dortania import *
 from ocebuild.sources.github import *
@@ -195,3 +194,10 @@ class PathResolver(BaseResolver, cls := type(Path())):
     
     #TODO: Handle additional path type verifications here
     return resolved_path
+
+__all__ = [
+  "BaseResolver",
+  "GitHubResolver",
+  "DortaniaResolver",
+  "PathResolver"
+]

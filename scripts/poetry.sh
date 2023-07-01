@@ -8,7 +8,7 @@
 ##
 
 # Install project dependencies
-poetry install -n --no-root
+poetry install -n
 
 # Install global poetry plugins
 poetry self add 'poethepoet[poetry_plugin]'   # Run poe tasks as `poetry <task>`

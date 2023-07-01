@@ -1,9 +1,8 @@
 ## @file
-# Methods for handling and extracting archive formats.
-#
 # Copyright (c) 2023, Cory Bennett. All rights reserved.
 # SPDX-License-Identifier: BSD-3-Clause
 ##
+"""Methods for handling and extracting archive formats."""
 
 from contextlib import contextmanager
 from shutil import rmtree, unpack_archive
@@ -56,3 +55,7 @@ def extract_archive(url: Union[str, Request],
   finally:
     # Cleanup after context exits
     if not persist: rmtree(tmp_dir)
+
+__all__ = [
+  "extract_archive"
+]

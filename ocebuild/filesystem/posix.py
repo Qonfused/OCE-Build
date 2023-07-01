@@ -1,9 +1,8 @@
 ## @file
-# Methods for handling cross-platform file system operations.
-#
 # Copyright (c) 2023, Cory Bennett. All rights reserved.
 # SPDX-License-Identifier: BSD-3-Clause
 ##
+"""Methods for handling cross-platform file system operations."""
 
 from os import rename as os_rename, PathLike
 from shutil import move as shutil_move
@@ -82,3 +81,9 @@ def glob(directory: Union[str, "PathLike[str]"],
       exclude_matches |= set(PathResolver(directory).glob(s))
     matches = list(set(matches) - exclude_matches)
   return matches[0] if first and len(matches) else matches
+
+__all__ = [
+  "rename",
+  "move",
+  "glob"
+]

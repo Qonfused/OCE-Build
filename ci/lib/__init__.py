@@ -3,5 +3,4 @@
 # SPDX-License-Identifier: BSD-3-Clause
 ##
 
-from ocebuild.constants import *
-from ocebuild.version import *
+from ci.lib.constants import *
