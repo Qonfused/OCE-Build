@@ -83,6 +83,16 @@ def get_local_statements(filepath: Union[str, PathResolver]) -> List[str]:
 
   return names
 
+def get_variable_docstring(statement: str,
+                           filepath: Union[str, PathResolver]
+                           ) -> Union[str, None]:
+  with open(filepath, 'r', encoding='UTF-8') as module_file:
+    file_text = module_file.read()
+    docstring = re_search(f'(?s)^{statement}\s?.*?\n^"""(.*?)"""$', file_text,
+                          group=1,
+                          multiline=True)
+    return docstring
+
 def get_public_exports(filepath: Union[str, PathResolver],
                        module_path: str
                        ) -> List[str]:
@@ -91,8 +101,6 @@ def get_public_exports(filepath: Union[str, PathResolver],
   statements = get_local_statements(filepath)
   exports: List[str] = []
   for s in module.__dir__():
-    # Skip explicitly marked internals
-    if s.startswith('_'): continue
     # Remove external module imports
     export = module.__getattribute__(s)
     if hasattr(export, '__loader__'): continue
@@ -100,12 +108,24 @@ def get_public_exports(filepath: Union[str, PathResolver],
     except AssertionError:
       if s not in statements: continue
     except AttributeError: pass
-    # Skip exports marked as internal
-    if (docstring := getdoc(export)):
-      internal_annotations = ('@internal', '@private')
-      if any(docstring.startswith(a) for a in internal_annotations): continue
+
+    # Parse docstrings for annotation markers
+    docstring = get_variable_docstring(s, filepath)
+    if not docstring: docstring = getdoc(export)
+
+    # Skip exports explicitly marked as internal
+    internal_annotations = ('@internal', '@private')
+    if docstring and any(a in docstring for a in internal_annotations): continue
+
+    # Include explicitly marked externals
+    external_annotations = ('@external', '@public')
+    if docstring and any(a in docstring for a in external_annotations): pass
+    # Skip implicitly marked internals
+    elif s.startswith('_'): continue
+
     # Otherwise, add to exports
     exports.append(s)
+  
   return exports
 
 def get_file_header(filepath: Union[str, PathResolver]):
@@ -177,6 +197,7 @@ def generate_api_exports(filepath: Union[str, PathResolver],
 
 def _main(entrypoint: Optional[str]=None
           ) -> None:
+  
   # Extract project entrypoint or default to project entrypoint
   if entrypoint: entrypoint = PROJECT_ROOT.joinpath(entrypoint)
   if not entrypoint: entrypoint = PROJECT_ENTRYPOINT
@@ -222,6 +243,7 @@ __all__ = [
   "recurse_packages",
   "recurse_modules",
   "get_local_statements",
+  "get_variable_docstring",
   "get_public_exports",
   "get_file_header",
   "generate_api_exports"

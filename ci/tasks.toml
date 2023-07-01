@@ -73,6 +73,6 @@ help    = "[CI] Regenerates implicit namespace and package-level module exports.
 
 [[tool.poe.tasks.resolve-modules.args]]
   name = "entrypoint"
-  options = ["--entrypoint", "--package-entrypoint"]
+  options = ["--entrypoint", "--project"]
   type = "string"
   help = "The entrypoint to resolve modules for. (Default: ocebuild entrypoint)"
