@@ -4,6 +4,7 @@
 ##
 
 from ocebuild.parsers._lib import *
+from ocebuild.parsers.asl import *
 from ocebuild.parsers.dict import *
 from ocebuild.parsers.plist import *
 from ocebuild.parsers.regex import *

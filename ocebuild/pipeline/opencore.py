@@ -2,7 +2,7 @@
 # Copyright (c) 2023, Cory Bennett. All rights reserved.
 # SPDX-License-Identifier: BSD-3-Clause
 ##
-"""# Methods for retrieving and handling OpenCore packages."""
+"""Methods for retrieving and handling OpenCore packages."""
 
 from contextlib import contextmanager
 from shutil import copytree, rmtree

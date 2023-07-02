@@ -5,3 +5,4 @@
 
 from ocebuild.pipeline.kexts import *
 from ocebuild.pipeline.opencore import *
+from ocebuild.pipeline.ssdts import *
