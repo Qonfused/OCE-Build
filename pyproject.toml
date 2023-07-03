@@ -66,13 +66,13 @@ help    = "Runs project tests with a short coverage report."
 
 [tool.pytest.ini_options]
 addopts           = "-rfEX --strict-markers"
-norecursedirs     = [ "dist", "docs", "scripts" ]
+norecursedirs     = [ "dist", "docs", "lib", "scripts" ]
 python_files      = [ "*_test.py" ]
 python_functions  = [ "test_*" ]
 
 [tool.coverage.run]
 relative_files  = true
-source          = ["ocebuild/*"]
+source          = [ "ocebuild/*" ]
 omit            = [ "*_test.py", "**/errors/*" ]
 
 [tool.coverage.report]
