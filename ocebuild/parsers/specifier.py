@@ -67,6 +67,7 @@ def parse_specifier(name: str,
 
 
 __all__ = [
+  # Functions (2)
   "parse_semver_params",
   "parse_specifier"
 ]

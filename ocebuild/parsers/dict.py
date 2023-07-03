@@ -89,6 +89,7 @@ def nested_del(dic: dict,
 
 
 __all__ = [
+  # Functions (4)
   "flatten_dict",
   "nested_get",
   "nested_set",

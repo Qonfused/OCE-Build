@@ -92,6 +92,7 @@ def glob(directory: Union[str, "PathLike[str]"],
 
 
 __all__ = [
+  # Functions (3)
   "rename",
   "move",
   "glob"

@@ -58,5 +58,6 @@ def extract_archive(url: Union[str, Request],
 
 
 __all__ = [
+  # Functions (1)
   "extract_archive"
 ]

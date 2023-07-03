@@ -201,6 +201,7 @@ class PathResolver(BaseResolver, cls := type(Path())):
 
 
 __all__ = [
+  # Classes (3)
   "GitHubResolver",
   "DortaniaResolver",
   "PathResolver"

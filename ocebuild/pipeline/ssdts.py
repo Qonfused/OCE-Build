@@ -92,6 +92,7 @@ def sort_ssdt_symbols(filepaths: List[Union[str, PathResolver]]) -> OrderedDict:
 
 
 __all__ = [
+  # Functions (2)
   "extract_iasl_binary",
   "sort_ssdt_symbols"
 ]

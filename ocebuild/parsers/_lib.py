@@ -35,5 +35,6 @@ def update_cursor(level: int,
 
 
 __all__ = [
+  # Functions (1)
   "update_cursor"
 ]

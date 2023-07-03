@@ -10,10 +10,11 @@ from argparse import ArgumentParser
 from ast import parse
 from ast import Import, ImportFrom
 from ast import Assign, FunctionDef, AsyncFunctionDef, ClassDef
+from collections import OrderedDict
 from importlib import import_module
 from inspect import getdoc
 
-from typing import List, Optional, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 from ocebuild.filesystem.posix import glob
 from ocebuild.parsers.regex import re_search
@@ -70,19 +71,37 @@ def recurse_modules(entrypoint: Union[str, PathResolver]) -> List[str]:
   modules = sorted(map(lambda m: m[:-len('.py')], patterns))
   return modules
 
-def get_local_statements(filepath: Union[str, PathResolver]) -> List[str]:
+def get_local_statements(filepath: Union[str, PathResolver]
+                         ) -> Tuple[List[str], Dict[str, List[str]]]:
   """Returns a list of local statements from a file."""
   is_import = lambda n: any([ isinstance(n, t) for t in AST_TYPES_IMPORTS ])
   is_def = lambda n: any([ isinstance(n, t) for t in AST_TYPES_STMTS ])
 
   names: List[str]=[]
+  types: Dict[str, List[str]] = OrderedDict()
+  for kind in ('Constants', 'Variables', 'Functions', 'Classes'):
+    types[kind] = []
+  # Enumerate ast nodes for names and node types
   body = parse(open(filepath, 'r').read()).body
   local_stmts = [n for n in body if is_def(n) and not is_import(n)]
   for s in local_stmts:
-    if isinstance(s, Assign): names += list(map(lambda n: n.id, s.targets))
-    else: names.append(s.name)
+    if isinstance(s, Assign):
+      for n in s.targets:
+        names.append(name := n.id)
+        # Tag node as a constant if it is uppercase
+        if str(name).isupper():
+          types['Constants'].append(name)
+        # Otherwise, tag as a variable
+        else:
+          types['Variables'].append(name)
+    else:
+      names.append(name := s.name)
+      if isinstance(s, FunctionDef) or isinstance(s, AsyncFunctionDef):
+        types['Functions'].append(name)
+      elif isinstance(s, ClassDef):
+        types['Classes'].append(name)
 
-  return names
+  return names, types
 
 def get_variable_docstring(statement: str,
                            filepath: Union[str, PathResolver]
@@ -99,7 +118,7 @@ def get_public_exports(filepath: Union[str, PathResolver],
                        ) -> List[str]:
   """Returns a list of public API exports from a module."""
   module = import_module(module_path)
-  statements = get_local_statements(filepath)
+  names, types = get_local_statements(filepath)
   exports: List[str] = []
   for s in module.__dir__():
     # Remove external module imports
@@ -107,7 +126,7 @@ def get_public_exports(filepath: Union[str, PathResolver],
     if hasattr(export, '__loader__'): continue
     try: assert export.__module__ == module_path
     except AssertionError:
-      if s not in statements: continue
+      if s not in names: continue
     except AttributeError: pass
 
     # Parse docstrings for annotation markers
@@ -127,7 +146,12 @@ def get_public_exports(filepath: Union[str, PathResolver],
     # Otherwise, add to exports
     exports.append(s)
   
-  return exports
+  export_types = dict()
+  for k,v in types.items():
+    filtered_names = list(filter(lambda n: n in exports, v))
+    if filtered_names: export_types[k] = filtered_names
+
+  return export_types
 
 def get_file_header(filepath: Union[str, PathResolver]):
   """Retrieves the file header from a file."""
@@ -181,9 +205,14 @@ def generate_api_exports(filepath: Union[str, PathResolver],
     # Extract `__all__` exports line
     public_exports = re_search(r'(?s)^__all__ = \[(.*?)\]$', file_text,
                                 multiline=True)
-    # Generate replacement text
-    replacement_entries = ',\n'.join(map(lambda e: f'  "{e}"',
-                                         module_exports))
+    # Generate replacement text with comments
+    replacement_entries: str=''
+    for idx, (kind, statements) in enumerate(module_exports.items()):
+      if not statements: continue
+      if idx: replacement_entries += '\n'
+      replacement_entries += f'  # {kind} ({len(statements)})\n'
+      replacement_entries += ',\n'.join(map(lambda e: f'  "{e}"', statements))
+      if not idx+1 == len(module_exports): replacement_entries += ','
     replacement_text = f'__all__ = [\n{replacement_entries}\n]'
     if not len(replacement_entries):
       replacement_text = '__all__ = []'
@@ -243,9 +272,11 @@ if __name__ == '__main__':
 
 
 __all__ = [
+  # Constants (3)
   "PRAGMA_FLAGS",
   "AST_TYPES_IMPORTS",
   "AST_TYPES_STMTS",
+  # Functions (7)
   "recurse_packages",
   "recurse_modules",
   "get_local_statements",

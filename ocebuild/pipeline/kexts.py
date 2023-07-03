@@ -114,6 +114,7 @@ def extract_kext_release(resolver: Union[GitHubResolver, DortaniaResolver],
 
 
 __all__ = [
+  # Functions (2)
   "extract_kext_archive",
   "extract_kext_release"
 ]

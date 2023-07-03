@@ -27,6 +27,7 @@ class PathValidationError(Exception):
 
 
 __all__ = [
+  # Classes (2)
   "GitHubRateLimit",
   "PathValidationError"
 ]

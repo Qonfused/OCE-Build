@@ -263,6 +263,7 @@ def parse_ssdt_namespace(lines: Union[List[str], TextIOWrapper]) -> dict:
 
 
 __all__ = [
+  # Constants (10)
   "ASL_COMPILER_CONTROLS",
   "ASL_TYPES_SCOPES",
   "ASL_TYPES_CONDITIONALS",
@@ -273,6 +274,7 @@ __all__ = [
   "RE_LOCAL_VAR",
   "RE_STATEMENT",
   "RE_NAME",
+  # Functions (2)
   "parse_definition_block",
   "parse_ssdt_namespace"
 ]

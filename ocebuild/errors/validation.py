@@ -86,6 +86,7 @@ def validate_path_tree(path: Union[str, "PathLike[str]"],
 
 
 __all__ = [
+  # Functions (2)
   "validate",
   "validate_path_tree"
 ]

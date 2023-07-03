@@ -44,6 +44,8 @@ def request(url: Union[str, Request], *args, **kwargs) -> any:
 
 
 __all__ = [
-  "RequestWrapper",
-  "request"
+  # Functions (1)
+  "request",
+  # Classes (1)
+  "RequestWrapper"
 ]

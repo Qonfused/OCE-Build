@@ -15,6 +15,7 @@ PROJECT_ENTRYPOINT = PathResolver(__file__).parent
 
 
 __all__ = [
+  # Constants (2)
   "PROJECT_ROOT",
   "PROJECT_ENTRYPOINT"
 ]

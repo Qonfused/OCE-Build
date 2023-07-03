@@ -73,8 +73,8 @@ def extract_opencore_archive(url: str,
 
 
 __all__ = [
-  # constants (1)
+  # Constants (1)
   "OPENCORE_BINARY_DATA_URL",
-  # functions (1)
+  # Functions (1)
   "extract_opencore_archive"
 ]

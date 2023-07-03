@@ -43,6 +43,7 @@ def re_search(pattern,
 
 
 __all__ = [
+  # Functions (2)
   "re_match",
   "re_search"
 ]

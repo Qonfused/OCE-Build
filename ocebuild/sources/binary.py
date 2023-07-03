@@ -39,6 +39,7 @@ def wrap_binary(args: List[str], binary_path: str) -> str:
   return process.stdout
 
 __all__ = [
+  # Functions (2)
   "get_binary_ext",
   "wrap_binary"
 ]

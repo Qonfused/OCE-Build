@@ -225,8 +225,10 @@ def sort_dependencies(dependencies: Dict[str, Tuple[str, str]],
 
 
 __all__ = [
+  # Constants (2)
   "SEMVER_SYMBOLS",
   "COMPARISON_SYMBOLS",
+  # Functions (6)
   "get_version_str",
   "get_version",
   "compare_version",

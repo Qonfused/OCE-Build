@@ -89,6 +89,7 @@ def dortania_release_url(plugin: str,
 
 
 __all__ = [
+  # Functions (5)
   "is_latest_build",
   "has_build",
   "get_latest_sha",

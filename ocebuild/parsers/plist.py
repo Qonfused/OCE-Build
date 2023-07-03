@@ -268,7 +268,9 @@ def write_plist(config: dict,
 
 
 __all__ = [
+  # Constants (1)
   "PLIST_SCHEMA",
+  # Functions (4)
   "parse_plist_types",
   "write_plist_types",
   "parse_plist",

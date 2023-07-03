@@ -136,7 +136,9 @@ if __name__ == "__main__":
 
 
 __all__ = [
+  # Variables (1)
   "version",
+  # Functions (2)
   "bump_version",
   "format_version"
 ]

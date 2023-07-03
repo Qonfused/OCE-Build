@@ -276,6 +276,7 @@ def github_artifacts_url(repository: str,
 
 
 __all__ = [
+  # Functions (9)
   "github_api_request",
   "github_rate_limit",
   "github_suite_id",
