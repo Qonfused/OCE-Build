@@ -24,7 +24,16 @@ def extract_opencore_archive(url: str,
                              target: Literal['IA32', 'X64']='X64',
                              persist: bool=False
                              ) -> Generator[PathResolver, any, None]:
-  """"""
+  """Extracts the contents of an OpenCore archive and yields a temporary directory.
+  
+  Args:
+    url: The URL of the OpenCore archive to extract.
+    target: The target EFI architecture to extract. Defaults to 'X64'.
+    persist: Whether to persist the temporary directory. Defaults to False.
+  
+  Yields:
+    A temporary directory containing the extracted contents.
+  """
   tmp_dir = mkdtemp()
   try:
     # Extract specified OpenCore package
@@ -64,6 +73,8 @@ def extract_opencore_archive(url: str,
 
 
 __all__ = [
+  # constants (1)
   "OPENCORE_BINARY_DATA_URL",
+  # functions (1)
   "extract_opencore_archive"
 ]
