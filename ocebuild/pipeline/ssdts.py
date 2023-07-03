@@ -5,15 +5,48 @@
 """Methods for retrieving and handling SSDT binaries."""
 
 from collections import OrderedDict
+from contextlib import contextmanager
+from functools import partial
 from graphlib import TopologicalSorter
+from os import unlink
+from tempfile import NamedTemporaryFile
 
-from typing import List, Union
+from typing import Callable, Generator, List, Optional, Union
 
 from ocebuild.parsers.asl import parse_ssdt_namespace
+from ocebuild.sources import request
+from ocebuild.sources.binary import get_binary_ext, wrap_binary
+from ocebuild.sources.github import github_file_url
 from ocebuild.sources.resolver import PathResolver
 
 
-def sort_ssdt_symbols(filepaths: List[Union[str, PathResolver]]):
+@contextmanager
+def extract_iasl_binary(url: Optional[str]=None,
+                        persist: bool=False
+                        ) -> Generator[Callable[[List[str]], str], any, None]:
+  """Extracts an iasl binary and yields a subprocess wrapper."""
+  binary = f'iasl{get_binary_ext()}'
+  tmp_file = NamedTemporaryFile(suffix=f'-{binary}', delete=False)
+  try:
+    # Fetch the iasl binary appropriate for the current platform
+    if not url:
+      url = github_file_url('Qonfused/OCE-Build',
+                            path=f'lib/iasl/{binary}',
+                            #TODO: Remove hardcoded commit when PR is merged.
+                            commit='448fd871d7de446b894770afb8e0d4b6b5dbbaec', 
+                            raw=True)
+    # Fetch and extract the iasl binary to a temporary file
+    with request(url) as response:
+      tmp_file.seek(0)
+      tmp_file.write(response.read())
+      tmp_file.close()
+    # Yield a wrapper over the iasl binary
+    yield partial(wrap_binary, binary_path=tmp_file.name)
+  finally:
+    # Cleanup after context exits
+    if not persist: unlink(tmp_file.name)
+
+def sort_ssdt_symbols(filepaths: List[Union[str, PathResolver]]) -> OrderedDict:
   """Sorts the injection order of SSDT tables by resolving symbolic references.
   
   Args:
@@ -59,5 +92,6 @@ def sort_ssdt_symbols(filepaths: List[Union[str, PathResolver]]):
 
 
 __all__ = [
+  "extract_iasl_binary",
   "sort_ssdt_symbols"
 ]

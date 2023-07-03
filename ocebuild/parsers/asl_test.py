@@ -107,9 +107,10 @@ def test_parse_ssdt_namespace():
                                         ('TableID', 'TEST'),
                                         ('OEMRevision', '0x00000000')]),
       'imports': OrderedDict([('SB', 'DeviceObj'),
-                              ('SB.PCI0', None)]),
+                              ('SB.PCI0', 'DeviceObj')]),
       'statements': OrderedDict([('QUX', 'Name'),
                                  ('SB.BAZ', 'Device'),
+                                 ('SB.BAZ.HID', 'Name'),
                                  ('SB.PCI0.QUUX', 'Name')])}
     
   # Test against SSDT-B
