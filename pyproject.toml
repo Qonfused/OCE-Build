@@ -66,6 +66,7 @@ help    = "Runs project tests with a short coverage report."
 
 [tool.pytest.ini_options]
 addopts           = "-rfEX --strict-markers"
+# filterwarnings = [ "ignore::DeprecationWarning" ]
 norecursedirs     = [ "dist", "docs", "lib", "scripts" ]
 python_files      = [ "*_test.py" ]
 python_functions  = [ "test_*" ]
