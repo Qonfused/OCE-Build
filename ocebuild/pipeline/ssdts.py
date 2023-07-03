@@ -31,7 +31,7 @@ def extract_iasl_binary(url: Optional[str]=None,
     # Fetch the iasl binary appropriate for the current platform
     if not url:
       url = github_file_url('Qonfused/OCE-Build',
-                            path=f'lib/iasl/{binary}',
+                            path=f'scripts/lib/iasl/{binary}',
                             #TODO: Remove hardcoded commit when PR is merged.
                             commit='448fd871d7de446b894770afb8e0d4b6b5dbbaec', 
                             raw=True)

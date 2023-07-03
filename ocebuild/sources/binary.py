@@ -32,7 +32,7 @@ def wrap_binary(args: List[str], binary_path: str) -> str:
                             stderr=subprocess.PIPE,
                             encoding='UTF-8')
   # Raise error without stacktrace
-  if process.returncode:
+  if process.returncode: #pragma: no cover
     with disable_exception_traceback():
       stderr_name = PathResolver(binary_path).name
       raise Exception(f'({stderr_name}) {process.stderr.strip()}')
