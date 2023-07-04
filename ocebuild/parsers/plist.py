@@ -12,6 +12,7 @@ from typing import List, Optional, Tuple, Union
 
 from ocebuild.parsers._lib import update_cursor
 from ocebuild.parsers.dict import flatten_dict, nested_get, nested_set
+from ocebuild.parsers.regex import re_search
 
 
 PLIST_SCHEMA = {
@@ -146,6 +147,10 @@ def parse_plist(lines: Union[List[str], TextIOWrapper],
       value = re.findall('<[a-z]+>(.*)</[a-z]+>', lnorm, re.IGNORECASE)
       if len(value): value = value[0]
 
+      # Parse property list types to Python types
+      entry = parse_plist_types(stype, value)
+      if entry is None: continue
+
       # Extract and validate parent tree level
       tree = cursor['keys']
       while len(tree)-1 >= level / max(1, cursor['indent']):
@@ -156,19 +161,27 @@ def parse_plist(lines: Union[List[str], TextIOWrapper],
         # Handle dictionary keys separately
         else:
           tree.pop(-2)
-      
-      # Parse property list types to Python types
-      # @see https://www.apple.com/DTDs/PropertyList-1.0.dtd
-      entry = parse_plist_types(stype, value)
-      if entry is None: continue
 
       # Handle object and array traversal
       ptree = tree[:-1] if stype != 'dict' else tree
       prev_value = nested_get(config, ptree)
+      # Handle nested object arrays
+      while tree and (prev_value is None):
+        ptree = tree[:-1]
+        prev_value = nested_get(config, ptree)
+      # Add non-keyed entries
+      if tree[-1] in prev_value:
+        # Handle pure array values
+        if isinstance(prev_value[tree[-1]], list):
+          prev_value = prev_value[tree[-1]]
+          prev_value.append(entry)
+          nested_set(config, tree, prev_value)
+          continue
+      
+      # Add new dict entries
       if isinstance(prev_value, dict) or prev_value is None:
-        try:
-          nested_set(config, tree, entry)
-        except: pass #TODO: Handle pure array entries
+        nested_set(config, tree, entry)
+      # Add new object array entries
       elif isinstance(prev_value, list):
         if stype == 'dict':
           # Always append dictionaries to arrays
@@ -217,22 +230,31 @@ def write_plist(config: dict,
       # Create parent dictionary for object arrays
       is_root_key = (j == len(tree)-1)
       if isinstance(key, int):
-        # Seek to current array index
         num_entries = 0
-        while not (has_array_index := key == (num_entries - 1)):
-          line_padding = (line := lines[head])[:-len(line.lstrip())]
-          if line == f'{padding[:-2]}</array>': break
-          elif line == f'{line_padding}<dict>': num_entries += 1
-          head += 1
-        # Skip end of previous array entry
-        if (has_entries := lines[head-1] != f'{padding[:-2]}<array>'):
-          while lines[head-1] != f'{padding}</dict>': head += 1
-          head -= 1
-        # Create new array entry
-        if not (has_entries and has_array_index):
-          if has_entries: head += 1
-          lines[head:head] = [f'{padding}<dict>', f'{padding}</dict>']
-          head += 1
+        if not isinstance(nested_get(config, tree[:-1]), list):
+          # Seek to current array index
+          while not (has_array_index := key == (num_entries - 1)):
+            line_padding = (line := lines[head])[:-len(line.lstrip())]
+            if line == f'{padding[:-2]}</array>': break
+            elif line == f'{line_padding}<dict>': num_entries += 1
+            head += 1
+          # Skip end of previous array entry
+          if (has_entries := lines[head-1] != f'{padding[:-2]}<array>'):
+            while lines[head-1] != f'{padding}</dict>': head += 1
+            head -= 1
+          # Create new array entry
+          if not (has_entries and has_array_index):
+            if has_entries: head += 1
+            lines[head:head] = [f'{padding}<dict>', f'{padding}</dict>']
+            head += 1
+        # # Handle pure array entries
+        # else:
+        #   # print(re_search(r'<key>(.*)</key>', lines[head-1]))
+        #   print(tree, key)
+        #   print(lines[head-1])
+        #   print(lines[head])
+        # #   print(entry)
+        # #   print()
         # Seek to end of entry
         continue
       # Insert array indices as additional keys
@@ -250,11 +272,25 @@ def write_plist(config: dict,
             head += 1
             if lines[head].startswith(f'{padding}<key>'): head += 1
             if lines[head].startswith(f'{padding[:-2]}</'): break
-        # Append new entry
-        defaults = ('dict' if not re_match else 'array', '' if is_root_key else None)
+            
+        # Append new entry to head
+        defaults = ('dict' if not re_match else 'array',
+                    '' if is_root_key else None)
         lns = [f'{padding}{v}' for v in write_plist_types(value, defaults)]
-        # Create a new key
-        lines[head:head] = (entry := [key_ln, *lns])
+        # Handle creating pure array entries
+        if is_root_key and not isinstance(nested_get(config, tree[:-1]), dict):
+          # Create new array field
+          if tree[-1] == 0:
+            lines[head:head] = [key_ln,
+                                f'{padding}<array>', f'{padding}</array>']
+            head += 2
+          entry = list(map(lambda s: f'  {s}', lns))
+        # Handle creating keyed entries
+        else:
+          entry = [key_ln, *lns]
+    
+        # Create root entries
+        lines[head:head] = entry
         head += len(entry) - 1
       else:
         # Seek end of level
@@ -263,6 +299,14 @@ def write_plist(config: dict,
           if len(padding) < len(line[:-len(line.lstrip())]): head += 1
           else: break
         head += 1
+        # Handle appending new pure array entries
+        if is_root_key and not isinstance(nested_get(config, tree[:-1]), dict):
+          # Seek end of array
+          while lines[head] != f'{padding}</array>': head += 1
+          # Append new entry to array
+          lns = [f'{padding}  {v}' for v in write_plist_types(value, defaults)]
+          lines[head:head] = lns
+          head += len(entry) - 1
 
   return lines
 

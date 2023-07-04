@@ -9,8 +9,11 @@ from datetime import datetime, timezone
 
 from ocebuild.parsers.dict import nested_get
 from ocebuild.parsers.plist import *
+from ocebuild.pipeline.opencore import extract_opencore_archive
 from ocebuild.sources._lib import request
-from ocebuild.sources.github import github_file_url
+from ocebuild.sources.binary import get_binary_ext, wrap_binary
+from ocebuild.sources.github import github_tag_names, github_file_url
+from ocebuild.versioning.semver import get_version
 
 
 def test_parse_plist_types():
@@ -142,4 +145,22 @@ def test_parse_plist():
       'Delete': {}
     }
 
-def test_write_plist(): pass # Not implemented
+def test_write_plist():
+  latest_tag = sorted(github_tag_names('acidanthera/OpenCorePkg'),
+                       key=lambda t: get_version(t))[-1]
+  url = f'https://github.com/acidanthera/OpenCorePkg/releases/download/{latest_tag}/OpenCore-{latest_tag}-DEBUG.zip'
+  with extract_opencore_archive(url) as opencore_dir:
+    # Parse sample config.plist to dict
+    config_plist_filepath = opencore_dir.joinpath('EFI', 'OC', 'config.plist')
+    with open(config_plist_filepath, 'r', encoding='utf-8') as file:
+      sample_plist = parse_plist([l.rstrip() for l in file])
+    # Write parsed config.plist as plist
+    output_plist_filepath = opencore_dir.joinpath('EFI', 'OC', 'parsed.plist')
+    with open(output_plist_filepath, 'w') as f:
+      lines = write_plist(sample_plist)
+      f.writelines("\n".join(lines))
+    # Validate output with ocvalidate binary
+    ocvalidate_binary = f'ocvalidate{get_binary_ext()}'
+    stdout = wrap_binary(args=[output_plist_filepath],
+                         binary_path=opencore_dir.joinpath('Utilities', 'ocvalidate', ocvalidate_binary))
+    assert 'No issues found.' in stdout
