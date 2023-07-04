@@ -5,30 +5,52 @@
 """Parser for converting annotated YAML to a Python dictionary."""
 
 import re
+from datetime import datetime
 from shlex import split
 from typing import List, Literal, Optional, Tuple, Union
 
 from ocebuild.parsers._lib import update_cursor
 from ocebuild.parsers.dict import flatten_dict, nested_get, nested_set
+from ocebuild.parsers.regex import re_search
 
 
 def parse_yaml_types(stype: str,
-                           value: str
-                           ) -> Union[Tuple[str, any], None]:
+                     value: str,
+                     schema: Literal['annotated', 'yaml']='yaml'
+                     ) -> Union[Tuple[str, any], None]:
   """Parse YAML types to Python types.
 
   Args:
     stype: YAML type (literal).
     value: YAML value.
+    schema: Flag to control input schema.
 
   Returns:
     Tuple of parsed type (literal) and value.
   """
-  raise NotImplementedError() #TODO
+  svalue = None
+  if schema == 'annotated':
+    # Parse annotated types
+    if   stype == 'Date':     stype = 'date';   svalue = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    elif stype == 'Boolean':  stype = 'bool';   svalue = value.lower() == 'true'
+    elif stype == 'Data':     stype = 'data';   svalue = "".join(map(lambda s: re_search(r'[a-zA-Z0-9 ]+', s),
+                                                                     value.split()))
+    elif stype == 'Dict':     stype = 'dict';   svalue = {}
+    elif stype == 'Number':
+      if '.' in value:        stype = 'float';  svalue = float(value)
+      else:                   stype = 'int';    svalue = int(value)
+    elif stype == 'Array':    stype = 'list';   svalue = []
+    elif stype == 'String':   stype = 'string'; svalue = value
+    # Handle generic or string types
+    if isinstance(svalue, str) and svalue[0] in ('"', "'"):
+      svalue = svalue[1:-1]
+    return stype, svalue
+  elif schema == 'yaml':
+    raise NotImplementedError() #TODO
 
 def write_yaml_types(value: Union[Tuple[str, any], any],
-                           schema: Literal['annotated', 'yaml']='yaml'
-                           ) -> Tuple[str, any]:
+                     schema: Literal['annotated', 'yaml']='yaml'
+                     ) -> Tuple[str, any]:
   """Parse Python types to YAML types.
 
   Args:
@@ -44,7 +66,6 @@ def write_yaml_types(value: Union[Tuple[str, any], any],
   if isinstance(value, tuple): stype, svalue = value
 
   if schema == 'annotated':
-    print('..', stype, svalue)
     # Parse native types
     if   stype == 'date':     stype = 'Date   '; svalue = str(svalue).replace(' ', 'T').replace('+00:00', 'Z')
     elif stype == 'bool':     stype = 'Boolean'; svalue = str(svalue).lower()
@@ -128,9 +149,10 @@ def parse_yaml(lines: List[str],
     # Extract tokens from line
     tokens = [p for p in split(lnorm) if (p != '|' and p != '-')]
     key = tokens[0][:-1] if (num_tokens := len(tokens)) else None
-    def get_schema(schema: Literal['plist', 'yaml']) -> Union[Tuple[str, str], str]:
-      if schema == 'plist':
-        return (tokens[1], ' '.join(tokens[2:]))
+    def get_schema(schema: Literal['annotated', 'yaml']
+                   ) -> Union[Tuple[str, str], str]:
+      if schema == 'annotated':
+        return parse_yaml_types(tokens[1], ' '.join(tokens[2:]), schema)
       elif schema == 'yaml':
         return ' '.join(tokens[1:])
     
@@ -185,7 +207,7 @@ def parse_yaml(lines: List[str],
     # Update dictionary values
     elif num_tokens >= 1:
       # Extract schema and entry value
-      schema = 'plist' if num_tokens >= 3 else 'yaml'
+      schema = 'annotated' if num_tokens >= 3 else 'yaml'
       entry = get_schema(schema)
 
       # TODO: Parse YAML types to Python types

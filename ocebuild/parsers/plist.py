@@ -30,8 +30,8 @@ PLIST_SCHEMA = {
 """
 
 def parse_plist_types(stype: str,
-                           value: str
-                           ) -> Union[Tuple[str, any],  None]:
+                      value: str
+                      ) -> Union[Tuple[str, any],  None]:
   """Parse property list types to Python types.
 
   Args:
@@ -56,8 +56,8 @@ def parse_plist_types(stype: str,
   return entry
 
 def write_plist_types(value: Union[Tuple[str, any], any],
-                           defaults: Union[Tuple[str, any], any]=('dict', None)
-                           ) -> List[str]:
+                      defaults: Union[Tuple[str, any], any]=('dict', None)
+                      ) -> List[str]:
   """Parse Python types to property list entries.
 
   Args:
