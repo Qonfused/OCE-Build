@@ -6,6 +6,7 @@
 ##
 """Binary helper functions."""
 
+from hashlib import sha256
 from os import chmod
 from platform import system
 import subprocess
@@ -23,6 +24,15 @@ def get_binary_ext(platform: Literal['Windows', 'Darwin', 'Linux']=system()
   elif platform == 'Darwin':  return ''
   elif platform == 'Linux':   return '.linux'
 
+def get_digest(file_path):
+  h = sha256()
+  with open(file_path, 'rb') as file:
+    while True:
+      chunk = file.read(h.block_size)
+      if not chunk: break
+      h.update(chunk)
+  return h.hexdigest()
+
 def wrap_binary(args: List[str], binary_path: str) -> str:
   """Wraps a binary and returns stdout."""
   if not isinstance(args, list): args = [args]
@@ -39,7 +49,8 @@ def wrap_binary(args: List[str], binary_path: str) -> str:
   return process.stdout
 
 __all__ = [
-  # Functions (2)
+  # Functions (3)
   "get_binary_ext",
+  "get_digest",
   "wrap_binary"
 ]
