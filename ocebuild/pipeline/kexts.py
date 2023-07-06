@@ -7,13 +7,11 @@
 from contextlib import contextmanager
 from shutil import rmtree
 
-from typing import Generator, Literal, Union
+from typing import Generator
 
 from ocebuild.filesystem.archives import extract_archive
-from ocebuild.parsers.dict import nested_get
 from ocebuild.parsers.plist import parse_plist
-from ocebuild.sources.github import github_release_catalog
-from ocebuild.sources.resolver import *
+from ocebuild.sources.resolver import PathResolver
 
 
 @contextmanager
@@ -51,7 +49,7 @@ def extract_kext_archive(url: str,
     with extract_archive(url, persist=True) as pkg:
       for plist_path in pkg.glob('**/*.kext/Contents/Info.plist'):
         kext_path = PathResolver(plist_path).parents[1].as_posix()
-        extract_path = f'.{str(kext_path)[len(str(pkg)):]}'
+        extract_path = f'.{str(kext_path).split(pkg.as_posix())[1]}'
         with open(plist_path, 'r', encoding='UTF-8') as file:
           # Build plist dictionary from filestream
           plist = parse_plist(file)
@@ -83,38 +81,8 @@ def extract_kext_archive(url: str,
     # Cleanup after context exits
     if not persist: rmtree(pkg)
 
-def extract_kext_release(resolver: Union[GitHubResolver, DortaniaResolver],
-                         build: Literal['RELEASE', 'DEBUG']='RELEASE'
-                         ):
-  name = resolver.__name__
-  url = resolver.resolve()
-  if '/releases/' not in url:
-    raise ValueError(f'URL must resolve to a GitHub release.')
-
-  # Get the release catalog for a given release url
-  release_catalog = github_release_catalog(url)
-  assets = release_catalog['assets']
-  if not len(assets):
-    raise ValueError(f'Release catalog for {name} has no assets.')
-  # Return the first release if only 1 artifact is present
-  elif len(assets) == 1:
-    return nested_get(assets, [0, 'browser_download_url'])
-  
-  has_name = lambda asset: all([ s in asset['name'] for s in name.split('-') ])
-  has_build = lambda asset: build in asset['name']
-  # Handle case where there is no clear resolution of the desired kext
-  if arr := list(filter(lambda a: not (has_name(a) and has_build(a)), assets)):
-    pass
-  # Handle ambiguous build targets
-  elif arr := list(filter(lambda a: has_name(a) and not has_build(a), assets)):
-    pass
-  #
-  elif arr := list(filter(lambda a: has_name(a) and not has_build(a), assets)):
-    pass
-
 
 __all__ = [
-  # Functions (2)
-  "extract_kext_archive",
-  "extract_kext_release"
+  # Functions (1)
+  "extract_kext_archive"
 ]

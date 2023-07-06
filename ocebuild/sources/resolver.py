@@ -144,7 +144,10 @@ class GitHubResolver(BaseResolver):
       return github_artifacts_url(**params)
     # Return the latest release (default) or by tag
     release_url = github_release_url(**params)
-    return self.extract_asset(self.__name__, release_url, build=build)
+    if (name := self.__name__):
+      # Return release asset url if name is provided
+      return self.extract_asset(name, url=release_url, build=build)
+    return release_url
 
 class DortaniaResolver(BaseResolver):
   """Resolves a Dortania build URL based on the class parameters."""

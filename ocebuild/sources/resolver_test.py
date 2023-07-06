@@ -11,6 +11,11 @@ from ocebuild.sources.resolver import *
 
 
 def test_GitHubResolver():
+  # Test release asset url resolution
+  assert GitHubResolver(repository='OpenIntelWireless/itlwm',
+                        tag='2.2.0',
+                        __name__='AirportItlwm-BigSur').resolve() == \
+    'https://github.com/OpenIntelWireless/itlwm/releases/download/v2.2.0/AirportItlwm_v2.2.0_stable_BigSur.kext.zip'
   # Test release url resolution
   assert GitHubResolver(repository='acidanthera/RestrictEvents',
                         tag='~1.0.6'
