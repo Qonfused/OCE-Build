@@ -4,6 +4,64 @@
 ##
 """Parser helper functions."""
 
+from copy import deepcopy
+from ocebuild.parsers.regex import re_search
+
+
+TAGS = ('@append', '@delete', '@fallback', '@override', '@prepend')
+"""Preprocessor tags for controlling output dict semantics."""
+
+def _append_tags(cursor, frontmatter_dict, defer_tree: bool=False):
+  """Append tag to frontmatter if entries marked with tag."""
+  if cursor['has_tag'] is None: return
+  tag_name, tag_options = cursor['has_tag']
+  # Leave tag tree null until another tag discovers the tree tag
+  if defer_tree:
+    if not 'defer_tree' in cursor: cursor['defer_tree'] = []
+    cursor['defer_tree'].append(len(frontmatter_dict['tags']))
+    tag_tree = None
+  else:
+    # Update deferred trees with current tree value
+    if 'defer_tree' in cursor:
+      for deferred in cursor['defer_tree']:
+        frontmatter_dict['tags'][deferred][1] = deepcopy(cursor['tag_tree'])
+      del cursor['defer_tree']
+    tag_tree = deepcopy(cursor['tag_tree'])
+  frontmatter_dict['tags'].append([tag_name, tag_tree, tag_options])
+  # Reset cursor attr
+  cursor['has_tag'] = None
+
+def _apply_macro(macro, flags, tokens, cursor, frontmatter_dict):
+  """Applies preprocessor macros to parser"""
+  if macro[-1] == ',':
+    for token in tokens[1:]: macro += token
+  flag = re_search(r'\((.*)\)', macro, group=1)
+  if flag is not None: macro = macro[:-len(f'({flag})')]
+
+  # Mark tagged entries on cursor (to append to frontmatter)
+  if any(macro.startswith(t) for t in TAGS):
+    # Handle any unresolved tags (non-attached)
+    if cursor['has_tag'] is not None:
+      _append_tags(cursor, frontmatter_dict, defer_tree=True)
+    cursor['has_tag'] = (macro, flag)
+  # Check if flag exists
+  elif macro == '@ifdef':
+    is_defined = (flag in flags) \
+              or (flag in frontmatter_dict)
+    cursor['skip'] = not is_defined
+  elif macro == '@ifndef':
+    is_not_defined = (flag not in flags) \
+                  and (flag not in frontmatter_dict)
+    cursor['skip'] = not is_not_defined
+  # Check if flag meets conditional
+  # elif macro == '@if':
+  # elif macro == '@elif':
+  # Switch macro skip
+  elif macro == '@else':
+    cursor['skip'] = not cursor['skip']
+  # End macro checking scope
+  elif macro == '@endif':
+    cursor['skip'] = False
 
 def update_cursor(level: int,
                   key: str,
@@ -35,6 +93,8 @@ def update_cursor(level: int,
 
 
 __all__ = [
+  # Constants (1)
+  "TAGS",
   # Functions (1)
   "update_cursor"
 ]

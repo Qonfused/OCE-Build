@@ -8,7 +8,7 @@ from typing import Dict, List, Tuple, Union
 
 from ocebuild.parsers.dict import nested_del, nested_get, nested_set, merge_dict
 from ocebuild.parsers.plist import parse_plist
-from ocebuild.parsers.yaml import TAGS, parse_yaml
+from ocebuild.parsers.yaml import parse_yaml
 from ocebuild.sources.resolver import PathResolver
 
 
@@ -79,7 +79,7 @@ def apply_preprocessor_tags(a: dict,
         entry = (v_b[0], options.join([str(x[1]) for x in reversed(filtered)]))
         nested_set(a, tree, entry)
     else:
-      raise ValueError(f"Unrecognized preprocessor tag: {tag}")
+      raise NotImplementedError(f"Unrecognized preprocessor tag: {tag}")
     # Cleanup dict b by deleting the (now duplicate) entry
     try: nested_del(b, tree)
     except KeyError: pass

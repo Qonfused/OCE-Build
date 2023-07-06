@@ -5,59 +5,14 @@
 """Parser for converting annotated YAML to a Python dictionary."""
 
 import re
-from copy import deepcopy
 from datetime import datetime
 from shlex import split
 from typing import List, Literal, Optional, Tuple, Union
 
-from ocebuild.parsers._lib import update_cursor
+from ocebuild.parsers._lib import update_cursor, _append_tags, _apply_macro
 from ocebuild.parsers.dict import flatten_dict, nested_get, nested_set
 from ocebuild.parsers.regex import re_search
 
-
-TAGS = ('@append', '@delete', '@fallback', '@override', '@prepend')
-"""Preprocessor tags for controlling output dict semantics."""
-
-def _append_tags(cursor, frontmatter_dict):
-  """Append tag to frontmatter if entries marked with tag."""
-  if cursor['has_tag'] is None: return
-  tag_name, tag_options = cursor['has_tag']
-  tag_tree = deepcopy(cursor['tag_tree'])
-  frontmatter_dict['tags'].append((tag_name, tag_tree, tag_options))
-  # Reset cursor attr
-  cursor['has_tag'] = None
-
-def _apply_macro(macro, flags, tokens, cursor, frontmatter_dict):
-  """Applies preprocessor macros to parser"""
-  if ',' in macro:
-    for token in tokens[1:]: macro += token
-  flag = re_search(r'\((.*)\)', macro, group=1)
-  if flag is not None: macro = macro[:-len(f'({flag})')]
-
-  # Mark tagged entries on cursor (to append to frontmatter)
-  if any(macro.startswith(t) for t in TAGS):
-    # Handle any unresolved tags (non-attached)
-    if cursor['has_tag'] is not None:
-      _append_tags(cursor, frontmatter_dict)
-    cursor['has_tag'] = (macro, flag)
-  # Check if flag exists
-  elif macro == '@ifdef':
-    is_defined = (flag in flags) \
-              or (flag in frontmatter_dict)
-    cursor['skip'] = not is_defined
-  elif macro == '@ifndef':
-    is_not_defined = (flag not in flags) \
-                  and (flag not in frontmatter_dict)
-    cursor['skip'] = not is_not_defined
-  # Check if flag meets conditional
-  # elif macro == '@if':
-  # elif macro == '@elif':
-  # Switch macro skip
-  elif macro == '@else':
-    cursor['skip'] = not cursor['skip']
-  # End macro checking scope
-  elif macro == '@endif':
-    cursor['skip'] = False
 
 def parse_yaml_types(stype: str,
                      value: str,
@@ -358,8 +313,6 @@ def write_yaml(config: dict,
 
 
 __all__ = [
-  # Constants (1)
-  "TAGS",
   # Functions (4)
   "parse_yaml_types",
   "write_yaml_types",
