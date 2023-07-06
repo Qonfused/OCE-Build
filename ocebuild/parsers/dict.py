@@ -87,11 +87,37 @@ def nested_del(dic: dict,
   for key in keys[:-1]: dic = dic[key]
   del dic[keys[-1]]
 
+def merge_dict(a: dict, b: dict) -> dict:
+  """Merges two dictionaries recursively.
+
+  Args:
+    a: The first dictionary.
+    b: The second dictionary.
+
+  Returns:
+    The merged dictionary.
+  """
+  def merge_recurse(a, b, path=None):
+    # Recurse on dict entries' values
+    if isinstance(a, dict) and isinstance(b, dict):
+      # Compute set of all keys in both dictionaries
+      keys = sorted(set(a.keys()) | set(b.keys()))
+      # Build output dictionary, merging values with common keys recursively
+      return { k: merge_recurse(a.get(k), b.get(k), path + [k]) for k in keys }
+    # Append array values by default
+    elif isinstance(a, list) and isinstance(b, list):
+      return a + b
+    # Override values of `a` with `b` if present in both
+    else: return a if b is None else b
+  # Merge dictionaries
+  return merge_recurse(a, b, path=[])
+
 
 __all__ = [
-  # Functions (4)
+  # Functions (5)
   "flatten_dict",
   "nested_get",
   "nested_set",
-  "nested_del"
+  "nested_del",
+  "merge_dict"
 ]

@@ -15,14 +15,19 @@
 #                             Misc. Cosmetic fixes                             #
 ################################################################################
 
-'@ifdef': RELEASE
+# Remove warning comments
+@delete('#WARNING - 1', '#WARNING - 2', '#WARNING - 3', '#WARNING - 4')
+# Remove redundant comment
+@delete('NVRAM.Add.7C436110-AB2A-4BBB-A880-FE41995C9F82.#INFO (prev-lang:kbd)')
+
+@ifdef(RELEASE)
 # Use default GoldenGate theme with OpenCanopy.
 # - https://dortania.github.io/OpenCore-Post-Install/cosmetic/gui.html
 Misc:
   Boot:
     PickerMode:               String  | "External"
     PickerVariant:            String  | "Acidanthera\GoldenGate"
-'@endif':
+@endif
 
 # Changes default macOS installer/keyboard language to English.
 # - You can find a list of supported languages below (convert HEX -> ASCI):
@@ -55,7 +60,7 @@ PlatformInfo:
 
 ################################################################################
 
-'@ifdef': DEBUG
+@ifdef(DEBUG)
 # Debugging quirks (recommended with DEBUG version of OpenCore)
 # - https://dortania.github.io/OpenCore-Install-Guide/troubleshooting/debug.html
 # - https://dortania.github.io/OpenCore-Install-Guide/troubleshooting/kernel-debugging.html#nvram
@@ -78,4 +83,4 @@ NVRAM:
       # `keepsyms=1`      (show panic log debug symbols)
       # `msgbuf=1048576`  (Resizes kernel msg buffer to 1 MB; avoids truncation)
       boot-args:              String  | "-v debug=0x100 keepsyms=1 msgbuf=1048576"
-'@endif':
+@endif

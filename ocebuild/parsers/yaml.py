@@ -5,6 +5,7 @@
 """Parser for converting annotated YAML to a Python dictionary."""
 
 import re
+from copy import deepcopy
 from datetime import datetime
 from shlex import split
 from typing import List, Literal, Optional, Tuple, Union
@@ -13,6 +14,50 @@ from ocebuild.parsers._lib import update_cursor
 from ocebuild.parsers.dict import flatten_dict, nested_get, nested_set
 from ocebuild.parsers.regex import re_search
 
+
+TAGS = ('@append', '@delete', '@fallback', '@override', '@prepend')
+"""Preprocessor tags for controlling output dict semantics."""
+
+def _append_tags(cursor, frontmatter_dict):
+  """Append tag to frontmatter if entries marked with tag."""
+  if cursor['has_tag'] is None: return
+  tag_name, tag_options = cursor['has_tag']
+  tag_tree = deepcopy(cursor['tag_tree'])
+  frontmatter_dict['tags'].append((tag_name, tag_tree, tag_options))
+  # Reset cursor attr
+  cursor['has_tag'] = None
+
+def _apply_macro(macro, flags, tokens, cursor, frontmatter_dict):
+  """Applies preprocessor macros to parser"""
+  if ',' in macro:
+    for token in tokens[1:]: macro += token
+  flag = re_search(r'\((.*)\)', macro, group=1)
+  if flag is not None: macro = macro[:-len(f'({flag})')]
+
+  # Mark tagged entries on cursor (to append to frontmatter)
+  if any(macro.startswith(t) for t in TAGS):
+    # Handle any unresolved tags (non-attached)
+    if cursor['has_tag'] is not None:
+      _append_tags(cursor, frontmatter_dict)
+    cursor['has_tag'] = (macro, flag)
+  # Check if flag exists
+  elif macro == '@ifdef':
+    is_defined = (flag in flags) \
+              or (flag in frontmatter_dict)
+    cursor['skip'] = not is_defined
+  elif macro == '@ifndef':
+    is_not_defined = (flag not in flags) \
+                  and (flag not in frontmatter_dict)
+    cursor['skip'] = not is_not_defined
+  # Check if flag meets conditional
+  # elif macro == '@if':
+  # elif macro == '@elif':
+  # Switch macro skip
+  elif macro == '@else':
+    cursor['skip'] = not cursor['skip']
+  # End macro checking scope
+  elif macro == '@endif':
+    cursor['skip'] = False
 
 def parse_yaml_types(stype: str,
                      value: str,
@@ -78,7 +123,6 @@ def write_yaml_types(value: Union[Tuple[str, any], any],
     else:
       stype =         stype.rjust(len('       ')).capitalize()
       svalue = str(value if not isinstance(value, tuple) else value[1])
-    # print(stype, svalue)
   elif schema == 'yaml':
     # Parse native types
     if   stype == 'bool':     svalue = str(svalue).lower()
@@ -122,16 +166,18 @@ def parse_yaml(lines: List[str],
   """
   if config is None: config = dict()
   if flags is None: flags = []
-  frontmatter_dict: Optional[dict]=dict()
+  frontmatter_dict = { 'variables': {}, 'tags': [] }
   
   i = 0
   cursor = {
     'keys': [],
     'level': 0,
     'indent': 0,
-    'skip': (def_flag := False),
+    'skip': False,
     'upshift': False,
-    'is_frontmatter': False
+    'is_frontmatter': False,
+    'has_tag': None,
+    'tag_tree': None
   }
   for _line in lines:
     i += 1; line = _line.rstrip()
@@ -158,35 +204,19 @@ def parse_yaml(lines: List[str],
     
     # Handle parsing frontmatter variables
     if cursor['is_frontmatter']:
-      frontmatter_dict[key] = get_schema('yaml')
+      nested_set(frontmatter, ['variables', key], get_schema('yaml'))
       continue
-    # def get_frontmatter():
-    #   """Replaces variables with frontmatter values"""
-
     # Handle preprocessor macros
-    if (macro := tokens[0][:-1]).startswith('@'):
-      flag = tokens[1] if num_tokens == 2 else def_flag
-      # Check if flag exists
-      if   macro == '@ifdef':
-        is_defined = (flag in flags) \
-                  or (flag in frontmatter_dict)
-        cursor['skip'] = not is_defined
-      elif macro == '@ifndef':
-        is_not_defined = (flag not in flags) \
-                     and (flag not in frontmatter_dict)
-        cursor['skip'] = not is_not_defined
-      # Check if flag meets conditional
-      # elif macro == '@if':
-      # elif macro == '@elif':
-      # Switch macro skip
-      elif macro == '@else':
-        cursor['skip'] = not cursor['skip']
-      # End macro checking scope
-      elif macro == '@endif':
-        cursor['skip'] = def_flag
+    elif (macro := tokens[0]).startswith('@'):
+      _apply_macro(macro, flags, tokens, cursor, frontmatter_dict)
       continue
     # Skip through macro checking scope
-    elif cursor['skip']: continue
+    elif cursor['skip']:
+      continue
+
+    #TODO: Handle parsing frontmatter variables
+    # def get_frontmatter():
+    #   """Replaces variables with frontmatter values"""
     
     # Handle non-dict yaml arrays
     if lnorm.startswith('- ') and ': ' not in lnorm:
@@ -204,14 +234,12 @@ def parse_yaml(lines: List[str],
     level = len(line[:-len(lnorm)])
     if num_tokens == 1 and tokens[0].endswith(':'):
       update_cursor(level, key, cursor, upshift=1)
+      cursor['tag_tree'] = cursor['keys']
     # Update dictionary values
     elif num_tokens >= 1:
       # Extract schema and entry value
       schema = 'annotated' if num_tokens >= 3 else 'yaml'
       entry = get_schema(schema)
-
-      # TODO: Parse YAML types to Python types
-      # entry = parseSerializedTypes(...)
 
       # Extract and validate parent tree level
       tree = cursor['keys']
@@ -225,9 +253,12 @@ def parse_yaml(lines: List[str],
         if isinstance(prev_value, list):
           prev_value.append(obj)
           nested_set(config, tree, prev_value)
+          cursor['tag_tree'] = tree + [len(prev_value) - 1]
         else:
           nested_set(config, tree, [obj])
+          cursor['tag_tree'] = tree + [0]
       else:
+        cursor['tag_tree'] = tree + [key]
         # Handle object and array traversal
         if isinstance(prev_value, dict) or prev_value is None:
           nested_set(config, [*tree, key], entry)
@@ -242,6 +273,8 @@ def parse_yaml(lines: List[str],
           nested_set(config, tree, prev_value)
     # Reached invalid line
     else: raise Exception(f'Invalid line at position {i}:\n\n{line}')
+
+    _append_tags(cursor, frontmatter_dict)
   
   if frontmatter: return config, frontmatter_dict
   return config
@@ -325,6 +358,8 @@ def write_yaml(config: dict,
 
 
 __all__ = [
+  # Constants (1)
+  "TAGS",
   # Functions (4)
   "parse_yaml_types",
   "write_yaml_types",
