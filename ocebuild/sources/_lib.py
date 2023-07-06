@@ -9,6 +9,7 @@ from __future__ import annotations
 from io import TextIOWrapper
 from json import load as json_load
 from ssl import _create_unverified_context as skip_ssl_verify
+from urllib.error import HTTPError
 from urllib.request import urlopen, Request
 
 from typing import Union
@@ -39,9 +40,12 @@ class RequestWrapper():
 
 def request(url: Union[str, Request], *args, **kwargs) -> any:
   """Simple wrapper over urlopen for skipping SSL verification."""
-  response = urlopen(url, context=skip_ssl_verify(), *args, **kwargs)
-  return RequestWrapper(response)
-
+  try:
+    response = urlopen(url, context=skip_ssl_verify(), *args, **kwargs)
+    return RequestWrapper(response)
+  except HTTPError as e:
+    print(f'Could not retrieve url: {e.url}')
+    raise e
 
 __all__ = [
   # Functions (1)

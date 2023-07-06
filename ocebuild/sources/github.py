@@ -125,7 +125,12 @@ def github_release_catalog(url: str) -> dict:
     Release catalog.
   """
   try:
-    return github_api_request(url.replace('https://github.com', '/repos')).json()
+    base_url, tag = url.replace('https://github.com', '/repos').split('/tag/')
+    release_catalog = github_api_request(base_url).json()
+    release_id = next(e['id'] for e in release_catalog if e['tag_name'] == tag)
+    if not release_id:
+      raise ValueError(f'No release catalog entry found for {tag}.')
+    return github_api_request(f'{base_url}/{release_id}').json()
   except:
     if not github_rate_limit(raise_error=True): raise
 
@@ -224,12 +229,11 @@ def github_release_url(repository: str,
     # -> "https://github.com/foo/bar/releases/tag/v1.0.0"
   """
   
-  if not tag:
-    try:
-      tags_catalog = github_api_request(f'/repos/{repository}/tags').json()
-      tag = tags_catalog[0]['name']
-    except:
-      if not github_rate_limit(raise_error=True): raise
+  try:
+    tags_catalog = github_api_request(f'/repos/{repository}/tags').json()
+    if not tag: tag = tags_catalog[0]['name']
+  except:
+    if not github_rate_limit(raise_error=True): raise
   return f'https://github.com/{repository}/releases/tag/{tag}'
 
 def github_artifacts_url(repository: str,

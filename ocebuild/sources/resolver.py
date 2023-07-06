@@ -4,9 +4,11 @@
 ##
 """Custom specifier resolver classes and methods."""
 
+from difflib import get_close_matches
 from inspect import signature
 from pathlib import Path
-from typing import Any, Generator, Optional, Tuple, TypeVar, Union
+from re import split
+from typing import Any, Generator, List, Literal, Optional, Tuple, TypeVar, Union
 
 from ocebuild.sources.dortania import *
 from ocebuild.sources.github import *
@@ -78,7 +80,49 @@ class GitHubResolver(BaseResolver):
     self.workflow = workflow
     self.commit = commit
   
-  def resolve(self: TGitHubResolver) -> str:
+  @staticmethod
+  def extract_asset(name: str,
+                    url: str,
+                    build: Literal['RELEASE', 'DEBUG']='RELEASE'
+                    ) -> str:
+    """Extracts the closest matching asset from a GitHub release url."""
+    if '/releases/' not in url:
+      raise ValueError(f'URL must resolve to a GitHub release.')
+
+    # Get the release assets for a given release url
+    release_catalog = github_release_catalog(url)
+    assets = release_catalog['assets']
+    if not len(assets):
+      raise ValueError(f'Release catalog for {name} has no assets.')
+    
+    name_parts = split('-|_| ', name.lower())
+    def get_match(arr: List[dict], cutoff=0.5):
+      """Finds the closest kext bundle in a list of release assets."""
+      closest = get_close_matches(name, [a['name'] for a in arr], n=1, cutoff=cutoff)
+      if not closest or not any([ s in closest[0].lower() for s in name_parts ]):
+        raise ValueError(f'Unable to resolve {name}.')
+      return next(a['browser_download_url'] for a in arr if a['name'] == closest[0])
+
+    # Get the asset with the closest name to the resolver and build target
+    asset = None
+    has_name = lambda asset: all([ s in asset['name'].lower() for s in name_parts ])
+    has_build = lambda asset: build.lower() in asset['name'].lower()
+    # Handle case where there is no clear resolution of the desired kext
+    # i.e. there is no release asset with the same name and build
+    if arr := list(filter(lambda a: not (has_name(a) and has_build(a)), assets)):
+      asset = get_match(arr)
+    # Handle case where there are no build targets
+    elif arr := list(filter(lambda a: has_name(a) and not has_build(a), assets)):
+      asset = get_match(arr)
+    # Handle ambiguous or close matches
+    elif arr := list(filter(lambda a: has_name(a) and has_build(a), assets)):
+      asset = get_match(arr)
+
+    return asset
+
+  def resolve(self: TGitHubResolver,
+              build: Literal['RELEASE', 'DEBUG']='RELEASE'
+              ) -> str:
     """Returns a URL based on the class parameters."""
     params = dict(self)
     # Resolve version tag
@@ -86,6 +130,12 @@ class GitHubResolver(BaseResolver):
       tags = github_tag_names(repository=params['repository'])
       params['tag'] = resolve_version_specifier(versions=tags,
                                                 specifier=params['tag'])
+      # Handle non-standard semver tags
+      if params['tag'] not in tags:
+        tag_matches = get_close_matches(params['tag'], tags)
+        if not tag_matches:
+          raise ValueError(f"No matching tags found for {params['tag']}")
+        params['tag'] = tag_matches[0]
     # Return raw file url
     if self.has_any('path'):
       return github_file_url(**params, raw=True)
@@ -93,7 +143,8 @@ class GitHubResolver(BaseResolver):
     if self.has_any('branch', 'workflow', 'commit'):
       return github_artifacts_url(**params)
     # Return the latest release (default) or by tag
-    return github_release_url(**params)
+    release_url = github_release_url(**params)
+    return self.extract_asset(self.__name__, release_url, build=build)
 
 class DortaniaResolver(BaseResolver):
   """Resolves a Dortania build URL based on the class parameters."""
