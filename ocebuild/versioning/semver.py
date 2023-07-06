@@ -34,7 +34,13 @@ def get_version_str(string: str) -> Union[str, None]:
     >>> get_version_string('latest')
     # -> None
   """
-  # return re_search(r'([\d.]+)', string, group=1)
+  # Remove non-standard release tags
+  string = string\
+    .replace('-prerelease', '') \
+    .replace('-release', '') \
+    .replace('-debug', '') \
+    .replace('-stable', '')
+  # Remove semver versioning symbols
   for symbol in reversed([*SEMVER_SYMBOLS, *COMPARISON_SYMBOLS]):
     if symbol in string[:len(symbol)]:
       return string[len(symbol):]
@@ -133,7 +139,6 @@ def resolve_version_specifier(versions: List[str],
   version_str = get_version_str(specifier)
   version = get_version(version_str)
   if not version: return None
-
   # Parse semver symbols
   symbol = specifier[:specifier.index(version_str if version_str else '')]
   # Up to next minor
@@ -160,10 +165,9 @@ def resolve_version_specifier(versions: List[str],
   else:
     # Exact match
     # e.g. '1.2.3' -> '==1.2.3'
-    if specifier == version_str:
-      filtered = [v for v in sorted_versions
-                  if compare_version(v, version, operator='==')]
-      if len(filtered): return str(filtered[-1])
+    filtered = [v for v in sorted_versions
+                if compare_version(v, version, operator='==')]
+    if len(filtered): return str(filtered[-1])
   # No match
   return None
 
