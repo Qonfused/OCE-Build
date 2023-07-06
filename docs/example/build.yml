@@ -7,7 +7,9 @@ ACPI:
 Drivers:
   - AudioDxe
   - HfsPlus
+@ifdef(RELEASE)
   - OpenCanopy
+@endif
   - OpenRuntime
   - ResetNvramEntry
   - Rts5227S

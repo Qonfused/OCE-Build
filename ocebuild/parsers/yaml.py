@@ -159,7 +159,10 @@ def parse_yaml(lines: List[str],
     
     # Handle parsing frontmatter variables
     if cursor['is_frontmatter']:
-      nested_set(frontmatter, ['variables', key], get_schema('yaml'))
+      value = get_schema('yaml')
+      nested_set(frontmatter_dict, ['variables', key], value)
+      # Add OpenCore build type as global flag
+      if key == 'oc-build': flags += [value]
       continue
     # Handle preprocessor macros
     elif (macro := tokens[0]).startswith('@'):
@@ -231,7 +234,9 @@ def parse_yaml(lines: List[str],
 
     _append_tags(cursor, frontmatter_dict)
   
-  if frontmatter: return config, frontmatter_dict
+  if frontmatter:
+    frontmatter_dict['flags'] = flags
+    return config, frontmatter_dict
   return config
 
 def write_yaml(config: dict,
