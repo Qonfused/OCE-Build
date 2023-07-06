@@ -43,7 +43,12 @@ def extract_archive(url: Union[str, Request],
       filename = re_match(pattern=r'^attachment; filename="?(.*)"?;?$',
                           string=response.headers.get('Content-Disposition'),
                           group=1)
-      extension = "".join(PathResolver(filename).suffixes)
+      if filename:
+        extension = "".join(PathResolver(filename).suffixes)
+      elif '.' in url:
+        extension = f'.{url.split(".")[-1]}'
+      else:
+        extension = url.split("/")[-1]
       # Write archive to a temporary file.
       with NamedTemporaryFile(suffix=extension) as tmp_file:
         tmp_file.write(response.read())
