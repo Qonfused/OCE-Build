@@ -38,3 +38,14 @@ def test_extract_kext_archive(__virtualsmc_archive):
   assert sorted(__virtualsmc_archive['ru.joedm.SMCSuperIO']) == \
     [('as.vit9696.Lilu', '1.2.0'),
      ('as.vit9696.VirtualSMC', '1.0.0')]
+
+  # Verify build targets are extracted correctly
+  url = 'https://github.com/Qonfused/OCE-Build/files/11971818/WhateverGreen-CI.zip'
+  with extract_kext_archive(url) as kexts:
+    # Verify only 1 kext is extracted
+    assert len(kexts) == 1 and 'WhateverGreen' in kexts
+    # Verify kext props are extracted
+    assert kexts['WhateverGreen']['__extract'] == \
+      './WhateverGreen-1.6.6-DEBUG.zip/WhateverGreen.kext'
+    assert kexts['WhateverGreen']['__url'] == url
+    assert kexts['WhateverGreen']['version'] == '1.6.6'

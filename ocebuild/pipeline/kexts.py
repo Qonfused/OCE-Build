@@ -5,9 +5,9 @@
 """Methods for retrieving and handling Kext packages."""
 
 from contextlib import contextmanager
-from shutil import rmtree
+from shutil import rmtree, unpack_archive
 
-from typing import Generator
+from typing import Generator, Literal
 
 from ocebuild.filesystem.archives import extract_archive
 from ocebuild.parsers.plist import parse_plist
@@ -16,6 +16,7 @@ from ocebuild.sources.resolver import PathResolver
 
 @contextmanager
 def extract_kext_archive(url: str,
+                         build: Literal['RELEASE', 'DEBUG']='RELEASE',
                          persist: bool=False
                          ) -> Generator[dict, any, None]:
   """Extracts Kexts from a URL and yields a temporary extraction dictionary.
@@ -44,12 +45,17 @@ def extract_kext_archive(url: str,
     #   'Bar': { ... }
     # }
   """
-  kexts = dict()
+  tmpdir: PathResolver=None
   try:
-    with extract_archive(url, persist=True) as pkg:
-      for plist_path in pkg.glob('**/*.kext/Contents/Info.plist'):
+    kexts = dict()
+    with extract_archive(url, persist=True) as tmpdir:
+      # Handle nested archives
+      for archive in tmpdir.glob('**/*.zip'):
+        unpack_archive(archive, tmpdir.joinpath(archive.name))
+      # Extract metadata from all included kexts
+      for plist_path in tmpdir.glob('**/*.kext/Contents/Info.plist'):
         kext_path = PathResolver(plist_path).parents[1].as_posix()
-        extract_path = f'.{str(kext_path).split(pkg.as_posix())[1]}'
+        extract_path = f'.{str(kext_path).split(tmpdir.as_posix())[1]}'
         with open(plist_path, 'r', encoding='UTF-8') as file:
           # Build plist dictionary from filestream
           plist = parse_plist(file)
@@ -75,11 +81,15 @@ def extract_kext_archive(url: str,
           "executable": executable,
           "dependencies": libraries
         }
+    # Filter build targets if provided in extract path
+    if any([ build.lower() in e['__extract'].lower() for e in kexts.values() ]):
+      kexts = { k:v for k,v in kexts.items()
+                if build.lower() in v['__extract'].lower() }
     # Yield the kexts dictionary.
     yield kexts
   finally:
     # Cleanup after context exits
-    if not persist: rmtree(pkg)
+    if tmpdir and not persist: rmtree(tmpdir)
 
 
 __all__ = [
