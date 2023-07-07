@@ -24,10 +24,10 @@ Kexts:
     properties:
       MaxKernel: "20.99.99"
       MinKernel: "20.0.0"
-  RestrictEvents-1:
-    specifier: acidanthera/RestrictEvents#e5c52564f5bca1aebbd916f2753f5a58809703a8
+  RestrictEvents-1: "acidanthera/RestrictEvents#e5c52564f5bca1aebbd916f2753f5a58809703a8"
   RestrictEvents:
-    specifier: acidanthera/RestrictEvents#foo
+    specifier: acidanthera/RestrictEvents#foo # The 'foo' branch is overrided by
+                                              # the 'branch' property below
     branch: force-vmm-install
     properties:
       Comment: "Workaround for macOS Sonoma OTA updates on unsupported SMBIOSes"
