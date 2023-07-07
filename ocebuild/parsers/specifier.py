@@ -15,16 +15,17 @@ def parse_semver_params(entry: Union[str, dict],
                         parameters: Optional[dict]) -> Dict[str, str]:
   """"""
   if parameters is None: parameters = dict()
-  params = ('branch', 'tag', 'workflow', 'commit')
+  # Release tag
+  if (prefix := re_match(f'^=', specifier)):
+    parameters['tag'] = specifier[len(prefix):]
+  params = ('tag', 'branch', 'workflow', 'commit')
   # (Priority: 1) Named specifier parameters
   if re_match(f'^#[a-zA-Z\\-]+=', specifier):
     for k in params:
-      if (prefix := re_match(f'#.*{k}=', specifier)):
+      if (prefix := re_match(f'#.*?{k}=', specifier)):
         #TODO: Add separation for multiple parameters (,)
         parameters[k] = specifier[len(prefix):]
   # (Priority: 2) Unnamed specifier parameters
-  elif (prefix := re_match(f'^=', specifier)):
-    parameters['tag'] = specifier[len(prefix):]
   elif (prefix := re_match(f'^#', specifier)):
     pattern = specifier[len(prefix):]
     # Test for whether matched string is a valid hash sha
@@ -49,17 +50,24 @@ def parse_specifier(name: str,
   parameters: Dict[str, str]=dict()
   resolver_props = { '__name__': name, '__specifier__': specifier }
 
+  # Specifier is a wildcard
+  if specifier == '*': return None
+
+  # Specifier points to a local file
+  if specifier.startswith('file:'):
+    specifier = specifier \
+      .replace('file://', '') \
+      .replace('file:', '')
+  if (filepath := PathResolver(specifier)).exists():
+    parameters['path'] = filepath
+    return PathResolver(**parameters, **resolver_props)
+
   # Specifier points to a github repository
   if (repository := re_match(r'[a-zA-Z0-9\-]+\/[a-zA-Z0-9\-]+', specifier)):
     parameters['repository'] = repository
     semver_specifier = specifier[len(repository):]
     parameters = parse_semver_params(entry, semver_specifier, parameters)
     return GitHubResolver(**parameters, **resolver_props)
-
-  # Specifier points to a local file
-  if (filepath := PathResolver(specifier)).exists():
-    parameters['path'] = filepath
-    return PathResolver(**parameters, **resolver_props)
   
   # Specifier points to a Dortania build (or latest)
   parameters = parse_semver_params(entry, specifier, parameters)
