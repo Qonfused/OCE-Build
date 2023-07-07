@@ -203,6 +203,7 @@ def parse_yaml(lines: List[str],
       tree = cursor['keys']
       while len(tree) > level / max(1, cursor['indent']):
         tree.pop(-1)
+        cursor['level'] -= cursor['indent']
       prev_value = nested_get(config, tree)
       
       # Handle initial array values
