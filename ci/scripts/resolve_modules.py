@@ -16,8 +16,7 @@ from inspect import getdoc
 
 from typing import Dict, List, Optional, Tuple, Union
 
-from ci import PROJECT_ROOT, PROJECT_ENTRYPOINT
-from ci.sort_imports import sort_file_imports
+from ci import PROJECT_ENTRYPOINT, PROJECT_ROOT
 
 from ocebuild.filesystem.posix import glob
 from ocebuild.parsers.regex import re_search
@@ -198,9 +197,6 @@ def generate_api_exports(filepath: Union[str, PathResolver],
   with open(filepath, 'r', encoding='UTF-8') as module_file:
     file_text = module_file.read()
 
-    # Sort imports by type
-    file_text = sort_file_imports(file_text)
-
     # Handle preprocessor flags
     preprocessor_flags = re_search(r'\#pragma\s?(.*)$', file_text,
                                     group=1,
@@ -231,9 +227,7 @@ def generate_api_exports(filepath: Union[str, PathResolver],
     PathResolver(filepath).write_text(file_text, encoding='UTF-8')
 
 
-def _main(entrypoint: Optional[str]=None
-          ) -> None:
-  
+def _main(entrypoint: Optional[str]=None) -> None:
   # Extract project entrypoint or default to project entrypoint
   if entrypoint: entrypoint = PROJECT_ROOT.joinpath(entrypoint)
   if not entrypoint: entrypoint = PROJECT_ENTRYPOINT

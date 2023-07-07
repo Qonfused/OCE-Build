@@ -76,3 +76,15 @@ help    = "[CI] Regenerates implicit namespace and package-level module exports.
   options = ["--entrypoint", "--project"]
   type = "string"
   help = "The entrypoint to resolve modules for. (Default: ocebuild entrypoint)"
+
+################################################################################
+
+[tool.poe.tasks.sort-imports]
+script  = "ci.scripts.sort_imports:_main"
+help    = "[CI] Sorts package and namespace imports in all python files."
+
+[[tool.poe.tasks.sort-imports.args]]
+  name = "entrypoint"
+  options = ["--entrypoint", "--project"]
+  type = "string"
+  help = "The entrypoint to sort imports in. (Default: ocebuild entrypoint)"

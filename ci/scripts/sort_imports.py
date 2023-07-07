@@ -1,7 +1,10 @@
+#!/usr/bin/env python3
+
 ## @file
 # Copyright (c) 2023, Cory Bennett. All rights reserved.
 # SPDX-License-Identifier: BSD-3-Clause
 ##
+"""Sorts import statements within python modules."""
 
 from itertools import groupby
 from operator import itemgetter
@@ -9,9 +12,13 @@ from os import path as os_path
 from re import sub as re_sub
 from sys import builtin_module_names, stdlib_module_names
 
-from ci import PROJECT_ROOT
+from typing import Optional, List, Union
 
+from ci import PROJECT_ROOT, PROJECT_ENTRYPOINT
+
+from ocebuild.filesystem import glob
 from ocebuild.parsers.regex import re_search
+from ocebuild.sources.resolver import PathResolver
 
 
 PYTHON_MODULES = set(builtin_module_names) | (stdlib_module_names)
@@ -101,6 +108,31 @@ def sort_file_imports(file: str) -> str:
     return file.replace(imports_block, sorted_block)
 
   return file
+
+def recurse_modules(entrypoint: Union[str, PathResolver]) -> List[str]:
+  """Returns a list of all project packages recursively."""
+  patterns = map(lambda f: PathResolver(f).resolve(),
+                 glob(entrypoint,
+                      pattern='**/*.py',
+                      exclude='**/__init__.py'))
+
+  packages = sorted(patterns)
+  return packages
+
+
+def _main(entrypoint: Optional[str]=None) -> None:
+  # Extract project entrypoint or default to project entrypoint
+  if entrypoint: entrypoint = PROJECT_ROOT.joinpath(entrypoint)
+  if not entrypoint: entrypoint = PROJECT_ENTRYPOINT
+
+  # Enumerate each package
+  for package in recurse_modules(entrypoint):
+    with open(package, 'r', encoding='UTF-8') as module_file:
+      file_text = module_file.read()
+      # Sort imports by type
+      file_text = sort_file_imports(file_text)
+      # Write to file
+    PathResolver(package).write_text(file_text, encoding='UTF-8')
 
 
 __all__ = [
