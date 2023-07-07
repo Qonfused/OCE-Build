@@ -5,4 +5,4 @@
 # SPDX-License-Identifier: BSD-3-Clause
 ##
 
-from ci.lib import *
+from ci.constants import *

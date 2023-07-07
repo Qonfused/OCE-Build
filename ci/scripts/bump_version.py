@@ -11,12 +11,12 @@ from argparse import ArgumentParser
 from types import SimpleNamespace
 from typing import Optional
 
+from ci import PROJECT_ROOT
+
 from ocebuild.parsers.regex import re_search
 from ocebuild.sources.resolver import PathResolver
 from ocebuild.version import __file__ as __version_file__, __version__
 from ocebuild.version import _MAJOR_VERSION, _MINOR_VERSION, _PATCH_VERSION, _PRE_RELEASE, _BUILD
-
-from ci import PROJECT_ROOT
 
 
 version = SimpleNamespace(major=int(_MAJOR_VERSION),

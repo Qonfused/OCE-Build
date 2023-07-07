@@ -53,7 +53,7 @@ pytest-cov  = ">=3,<5"
 ################################################################################
 
 [tool.poe]
-include = [ "ci/tasks.toml" ]
+include = [ "ci/scripts/tasks.toml" ]
 poetry_command = "" # Run tasks via `poetry <task>` with the poethepoet plugin.
 
 [tool.poe.tasks.test]
@@ -67,7 +67,7 @@ help    = "Runs project tests with a short coverage report."
 [tool.pytest.ini_options]
 addopts           = "-rfEX --strict-markers"
 # filterwarnings = [ "ignore::DeprecationWarning" ]
-norecursedirs     = [ "dist", "docs", "lib", "scripts" ]
+norecursedirs     = [ "ci", "dist", "docs", "scripts" ]
 python_files      = [ "*_test.py" ]
 python_functions  = [ "test_*" ]
 

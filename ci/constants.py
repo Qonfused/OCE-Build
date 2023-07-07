@@ -3,8 +3,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 ##
 
-from ocebuild.sources.resolver import PathResolver
 from ocebuild import __file__
+from ocebuild.sources.resolver import PathResolver
 
 
 PROJECT_ROOT = PathResolver(__file__).parents[1]

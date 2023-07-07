@@ -4,7 +4,7 @@
 # Copyright (c) 2023, Cory Bennett. All rights reserved.
 # SPDX-License-Identifier: BSD-3-Clause
 ##
-"""Regenerates implicit namespace and package-level module exports.."""
+"""Regenerates implicit namespace and package-level module exports."""
 
 from argparse import ArgumentParser
 from ast import parse
@@ -16,11 +16,12 @@ from inspect import getdoc
 
 from typing import Dict, List, Optional, Tuple, Union
 
+from ci import PROJECT_ROOT, PROJECT_ENTRYPOINT
+from ci.sort_imports import sort_file_imports
+
 from ocebuild.filesystem.posix import glob
 from ocebuild.parsers.regex import re_search
 from ocebuild.sources.resolver import PathResolver
-
-from ci import PROJECT_ROOT, PROJECT_ENTRYPOINT
 
 
 PRAGMA_FLAGS = [
@@ -196,6 +197,10 @@ def generate_api_exports(filepath: Union[str, PathResolver],
   module_exports = get_public_exports(filepath, module_path)
   with open(filepath, 'r', encoding='UTF-8') as module_file:
     file_text = module_file.read()
+
+    # Sort imports by type
+    file_text = sort_file_imports(file_text)
+
     # Handle preprocessor flags
     preprocessor_flags = re_search(r'\#pragma\s?(.*)$', file_text,
                                     group=1,
@@ -221,6 +226,7 @@ def generate_api_exports(filepath: Union[str, PathResolver],
       file_text = file_text.replace(public_exports, replacement_text)
     else:
       file_text += f'\n\n{replacement_text}\n'
+
     # Write to file
     PathResolver(filepath).write_text(file_text, encoding='UTF-8')
 
