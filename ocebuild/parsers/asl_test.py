@@ -8,6 +8,8 @@ from functools import partial
 
 import pytest
 
+from ci import MOCK_PATH
+
 from ocebuild.parsers.asl import *
 from ocebuild.parsers.regex import re_search
 
@@ -96,9 +98,8 @@ def test_parse_definition_block():
     parse_definition_block('DefinitionBlock ()')
 
 def test_parse_ssdt_namespace():
-  mock_path = 'ci/mock'
   # Test against SSDT-A
-  with open(f'{mock_path}/ACPI/SSDT-A.dsl', encoding='UTF-8') as ssdt_file:
+  with open(f'{MOCK_PATH}/ACPI/SSDT-A.dsl', encoding='UTF-8') as ssdt_file:
     assert parse_ssdt_namespace(ssdt_file) == \
       {'definition_block': OrderedDict([('AMLFileName', ''),
                                         ('TableSignature', 'SSDT'),
@@ -114,7 +115,7 @@ def test_parse_ssdt_namespace():
                                  ('SB.PCI0.QUUX', 'Name')])}
     
   # Test against SSDT-B
-  with open(f'{mock_path}/ACPI/SSDT-B.dsl', encoding='UTF-8') as ssdt_file:
+  with open(f'{MOCK_PATH}/ACPI/SSDT-B.dsl', encoding='UTF-8') as ssdt_file:
     assert parse_ssdt_namespace(ssdt_file) == \
       {'definition_block': OrderedDict([('AMLFileName', ''),
                                         ('TableSignature', 'SSDT'),

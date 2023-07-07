@@ -13,9 +13,13 @@ PROJECT_ROOT = PathResolver(__file__).parents[1]
 PROJECT_ENTRYPOINT = PathResolver(__file__).parent
 """The project's import entrypoint."""
 
+MOCK_PATH = PROJECT_ROOT.joinpath('ci', 'mock')
+"""The project's test mock directory."""
+
 
 __all__ = [
-  # Constants (2)
+  # Constants (3)
   "PROJECT_ROOT",
-  "PROJECT_ENTRYPOINT"
+  "PROJECT_ENTRYPOINT",
+  "MOCK_PATH"
 ]
