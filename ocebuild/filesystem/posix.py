@@ -4,7 +4,7 @@
 ##
 """Methods for handling cross-platform file system operations."""
 
-from os import rename as os_rename, PathLike
+from os import PathLike, rename as os_rename
 from shutil import move as shutil_move
 
 from typing import Generator, List, Optional, Union

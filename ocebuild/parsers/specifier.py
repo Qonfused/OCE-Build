@@ -7,7 +7,7 @@
 from typing import Dict, Optional, Union
 
 from ocebuild.parsers.regex import re_match, re_search
-from ocebuild.sources.resolver import GitHubResolver, DortaniaResolver, PathResolver
+from ocebuild.sources.resolver import DortaniaResolver, GitHubResolver, PathResolver
 
 
 def parse_semver_params(entry: Union[str, dict],

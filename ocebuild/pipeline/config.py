@@ -6,7 +6,7 @@
 
 from typing import Dict, List, Tuple, Union
 
-from ocebuild.parsers.dict import nested_del, nested_get, nested_set, merge_dict
+from ocebuild.parsers.dict import merge_dict, nested_del, nested_get, nested_set
 from ocebuild.parsers.plist import parse_plist
 from ocebuild.parsers.yaml import parse_yaml
 from ocebuild.sources.resolver import PathResolver

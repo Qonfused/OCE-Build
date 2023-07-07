@@ -3,9 +3,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 ##
 
-import pytest
-
 from datetime import datetime, timezone
+
+import pytest
 
 from ocebuild.parsers.dict import nested_get
 from ocebuild.parsers.yaml import *

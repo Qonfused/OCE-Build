@@ -12,9 +12,9 @@ from os import path as os_path
 from re import sub as re_sub
 from sys import builtin_module_names, stdlib_module_names
 
-from typing import Optional, List, Union
+from typing import List, Optional, Union
 
-from ci import PROJECT_ROOT, PROJECT_ENTRYPOINT
+from ci import PROJECT_ENTRYPOINT, PROJECT_ROOT
 
 from ocebuild.filesystem import glob
 from ocebuild.parsers.regex import re_search

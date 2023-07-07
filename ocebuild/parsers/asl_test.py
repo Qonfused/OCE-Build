@@ -3,10 +3,10 @@
 # SPDX-License-Identifier: BSD-3-Clause
 ##
 
-import pytest
-
 from collections import OrderedDict
 from functools import partial
+
+import pytest
 
 from ocebuild.parsers.asl import *
 from ocebuild.parsers.regex import re_search

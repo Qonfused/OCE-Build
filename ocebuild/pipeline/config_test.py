@@ -7,4 +7,3 @@ import pytest
 
 from ocebuild.pipeline.config import *
 
-

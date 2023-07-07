@@ -11,7 +11,7 @@ from tempfile import mkdtemp
 from typing import Generator, Literal
 
 from ocebuild.filesystem.archives import extract_archive
-from ocebuild.filesystem.posix import move, glob
+from ocebuild.filesystem.posix import glob, move
 from ocebuild.sources.github import github_archive_url
 from ocebuild.sources.resolver import PathResolver
 

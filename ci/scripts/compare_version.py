@@ -9,9 +9,9 @@
 from argparse import ArgumentParser
 from platform import python_version as platform_version
 
-from packaging import version as pkgv
-
 from typing import Optional
+
+from packaging import version as pkgv
 
 
 def _main(python_version: Optional[str] = None,

@@ -6,9 +6,10 @@
 
 from graphlib import TopologicalSorter
 from itertools import chain
-from packaging import version as vpkg
 
 from typing import Dict, Generator, List, Tuple, Union
+
+from packaging import version as vpkg
 
 
 SEMVER_SYMBOLS      = ('~', '^')

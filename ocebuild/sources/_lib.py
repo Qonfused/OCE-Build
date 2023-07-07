@@ -10,7 +10,7 @@ from io import TextIOWrapper
 from json import load as json_load
 from ssl import _create_unverified_context as skip_ssl_verify
 from urllib.error import HTTPError
-from urllib.request import urlopen, Request
+from urllib.request import Request, urlopen
 
 from typing import Union
 

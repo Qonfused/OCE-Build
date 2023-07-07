@@ -4,10 +4,11 @@
 ##
 """Parser for converting property list to a Python dictionary."""
 
-from base64 import b64encode, b64decode
+import re
+from base64 import b64decode, b64encode
 from datetime import datetime
 from io import TextIOWrapper
-import re
+
 from typing import List, Optional, Tuple, Union
 
 from ocebuild.parsers._lib import update_cursor

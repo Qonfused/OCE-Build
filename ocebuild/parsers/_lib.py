@@ -5,6 +5,7 @@
 """Parser helper functions."""
 
 from copy import deepcopy
+
 from ocebuild.parsers.regex import re_search
 
 

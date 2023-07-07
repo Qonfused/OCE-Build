@@ -7,9 +7,10 @@
 import re
 from datetime import datetime
 from shlex import split
+
 from typing import List, Literal, Optional, Tuple, Union
 
-from ocebuild.parsers._lib import update_cursor, _append_tags, _apply_macro
+from ocebuild.parsers._lib import _append_tags, _apply_macro, update_cursor
 from ocebuild.parsers.dict import flatten_dict, nested_get, nested_set
 from ocebuild.parsers.regex import re_search
 

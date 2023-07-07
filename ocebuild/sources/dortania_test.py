@@ -7,4 +7,3 @@ import pytest
 
 from ocebuild.sources.dortania import *
 
-

@@ -6,10 +6,10 @@
 ##
 """Binary helper functions."""
 
+import subprocess
 from hashlib import sha256
 from os import chmod
 from platform import system
-import subprocess
 
 from typing import List, Literal
 

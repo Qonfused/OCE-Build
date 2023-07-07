@@ -9,7 +9,7 @@
 from argparse import ArgumentParser
 from ast import parse
 from ast import Import, ImportFrom
-from ast import Assign, FunctionDef, AsyncFunctionDef, ClassDef
+from ast import Assign, AsyncFunctionDef, ClassDef, FunctionDef
 from collections import OrderedDict
 from importlib import import_module
 from inspect import getdoc

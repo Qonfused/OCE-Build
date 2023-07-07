@@ -3,9 +3,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 ##
 
-import pytest
-
 from pathlib import Path
+
+import pytest
 
 from ocebuild.sources.resolver import *
 

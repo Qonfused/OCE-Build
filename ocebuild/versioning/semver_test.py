@@ -4,7 +4,6 @@
 ##
 
 import pytest
-
 from packaging import version as vpkg
 
 from ocebuild.pipeline.kexts_test import __virtualsmc_archive
