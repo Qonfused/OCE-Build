@@ -139,10 +139,11 @@ __all__ = [
   # Constants (2)
   "PYTHON_MODULES",
   "RE_IMPORT_BLOCK",
-  # Functions (5)
+  # Functions (6)
   "module_name",
   "package_name",
   "sorting_rules",
   "sort_imports_block",
-  "sort_file_imports"
+  "sort_file_imports",
+  "recurse_modules"
 ]
