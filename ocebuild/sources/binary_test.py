@@ -11,12 +11,12 @@ from ocebuild.sources.resolver import PathResolver
 
 def test_get_binary_ext():
   ext = get_binary_ext()
-  assert PathResolver(f'scripts/lib/iasl/iasl{ext}').exists()
+  assert PathResolver(f'bin/iasl/iasl{ext}').exists()
 
 def test_wrap_binary():
   binary = f'iasl{get_binary_ext()}'
   stdout = wrap_binary(args=['-v'],
-                       binary_path=f'scripts/lib/iasl/{binary}')
+                       binary_path=f'bin/iasl/{binary}')
   if   binary == 'iasl':
     assert stdout.strip() == "\n".join([
       "Intel ACPI Component Architecture",
