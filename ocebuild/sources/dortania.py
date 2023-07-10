@@ -4,7 +4,7 @@
 ##
 """Methods for formatting and retrieving Dortania source URLs."""
 
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from typing import Optional
 
@@ -13,13 +13,13 @@ from ocebuild.sources._lib import request
 from ocebuild.sources.github import github_file_url, github_release_url
 
 
-DORTANIA_LAST_UPDATED: datetime
+DORTANIA_LAST_UPDATED: datetime=None
 """The last time the Dortania build catalog was updated."""
 
-DORTANIA_LATEST_BUILDS: dict
+DORTANIA_LATEST_BUILDS: dict={}
 """The latest Dortania build catalog."""
 
-DORTANIA_LISTED_BUILDS: dict
+DORTANIA_LISTED_BUILDS: set={}
 """Available plugins in the Dortania build catalog."""
 
 ################################################################################
@@ -28,23 +28,31 @@ DORTANIA_LISTED_BUILDS: dict
 
 def is_latest_build() -> bool:
   """Checks if the build catalog is latest."""
+  global DORTANIA_LAST_UPDATED
+
   timestamp = datetime.now(tz=timezone.utc)
   # Only re-validate 30 minutes after the last update
-  if (timestamp - DORTANIA_LAST_UPDATED) <= datetime.timedelta(minutes=30):
+  if not DORTANIA_LAST_UPDATED: pass
+  elif (timestamp - DORTANIA_LAST_UPDATED) <= timedelta(minutes=30):
     return True
+
   # Revalidate build catalog timestamp
   latest_timestamp = datetime.fromisoformat(
       request(dortania_file_url('last_updated.txt')).text().read())
-  if latest_timestamp > DORTANIA_LAST_UPDATED:
+  if not DORTANIA_LAST_UPDATED or latest_timestamp > DORTANIA_LAST_UPDATED:
     DORTANIA_LAST_UPDATED = latest_timestamp
     return False
+
   return True
 
 def has_build(plugin: str) -> str:
   """Checks if a plugin has a build."""
+  global DORTANIA_LISTED_BUILDS
   # Revalidates build catalog cache
   if not is_latest_build():
-    DORTANIA_LISTED_BUILDS = request(dortania_file_url('plugins.json')).json()
+    # print('Revalidating build catalog cache...')
+    catalog = request(dortania_file_url('plugins.json')).json()
+    DORTANIA_LISTED_BUILDS = set(catalog['plugins'])
   # Check if plugin is in the build catalog
   return plugin in DORTANIA_LISTED_BUILDS
 
@@ -54,17 +62,19 @@ def has_build(plugin: str) -> str:
 
 def get_latest_sha(plugin: str) -> str:
   """Gets the latest build sha for a plugin."""
+  global DORTANIA_LATEST_BUILDS
   if not has_build(plugin):
     raise ValueError(f'Plugin {plugin} not in Dortania build catalog.')
   # Revalidates build catalog cache
-  if not is_latest_build():
+  if not DORTANIA_LATEST_BUILDS or not is_latest_build():
     DORTANIA_LATEST_BUILDS = request(dortania_file_url('latest.json')).json()
   # Returns the latest build sha
   try:
     return nested_get(DORTANIA_LATEST_BUILDS,
                       keys=[plugin, 'versions', 0, 'commit', 'sha'])
   except:
-    raise ValueError(f'Plugin {plugin} has no builds listed.')
+    raise
+    # raise ValueError(f'Plugin {plugin} has no builds listed.')
 
 ################################################################################
 #                        URL formatting/retrieval functions                    #
@@ -85,7 +95,7 @@ def dortania_release_url(plugin: str,
   # Returns the latest build release (default) or by commit
   if not commit: commit = get_latest_sha(plugin)
   return github_release_url(repository='dortania/build-repo',
-                            tag=f'{plugin}{commit[:7]}')
+                            tag=f'{plugin}-{commit[:7]}')
 
 
 __all__ = [

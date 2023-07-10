@@ -4,7 +4,7 @@
 ##
 """Dictionary helper functions."""
 
-from typing import Dict, List, Union
+from typing import Dict, List, Union, Optional
 
 
 def flatten_dict(dic: dict,
@@ -42,8 +42,9 @@ def flatten_dict(dic: dict,
   return flat_dict
 
 def nested_get(dic: dict,
-               keys: List[str]
-               ) -> Union[dict, None]:
+               keys: List[str],
+               default: Optional[any]=None
+               ) -> Union[dict, any, None]:
   """Retrieves a nested value from a dictionary.
 
   Args:
@@ -56,7 +57,7 @@ def nested_get(dic: dict,
   try:
     for key in keys: dic = dic[key]
     return dic
-  except: return None
+  except: return default
 
 def nested_set(dic: dict,
                keys: List[str],

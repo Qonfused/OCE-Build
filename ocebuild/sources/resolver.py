@@ -13,7 +13,13 @@ from typing import Any, Generator, List, Literal, Optional, Tuple, TypeVar, Unio
 
 from ocebuild.sources.dortania import *
 from ocebuild.sources.github import *
-from ocebuild.versioning.semver import resolve_version_specifier
+from ocebuild.versioning.semver import get_version, resolve_version_specifier
+
+
+TBaseResolver = TypeVar("TBaseResolver", bound="BaseResolver")
+TGitHubResolver = TypeVar("TGitHubResolver", bound="GitHubResolver")
+TDortaniaResolver = TypeVar("TDortaniaResolver", bound="DortaniaResolver")
+TPathResolver = TypeVar("TPathResolver", bound="PathResolver")
 
 
 class BaseResolver():
@@ -22,7 +28,6 @@ class BaseResolver():
   This class is used to store custom specifier methods and metadata.
   @internal
   """
-  TBaseResolver = TypeVar("TBaseResolver", bound="BaseResolver")
 
   def __init__(self: TBaseResolver,
                *args,
@@ -57,7 +62,6 @@ class BaseResolver():
 
 class GitHubResolver(BaseResolver):
   """Resolves a GitHub URL based on the class parameters."""
-  TGitHubResolver = TypeVar("TGitHubResolver", bound="GitHubResolver")
 
   def __init__(self: TGitHubResolver,
                repository: str,
@@ -82,22 +86,26 @@ class GitHubResolver(BaseResolver):
     self.commit = commit
   
   @staticmethod
-  def extract_asset(name: str,
+  def extract_asset(self: Union[TGitHubResolver, TDortaniaResolver],
+                    name: str,
                     url: str,
-                    build: Literal['RELEASE', 'DEBUG']='RELEASE'
+                    build: Optional[Literal['RELEASE', 'DEBUG']]=None
                     ) -> str:
     """Extracts the closest matching asset from a GitHub release url."""
     if '/releases/' not in url:
       raise ValueError(f'URL must resolve to a GitHub release.')
+    if build is None: build = 'RELEASE'
+    self.build = build
+
+    release_catalog = github_release_catalog(url)
 
     # Get the release assets for a given release url
-    release_catalog = github_release_catalog(url)
     assets = release_catalog['assets']
     if not len(assets):
       raise ValueError(f'Release catalog for {name} has no assets.')
     
     name_parts = split('-|_| ', name.lower())
-    def get_match(arr: List[dict], cutoff=0.5):
+    def get_match(arr: List[dict], cutoff=0.25):
       """Finds the closest kext bundle in a list of release assets."""
       closest = get_close_matches(name, [a['name'] for a in arr], n=1, cutoff=cutoff)
       if not closest or not any([ s in closest[0].lower() for s in name_parts ]):
@@ -108,51 +116,73 @@ class GitHubResolver(BaseResolver):
     asset = None
     has_name = lambda asset: all([ s in asset['name'].lower() for s in name_parts ])
     has_build = lambda asset: build.lower() in asset['name'].lower()
-    # Handle case where there is no clear resolution of the desired kext
-    # i.e. there is no release asset with the same name and build
-    if arr := list(filter(lambda a: not (has_name(a) and has_build(a)), assets)):
+    # Handle ambiguous or close matches
+    if arr := list(filter(lambda a: has_name(a) and has_build(a), assets)):
       asset = get_match(arr)
     # Handle case where there are no build targets
     elif arr := list(filter(lambda a: has_name(a) and not has_build(a), assets)):
       asset = get_match(arr)
-    # Handle ambiguous or close matches
-    elif arr := list(filter(lambda a: has_name(a) and has_build(a), assets)):
+    # Handle case where there is no clear resolution of the desired kext
+    # i.e. there is no release asset with the same name and build
+    elif arr := list(filter(lambda a: not (has_name(a) and has_build(a)), assets)):
       asset = get_match(arr)
+    
+    # Store the asset version
+    release_version = get_version(release_catalog['tag_name'])
+    if not release_version: pass
+      #TODO: Handle case where the release tag is not a valid version
+      # try:
+      #   # Do a best attempt of extracting the version from the asset name
+      #   asset_metastring = "-".join(asset.split('/')[-1].split('-')[1:]) \
+      #     .lower() \
+      #     .replace(f'-{build.lower()}', '')
+      #   version_parts = asset_metastring.split('.')[:-1]
+      #   release_version = get_version(".".join(version_parts))
+      # except: pass
+    if release_version:
+      self.version = ".".join(map(str, release_version.release))
 
     return asset
 
   def resolve(self: TGitHubResolver,
-              build: Literal['RELEASE', 'DEBUG']='RELEASE'
+              build: Optional[Literal['RELEASE', 'DEBUG']]=None
               ) -> str:
     """Returns a URL based on the class parameters."""
     params = dict(self)
+  
     # Resolve version tag
     if self.has_any('tag'):
+      input_tag = params['tag']
       tags = github_tag_names(repository=params['repository'])
       params['tag'] = resolve_version_specifier(versions=tags,
-                                                specifier=params['tag'])
+                                                specifier=input_tag)
+      if params['tag'] is None:
+        raise ValueError(f"{params['repository']} - Could not resolve a tag for '{input_tag}'")
       # Handle non-standard semver tags
       if params['tag'] not in tags:
         tag_matches = get_close_matches(params['tag'], tags)
         if not tag_matches:
-          raise ValueError(f"No matching tags found for {params['tag']}")
+          raise ValueError(f"{params['repository']} - No matching tags found for '{params['tag']}'")
         params['tag'] = tag_matches[0]
+      
     # Return raw file url
     if self.has_any('path'):
       return github_file_url(**params, raw=True)
+  
     # Resolve artifact from latest workflow run
     if self.has_any('branch', 'workflow', 'commit'):
       return github_artifacts_url(**params)
+  
     # Return the latest release (default) or by tag
     release_url = github_release_url(**params)
     if (name := self.__name__):
       # Return release asset url if name is provided
-      return self.extract_asset(name, url=release_url, build=build)
+      return self.extract_asset(self, name, url=release_url, build=build)
+  
     return release_url
 
 class DortaniaResolver(BaseResolver):
   """Resolves a Dortania build URL based on the class parameters."""
-  TDortaniaResolver = TypeVar("TDortaniaResolver", bound="DortaniaResolver")
 
   def __init__(self: TDortaniaResolver,
                commit: Optional[str]=None,
@@ -165,23 +195,39 @@ class DortaniaResolver(BaseResolver):
 
     # Public properties
     self.commit = commit
+  
+  @staticmethod
+  def has_build(plugin: str): return has_build(plugin=plugin)
 
-  def resolve(self: TDortaniaResolver) -> str:
+  def resolve(self: TDortaniaResolver,
+              build: Optional[Literal['RELEASE', 'DEBUG']]=None
+              ) -> str:
     """Returns a URL based on the class parameters."""
+    if not build: build = self.build
     plugin = self.__name__
     params = dict(self)
+  
     # Resolve build commit sha
     commit_sha: str
     if self.has_any('commit'):
       commit_sha = params['commit']
     else:
       commit_sha = get_latest_sha(plugin)
+      self.commit = commit_sha
+    
     # Return the latest build (default) or by commit sha
-    return dortania_release_url(plugin, commit=commit_sha)
+    release_url = dortania_release_url(plugin, commit=commit_sha)
+    if build is not None:
+      # Return release asset url if name is provided
+      return GitHubResolver.extract_asset(self,
+                                          name=plugin,
+                                          url=release_url,
+                                          build=build)
+  
+    return release_url
 
 class PathResolver(BaseResolver, cls := type(Path())):
   """Resolves a filepath based on the class parameters."""
-  TPathResolver = TypeVar("TPathResolver", bound="PathResolver")
 
   def __init__(self: TPathResolver,
                path: Path,
@@ -236,9 +282,11 @@ class PathResolver(BaseResolver, cls := type(Path())):
     parent_dir = cls(path).resolve()
     if self.resolve().is_file():
       parent_dir = parent_dir.parent
-    return self.relative_to(parent_dir).as_posix().__str__()
+    return self.relative_to(parent_dir).as_posix()
   
-  def resolve(self: TPathResolver, strict: bool = False) -> cls:
+  def resolve(self: TPathResolver,
+              strict: bool = False
+              ) -> cls:
     """Resolves a filepath based on the class parameters."""
     resolved_path: cls
     # Check if path has called the `__init__` method - Python 3.12+
@@ -256,6 +304,11 @@ class PathResolver(BaseResolver, cls := type(Path())):
 
 
 __all__ = [
+  # Variables (4)
+  "TBaseResolver",
+  "TGitHubResolver",
+  "TDortaniaResolver",
+  "TPathResolver",
   # Classes (3)
   "GitHubResolver",
   "DortaniaResolver",

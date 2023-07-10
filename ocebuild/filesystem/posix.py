@@ -5,11 +5,21 @@
 """Methods for handling cross-platform file system operations."""
 
 from os import PathLike, rename as os_rename
-from shutil import move as shutil_move
+from shutil import move as shutil_move, rmtree
 
 from typing import Generator, List, Optional, Union
 
 from ocebuild.sources.resolver import PathResolver
+
+
+def remove(path: Union[str, "PathLike[str]"]) -> None:
+  """Removes a file or directory."""
+  path = PathResolver(path)
+  if not path.exists(): return
+  elif path.is_file(): path.unlink()
+  elif path.is_dir(): rmtree(path)
+  else:
+    raise ValueError(f'Path is not a file or directory: {path}')
 
 
 def rename(path: Union[str, "PathLike[str]"],
@@ -92,7 +102,8 @@ def glob(directory: Union[str, "PathLike[str]"],
 
 
 __all__ = [
-  # Functions (3)
+  # Functions (4)
+  "remove",
   "rename",
   "move",
   "glob"

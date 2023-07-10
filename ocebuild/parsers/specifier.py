@@ -4,6 +4,8 @@
 ##
 """Custom specifier resolver classes and methods."""
 
+from os import getcwd
+
 from typing import Dict, Optional, Union
 
 from ocebuild.parsers.regex import re_match, re_search
@@ -43,7 +45,8 @@ def parse_semver_params(entry: Union[str, dict],
   return parameters
 
 def parse_specifier(name: str,
-                    entry: Union[str, Dict[str, any]]
+                    entry: Union[str, Dict[str, any]],
+                    base_path: Optional[str]=getcwd()
                     ) -> Union[GitHubResolver, PathResolver, DortaniaResolver, None]:
   """"""
   specifier = entry['specifier'] if isinstance(entry, dict) else entry
@@ -51,18 +54,13 @@ def parse_specifier(name: str,
   resolver_props = { '__name__': name, '__specifier__': specifier }
 
   # Specifier is a wildcard
-  if specifier == '*': return None
-
-  # Specifier points to a local file
-  if specifier.startswith('file:'):
-    specifier = specifier \
-      .replace('file://', '') \
-      .replace('file:', '')
-  if (filepath := PathResolver(specifier)).exists():
-    parameters['path'] = filepath
-    return PathResolver(**parameters, **resolver_props)
+  if not specifier or specifier == '*': return None
 
   # Specifier points to a github repository
+  if isinstance(entry, dict) and 'repository' in entry:
+    # Add repository name to specifier if provided as an object parameter
+    delimiter = '=' if not specifier.startswith('#') else ''
+    specifier = delimiter.join([entry['repository'], specifier])
   if (repository := re_match(r'[a-zA-Z0-9\-]+\/[a-zA-Z0-9\-]+', specifier)):
     parameters['repository'] = repository
     semver_specifier = specifier[len(repository):]
@@ -70,8 +68,21 @@ def parse_specifier(name: str,
     return GitHubResolver(**parameters, **resolver_props)
   
   # Specifier points to a Dortania build (or latest)
-  parameters = parse_semver_params(entry, specifier, parameters)
-  return DortaniaResolver(**parameters, **resolver_props)
+  if DortaniaResolver.has_build(name):
+    parameters = parse_semver_params(entry, specifier, parameters)
+    return DortaniaResolver(**parameters, **resolver_props)
+  
+  # Specifier points to a local file
+  if specifier.startswith('file:'):
+    specifier = specifier \
+      .replace('file://', '') \
+      .replace('file:', '')
+  if (filepath := PathResolver(base_path, specifier)).exists():
+    parameters['path'] = filepath
+    return PathResolver(**parameters, **resolver_props)
+  
+  # No resolver matched
+  return None
 
 
 __all__ = [

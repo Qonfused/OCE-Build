@@ -66,3 +66,5 @@ def test_extract_opencore_archive():
       }
     }
     assert validate_path_tree(pkg, efi_tree)
+
+def test_extract_opencore_directory(): pass # Not implemented

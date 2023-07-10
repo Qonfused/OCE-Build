@@ -163,7 +163,7 @@ def parse_yaml(lines: List[str],
       value = get_schema('yaml')
       nested_set(frontmatter_dict, ['variables', key], value)
       # Add OpenCore build type as global flag
-      if key == 'oc-build': flags += [value]
+      if key in ('build', 'target'): flags += [value]
       continue
     # Handle preprocessor macros
     elif (macro := tokens[0]).startswith('@'):

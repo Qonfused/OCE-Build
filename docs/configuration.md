@@ -10,15 +10,15 @@ Refer to [`example/build.yml`](`/docs/example/build.yml`) for an example build c
 
 In a `build.yml` file, the OpenCore build and version can optionally be specified using YAML frontmatter with the below properties:
 
-- The `oc-build` property can be either `RELEASE` or `DEBUG` (defaults to `RELEASE`).
-- The `oc-version` property is a [version specifier](#version-specifiers) (covered later in this document).
+- The `build` property can be either `RELEASE` or `DEBUG` (defaults to `RELEASE`).
+- The `version` property is a [version specifier](#version-specifiers) (covered later in this document).
 
 For example, the below configuration specifies the latest debug build of OpenCore:
 
 ```yaml
 ---
-oc-version: latest
-oc-build: DEBUG
+version: latest
+build: DEBUG
 ---
 ```
 
