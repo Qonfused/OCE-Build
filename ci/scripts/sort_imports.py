@@ -10,7 +10,8 @@ from itertools import groupby
 from operator import itemgetter
 from os import path as os_path
 from re import sub as re_sub
-from sys import builtin_module_names, stdlib_module_names
+#FIXME: stdlib_module_names is 3.10+ only.
+from sys import builtin_module_names, stdlib_module_names 
 
 from typing import List, Optional, Union
 

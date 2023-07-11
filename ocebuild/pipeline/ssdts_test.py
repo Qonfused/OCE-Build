@@ -5,9 +5,9 @@
 
 import pytest
 
-from ci import MOCK_PATH
-
 from .ssdts import *
+
+from ci import MOCK_PATH
 
 from ocebuild.sources.resolver import PathResolver
 
