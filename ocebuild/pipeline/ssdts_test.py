@@ -7,7 +7,8 @@ import pytest
 
 from ci import MOCK_PATH
 
-from ocebuild.pipeline.ssdts import *
+from .ssdts import *
+
 from ocebuild.sources.resolver import PathResolver
 
 

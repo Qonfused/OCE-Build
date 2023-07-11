@@ -12,8 +12,9 @@ from os import PathLike
 
 from typing import Callable, Literal, Optional, Tuple, Union
 
-from ocebuild.errors._lib import disable_exception_traceback
-from ocebuild.errors.types import PathValidationError
+from ._lib import disable_exception_traceback
+from .types import PathValidationError
+
 from ocebuild.parsers.dict import flatten_dict
 from ocebuild.sources.resolver import PathResolver
 

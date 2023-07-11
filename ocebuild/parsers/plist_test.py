@@ -7,10 +7,11 @@ from datetime import datetime, timezone
 
 import pytest
 
-from ocebuild.parsers.dict import nested_get
-from ocebuild.parsers.plist import *
+from .dict import nested_get
+from .plist import *
+
 from ocebuild.pipeline.opencore import extract_opencore_archive
-from ocebuild.sources._lib import request
+from ocebuild.sources import request
 from ocebuild.sources.binary import get_binary_ext, wrap_binary
 from ocebuild.sources.github import github_file_url, github_tag_names
 from ocebuild.versioning.semver import get_version

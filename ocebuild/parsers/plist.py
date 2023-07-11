@@ -11,9 +11,9 @@ from io import TextIOWrapper
 
 from typing import List, Optional, Tuple, Union
 
-from ocebuild.parsers._lib import update_cursor
-from ocebuild.parsers.dict import flatten_dict, nested_get, nested_set
-from ocebuild.parsers.regex import re_search
+from ._lib import update_cursor
+from .dict import flatten_dict, nested_get, nested_set
+from .regex import re_search
 
 
 PLIST_SCHEMA = {

@@ -8,7 +8,8 @@ from os import getcwd
 
 from typing import Dict, Optional, Union
 
-from ocebuild.parsers.regex import re_match, re_search
+from .regex import re_match, re_search
+
 from ocebuild.sources.resolver import DortaniaResolver, GitHubResolver, PathResolver
 
 

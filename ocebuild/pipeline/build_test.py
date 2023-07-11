@@ -5,5 +5,5 @@
 
 import pytest
 
-from ocebuild.pipeline.build import *
+from .build import *
 

@@ -6,12 +6,13 @@
 
 from os import getcwd
 
-from typing import Tuple, Union, Optional, Iterator
+from typing import Iterator, Optional, Tuple, Union
+
+from .build import _iterate_entries
 
 from ocebuild.parsers.dict import nested_get, nested_set
 from ocebuild.parsers.specifier import parse_specifier
 from ocebuild.parsers.yaml import parse_yaml
-from ocebuild.pipeline.build import _iterate_entries
 from ocebuild.sources.resolver import *
 
 

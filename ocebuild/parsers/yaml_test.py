@@ -7,8 +7,8 @@ from datetime import datetime, timezone
 
 import pytest
 
-from ocebuild.parsers.dict import nested_get
-from ocebuild.parsers.yaml import *
+from .dict import nested_get
+from .yaml import *
 
 
 def test_parse_yaml_types(): pass # Not implemented

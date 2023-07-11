@@ -7,7 +7,7 @@
 from functools import partial
 from sys import exit as sys_exit
 
-from typing import List, Iterator, Optional, Union
+from typing import Iterator, List, Optional, Union
 
 import click
 from rich.progress import track

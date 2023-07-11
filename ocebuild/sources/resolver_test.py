@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from ocebuild.sources.resolver import *
+from .resolver import *
 
 
 def test_GitHubResolver():

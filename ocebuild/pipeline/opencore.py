@@ -8,7 +8,7 @@ from contextlib import contextmanager
 from shutil import copy, copytree, rmtree
 from tempfile import mkdtemp
 
-from typing import Generator, Literal, Optional, Union, Iterator, List
+from typing import Generator, Iterator, List, Literal, Optional, Union
 
 from ocebuild.filesystem.archives import extract_archive
 from ocebuild.filesystem.posix import glob, move, remove

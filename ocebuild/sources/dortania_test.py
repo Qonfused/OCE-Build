@@ -5,5 +5,5 @@
 
 import pytest
 
-from ocebuild.sources.dortania import *
+from .dortania import *
 

@@ -10,10 +10,11 @@ from urllib.request import Request
 
 from typing import List, Optional, Union
 
+from ._lib import request
+
 from ocebuild.constants import ENV
 from ocebuild.errors import disable_exception_traceback, GitHubRateLimit
 from ocebuild.parsers.dict import nested_get
-from ocebuild.sources._lib import request
 
 
 def github_api_request(endpoint: Optional[str]=None,

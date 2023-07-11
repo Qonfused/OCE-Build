@@ -8,10 +8,10 @@ from functools import partial
 
 import pytest
 
-from ci import MOCK_PATH
+from .asl import *
+from .regex import re_search
 
-from ocebuild.parsers.asl import *
-from ocebuild.parsers.regex import re_search
+from ci import MOCK_PATH
 
 
 ################################################################################

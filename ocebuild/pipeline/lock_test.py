@@ -5,5 +5,5 @@
 
 import pytest
 
-from ocebuild.pipeline.lock import *
+from .lock import *
 

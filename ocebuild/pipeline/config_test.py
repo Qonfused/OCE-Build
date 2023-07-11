@@ -5,5 +5,5 @@
 
 import pytest
 
-from ocebuild.pipeline.config import *
+from .config import *
 

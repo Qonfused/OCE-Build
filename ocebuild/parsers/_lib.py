@@ -6,7 +6,7 @@
 
 from copy import deepcopy
 
-from ocebuild.parsers.regex import re_search
+from .regex import re_search
 
 
 TAGS = ('@append', '@delete', '@fallback', '@override', '@prepend')

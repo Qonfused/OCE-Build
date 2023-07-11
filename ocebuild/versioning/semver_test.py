@@ -6,8 +6,9 @@
 import pytest
 from packaging import version as vpkg
 
+from .semver import *
+
 from ocebuild.pipeline.kexts_test import __virtualsmc_archive
-from ocebuild.versioning.semver import *
 
 
 def test_get_version_str():

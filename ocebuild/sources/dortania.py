@@ -8,9 +8,10 @@ from datetime import datetime, timedelta, timezone
 
 from typing import Optional
 
+from ._lib import request
+from .github import github_file_url, github_release_url
+
 from ocebuild.parsers.dict import nested_get
-from ocebuild.sources._lib import request
-from ocebuild.sources.github import github_file_url, github_release_url
 
 
 DORTANIA_LAST_UPDATED: datetime=None

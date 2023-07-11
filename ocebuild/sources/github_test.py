@@ -5,7 +5,7 @@
 
 import pytest
 
-from ocebuild.sources.github import *
+from .github import *
 
 
 def test_github_file_url(): pass # Not implemented

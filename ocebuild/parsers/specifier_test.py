@@ -5,8 +5,8 @@
 
 import pytest
 
-from ocebuild.parsers.specifier import *
-from ocebuild.parsers.yaml import parse_yaml
+from .specifier import *
+from .yaml import parse_yaml
 
 
 def test_parse_specifier(): pass # Not implemented

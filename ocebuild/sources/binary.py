@@ -13,8 +13,9 @@ from platform import system
 
 from typing import List, Literal
 
+from .resolver import PathResolver
+
 from ocebuild.errors._lib import disable_exception_traceback
-from ocebuild.sources.resolver import PathResolver
 
 
 def get_binary_ext(platform: Literal['Windows', 'Darwin', 'Linux']=system()

@@ -11,8 +11,9 @@ from re import split
 
 from typing import Any, Generator, List, Literal, Optional, Tuple, TypeVar, Union
 
-from ocebuild.sources.dortania import *
-from ocebuild.sources.github import *
+from .dortania import *
+from .github import *
+
 from ocebuild.versioning.semver import get_version, resolve_version_specifier
 
 

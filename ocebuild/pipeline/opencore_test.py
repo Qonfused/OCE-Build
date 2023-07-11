@@ -5,8 +5,9 @@
 
 import pytest
 
+from .opencore import *
+
 from ocebuild.errors.validation import validate_path_tree
-from ocebuild.pipeline.opencore import *
 from ocebuild.sources.github import github_tag_names
 from ocebuild.versioning.semver import get_version
 

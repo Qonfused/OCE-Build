@@ -9,8 +9,8 @@ from io import TextIOWrapper
 
 from typing import List, Union
 
-from ocebuild.parsers.dict import nested_set
-from ocebuild.parsers.regex import re_search
+from .dict import nested_set
+from .regex import re_search
 
 
 def _normalize_line(string: str):

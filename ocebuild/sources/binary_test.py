@@ -5,8 +5,8 @@
 
 import pytest
 
-from ocebuild.sources.binary import *
-from ocebuild.sources.resolver import PathResolver
+from .binary import *
+from .resolver import PathResolver
 
 
 def test_get_binary_ext():
