@@ -8,7 +8,7 @@ from contextlib import contextmanager
 from shutil import copy, copytree, rmtree
 from tempfile import mkdtemp
 
-from typing import Generator, Literal, Optional, Union
+from typing import Generator, Literal, Optional, Union, Iterator, List
 
 from ocebuild.filesystem.archives import extract_archive
 from ocebuild.filesystem.posix import glob, move, remove
@@ -18,6 +18,17 @@ from ocebuild.sources.resolver import PathResolver
 
 OPENCORE_BINARY_DATA_URL = github_archive_url('acidanthera/OcBinaryData',
                                               branch='master')
+
+def _iterate_entries(opencore_pkg: PathResolver,
+                     OC_DIR: PathResolver
+                     ) -> Generator[PathResolver, any, None]:
+  """Iterate over the entries in the build configuration."""
+  for category in map(lambda p: p.name, OC_DIR.iterdir()):
+    if category not in ('ACPI', 'Drivers', 'Kexts', 'Tools'): continue
+    for path in map(lambda p: p.relative_to(opencore_pkg).as_posix(),
+                    OC_DIR.joinpath(category).iterdir()):
+      yield path
+
 
 @contextmanager
 def extract_opencore_archive(url: str,
@@ -79,7 +90,10 @@ def extract_opencore_archive(url: str,
 def extract_opencore_directory(resolvers: dict,
                                lockfile: dict,
                                target: str,
-                               out_dir: Optional[str]=None
+                               out_dir: Optional[str]=None,
+                               *args,
+                               __wrapper: Optional[Iterator]=None,
+                               **kwargs
                                ) -> Union[PathResolver, None]:
   """"""
   url = resolvers['OpenCore']['url']
@@ -91,16 +105,17 @@ def extract_opencore_directory(resolvers: dict,
     # Include only binaries that are specified in the build config
     bundled = set(v['__filepath'] for v in resolvers.values()
                   if v['specifier'] == '*')
-    for category in map(lambda p: p.name, OC_DIR.iterdir()):
-      if category not in ('ACPI', 'Drivers', 'Kexts', 'Tools'): continue
-      for path in map(lambda p: p.relative_to(opencore_pkg).as_posix(),
-                      OC_DIR.joinpath(category).iterdir()):
-        if path not in bundled:
-          remove(opencore_pkg.joinpath(path))
-        else:
-          #TODO: Add entry under OpenCore's `bundled` property
-          bundled.discard(path)
-          del resolvers[PathResolver(path).stem]
+    # Handle interactive mode for iterator
+    iterator = set(_iterate_entries(opencore_pkg, OC_DIR))
+    if __wrapper is not None: iterator = __wrapper(iterator)
+    # Iterate over the entries in the extracted OpenCore package
+    for path in iterator:
+      if path not in bundled:
+        remove(opencore_pkg.joinpath(path))
+      else:
+        #TODO: Add entry under OpenCore's `bundled` property
+        bundled.discard(path)
+        del resolvers[PathResolver(path).stem]
     # Copy the remaining files to the output directory
     if out_dir is not None:
       copytree(opencore_pkg, out_dir, dirs_exist_ok=True)

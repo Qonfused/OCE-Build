@@ -7,7 +7,7 @@ readme        = "docs/README.md"
 license       = "BSD-3-Clause"
 homepage      = "https://github.com/Qonfused/OCE-Build"
 repository    = "https://github.com/Qonfused/OCE-Build"
-documentation = "https://oce-build.readthedocs.io/"
+documentation = "https://ocebuild.readthedocs.io/"
 keywords      = [ "cli", "tui", "packaging", "dependency", "opencore" ]
 classifiers   = [
   "Development Status :: 1 - Planning",
@@ -37,7 +37,11 @@ python            = ">=3.8"
 packaging         = "^23.0"
 graphlib_backport = { version = "^1.0.0", python = "<3.9" }
 typing_extensions = { version = "^4.2.0", python = "<3.10" }
-  
+
+[tool.poetry.group.cli.dependencies]
+click = "^8.0.1"
+rich = "^13.4.2"
+
 [tool.poetry.group.dev.dependencies]
 python-dotenv = "^1.0.0"
 
@@ -51,6 +55,9 @@ pytest-cov  = ">=3,<5"
 ################################################################################
 #                                Project Scripts                               #
 ################################################################################
+
+[tool.poetry.scripts]
+ocebuild = "ocebuild.cli.__main__:_main"
 
 [tool.poe]
 include = [ "ci/scripts/tasks.toml" ]

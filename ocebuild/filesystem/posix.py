@@ -71,7 +71,7 @@ def glob(directory: Union[str, "PathLike[str]"],
          include: Optional[Union[str, List[str]]]=None,
          exclude: Optional[Union[str, List[str]]]=None,
          first: Optional[bool] = False
-         ) -> Union[Generator[PathResolver, None, None], PathResolver]:
+         ) -> Union[Generator[PathResolver, None, None], PathResolver, None]:
   """Returns a list of paths matching the given pattern.
 
   Args:
@@ -98,7 +98,9 @@ def glob(directory: Union[str, "PathLike[str]"],
     for s in exclude:
       exclude_matches |= set(PathResolver(directory).glob(s))
     matches = list(set(matches) - exclude_matches)
-  return matches[0] if first and len(matches) else matches
+  if first:
+    return matches[0] if len(matches) else None
+  return matches
 
 
 __all__ = [

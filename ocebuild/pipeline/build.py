@@ -4,6 +4,8 @@
 ##
 """"""
 
+from itertools import chain
+
 from typing import List, Tuple
 
 from ocebuild.parsers.dict import nested_get, nested_set
@@ -16,9 +18,15 @@ def __set_var_default(build_vars: dict, name: str, default: str):
     nested_set(build_vars, ['variables', name], variable)
   return variable
 
-def read_build_config(filepath: str,
-                      normalize_entries: bool=True
-                      ) -> Tuple[dict, dict, List[str]]:
+def _iterate_entries(build_config: dict) -> List[Tuple[str, str, dict]]:
+  """Iterate over the entries in the build configuration."""
+  def group_entries(category: str, entries: dict):
+    return [(category, name, entry) for name, entry in entries.items()]
+  return list(chain(*[group_entries(c,d) for c,d in build_config.items()]))
+
+def read_build_file(filepath: str,
+                    normalize_entries: bool=True
+                    ) -> Tuple[dict, dict, List[str]]:
   """Read the build configuration from the specified build file."""
   with open(filepath, 'r', encoding='UTF-8') as f:
     build_config, build_vars = parse_yaml(f, frontmatter=True)
@@ -61,5 +69,5 @@ def read_build_config(filepath: str,
 
 __all__ = [
   # Functions (1)
-  "read_build_config"
+  "read_build_file"
 ]
