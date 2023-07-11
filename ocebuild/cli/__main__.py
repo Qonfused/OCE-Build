@@ -8,6 +8,7 @@
 
 import click
 
+from ._lib import _format_url, error
 from .build import cli as build
 
 
@@ -23,4 +24,13 @@ def _main():
   cli.add_command(build)
   cli()
 
-if __name__ == '__main__': _main()
+if __name__ == '__main__':
+  try: _main()
+  except Exception:
+    _rich_traceback_omit = True
+    issues_url = _format_url("https://github.com/Qonfused/OCE-Build/issues")
+    error(msg="An unexpected error occurred.",
+          label='Abort',
+          hint=f"Please report this issue at {issues_url}.",
+          traceback=True)
+
