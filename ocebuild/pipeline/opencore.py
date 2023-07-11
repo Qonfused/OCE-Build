@@ -90,7 +90,7 @@ def extract_opencore_archive(url: str,
 def extract_opencore_directory(resolvers: dict,
                                lockfile: dict,
                                target: str,
-                               out_dir: Optional[str]=None,
+                               out_dir: Union[str, PathResolver],
                                *args,
                                __wrapper: Optional[Iterator]=None,
                                **kwargs
@@ -107,19 +107,20 @@ def extract_opencore_directory(resolvers: dict,
                   if v['specifier'] == '*')
     # Handle interactive mode for iterator
     iterator = set(_iterate_entries(opencore_pkg, OC_DIR))
+    num_entries = len(iterator)
     if __wrapper is not None: iterator = __wrapper(iterator)
     # Iterate over the entries in the extracted OpenCore package
-    for path in iterator:
+    for idx, path in enumerate(iterator):
       if path not in bundled:
         remove(opencore_pkg.joinpath(path))
       else:
         #TODO: Add entry under OpenCore's `bundled` property
         bundled.discard(path)
         del resolvers[PathResolver(path).stem]
-    # Copy the remaining files to the output directory
-    if out_dir is not None:
-      copytree(opencore_pkg, out_dir, dirs_exist_ok=True)
-      return PathResolver(out_dir, OC_DIR.relative_to(opencore_pkg))
+      # Copy the remaining files to the output directory
+      if idx + 1 == num_entries:
+        copytree(opencore_pkg, out_dir, dirs_exist_ok=True)
+        return PathResolver(out_dir, OC_DIR.relative_to(opencore_pkg))
 
 
 __all__ = [
