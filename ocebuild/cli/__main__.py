@@ -16,11 +16,10 @@ from .lock import cli as lock
 
 
 @click.group(context_settings=CONTEXT_SETTINGS)
-@click.option('-v', '--verbose', is_flag=True, help='Enable verbose output.')
 @click.pass_context
-def cli(ctx, verbose):
+def cli(ctx):
   """Main runner for the CLI."""
-  ctx.obj = CLIEnv(verbose=verbose)
+  ctx.obj = CLIEnv()
 
 
 def _main():
