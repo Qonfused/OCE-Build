@@ -278,10 +278,13 @@ class PathResolver(BaseResolver, cls := type(Path())):
     # Re-initialize PathResolver instances
     return (PathResolver(p) for p in glob_iter)
 
-  def relative(self: TPathResolver, path: Union[str, TPathResolver]) -> str:
+  def relative(self: TPathResolver,
+               path: Union[str, TPathResolver]='.',
+               from_parent: bool=False
+               ) -> str:
     """Resolves a relative representation from a path."""
     parent_dir = cls(path).resolve()
-    if self.resolve().is_file():
+    if from_parent and self.resolve().is_file():
       parent_dir = parent_dir.parent
     return self.relative_to(parent_dir).as_posix()
   

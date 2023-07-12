@@ -62,7 +62,8 @@ def recurse_packages(entrypoint: Union[str, PathResolver]) -> List[str]:
 
 def recurse_modules(entrypoint: Union[str, PathResolver]) -> List[str]:
   """Returns a list of all project modules recursively."""
-  patterns = map(lambda f: PathResolver(f).relative(entrypoint),
+  patterns = map(lambda f: PathResolver(f).relative(entrypoint,
+                                                    from_parent=True),
                  glob(entrypoint,
                       pattern='[!_]*.py',
                       include='_lib.py',
