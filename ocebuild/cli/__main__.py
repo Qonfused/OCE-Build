@@ -6,31 +6,35 @@
 ##
 """Entry point for the CLI."""
 
+from os import _exit as os_exit
+
 import click
 
-from ._lib import _format_url, error
+from ._lib import _format_url, abort, CLIEnv, CONTEXT_SETTINGS
 from .build import cli as build
 
 
-CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
-"""Shared context settings for the CLI."""
-
-@click.group(context_settings=CONTEXT_SETTINGS)
-def cli(): pass
+@click.group(context_settings=CONTEXT_SETTINGS,
+             invoke_without_command=True)
+@click.option('-v', '--verbose', is_flag=True, help='Enable verbose output.')
+@click.pass_context
+def cli(ctx, verbose):
+  """Main runner for the CLI."""
+  ctx.obj = CLIEnv(verbose=verbose)
 
 
 def _main():
-  """Main runner for the CLI."""
-  cli.add_command(build)
-  cli()
-
-if __name__ == '__main__':
-  try: _main()
+  """Entry point for the CLI."""
+  try:
+    cli.add_command(build)
+    cli()
+  # Cleanup the CLI environment on exit.
+  except SystemExit as e:
+    os_exit(e.code or 0)
+  # Catch any unhandled exceptions.
   except Exception:
-    _rich_traceback_omit = True
     issues_url = _format_url("https://github.com/Qonfused/OCE-Build/issues")
-    error(msg="An unexpected error occurred.",
-          label='Abort',
-          hint=f"Please report this issue at {issues_url}.",
-          traceback=True)
+    abort(msg="An unexpected error occurred.",
+          hint=f"Please report this issue at {issues_url}.")
 
+if __name__ == '__main__': _main()

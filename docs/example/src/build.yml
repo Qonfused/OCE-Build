@@ -37,7 +37,7 @@ Kexts:
       - VoodooI2C/VoodooI2CServices
       - VoodooI2C/VoodooGPIO
       - VoodooI2C/VoodooInput
-  Foo: "file:UTBMap.kext"
+  Foo: "file:./Kexts/UTBMap.kext"
 Tools:
   - ControlMsrE2
   - OpenShell

@@ -8,101 +8,56 @@
 
 from os import getcwd
 
+from typing import List, Tuple, Union
+
 import click
 from rich.progress import Progress
 
-from ._lib import echo, error, progress_bar
+from ._lib import CLIEnv, abort, cli_command, debug, error, progress_bar
 
 from ocebuild.errors import PathValidationError
 from ocebuild.filesystem import glob, remove
 from ocebuild.parsers.dict import nested_get
 from ocebuild.pipeline.build import read_build_file
-from ocebuild.pipeline.lock import read_lockfile, resolve_specifiers
 from ocebuild.pipeline.opencore import extract_opencore_directory
 from ocebuild.sources.resolver import PathResolver
 
 
-@click.command(name="build")
-@click.option("-c", "--cwd",
-              default=getcwd(),
-              type=click.Path(file_okay=False),
-              help="Use the specified directory as the project root.")
-@click.option("-o", "--out",
-              default='dist',
-              type=click.Path(file_okay=False),
-              help="Use the specified directory as the output directory.")
-@click.option("--clean",
-              is_flag=True,
-              help="Clean the output directory before building.")
-@click.option("--update",
-              is_flag=True,
-              help="Update outdated lockfile entries before building.")
-@click.option("--force",
-              is_flag=True,
-              help="Force the build even if the lockfile is up to date.")
-def cli(cwd, out, clean, update, force):
-  """Builds the project's OpenCore EFI directory."""
-
-  BUILD_DIR = PathResolver(cwd, out)
-  if clean:
-    try:
-      remove(BUILD_DIR)
-    except Exception as e:
-      error(msg=f'Failed to clean the output directory ({BUILD_DIR})',
-            hint='Check the output directory permissions.',
-            label='Abort', traceback=True, suppress=[__file__])
-
-  # Read the build configuration
+def get_build_file(cwd: Union[str, PathResolver]
+                   ) -> Tuple[dict, dict, List[str], PathResolver, PathResolver]:
+  """Read the build configuration"""
   BUILD_FILE = glob(cwd, '**/build.yml', include='**/build.yaml', first=True)
   try:
-    build_config, build_vars, flags = read_build_file(filepath=BUILD_FILE)
-  except:
-    error(msg="Could not find 'build.{yml,yaml}'",
-          hint="Try running `ocebuild init` first.")
+    if BUILD_FILE:
+      debug(msg=f"Found build configuration at '{BUILD_FILE.relative(cwd)}'.")
+      build_config, build_vars, flags = read_build_file(filepath=BUILD_FILE)
+    else:
+      error(msg="Could not find 'build.{yml,yaml}'",
+            hint="Try running `ocebuild init` first.")
+  except Exception as e:
+    abort(msg=f"Encountered an error while reading '{BUILD_FILE.name}': {e}",
+          hint='Check the build configuration for errors.',)
   else: 
     PROJECT_DIR = PathResolver(BUILD_FILE.parent)
+    debug(msg=f"Using '{PROJECT_DIR.relative('.')}' as the project root.")
+  
+  return build_config, build_vars, flags, BUILD_FILE, PROJECT_DIR
 
-  # Read the lockfile
-  LOCK_FILE = PathResolver(PROJECT_DIR, 'build.lock')
-  if LOCK_FILE.exists():
-    try:
-      lockfile = read_lockfile(lockfile_path=LOCK_FILE)
-      if not lockfile:
-        raise AssertionError('The lockfile is empty.')
-    except Exception as e:
-      error(msg=f"Encountered an error while reading '{LOCK_FILE.name}': {e}",
-            hint="Try running `ocebuild lock` first.")
-  else:
-    lockfile = {}
-  
-  # Resolve the specifiers in the build configuration
-  try:
-    with Progress(transient=True) as progress:
-      bar = progress_bar('Resolving build specifiers', wrap=progress)
-      resolvers = resolve_specifiers(build_config, lockfile,
-                                    base_path=PROJECT_DIR,
-                                    update=update,
-                                    force=force,
-                                    # Interactive arguments
-                                    __wrapper=bar)
-  except Exception as e:
-    error(msg=f'Failed to resolve build specifiers: {e}',
-          hint='Check the build configuration for errors.',
-          label='Abort', traceback=True, suppress=[__file__])
-  else:
-    if not resolvers:
-      echo(calls=[{'msg': '\nNothing to build.', 'fg': 'white' },
-                  'Try running with `--update` or `--force` to regenerate a build.'],
-           exit=0)
-  
-  # Extract the OpenCore package to the output directory
+def extract_opencore_pkg(cwd: Union[str, PathResolver],
+                         build_config: dict,
+                         build_vars: dict,
+                         resolvers: dict,
+                         lockfile: dict,
+                         out_dir: Union[str, PathResolver]
+                         ) -> PathResolver:
+  """Extracts the OpenCore package to the output directory"""
   try:
     with Progress(transient=True) as progress:
       bar = progress_bar('Extracting OpenCore package', wrap=progress)
       OC_DIR = extract_opencore_directory(resolvers,
                                           lockfile,
                                           target=build_vars['variables']['target'],
-                                          out_dir=BUILD_DIR,
+                                          out_dir=out_dir,
                                           # Interactive arguments
                                           __wrapper=bar)
     # Validate that the OpenCore directory was extracted
@@ -115,7 +70,7 @@ def cli(cwd, out, clean, update, force):
                                 kind='Directory')
     # Validate that the OpenCore binary was extracted
     oc_config = nested_get(build_config, ['OpenCorePkg', 'OpenCore'])
-    oc_binary = PathResolver(BUILD_DIR, oc_config['__filepath'])
+    oc_binary = PathResolver(out_dir, oc_config['__filepath'])
     if not (oc_binary.exists() and OC_DIR.joinpath(oc_binary.name).exists()):
       raise PathValidationError('The extracted OpenCore package is malformed.',
                                 name=oc_binary.name,
@@ -125,5 +80,60 @@ def cli(cwd, out, clean, update, force):
     error(msg=f'Failed to extract the OpenCore package: {e}',
           hint='Check the OpenCore build configuration for errors.')
   except Exception as e:
-    error(msg=f'Encountered an error while extracting the OpenCore package',
-          label='Abort', traceback=True, suppress=[__file__])
+    abort(msg=f'Encountered an error while extracting the OpenCore package')
+  else:
+    OC_DIR = PathResolver(cwd, OC_DIR.resolve())
+    debug(msg=f"Extracted OpenCore binaries to '{OC_DIR.relative(cwd)}'.")
+
+  return OC_DIR
+
+
+@cli_command(name='build')
+@click.option("-c", "--cwd",
+              type=click.Path(file_okay=False),
+              help="Use the specified directory as the working directory.")
+@click.option("-o", "--out",
+              type=click.Path(file_okay=False),
+              help="Use the specified directory as the output directory.")
+@click.option("--clean",
+              is_flag=True,
+              help="Clean the output directory before building.")
+@click.option("--update",
+              is_flag=True,
+              help="Update outdated lockfile entries before building.")
+@click.option("--force",
+              is_flag=True,
+              help="Force the build even if the lockfile is up to date.")
+def cli(env, cwd, out, clean, update, force):
+  """Builds the project's OpenCore EFI directory."""
+
+  if not cwd: cwd = getcwd()
+  else: debug(msg=f"(--cwd) Using '{cwd}' as the working directory.")
+  
+  if not out: out = 'dist'
+  else: debug(msg=f"(--out) Using '{out}' as the build directory.")
+
+  # Prepare the build directory
+  BUILD_DIR = PathResolver(cwd, out)
+  if clean:
+    debug(msg='(--clean) Cleaning the output directory...')
+    try:
+      remove(BUILD_DIR)
+    except Exception:
+      abort(msg=f'Failed to clean the output directory ({BUILD_DIR})',
+            hint='Check the output directory permissions.')
+
+  # Read the build configuration
+  build_config, build_vars, flags, *_, PROJECT_DIR = get_build_file(cwd)
+
+  # Read the lockfile
+  from .lock import resolve_lockfile
+  lockfile, resolvers, LOCKFILE = resolve_lockfile(env, cwd, update, force,
+                                                   build_config=build_config,
+                                                   PROJECT_DIR=PROJECT_DIR)
+
+  # Extract the OpenCore package to the output directory
+  OC_DIR = extract_opencore_pkg(cwd,
+                                build_config, build_vars,
+                                resolvers, lockfile,
+                                out_dir=BUILD_DIR)

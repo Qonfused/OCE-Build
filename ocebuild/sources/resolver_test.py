@@ -42,21 +42,21 @@ def test_PathResolver():
   cls = type(Path())
 
   # Test BaseResolver and PathResolver subclassing
-  assert PathResolver('docs/example/build.lock').path == \
-    'docs/example/build.lock'
-  assert dict(PathResolver('docs/example/build.lock')) == \
-    { 'path': 'docs/example/build.lock' }
+  assert PathResolver('docs/example/src/build.lock').path == \
+    'docs/example/src/build.lock'
+  assert dict(PathResolver('docs/example/src/build.lock')) == \
+    { 'path': 'docs/example/src/build.lock' }
 
   # Test resolve() output (tests PathResolver bound method)
   for s in [
-    'docs/example/build.lock',
-    'ocebuild/../docs/example/build.lock'
+    'docs/example/src/build.lock',
+    'ocebuild/../docs/example/src/build.lock'
   ]:
     assert str(PathResolver(s).resolve()) == str(cls(s).resolve())
 
   # Test absolute() output (tests PosixPath/WindowsPath bound method)
   for s in [
-    'docs/example/build.lock',
-    'ocebuild/../docs/example/build.lock'
+    'docs/example/src/build.lock',
+    'ocebuild/../docs/example/src/build.lock'
   ]:
     assert str(PathResolver(s).absolute()) == str(cls(s).absolute())

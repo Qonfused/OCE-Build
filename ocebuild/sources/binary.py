@@ -25,8 +25,9 @@ def get_binary_ext(platform: Literal['Windows', 'Darwin', 'Linux']=system()
   elif platform == 'Darwin':  return ''
   elif platform == 'Linux':   return '.linux'
 
-def get_digest(file_path):
-  h = sha256()
+def get_digest(file_path, algorithm=sha256()) -> str:
+  """Gets a digest for a file."""
+  h = algorithm()
   with open(file_path, 'rb') as file:
     while True:
       chunk = file.read(h.block_size)

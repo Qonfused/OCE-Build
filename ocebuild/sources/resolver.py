@@ -22,7 +22,6 @@ TGitHubResolver = TypeVar("TGitHubResolver", bound="GitHubResolver")
 TDortaniaResolver = TypeVar("TDortaniaResolver", bound="DortaniaResolver")
 TPathResolver = TypeVar("TPathResolver", bound="PathResolver")
 
-
 class BaseResolver():
   """Base resolver class implementing overrides.
 
@@ -130,16 +129,16 @@ class GitHubResolver(BaseResolver):
     
     # Store the asset version
     release_version = get_version(release_catalog['tag_name'])
-    if not release_version: pass
-      #TODO: Handle case where the release tag is not a valid version
-      # try:
-      #   # Do a best attempt of extracting the version from the asset name
-      #   asset_metastring = "-".join(asset.split('/')[-1].split('-')[1:]) \
-      #     .lower() \
-      #     .replace(f'-{build.lower()}', '')
-      #   version_parts = asset_metastring.split('.')[:-1]
-      #   release_version = get_version(".".join(version_parts))
-      # except: pass
+    if not release_version:
+      #TODO: Ensure case where the release tag is not a valid version is handled
+      try:
+        # Do a best attempt of extracting the version from the asset name
+        asset_metastring = "-".join(asset.split('/')[-1].split('-')[1:]) \
+          .lower() \
+          .replace(f'-{build.lower()}', '')
+        version_parts = asset_metastring.split('.')[:-1]
+        release_version = get_version(".".join(version_parts))
+      except: pass
     if release_version:
       self.version = ".".join(map(str, release_version.release))
 
@@ -151,10 +150,15 @@ class GitHubResolver(BaseResolver):
     """Returns a URL based on the class parameters."""
     params = dict(self)
   
+    # Return raw file url
+    if self.has_any('path'):
+      return github_file_url(**params, raw=True)
+
     # Resolve version tag
     if self.has_any('tag'):
       input_tag = params['tag']
-      tags = github_tag_names(repository=params['repository'])
+      tags, commits = github_tag_names(repository=params['repository'],
+                                       get_commits=True)
       params['tag'] = resolve_version_specifier(versions=tags,
                                                 specifier=input_tag)
       if params['tag'] is None:
@@ -165,14 +169,15 @@ class GitHubResolver(BaseResolver):
         if not tag_matches:
           raise ValueError(f"{params['repository']} - No matching tags found for '{params['tag']}'")
         params['tag'] = tag_matches[0]
-      
-    # Return raw file url
-    if self.has_any('path'):
-      return github_file_url(**params, raw=True)
-  
+      # Get the commit hash for the resolved tag
+      self.commit = next((c for t,c in zip(tags, commits) if t == params['tag']),
+                         self.commit)
     # Resolve artifact from latest workflow run
-    if self.has_any('branch', 'workflow', 'commit'):
-      return github_artifacts_url(**params)
+    elif self.has_any('branch', 'workflow', 'commit'):
+      url, commit = github_artifacts_url(**params, get_commit=True)
+      if not self.has_any('commit'):
+        self.commit = commit
+      return url
   
     # Return the latest release (default) or by tag
     release_url = github_release_url(**params)
@@ -306,8 +311,11 @@ class PathResolver(BaseResolver, cls := type(Path())):
     #TODO: Handle additional path type verifications here
     return resolved_path
 
+ResolverType = Union[GitHubResolver, DortaniaResolver, PathResolver]
+
 
 __all__ = [
+  "ResolverType",
   # Variables (4)
   "TBaseResolver",
   "TGitHubResolver",

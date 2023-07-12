@@ -26,7 +26,8 @@ def _category_extension(category: str) -> Tuple[str, str]:
     ext = '.efi';   kind = 'Binary'
   return ext, kind
 
-def _format_resolver(resolver: Union[GitHubResolver, DortaniaResolver, PathResolver, None],
+def _format_resolver(resolver: Union[ResolverType, None],
+                     base_path: str=getcwd(),
                      as_specifier: bool=False) -> str:
   """"""
   resolution: str = ''
@@ -43,16 +44,16 @@ def _format_resolver(resolver: Union[GitHubResolver, DortaniaResolver, PathResol
 
   # Add the resolver or specifier version/commit
   resolver_props = dict(resolver)
-  if   'commit' in resolver_props:
-    resolution += f"#commit={resolver_props['commit']}"
-  elif as_specifier and 'tag' in resolver_props:
+  if as_specifier and 'tag' in resolver_props:
     resolution += f":{resolver_props['tag']}"
   elif 'version' in resolver_props:
     resolution += f":{resolver_props['version']}"
+  elif 'commit' in resolver_props:
+    resolution += f"#commit={resolver_props['commit']}"
   elif isinstance(resolver, DortaniaResolver):
     resolution += f":{resolver.__specifier__}"
   elif isinstance(resolver, PathResolver):
-    resolution += f":{resolver.path}"
+    resolution += f":{resolver.path.relative_to(base_path)}"
   
   return resolution
 
@@ -152,7 +153,9 @@ def resolve_specifiers(build_config: dict,
   for category, name, entry in iterator:
     # Prune matching resolvers and remove outdated entries from lockfile
     resolver = parse_specifier(name, entry, base_path=base_path)
-    specifier = _format_resolver(resolver, as_specifier=True)
+    specifier = _format_resolver(resolver,
+                                 base_path=base_path,
+                                 as_specifier=True)
     if   force or update: pass #de-op
     elif specifier in lockfile: continue
 
@@ -183,7 +186,8 @@ def resolve_specifiers(build_config: dict,
         raise ValueError(f'Invalid resolver: {resolver}')
       
       # Format the resolution
-      resolver_props['resolution'] = _format_resolver(resolver)
+      resolver_props['resolution'] = _format_resolver(resolver,
+                                                      base_path=base_path)
       resolver_props['specifier'] = specifier
     except ValueError:
       continue #TODO: Add warning

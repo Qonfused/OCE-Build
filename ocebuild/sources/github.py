@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 from functools import partial
 from urllib.request import Request
 
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Tuple
 
 from ._lib import request
 
@@ -101,18 +101,26 @@ def github_suite_id(repository: str,
   except:
     if not github_rate_limit(raise_error=True): raise
 
-def github_tag_names(repository: str) -> List[str]:
+def github_tag_names(repository: str,
+                     get_commits=False
+                     ) -> Union[List[str], Tuple[List[str], List[str]]]:
   """Returns a list of all repository tags.
 
   Args:
     repository: GitHub repository name.
+    get_commits: If True, additionally returns a list of commit hashes.
 
   Returns:
     List of repository tags.
   """
   try:
     tags_endpoint = f"/repos/{repository}/tags"
-    return [tag['name'] for tag in github_api_request(tags_endpoint).json()]
+    tags_catalog = github_api_request(tags_endpoint).json()
+    tag_names = [tag['name'] for tag in tags_catalog]
+    if get_commits:
+      tag_commits = [nested_get(tag, ['commit', 'sha']) for tag in tags_catalog]
+      return tag_names, tag_commits
+    return tag_names
   except:
     if not github_rate_limit(raise_error=True): raise
 
@@ -241,8 +249,9 @@ def github_release_url(repository: str,
 def github_artifacts_url(repository: str,
                          branch: Optional[str]=None,
                          workflow: Optional[str]=None,
-                         commit: Optional[str]=None
-                         ) -> Union[str, None]:
+                         commit: Optional[str]=None,
+                         get_commit=False
+                         ) -> Union[str, Tuple[str, str], None]:
   """Formats a GitHub artifacts URL.
 
   Args:
@@ -250,6 +259,7 @@ def github_artifacts_url(repository: str,
     branch: Branch name.
     tag: Tag name.
     commit: Commit hash.
+    get_commit: If True, additionally returns the commit hash.
 
   Returns:
     URL of the artifacts archive.
@@ -275,7 +285,9 @@ def github_artifacts_url(repository: str,
       if commit and commit != head_sha: continue
       # Return the first matching artifact url
       if (suite_id := github_suite_id(repository, head_sha, w_id)):
-        return f'https://github.com/{repository}/suites/{suite_id}/artifacts/{id}'
+        url = f'https://github.com/{repository}/suites/{suite_id}/artifacts/{id}'
+        if get_commit: return url, head_sha
+        return url
   except:
     if not github_rate_limit(raise_error=True): raise
   return None
