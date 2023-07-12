@@ -12,10 +12,10 @@ import click
 
 from ._lib import _format_url, abort, CLIEnv, CONTEXT_SETTINGS
 from .build import cli as build
+from .lock import cli as lock
 
 
-@click.group(context_settings=CONTEXT_SETTINGS,
-             invoke_without_command=True)
+@click.group(context_settings=CONTEXT_SETTINGS)
 @click.option('-v', '--verbose', is_flag=True, help='Enable verbose output.')
 @click.pass_context
 def cli(ctx, verbose):
@@ -27,6 +27,7 @@ def _main():
   """Entry point for the CLI."""
   try:
     cli.add_command(build)
+    cli.add_command(lock)
     cli()
   # Cleanup the CLI environment on exit.
   except SystemExit as e:
