@@ -14,8 +14,12 @@ from ._lib import _format_url, abort, CLIEnv, CONTEXT_SETTINGS
 from .build import cli as build
 from .lock import cli as lock
 
+from ocebuild.version import __version__
+
 
 @click.group(context_settings=CONTEXT_SETTINGS)
+@click.version_option(message='ocebuild-cli %(version)s',
+                      version=__version__)
 @click.pass_context
 def cli(ctx):
   """Main runner for the CLI."""
