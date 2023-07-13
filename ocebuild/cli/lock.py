@@ -68,9 +68,11 @@ def _print_pending_resolvers(resolvers: dict) -> None:
     resolution_entry = _rich_resolver(resolver=entry['__resolver'],
                                       resolver_props=entry,
                                       resolution=entry['resolution'])
-    checksum = props['commit'] if 'commit' in props else \
-      props['checksum'] if 'checksum' in props else \
-        None
+    from ._lib import DEBUG
+    checksum = None if not DEBUG else \
+      props['commit'] if 'commit' in props else \
+        props['checksum'] if 'checksum' in props else \
+          None
     table.add_row(f"[bold]{type_entry}" if type_entry != prev_type else \
                     '[dim]..',
                   f"[cyan]{name}",
