@@ -34,8 +34,8 @@ def _rich_resolver(resolver: ResolverType,
     path = PathResolver(resolver.path)
     name, filepath = resolution.split('@file:')
     resolution_str = f'file:{filepath}' \
-      .replace(':', '[/dim cyan][dim]:', 1) \
-      .replace(path.name, f'[dim bold yellow]{path.name}', 1)
+      .replace(':', '[/dim cyan][dim]:[/dim][dim yellow]', 1) \
+      .replace(path.name, f'[bold yellow]{path.name}', 1)
   elif 'url' in resolver_props:
     name, resolution_str = resolution.split('@')
     resolution_str = resolution_str \
@@ -67,13 +67,15 @@ def _print_pending_resolvers(resolvers: dict) -> None:
     resolution_entry = _rich_resolver(resolver=entry['__resolver'],
                                       resolver_props=entry,
                                       resolution=entry['resolution'])
+    checksum = props['commit'] if 'commit' in props else \
+      entry['checksum'] if 'checksum' in entry else \
+        None
     table.add_row(f"[bold]{type_entry}" if type_entry != prev_type else \
                     '[dim]..',
                   f"[cyan]{name}",
                   (f"[green]{entry['version']}[/green]" if 'version' in entry \
                     else '[dim]-')
-                  + (f" [dim]({_rich_commit(props['commit'])})" if 'commit' in props \
-                      else ' ' * 16),
+                  + (f" [dim]({_rich_commit(checksum)})" if checksum else ''),
                   resolution_entry if '__resolver' in entry else '')
     prev_type = type_entry
 
@@ -132,9 +134,7 @@ def resolve_lockfile(env: CLIEnv, cwd, update, force,
     abort(msg=f'Failed to resolve build specifiers: {e}',
           hint='Check the build configuration for errors.')
   else:
-    resolved = { k:v for k,v in resolvers.items()
-                 if v['__resolver'] \
-                 and not isinstance(v['__resolver'], PathResolver) }
+    resolved = { k:v for k,v in resolvers.items() if v['__resolver'] }
     msg = f'Pending {len(resolved)} new entries (of {len(resolvers)})'
     if env.verbose:
       echo(f"\n{msg}:", fg='white')

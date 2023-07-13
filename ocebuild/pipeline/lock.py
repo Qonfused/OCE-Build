@@ -4,6 +4,7 @@
 ##
 """"""
 
+from hashlib import sha1
 from os import getcwd
 
 from typing import Dict, Iterator, Optional, Tuple, Union
@@ -13,6 +14,7 @@ from .build import _iterate_entries
 from ocebuild.parsers.dict import nested_get, nested_set
 from ocebuild.parsers.regex import re_match, re_search
 from ocebuild.parsers.yaml import parse_yaml
+from ocebuild.sources.binary import get_digest
 from ocebuild.sources.resolver import *
 
 
@@ -168,6 +170,9 @@ def resolve_specifiers(build_config: dict,
         # Resolve the path for the specifier
         path = resolver.resolve(strict=True)
         resolver_props['path'] = path
+        # Calculate the checksum for the file
+        checksum = get_digest(path, algorithm=sha1)
+        resolver_props['checksum'] = checksum
       elif isinstance(resolver, (GitHubResolver, DortaniaResolver)):
         # Extract the build type (default to OpenCore build type)
         build = nested_get(entry, ['build'], default=default_build)

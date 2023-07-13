@@ -8,7 +8,7 @@
 
 import subprocess
 from hashlib import sha256
-from os import chmod
+from os import chmod, walk
 from platform import system
 
 from typing import List, Literal
@@ -25,15 +25,37 @@ def get_binary_ext(platform: Literal['Windows', 'Darwin', 'Linux']=system()
   elif platform == 'Darwin':  return ''
   elif platform == 'Linux':   return '.linux'
 
-def get_digest(file_path, algorithm=sha256()) -> str:
+def _get_file_digest(filename, hash) -> str:
   """Gets a digest for a file."""
-  h = algorithm()
-  with open(file_path, 'rb') as file:
+  with open(filename, 'rb') as file:
     while True:
-      chunk = file.read(h.block_size)
+      chunk = file.read(hash.block_size)
       if not chunk: break
-      h.update(chunk)
-  return h.hexdigest()
+      hash.update(chunk)
+  return hash
+
+def _get_dir_digest(directory, hash):
+  """Recursively gets a digest for all files in a directory."""
+  for path in sorted(PathResolver(directory).iterdir()):
+    # Ensure subdirectories are sorted for consistent hashes
+    hash.update(path.name.encode())
+    if path.is_file():
+      hash = _get_file_digest(path, hash)
+    elif path.is_dir():
+      hash = _get_dir_digest(path, hash)
+  return hash
+
+def get_digest(filepath, algorithm=sha256) -> str:
+  """Gets a digest for a file or directory."""
+  hash = algorithm()
+  if not (path := PathResolver(filepath)).exists():
+    raise FileNotFoundError(f'No such file or directory: {filepath}')
+  elif path.is_file():
+    _get_file_digest(filepath, hash)
+  elif path.is_dir():
+    _get_dir_digest(filepath, hash)
+
+  return hash.digest().hex()
 
 def wrap_binary(args: List[str], binary_path: str) -> str:
   """Wraps a binary and returns stdout."""
