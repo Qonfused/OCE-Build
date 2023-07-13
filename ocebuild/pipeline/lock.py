@@ -4,7 +4,6 @@
 ##
 """"""
 
-from hashlib import sha1
 from os import getcwd
 
 from typing import Dict, Iterator, Optional, Tuple, Union
@@ -14,7 +13,6 @@ from .build import _iterate_entries
 from ocebuild.parsers.dict import nested_get, nested_set
 from ocebuild.parsers.regex import re_match, re_search
 from ocebuild.parsers.yaml import parse_yaml
-from ocebuild.sources.binary import get_digest
 from ocebuild.sources.resolver import *
 
 
@@ -33,6 +31,7 @@ def _format_resolver(resolver: Union[ResolverType, None],
                      as_specifier: bool=False) -> str:
   """"""
   resolution: str = ''
+  resolver_props = dict(resolver) if resolver is not None else dict()
 
   # Add the resolver or specifier name
   if isinstance(resolver, GitHubResolver):
@@ -45,17 +44,21 @@ def _format_resolver(resolver: Union[ResolverType, None],
     return '*' if as_specifier else None
 
   # Add the resolver or specifier version/commit
-  resolver_props = dict(resolver)
-  if as_specifier and 'tag' in resolver_props:
-    resolution += f":{resolver_props['tag']}"
-  elif 'version' in resolver_props:
-    resolution += f":{resolver_props['version']}"
-  elif 'commit' in resolver_props:
-    resolution += f"#commit={resolver_props['commit']}"
-  elif isinstance(resolver, DortaniaResolver):
-    resolution += f":{resolver.__specifier__}"
-  elif isinstance(resolver, PathResolver):
-    resolution += f":{resolver.path.relative_to(base_path)}"
+  if isinstance(resolver, GitHubResolver):
+    if as_specifier and 'tag' in resolver_props:
+      resolution += f":{resolver_props['tag']}"
+    elif 'version' in resolver_props:
+      resolution += f":{resolver_props['version']}"
+    elif 'commit' in resolver_props:
+      resolution += f"#commit={resolver_props['commit']}"
+  else:
+    if isinstance(resolver, DortaniaResolver):
+      resolution += f":{resolver.__specifier__}"
+    elif isinstance(resolver, PathResolver):
+      resolution += f":{resolver.path.relative_to(base_path)}"
+    # Add the resolver checksum
+    if 'checksum' in resolver_props:
+      resolution += f"#checksum={resolver_props['checksum']}"
   
   return resolution
 
@@ -170,9 +173,6 @@ def resolve_specifiers(build_config: dict,
         # Resolve the path for the specifier
         path = resolver.resolve(strict=True)
         resolver_props['path'] = path
-        # Calculate the checksum for the file
-        checksum = get_digest(path, algorithm=sha1)
-        resolver_props['checksum'] = checksum
       elif isinstance(resolver, (GitHubResolver, DortaniaResolver)):
         # Extract the build type (default to OpenCore build type)
         build = nested_get(entry, ['build'], default=default_build)
@@ -185,8 +185,6 @@ def resolve_specifiers(build_config: dict,
         # Extract the version or commit from the resolver
         if   'version' in (props := dict(resolver)):
           resolver_props['version'] = props['version']
-        # elif 'commit' in props:
-        #   resolver_props['commit'] = props['commit']
       else:
         raise ValueError(f'Invalid resolver: {resolver}')
       

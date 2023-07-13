@@ -6,7 +6,6 @@
 ##
 """CLI entrypoint for the lock command."""
 
-from hashlib import sha1
 from os import getcwd
 
 from typing import Optional, Tuple, Union
@@ -28,14 +27,16 @@ def _rich_resolver(resolver: ResolverType,
                    resolution: str
                    ) -> Union[str, None]:
   """Returns a rich formatted specifier resolver."""
-  
+
   if resolver is None: return None
   elif 'path' in resolver_props:
     path = PathResolver(resolver.path)
     name, filepath = resolution.split('@file:')
     resolution_str = f'file:{filepath}' \
       .replace(':', '[/dim cyan][dim]:[/dim][dim yellow]', 1) \
-      .replace(path.name, f'[bold yellow]{path.name}', 1)
+      .replace(path.name, f'[bold yellow]{path.name}', 1) \
+      .replace('#', '[/bold yellow][/dim yellow][dim]#[dim bold]') \
+      .replace('=', '[/dim bold][dim]=')
   elif 'url' in resolver_props:
     name, resolution_str = resolution.split('@')
     resolution_str = resolution_str \
@@ -68,7 +69,7 @@ def _print_pending_resolvers(resolvers: dict) -> None:
                                       resolver_props=entry,
                                       resolution=entry['resolution'])
     checksum = props['commit'] if 'commit' in props else \
-      entry['checksum'] if 'checksum' in entry else \
+      props['checksum'] if 'checksum' in props else \
         None
     table.add_row(f"[bold]{type_entry}" if type_entry != prev_type else \
                     '[dim]..',
