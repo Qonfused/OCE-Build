@@ -9,15 +9,15 @@
 from hashlib import sha1
 from os import getcwd
 
+from typing import Optional, Tuple, Union
+
 import click
 from rich import box
 from rich.console import Console
 from rich.progress import Progress
 from rich.table import Table
 
-from typing import Tuple, Union, Optional
-
-from ._lib import CLIEnv, abort, cli_command, debug, echo, error, progress_bar
+from ._lib import abort, cli_command, CLIEnv, debug, echo, error, progress_bar
 
 from ocebuild.pipeline.lock import read_lockfile, resolve_specifiers
 from ocebuild.sources.binary import get_digest

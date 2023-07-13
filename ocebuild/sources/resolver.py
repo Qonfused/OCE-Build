@@ -315,12 +315,12 @@ ResolverType = Union[GitHubResolver, DortaniaResolver, PathResolver]
 
 
 __all__ = [
-  "ResolverType",
-  # Variables (4)
+  # Variables (5)
   "TBaseResolver",
   "TGitHubResolver",
   "TDortaniaResolver",
   "TPathResolver",
+  "ResolverType",
   # Classes (3)
   "GitHubResolver",
   "DortaniaResolver",

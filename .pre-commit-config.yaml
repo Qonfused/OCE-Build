@@ -21,9 +21,3 @@ repos:
     language: system
     types: [python]
     pass_filenames: false
-  - id: poetry-test
-    name: 'poetry-test'
-    entry: poetry run poe test
-    language: system
-    types: [python]
-    pass_filenames: false

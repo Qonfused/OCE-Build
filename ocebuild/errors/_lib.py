@@ -9,8 +9,8 @@ from contextlib import contextmanager
 from sys import exc_info
 from traceback import extract_tb, print_exception
 
-from typing import List, Optional
 from types import ModuleType
+from typing import List, Optional
 
 from ocebuild import __file__ as module_path
 

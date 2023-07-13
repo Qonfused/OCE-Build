@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 from functools import partial
 from urllib.request import Request
 
-from typing import List, Optional, Union, Tuple
+from typing import List, Optional, Tuple, Union
 
 from ._lib import request
 

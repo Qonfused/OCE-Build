@@ -13,7 +13,7 @@ from typing import List, Tuple, Union
 import click
 from rich.progress import Progress
 
-from ._lib import CLIEnv, abort, cli_command, debug, error, progress_bar
+from ._lib import abort, cli_command, CLIEnv, debug, error, progress_bar
 
 from ocebuild.errors import PathValidationError
 from ocebuild.filesystem import glob, remove
