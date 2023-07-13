@@ -25,7 +25,19 @@ from ocebuild.sources.resolver import PathResolver
 
 def get_build_file(cwd: Union[str, PathResolver]
                    ) -> Tuple[dict, dict, List[str], PathResolver, PathResolver]:
-  """Read the build configuration"""
+  """Reads the build file configuration.
+  
+  Args:
+    cwd: The current working directory.
+  
+  Returns:
+    A tuple containing:
+      - The build configuration.
+      - The build variables.
+      - The build flags.
+      - The build file path.
+      - The project directory.
+  """
   BUILD_FILE = glob(cwd, '**/build.yml', include='**/build.yaml', first=True)
   try:
     if BUILD_FILE:
@@ -50,7 +62,19 @@ def extract_opencore_pkg(cwd: Union[str, PathResolver],
                          lockfile: dict,
                          out_dir: Union[str, PathResolver]
                          ) -> PathResolver:
-  """Extracts the OpenCore package to the output directory"""
+  """Extracts the OpenCore package to the output directory.
+  
+  Args:
+    cwd: The current working directory.
+    build_config: The build configuration.
+    build_vars: The build variables.
+    resolvers: The source resolvers.
+    lockfile: The lockfile.
+    out_dir: The output directory.
+  
+  Returns:
+    The path to the extracted OpenCore package.
+  """
   try:
     with Progress(transient=True) as progress:
       bar = progress_bar('Extracting OpenCore package', wrap=progress)

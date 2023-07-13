@@ -22,11 +22,20 @@ from ocebuild.pipeline.lock import read_lockfile, resolve_specifiers
 from ocebuild.sources.resolver import PathResolver, ResolverType
 
 
-def _rich_resolver(resolver: ResolverType,
+def rich_resolver(resolver: ResolverType,
                    resolver_props: dict,
                    resolution: str
                    ) -> Union[str, None]:
-  """Returns a rich formatted specifier resolver."""
+  """Returns a rich formatted specifier resolver.
+  
+  Args:
+    resolver: The resolver class.
+    resolver_props: The resolver properties.
+    resolution: The specifier resolution.
+
+  Returns:
+    A rich formatted specifier resolver.
+  """
 
   if resolver is None: return None
   elif 'path' in resolver_props:
@@ -46,11 +55,24 @@ def _rich_resolver(resolver: ResolverType,
 
   return f"[cyan]{name}[/cyan][dim cyan]@{resolution_str}"
 
-def _rich_commit(commit: str, algorithm='SHA1') -> str:
+def rich_commit(commit: str, algorithm='SHA1') -> str:
+  """Returns a rich formatted commit or chechsum hash.
+  
+  Args:
+    commit: The commit or checksum hash.
+    algorithm: The algorithm used to generate the hash.
+
+  Returns:
+    A rich formatted commit or checksum hash.
+  """
   return f"[dim bold]{algorithm}[/dim bold][dim]:{commit[:7]}…"
 
-def _print_pending_resolvers(resolvers: dict) -> None:
-  """Prints the resolved specifiers for the given resolvers."""
+def print_pending_resolvers(resolvers: dict) -> None:
+  """Prints the resolved specifiers for the given resolvers.
+  
+  Args:
+    resolvers: A dictionary of resolver entries.
+  """
 
   table = Table(box=box.ROUNDED)
   table.add_column('Type', justify='right', style='bold', no_wrap=True)
@@ -64,7 +86,7 @@ def _print_pending_resolvers(resolvers: dict) -> None:
     type_entry = entry['__category'] if entry['__category'] != prev_type else None
     prev_type = type_entry
     props = dict(entry['__resolver']) if '__resolver' in entry else {}
-    resolution_entry = _rich_resolver(resolver=entry['__resolver'],
+    resolution_entry = rich_resolver(resolver=entry['__resolver'],
                                       resolver_props=entry,
                                       resolution=entry['resolution'])
     # Show additional information if in debug mode.
@@ -78,7 +100,7 @@ def _print_pending_resolvers(resolvers: dict) -> None:
                   f"[cyan]{name}",
                   (f"[green]{entry['version']}[/green]" if 'version' in entry \
                     else '[dim]-')
-                  + (f" [dim]({_rich_commit(checksum)})" if checksum else ''),
+                  + (f" [dim]({rich_commit(checksum)})" if checksum else ''),
                   resolution_entry if '__resolver' in entry else '')
 
   Console().print(table)
@@ -86,7 +108,17 @@ def _print_pending_resolvers(resolvers: dict) -> None:
 def get_lockfile(cwd: Union[str, PathResolver],
                  project_dir: Union[str, PathResolver]
                  ) -> Tuple[dict, PathResolver]:
-  """Reads the project's lockfile."""
+  """Reads the project's lockfile.
+  
+  Args:
+    cwd: The current working directory.
+    project_dir: The project directory.
+
+  Returns:
+    A tuple containing:
+      - The lockfile dictionary.
+      - The lockfile path.
+  """
 
   LOCK_FILE = PathResolver(project_dir, 'build.lock')
   if LOCK_FILE.exists():
@@ -102,11 +134,29 @@ def get_lockfile(cwd: Union[str, PathResolver],
   
   return lockfile, LOCK_FILE
 
-def resolve_lockfile(env: CLIEnv, cwd, update, force,
+def resolve_lockfile(env: CLIEnv,
+                     cwd: Union[str, PathResolver],
+                     update: bool=False,
+                     force: bool=False,
                      build_config: Optional[dict]=None,
                      PROJECT_DIR: Optional[PathResolver]=None
                      ) -> Tuple[dict, dict, PathResolver]:
-  """Resolves the project's lockfile."""
+  """Resolves the project's lockfile.
+  
+  Args:
+    env: The CLI environment.
+    cwd: The current working directory.
+    update: Whether to update the lockfile.
+    force: Whether to force the lockfile update.
+    build_config: The build configuration. (Optional)
+    PROJECT_DIR: The project directory. (Optional)
+
+  Returns:
+    A tuple containing:
+      - The lockfile dictionary.
+      - The resolved specifiers.
+      - The lockfile path.
+  """
 
   # Read the build configuration
   if not (build_config or PROJECT_DIR):
@@ -140,7 +190,7 @@ def resolve_lockfile(env: CLIEnv, cwd, update, force,
     msg = f'Pending {len(resolved)} new entries (of {len(resolvers)})'
     if env.verbose:
       echo(f"\n{msg}:", fg='white')
-      _print_pending_resolvers(resolved)
+      print_pending_resolvers(resolved)
     else:
       echo(f"\n{msg}.", fg='white')
   
@@ -168,7 +218,10 @@ def cli(env, cwd, update, force):
 
 
 __all__ = [
-  # Functions (3)
+  # Functions (6)
+  "rich_resolver",
+  "rich_commit",
+  "print_pending_resolvers",
   "get_lockfile",
   "resolve_lockfile",
   "cli"

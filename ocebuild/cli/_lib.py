@@ -90,10 +90,31 @@ def cli_command(name: Optional[str]=None):
 ################################################################################
 
 def _format_url(url: str) -> str:
+  """Formats a URL for the CLI.
+  
+  Args:
+    url: The URL to format.
+  
+  Returns:
+    A rich-formatted URL.
+  """
   return click.style(url, fg="blue", underline=True, bold=True)
 
 def debug(msg: str, *args, **kwargs):
-  """Prints a debug message."""
+  """Prints a debug message.
+
+  This function is a wrapper for `echo()` that only prints if the global
+  `DEBUG` flag is set.
+  
+  Args:
+    msg: The message to print.
+    *args: Additional arguments to pass to `echo()`.
+    **kwargs: Additional keyword arguments to pass to `echo()`.
+
+  Example:
+    >>> debug('This is a debug message.')
+    # -> DEBUG: This is a debug message.
+  """
   global DEBUG
   if not DEBUG: return
   echo(msg=f"DEBUG: {msg}", *args, dim=True, **kwargs)
@@ -104,7 +125,19 @@ def echo(msg: Optional[str]=None,
          exit: Optional[int]=None,
          **kwargs
          ) -> None:
-  """Stylized echo for the CLI."""
+  """Stylized echo for the CLI.
+  
+  Args:
+    msg: The message to print.
+    *args: Additional arguments to pass to `click.echo()`.
+    calls: A list of additional calls to `echo()`.
+    exit: The exit code to exit with. (Optional)
+    **kwargs: Additional keyword arguments to pass to `click.echo()`.
+
+  Example:
+    >>> echo('This is a message.')
+    # -> This is a message.
+  """
   if msg:
     click.echo(click.style(msg, *args, **kwargs))
   elif calls:
@@ -120,7 +153,19 @@ def error(msg: str,
           traceback: bool=False,
           suppress: Optional[List[str]]=None
           ) -> None:
-  """Stylized error message for the CLI."""
+  """Stylized error message for the CLI.
+  
+  Args:
+    msg: The error message to print.
+    label: The label to print before the error message.
+    hint: A hint to print after the error message. (Optional)
+    traceback: Whether to print a traceback. (Optional)
+    suppress: A list of filepaths to suppress from the traceback. (Optional)
+  
+  Example:
+    >>> error('This is an error message.')
+    # -> Error: This is an error message.
+  """
 
   header = click.style(f'{label}: ', fg="red", bold=True)
   calls = [{ "msg": f"\n{header}{msg}", "fg": "red" }]
@@ -140,6 +185,21 @@ def error(msg: str,
   sys_exit(1)
 
 def abort(msg: str, hint: Optional[str]=None) -> None:
+  """Stylized abort message for the CLI.
+
+  This function is a wrapper for `error()` that exits with a non-zero exit code.
+  By default, a full traceback is printed using `wrap_exception()`, hiding
+  internal stack frames.
+
+  Args:
+    msg: The abort message to print.
+    hint: A hint to print after the abort message. (Optional)
+  
+  Example:
+    >>> abort('This is an abort message.')
+    # -> Abort: This is an abort message.
+    # (rich.console `print_exception()` traceback)
+  """
   caller = inspect.stack()[1].filename
   error(msg=msg, hint=hint, label='Abort', traceback=True, suppress=[caller])
 
@@ -152,7 +212,18 @@ def progress_bar(description: str,
                  wrap: Callable=track,
                  **kwargs
                  ) -> Generator[Iterator, any, None]:
-  """Stylized progress bar for the CLI."""
+  """Stylized progress bar for the CLI.
+  
+  Args:
+    description: The description to display for the progress bar.
+    *args: Additional arguments to pass to `rich.track()`.
+    wrap: The function to wrap the progress bar with. (Optional)
+      This can be a parent rich.Progress() context, or a custom wrapper.
+    **kwargs: Additional keyword arguments to pass to `rich.track()`.
+  
+  Returns:
+    A partial for a generator that yields an iterator for the progress bar.
+  """
   if isinstance(wrap, Progress):
     ctx = wrap
     task_id = ctx.add_task(description, total=None)
