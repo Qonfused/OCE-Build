@@ -24,33 +24,62 @@ RE_IMPORT_BLOCK = r'(?s)(\n*^(?:from|import).*^(?:from|import).*?\n*$)'
 """Regular expression that matches import statements and adjacent newlines."""
 
 def module_name(s: str) -> str:
-  """Returns the module name of an import statement."""
+  """Returns the root module name of an import statement.
+  
+  Examples:
+    >>> package_name('import os')
+    # -> 'os'
+    >>> package_name('from os import path')
+    # -> 'os'
+    >>> package_name('from os.path import join')
+    # -> 'os.path'
+  """
   if s.lower().startswith('import'):
     return re_search(r'^import (.*)', s, group=1)
   return re_search(r'^from (.*?) import ', s, group=1)
 
 def package_name(s: str) -> str:
-  """Returns the package name of an import statement."""
+  """Returns the root package name of an import statement.
+  
+  Examples:
+    >>> package_name('import os')
+    # -> 'os'
+    >>> package_name('from os import path')
+    # -> 'os'
+    >>> package_name('from os.path import join')
+    # -> 'os'
+  """
   return module_name(s).split('.')[0]
 
 def sorting_rules(s: str) -> int:
-  """Returns a bitfield of sorting rules for an import statement."""
+  """Returns an integer sum of sorting rules for an import statement.
+
+  The sorting rules are as follows:
+    - Internal Python packages (e.g. __future__)
+    - Native Python packages (e.g. os, sys)
+    - Typing packages (e.g. typing, typing_extensions)
+    - External Python packages (e.g. numpy, scipy)
+    - Project namespace/packages (e.g. ci, ocebuild)
+
+  This is constructed using the following bit flags:
+    0: Package is an internal python module.
+    1: Package is a native python module.
+    2: Package is a typing module
+    4: Package is an external python module.
+    8: Package is a project namespace/module.
+  """
   return (
-    # 0: Package is an internal python module.
-    # 1: Package is a native python module.
     (1 * int(not package_name(s).startswith('__'))) +
-    # 2: Package is a typing module
     (2 * int(any([package_name(s) in (
         'types', 'typing', 'typing_extensions')]))) +
-    # 4: Package is an external python module.
     (4 * int(not package_name(s) in PYTHON_MODULES)) +
-    # 8: Package is a project namespace/module.
     (8 * int(os_path.isdir(
         PROJECT_ROOT.joinpath(package_name(s)))))
   )
 
 def sort_imports_block(imports_block: str) -> str:
   """Sorts import statements in a block of text."""
+
   # Sort import statements.
   import_statements = re_sub('\n{2,}', '\n', imports_block.strip()).split('\n')
   import_statements = sorted(import_statements,

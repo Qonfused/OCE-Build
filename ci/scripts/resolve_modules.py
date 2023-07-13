@@ -74,7 +74,18 @@ def recurse_modules(entrypoint: Union[str, PathResolver]) -> List[str]:
 
 def get_local_statements(filepath: Union[str, PathResolver]
                          ) -> Tuple[List[str], Dict[str, List[str]]]:
-  """Returns a list of local statements from a file."""
+  """Returns a list of local statements from a file.
+  
+  This is used to differentiate local statements from import statements.
+
+  Args:
+    filepath: The path to the file to parse.
+
+  Returns:
+    A tuple containing:
+      - A list of all local names in the file.
+      - A dictionary of all local names and their types.
+  """
   is_import = lambda n: any([ isinstance(n, t) for t in AST_TYPES_IMPORTS ])
   is_def = lambda n: any([ isinstance(n, t) for t in AST_TYPES_STMTS ])
 
@@ -107,6 +118,15 @@ def get_local_statements(filepath: Union[str, PathResolver]
 def get_variable_docstring(statement: str,
                            filepath: Union[str, PathResolver]
                            ) -> Union[str, None]:
+  """Returns the docstring for a variable.
+  
+  Args:
+    statement: The name of the variable to retrieve the docstring for.
+    filepath: The path to the file containing the variable.
+  
+  Returns:
+    The docstring for the variable, or None if it does not exist.
+  """
   with open(filepath, 'r', encoding='UTF-8') as module_file:
     file_text = module_file.read()
     docstring = re_search(f'(?s)^{statement}\s?.*?\n^"""(.*?)"""$', file_text,
@@ -116,8 +136,16 @@ def get_variable_docstring(statement: str,
 
 def get_public_exports(filepath: Union[str, PathResolver],
                        module_path: str
-                       ) -> List[str]:
-  """Returns a list of public API exports from a module."""
+                       ) -> dict[str, list[str]]:
+  """Returns a list of public API exports from a module.
+  
+  Args:
+    filepath: The path to the module file.
+    module_path: The path to the module.
+  
+  Returns:
+    A dictionary of public API exports from the module, ordered by AST type.
+  """
   module = import_module(module_path)
   names, types = get_local_statements(filepath)
   exports: List[str] = []
@@ -155,7 +183,7 @@ def get_public_exports(filepath: Union[str, PathResolver],
   return export_types
 
 def get_file_header(filepath: Union[str, PathResolver]):
-  """Retrieves the file header from a file."""
+  """Retrieves the file header and module docstring from a file."""
   lines: List[str] = []
   with open(filepath, 'r', encoding='UTF-8') as init_file:
     has_pragma_line = False
@@ -193,7 +221,18 @@ def get_file_header(filepath: Union[str, PathResolver]):
 def generate_api_exports(filepath: Union[str, PathResolver],
                          module_path: str
                          ) -> None:
-  """Generates a module's API exports."""
+  """Generates a module's API exports.
+  
+  This is controlled through the `__all__` variable, which is generated
+  by this function for each module. This function also preserves the
+  module's docstring and SPDX header, as well as any preprocessor flags.
+
+  Files can opt out of this behavior with the `preserve-exports` pragma flag.
+
+  Args:
+    filepath: The path to the module file.
+    module_path: The path to the module.
+  """
   module_exports = get_public_exports(filepath, module_path)
   with open(filepath, 'r', encoding='UTF-8') as module_file:
     file_text = module_file.read()
