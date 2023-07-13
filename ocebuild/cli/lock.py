@@ -20,7 +20,6 @@ from rich.table import Table
 from ._lib import abort, cli_command, CLIEnv, debug, echo, error, progress_bar
 
 from ocebuild.pipeline.lock import read_lockfile, resolve_specifiers
-from ocebuild.sources.binary import get_digest
 from ocebuild.sources.resolver import PathResolver, ResolverType
 
 
@@ -107,8 +106,8 @@ def resolve_lockfile(env: CLIEnv, cwd, update, force,
 
   # Read the build configuration
   if not (build_config or PROJECT_DIR):
-    from .build import read_build_file
-    build_config, *_, PROJECT_DIR = read_build_file(cwd)
+    from .build import get_build_file
+    build_config, *_, PROJECT_DIR = get_build_file(cwd)
   
   # Read the lockfile
   lockfile, LOCKFILE = get_lockfile(cwd, project_dir=PROJECT_DIR)
@@ -164,3 +163,11 @@ def cli(env, cwd, update, force):
 
   # Process the lockfile
   lockfile, resolvers, LOCKFILE = resolve_lockfile(env, cwd, update, force)
+
+
+__all__ = [
+  # Functions (3)
+  "get_lockfile",
+  "resolve_lockfile",
+  "cli"
+]

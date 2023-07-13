@@ -137,3 +137,11 @@ def cli(env, cwd, out, clean, update, force):
                                 build_config, build_vars,
                                 resolvers, lockfile,
                                 out_dir=BUILD_DIR)
+
+
+__all__ = [
+  # Functions (3)
+  "get_build_file",
+  "extract_opencore_pkg",
+  "cli"
+]
