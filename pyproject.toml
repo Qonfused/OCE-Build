@@ -82,7 +82,7 @@ python_functions  = [ "test_*" ]
 [tool.coverage.run]
 relative_files  = true
 source          = [ "ocebuild/*" ]
-omit            = [ "*_test.py", "**/errors/*" ]
+omit            = [ "__*.py", "*_test.py", "**/errors/*" ]
 
 [tool.coverage.report]
 exclude_also  = [
