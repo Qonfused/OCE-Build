@@ -1,0 +1,29 @@
+repos:
+- repo: https://github.com/python-poetry/poetry
+  rev: '1.5.0'
+  hooks:
+  - id: poetry-check
+  - id: poetry-lock
+  - id: poetry-export
+    args: ["-f", "requirements.txt", "-o", "requirements.txt"]
+- repo: local
+  hooks:
+  - id: ci:resolve-modules
+    name: 'ci: resolve-modules'
+    entry: poetry run poe resolve-modules
+    language: system
+    types: [python]
+    fail_fast: true
+    pass_filenames: false
+  - id: ci:sort-imports
+    name: 'ci: sort-imports'
+    entry: poetry run poe sort-imports
+    language: system
+    types: [python]
+    pass_filenames: false
+  - id: poetry-test
+    name: 'poetry-test'
+    entry: poetry run poe test
+    language: system
+    types: [python]
+    pass_filenames: false

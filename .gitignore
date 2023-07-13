@@ -4,6 +4,7 @@
 !/.vscode
 !/.gitattributes
 !/.gitignore
+!/.pre-commit-config.yaml
 
 # Build artifacts
 dist/
