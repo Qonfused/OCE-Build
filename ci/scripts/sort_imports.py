@@ -10,20 +10,15 @@ from itertools import groupby
 from operator import itemgetter
 from os import path as os_path
 from re import sub as re_sub
-#FIXME: stdlib_module_names is 3.10+ only.
-from sys import builtin_module_names, stdlib_module_names 
 
 from typing import List, Optional, Union
 
-from ci import PROJECT_ENTRYPOINT, PROJECT_ROOT
+from ci import PROJECT_ENTRYPOINT, PROJECT_ROOT, PYTHON_MODULES
 
 from ocebuild.filesystem import glob
 from ocebuild.parsers.regex import re_search
 from ocebuild.sources.resolver import PathResolver
 
-
-PYTHON_MODULES = set(builtin_module_names) | (stdlib_module_names)
-"""Set of all Python built-in and stdlib python modules."""
 
 RE_IMPORT_BLOCK = r'(?s)(\n*^(?:from|import).*^(?:from|import).*?\n*$)'
 """Regular expression that matches import statements and adjacent newlines."""
@@ -137,8 +132,7 @@ def _main(entrypoint: Optional[str]=None) -> None:
 
 
 __all__ = [
-  # Constants (2)
-  "PYTHON_MODULES",
+  # Constants (1)
   "RE_IMPORT_BLOCK",
   # Functions (6)
   "module_name",
