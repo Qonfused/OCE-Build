@@ -19,9 +19,21 @@ from ocebuild.versioning.semver import get_version, resolve_version_specifier
 
 
 TBaseResolver = TypeVar("TBaseResolver", bound="BaseResolver")
+"""Internal type alias to BaseResolver
+@internal
+"""
 TGitHubResolver = TypeVar("TGitHubResolver", bound="GitHubResolver")
+"""Internal type alias to GitHubResolver
+@internal
+"""
 TDortaniaResolver = TypeVar("TDortaniaResolver", bound="DortaniaResolver")
+"""Internal type alias to DortaniaResolver
+@internal
+"""
 TPathResolver = TypeVar("TPathResolver", bound="PathResolver")
+"""Internal type alias to PathResolver
+@internal
+"""
 
 class BaseResolver():
   """Base resolver class implementing overrides.
@@ -297,7 +309,16 @@ class PathResolver(BaseResolver, cls := type(Path())):
   def resolve(self: TPathResolver,
               strict: bool = False
               ) -> cls:
-    """Resolves a filepath based on the class parameters."""
+    """Resolves a filepath based on the class parameters.
+
+    If the path exists, the checksum is calculated and stored.
+
+    Args:
+      strict: If True, raises an error if the path does not exist.
+
+    Returns:
+      The resolved filepath wrapped in a PathResolver instance.
+    """
     resolved_path: cls
     # Check if path has called the `__init__` method - Python 3.12+
     if '_raw_paths' in dir(self):
@@ -317,14 +338,11 @@ class PathResolver(BaseResolver, cls := type(Path())):
     return resolved_path
 
 ResolverType = Union[GitHubResolver, DortaniaResolver, PathResolver]
+"""A type alias for the Resolver classes."""
 
 
 __all__ = [
-  # Variables (5)
-  "TBaseResolver",
-  "TGitHubResolver",
-  "TDortaniaResolver",
-  "TPathResolver",
+  # Variables (1)
   "ResolverType",
   # Classes (3)
   "GitHubResolver",

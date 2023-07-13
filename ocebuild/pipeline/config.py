@@ -115,7 +115,19 @@ def merge_configs(base: Union[str, PathResolver],
   return base_config
 
 def read_config(filepath: str) -> Tuple[Dict, Union[Dict, None]]:
-  """Reads a configuration file."""
+  """Reads a configuration file.
+  
+  Args:
+    filepath: The path to the configuration file.
+
+  Raises:
+    ValueError: If the file extension is not supported.
+  
+  Returns:
+    A tuple containing:
+      - The configuration file.
+      - The frontmatter of the configuration file.
+  """
   with open(filepath, 'r', encoding='UTF-8') as f:
     file_ext = PathResolver(filepath).suffix
     if   file_ext in ('.plist'):

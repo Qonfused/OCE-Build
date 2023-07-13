@@ -13,14 +13,20 @@ from ocebuild.sources.resolver import PathResolver
 
 
 def remove(path: Union[str, "PathLike[str]"]) -> None:
-  """Removes a file or directory."""
+  """Removes a file or directory.
+  
+  Args:
+    path: Path to the file or directory.
+  
+  Raises:
+    ValueError: If the path is not a file or directory.
+  """
   path = PathResolver(path)
   if not path.exists(): return
   elif path.is_file(): path.unlink()
   elif path.is_dir(): rmtree(path)
   else:
     raise ValueError(f'Path is not a file or directory: {path}')
-
 
 def rename(path: Union[str, "PathLike[str]"],
            name: str

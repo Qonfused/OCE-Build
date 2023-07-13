@@ -28,7 +28,7 @@ DORTANIA_LISTED_BUILDS: set={}
 ################################################################################
 
 def is_latest_build() -> bool:
-  """Checks if the build catalog is latest."""
+  """Checks if the cached build catalog is latest."""
   global DORTANIA_LAST_UPDATED
 
   timestamp = datetime.now(tz=timezone.utc)
@@ -46,7 +46,7 @@ def is_latest_build() -> bool:
 
   return True
 
-def has_build(plugin: str) -> str:
+def has_build(plugin: str) -> bool:
   """Checks if a plugin has a build."""
   global DORTANIA_LISTED_BUILDS
   # Revalidates build catalog cache
@@ -81,16 +81,31 @@ def get_latest_sha(plugin: str) -> str:
 #                        URL formatting/retrieval functions                    #
 ################################################################################
 
-def dortania_file_url(file: str):
-  """Formats a Dortania build repo file URL."""
+def dortania_file_url(filepath: str) -> str:
+  """Formats a Dortania build repo file URL.
+  
+  Args:
+    file: The remote filepath of the file.
+
+  Returns:
+    The formatted Dortania build repo file URL.
+  """
   return github_file_url(repository='dortania/build-repo',
                          branch='builds',
-                         path=file,
+                         path=filepath,
                          raw=True)
 
 def dortania_release_url(plugin: str,
                          commit: Optional[str]=None) -> str:
-  """Formats a Dortania build release URL."""
+  """Formats a Dortania build release URL.
+  
+  Args:
+    plugin: The plugin to get the release URL for.
+    commit: The commit to get the release URL for. Defaults to the latest build.
+  
+  Returns:
+    The formatted Dortania build release URL.
+  """
   if not has_build(plugin):
     raise ValueError(f'Plugin {plugin} not in Dortania build catalog.')
   # Returns the latest build release (default) or by commit

@@ -6,16 +6,29 @@
 
 from copy import deepcopy
 
+from typing import List
+
 from .regex import re_search
 
 
 TAGS = ('@append', '@delete', '@fallback', '@override', '@prepend')
 """Preprocessor tags for controlling output dict semantics."""
 
-def _append_tags(cursor, frontmatter_dict, defer_tree: bool=False):
-  """Append tag to frontmatter if entries marked with tag."""
+def _append_tags(cursor: dict,
+                 frontmatter_dict: dict,
+                 defer_tree: bool=False
+                 ) -> None:
+  """Append tag to frontmatter if entries marked with tag.
+  
+  Args:
+    cursor: The cursor dictionary.
+    frontmatter_dict: The frontmatter dictionary.
+    defer_tree: Whether to defer tree tag resolution until the next call.
+  """
+
   if cursor['has_tag'] is None: return
   tag_name, tag_options = cursor['has_tag']
+
   # Leave tag tree null until another tag discovers the tree tag
   if defer_tree:
     if not 'defer_tree' in cursor: cursor['defer_tree'] = []
@@ -28,12 +41,28 @@ def _append_tags(cursor, frontmatter_dict, defer_tree: bool=False):
         frontmatter_dict['tags'][deferred][1] = deepcopy(cursor['tag_tree'])
       del cursor['defer_tree']
     tag_tree = deepcopy(cursor['tag_tree'])
+
   frontmatter_dict['tags'].append([tag_name, tag_tree, tag_options])
   # Reset cursor attr
   cursor['has_tag'] = None
 
-def _apply_macro(macro, flags, tokens, cursor, frontmatter_dict):
-  """Applies preprocessor macros to parser"""
+def _apply_macro(macro: str,
+                 flags: List[str],
+                 tokens: List[str],
+                 cursor: dict,
+                 frontmatter_dict: dict
+                 ) -> None:
+  """Applies preprocessor macros to parser cursor or frontmatter.
+  
+  Args:
+    macro: The macro to apply.
+    flags: The current flags.
+    tokens: The parsed tokens.
+    cursor: The cursor dictionary.
+    frontmatter_dict: The frontmatter dictionary.
+  """
+
+  # Fix comma-separated macro flags
   if macro[-1] == ',':
     for token in tokens[1:]: macro += token
   flag = re_search(r'\((.*)\)', macro, group=1)

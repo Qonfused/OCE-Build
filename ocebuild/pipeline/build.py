@@ -13,6 +13,7 @@ from ocebuild.parsers.yaml import parse_yaml
 
 
 def __set_var_default(build_vars: dict, name: str, default: str):
+  """Set a variable to a default value if it is not already set."""
   if not (variable := nested_get(build_vars, ['variables', name])):
     variable = default
     nested_set(build_vars, ['variables', name], variable)
@@ -27,7 +28,18 @@ def _iterate_entries(build_config: dict) -> List[Tuple[str, str, dict]]:
 def read_build_file(filepath: str,
                     normalize_entries: bool=True
                     ) -> Tuple[dict, dict, List[str]]:
-  """Read the build configuration from the specified build file."""
+  """Read the build configuration from the specified build file.
+  
+  Args:
+    filepath: The path to the build file.
+    normalize_entries: Whether to normalize the entries in the build file.
+  
+  Returns:
+    A tuple containing:
+      - The build configuration.
+      - The build variables.
+      - The build flags.
+  """
   with open(filepath, 'r', encoding='UTF-8') as f:
     build_config, build_vars = parse_yaml(f, frontmatter=True)
   

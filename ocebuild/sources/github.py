@@ -22,6 +22,8 @@ def github_api_request(endpoint: Optional[str]=None,
                        ) -> any:
   """Gets a GitHub API request.
 
+  This method will automatically add the GitHub token from the environment.
+
   Args:
     endpoint: GitHub API endpoint.
 

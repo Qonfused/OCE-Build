@@ -39,7 +39,19 @@ class RequestWrapper():
     return TextIOWrapper(self._wrapped_response, *args, **kargs)
 
 def request(url: Union[str, Request], *args, **kwargs) -> any:
-  """Simple wrapper over urlopen for skipping SSL verification."""
+  """Simple wrapper over urlopen for skipping SSL verification.
+  
+  Args:
+    url: The url to open.
+    *args: Additional arguments to pass to urlopen.
+    **kwargs: Additional keyword arguments to pass to urlopen.
+
+  Raises:
+    HTTPError: If the url could not be retrieved.
+  
+  Returns:
+    The response from urlopen wrapped in a RequestWrapper class.
+  """
   try:
     response = urlopen(url, context=skip_ssl_verify(), *args, **kwargs)
     return RequestWrapper(response)

@@ -95,22 +95,37 @@ def extract_opencore_directory(resolvers: dict,
                                __wrapper: Optional[Iterator]=None,
                                **kwargs
                                ) -> Union[PathResolver, None]:
-  """"""
+  """Extracts the OpenCore pacakge from the build OpenCore configuration.
+  
+  Args:
+    resolvers: The build configuration resolvers.
+    lockfile: The build configuration lockfile.
+    target: The target EFI architecture to extract.
+    out_dir: The output directory to extract the OpenCore package to.
+    *args: Additional arguments to pass to the optional iterator wrapper.
+    __wrapper: A wrapper function to apply to the iterator. (Optional)
+    **kwargs: Additional keyword arguments to pass to the optional iterator wrapper.
+
+  Returns:
+    A PathResolver to the extracted OpenCore directory.
+  """
   url = resolvers['OpenCore']['url']
   #TODO: Add OpenCore to the lockfile
   del resolvers['OpenCore']
 
   with extract_opencore_archive(url, target=target) as opencore_pkg:
     OC_DIR = opencore_pkg.joinpath('EFI', 'OC')
-    # Include only binaries that are specified in the build config
-    bundled = set(v['__filepath'] for v in resolvers.values()
-                  if v['specifier'] == '*')
+    
     # Handle interactive mode for iterator
     iterator = set(_iterate_entries(opencore_pkg, OC_DIR))
     num_entries = len(iterator)
-    if __wrapper is not None: iterator = __wrapper(iterator)
+    if __wrapper is not None: iterator = __wrapper(iterator, *args, **kwargs)
+    
     # Iterate over the entries in the extracted OpenCore package
+    bundled = set(v['__filepath'] for v in resolvers.values()
+                  if v['specifier'] == '*')
     for idx, path in enumerate(iterator):
+      # Include only binaries that are specified as bundled in the build config
       if path not in bundled:
         remove(opencore_pkg.joinpath(path))
       else:
@@ -118,7 +133,7 @@ def extract_opencore_directory(resolvers: dict,
         bundled.discard(path)
         del resolvers[PathResolver(path).stem]
       # Copy the remaining files to the output directory
-      if idx + 1 == num_entries:
+      if idx + 1 == num_entries: # This stalls the iterator until completion
         copytree(opencore_pkg, out_dir, dirs_exist_ok=True)
         return PathResolver(out_dir, OC_DIR.relative_to(opencore_pkg))
 

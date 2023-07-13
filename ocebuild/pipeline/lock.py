@@ -17,7 +17,16 @@ from ocebuild.sources.resolver import *
 
 
 def _category_extension(category: str) -> Tuple[str, str]:
-  """Determine the file extension for the category."""
+  """Determine the file extension for the category.
+  
+  Args:
+    category: The category to determine the file extension for.
+  
+  Returns:
+    A tuple containing:
+      - The file extension for the category.
+      - The kind of entry for the category.
+  """
   if   category == 'ACPI':
     ext = '.aml';   kind = 'SSDT'
   elif category == 'Kexts':
@@ -29,7 +38,16 @@ def _category_extension(category: str) -> Tuple[str, str]:
 def _format_resolver(resolver: Union[ResolverType, None],
                      base_path: str=getcwd(),
                      as_specifier: bool=False) -> str:
-  """"""
+  """Formats a resolver string for lockfile resolution.
+  
+  Args:
+    resolver: The resolver to format.
+    base_path: The base path to use for relative paths.
+    as_specifier: Whether to instead format the specifier. (Optional)
+  
+  Returns:
+    The formatted resolver string.
+  """
   resolution: str = ''
   resolver_props = dict(resolver) if resolver is not None else dict()
 
@@ -65,7 +83,16 @@ def _format_resolver(resolver: Union[ResolverType, None],
 def parse_semver_params(entry: Union[str, dict],
                         specifier: str,
                         parameters: Optional[dict]) -> Dict[str, str]:
-  """"""
+  """Parses a semver version entry or specifier for parameters.
+  
+  Args:
+    entry: The entry to parse additional properties from.
+    specifier: The specifier string to parse.
+    parameters: The parameters dictionary to mutate. (Optional)
+  
+  Returns:
+    The parameters dictionary.
+  """
   if parameters is None: parameters = dict()
   # Release tag
   if (prefix := re_match(f'^=', specifier)):
@@ -98,7 +125,16 @@ def parse_specifier(name: str,
                     entry: Union[str, Dict[str, any]],
                     base_path: Optional[str]=getcwd()
                     ) -> Union[GitHubResolver, PathResolver, DortaniaResolver, None]:
-  """"""
+  """Parses a specifier string for a resolver class.
+  
+  Args:
+    name: The name of the entry to parse.
+    entry: The entry to parse.
+    base_path: The base path to use for relative paths. (Optional)
+  
+  Returns:
+    The resolver class for the specifier.
+  """
   specifier = entry['specifier'] if isinstance(entry, dict) else entry
   parameters: Dict[str, str]=dict()
   resolver_props = { '__name__': name, '__specifier__': specifier }
@@ -135,6 +171,7 @@ def parse_specifier(name: str,
   return None
 
 def read_lockfile(lockfile_path: str) -> dict:
+  """Reads a lockfile from the specified path."""
   with open(lockfile_path, 'r', encoding='UTF-8') as f:
     lockfile, metadata = parse_yaml(f, frontmatter=True)
   return lockfile
@@ -148,12 +185,29 @@ def resolve_specifiers(build_config: dict,
                        __wrapper: Optional[Iterator]=None,
                        **kwargs
                        ) -> dict:
-  """"""
+  """Resolves the specifiers for each entry in the build configuration.
+  
+  Args:
+    build_config: The build configuration to resolve specifiers for.
+    lockfile: The lockfile to resolve specifiers against.
+    base_path: The base path to use for relative paths. (Optional)
+    update: Whether to update outdated entries in the lockfile. (Optional)
+    force: Whether to force resolve all entries in the build configuration. (Optional)
+    *args: Additional arguments to pass to the optional iterator wrapper.
+    __wrapper: A wrapper function to apply to the iterator. (Optional)
+    **kwargs: Additional keyword arguments to pass to the optional iterator wrapper.
+  
+  Raises:
+    ValueError: If a resolver or the build configuration is invalid.
+
+  Returns:
+    The resolved build configuration.
+  """
   resolvers = {}
   default_build = nested_get(build_config, ['OpenCorePkg', 'OpenCore', 'build'])
   # Handle interactive mode for iterator
   iterator = _iterate_entries(build_config)
-  if __wrapper is not None: iterator = __wrapper(iterator)
+  if __wrapper is not None: iterator = __wrapper(iterator, *args, **kwargs)
   # Resolve the specifiers for each entry in the build configuration
   for category, name, entry in iterator:
     # Prune matching resolvers and remove outdated entries from lockfile

@@ -46,7 +46,15 @@ def _get_dir_digest(directory, hash):
   return hash
 
 def get_digest(filepath, algorithm=sha256) -> str:
-  """Gets a digest for a file or directory."""
+  """Gets a digest for a file or directory.
+  
+  Args:
+    filepath: The path to the file or directory.
+    algorithm: The hashlib algorithm method to use.
+  
+  Returns:
+    A hex digest of the file or directory.
+  """
   hash = algorithm()
   if not (path := PathResolver(filepath)).exists():
     raise FileNotFoundError(f'No such file or directory: {filepath}')
@@ -58,7 +66,18 @@ def get_digest(filepath, algorithm=sha256) -> str:
   return hash.digest().hex()
 
 def wrap_binary(args: List[str], binary_path: str) -> str:
-  """Wraps a binary and returns stdout."""
+  """Wraps a binary and returns stdout.
+  
+  Args:
+    args: The arguments to pass to the binary.
+    binary_path: The path to the binary.
+
+  Raises:
+    Exception: If the binary returns a non-zero exit code.
+
+  Returns:
+    The stdout of the binary.
+  """
   if not isinstance(args, list): args = [args]
   chmod(binary_path := binary_path, 0o755)
   process = subprocess.run([binary_path, *args],

@@ -24,7 +24,15 @@ from ocebuild.sources.resolver import PathResolver
 def extract_iasl_binary(url: Optional[str]=None,
                         persist: bool=False
                         ) -> Generator[Callable[[List[str]], str], any, None]:
-  """Extracts an iasl binary and yields a subprocess wrapper."""
+  """Extracts an iasl binary and yields a subprocess wrapper.
+  
+  Args:
+    url: The URL to the iasl binary.
+    persist: Whether to persist the extracted binary.
+  
+  Yields:
+    A subprocess wrapper for the extracted iasl binary.
+  """
   binary = f'iasl{get_binary_ext()}'
   tmp_file = NamedTemporaryFile(suffix=f'-{binary}', delete=False)
   try:
@@ -46,6 +54,9 @@ def extract_iasl_binary(url: Optional[str]=None,
 
 def sort_ssdt_symbols(filepaths: List[Union[str, PathResolver]]) -> OrderedDict:
   """Sorts the injection order of SSDT tables by resolving symbolic references.
+
+  This is a naive implementation that does not prune conditional branches or
+  build flags outside of standard ACPI spec.
   
   Args:
     filepaths: A list of filepaths to SSDT files.

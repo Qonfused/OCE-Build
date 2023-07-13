@@ -2,6 +2,7 @@
 # Copyright (c) 2023, Cory Bennett. All rights reserved.
 # SPDX-License-Identifier: BSD-3-Clause
 ##
+"""Parsers for various native types and file formats."""
 
 from ocebuild.parsers._lib import *
 from ocebuild.parsers.asl import *
