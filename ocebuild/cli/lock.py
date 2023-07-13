@@ -46,8 +46,8 @@ def _rich_resolver(resolver: ResolverType,
 
   return f"[cyan]{name}[/cyan][dim cyan]@{resolution_str}"
 
-def _rich_commit(commit: str) -> str:
-  return f"[dim bold]SHA1[/dim bold][dim]:{commit[:7]}"
+def _rich_commit(commit: str, algorithm='SHA1') -> str:
+  return f"[dim bold]{algorithm}[/dim bold][dim]:{commit[:7]}…"
 
 def _print_pending_resolvers(resolvers: dict) -> None:
   """Prints the resolved specifiers for the given resolvers."""
@@ -58,29 +58,28 @@ def _print_pending_resolvers(resolvers: dict) -> None:
   table.add_column('Version', justify='right')
   table.add_column('Resolution', justify='left')
 
-  def _rich_commit(commit: str, algorithm='SHA1') -> str:
-    return f"[dim bold]{algorithm}[/dim bold][dim]:{commit[:7]}…"
-
   prev_type = None
   for name, entry in resolvers.items():
-    type_entry = entry['__category']
+    # Extract the resolver type and resolution properties.
+    type_entry = entry['__category'] if entry['__category'] != prev_type else None
+    prev_type = type_entry
     props = dict(entry['__resolver']) if '__resolver' in entry else {}
     resolution_entry = _rich_resolver(resolver=entry['__resolver'],
                                       resolver_props=entry,
                                       resolution=entry['resolution'])
+    # Show additional information if in debug mode.
     from ._lib import DEBUG
     checksum = None if not DEBUG else \
       props['commit'] if 'commit' in props else \
         props['checksum'] if 'checksum' in props else \
           None
-    table.add_row(f"[bold]{type_entry}" if type_entry != prev_type else \
-                    '[dim]..',
+    # Add resolver entry to the table.
+    table.add_row(f"[bold]{type_entry}" if type_entry else '[dim]..',
                   f"[cyan]{name}",
                   (f"[green]{entry['version']}[/green]" if 'version' in entry \
                     else '[dim]-')
                   + (f" [dim]({_rich_commit(checksum)})" if checksum else ''),
                   resolution_entry if '__resolver' in entry else '')
-    prev_type = type_entry
 
   Console().print(table)
 
