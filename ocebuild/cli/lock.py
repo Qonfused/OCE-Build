@@ -69,6 +69,12 @@ def rich_commit(commit: str, algorithm='SHA1') -> str:
 
 def print_pending_resolvers(resolvers: dict) -> None:
   """Prints the resolved specifiers for the given resolvers.
+
+  Resolvers are presented in a table with the following columns:
+    - Type: The resolver type.
+    - Name: The resolver name.
+    - Version: The resolver version, optionally with the commit or checksum hash.
+    - Resolution: The specifier resolution.
   
   Args:
     resolvers: A dictionary of resolver entries.
@@ -84,11 +90,11 @@ def print_pending_resolvers(resolvers: dict) -> None:
   for name, entry in resolvers.items():
     # Extract the resolver type and resolution properties.
     type_entry = entry['__category'] if entry['__category'] != prev_type else None
-    prev_type = type_entry
+    if type_entry: prev_type = type_entry
     props = dict(entry['__resolver']) if '__resolver' in entry else {}
     resolution_entry = rich_resolver(resolver=entry['__resolver'],
-                                      resolver_props=entry,
-                                      resolution=entry['resolution'])
+                                     resolver_props=entry,
+                                     resolution=entry['resolution'])
     # Show additional information if in debug mode.
     from ._lib import DEBUG
     checksum = None if not DEBUG else \
