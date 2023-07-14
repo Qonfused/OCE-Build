@@ -123,6 +123,7 @@ def get_lockfile(cwd: Union[str, PathResolver],
   Returns:
     A tuple containing:
       - The lockfile dictionary.
+      - The lockfile metadata.
       - The lockfile path.
   """
 
@@ -130,7 +131,7 @@ def get_lockfile(cwd: Union[str, PathResolver],
   if LOCK_FILE.exists():
     debug(msg=f"Found lockfile at '{LOCK_FILE.relative(cwd)}'.")
     try:
-      lockfile = read_lockfile(lockfile_path=LOCK_FILE)
+      lockfile, metadata = read_lockfile(lockfile_path=LOCK_FILE)
     except Exception as e:
       error(msg=f"Encountered an error while reading '{LOCK_FILE.name}': {e}",
             hint="Try running `ocebuild lock` first.")
@@ -138,10 +139,32 @@ def get_lockfile(cwd: Union[str, PathResolver],
     debug(msg=f"Creating a new lockfile at '{LOCK_FILE.relative(cwd)}'.")
     lockfile = {}
   
-  return lockfile, LOCK_FILE
+  return lockfile, metadata, LOCK_FILE
+
+def validate_lockfile(lockfile: dict, build_config: dict) -> None:
+  """Verifies that the lockfile is consistent with the build file.
+  
+  Args:
+    lockfile: The lockfile dictionary.
+    build_config: The build configuration dictionary.
+
+  Raises:
+    AssertionError: If the lockfile does not match the build file.
+  """
+  lockfile_keys = set(lockfile.keys())
+  buildcfg_keys = set(k for e in build_config.values() for k in e.keys())
+  if lockfile_keys == buildcfg_keys:
+    return # Pass: Lockfile is consistent with the build file.
+  elif lockfile_keys.issubset(buildcfg_keys):
+    raise AssertionError('Lockfile is missing new build configuration entries.')
+  elif buildcfg_keys.issubset(lockfile_keys):
+    raise AssertionError('Lockfile contains outdated build configuration entries.')
+  else:
+    raise AssertionError('Lockfile is inconsistent with the build file.')
 
 def resolve_lockfile(env: CLIEnv,
                      cwd: Union[str, PathResolver],
+                     check: bool=False,
                      update: bool=False,
                      force: bool=False,
                      build_config: Optional[dict]=None,
@@ -152,6 +175,7 @@ def resolve_lockfile(env: CLIEnv,
   Args:
     env: The CLI environment.
     cwd: The current working directory.
+    check: Whether to check if the lockfile is consistent with the build file.
     update: Whether to update the lockfile.
     force: Whether to force the lockfile update.
     build_config: The build configuration. (Optional)
@@ -161,7 +185,6 @@ def resolve_lockfile(env: CLIEnv,
     A tuple containing:
       - The lockfile dictionary.
       - The resolved specifiers.
-      - The lockfile path.
   """
 
   # Read the build configuration
@@ -170,14 +193,14 @@ def resolve_lockfile(env: CLIEnv,
     build_config, *_, PROJECT_DIR = get_build_file(cwd)
   
   # Read the lockfile
-  lockfile, LOCKFILE = get_lockfile(cwd, project_dir=PROJECT_DIR)
+  lockfile, metadata, LOCKFILE = get_lockfile(cwd, project_dir=PROJECT_DIR)
   
   # Resolve the specifiers in the build configuration
   if update: debug(msg='(--update) Updating lockfile entries...')
   if force:  debug(msg='(--force) Forcing lockfile update...')
   try:
     with Progress(transient=True) as progress:
-      bar = progress_bar('Resolving build specifiers', wrap=progress)
+      bar = progress_bar('Resolving lockfile entries', wrap=progress)
       resolvers = resolve_specifiers(build_config, lockfile,
                                      base_path=PROJECT_DIR,
                                      update=update,
@@ -191,44 +214,63 @@ def resolve_lockfile(env: CLIEnv,
   except Exception as e:
     abort(msg=f'Failed to resolve build specifiers: {e}',
           hint='Check the build configuration for errors.')
-  else:
-    resolved = { k:v for k,v in resolvers.items() if v['__resolver'] }
-    msg = f'Pending {len(resolved)} new entries (of {len(resolvers)})'
-    if env.verbose:
-      echo(f"\n{msg}:", fg='white')
-      print_pending_resolvers(resolved)
+
+  # Validate that the lockfile matches the build configuration
+  if check:
+    debug(msg='(--check) Validating lockfile entries...')
+    try:
+      validate_lockfile(lockfile, build_config)
+    except AssertionError as e:
+      echo(e, fg='red', exit=1)
     else:
-      echo(f"\n{msg}.", fg='white')
+      echo('Lockfile validation succeeded.', fg='green', exit=0)
+  # Handle updating the lockfile
+  elif not lockfile or (update or force):
+    resolved = { k:v for k,v in resolvers.items() if v['__resolver'] }
+    if len(resolved):
+      # Display pending lockfile entries
+      msg = f'Resolved {len(resolved)} new entries (of {len(resolvers)})'
+      if env.verbose:
+        echo(f"{msg}:", fg='white')
+        print_pending_resolvers(resolved)
+      else:
+        echo(f"{msg}.", fg='white')
+    else:
+      echo('Lockfile is up to date.', fg='white')
   
-  return lockfile, resolvers, LOCKFILE
+  return lockfile, resolvers
 
 
 @cli_command(name='lock')
 @click.option("-c", "--cwd",
               type=click.Path(file_okay=False),
               help="Use the specified directory as the working directory.")
+@click.option("--check",
+              is_flag=True,
+              help="Check that lockfile is consistent with the build file.")
 @click.option("--update",
               is_flag=True,
-              help="Update outdated lockfile entries before building.")
+              help="Update outdated lockfile entries.")
 @click.option("--force",
               is_flag=True,
-              help="Force the build even if the lockfile is up to date.")
-def cli(env, cwd, update, force):
+              help="Force refresh even if the lockfile is up to date.")
+def cli(env, cwd, check, update, force):
   """Updates the project's lockfile."""
 
   if not cwd: cwd = getcwd()
   else: debug(msg=f"(--cwd) Using '{cwd}' as the working directory.")
 
   # Process the lockfile
-  lockfile, resolvers, LOCKFILE = resolve_lockfile(env, cwd, update, force)
+  lockfile, resolvers = resolve_lockfile(env, cwd, check, update, force)
 
 
 __all__ = [
-  # Functions (6)
+  # Functions (7)
   "rich_resolver",
   "rich_commit",
   "print_pending_resolvers",
   "get_lockfile",
+  "validate_lockfile",
   "resolve_lockfile",
   "cli"
 ]

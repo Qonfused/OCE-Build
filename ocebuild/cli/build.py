@@ -13,7 +13,7 @@ from typing import List, Tuple, Union
 import click
 from rich.progress import Progress
 
-from ._lib import abort, cli_command, CLIEnv, debug, error, progress_bar
+from ._lib import abort, cli_command, debug, error, progress_bar
 
 from ocebuild.errors import PathValidationError
 from ocebuild.filesystem import glob, remove
@@ -152,9 +152,9 @@ def cli(env, cwd, out, clean, update, force):
 
   # Read the lockfile
   from .lock import resolve_lockfile
-  lockfile, resolvers, LOCKFILE = resolve_lockfile(env, cwd, update, force,
-                                                   build_config=build_config,
-                                                   PROJECT_DIR=PROJECT_DIR)
+  lockfile, resolvers = resolve_lockfile(env, cwd, update, force,
+                                         build_config=build_config,
+                                         PROJECT_DIR=PROJECT_DIR)
 
   # Extract the OpenCore package to the output directory
   OC_DIR = extract_opencore_pkg(cwd,

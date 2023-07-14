@@ -170,11 +170,11 @@ def parse_specifier(name: str,
   # No resolver matched
   return None
 
-def read_lockfile(lockfile_path: str) -> dict:
+def read_lockfile(lockfile_path: str) -> Tuple[dict, dict]:
   """Reads a lockfile from the specified path."""
   with open(lockfile_path, 'r', encoding='UTF-8') as f:
     lockfile, metadata = parse_yaml(f, frontmatter=True)
-  return lockfile
+  return lockfile, metadata
 
 def resolve_specifiers(build_config: dict,
                        lockfile: dict,
