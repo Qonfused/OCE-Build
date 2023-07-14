@@ -57,15 +57,15 @@ bash scripts/setup-poetry.sh
 
 ### Project Scripts
 
-This project uses a custom set of scripts to help manage the development and build process. These scripts are located in the `ci/scripts` directory. These scripts are intended to be run through the [`poethepoet`](https://github.com/nat-n/poethepoet) plugin, which is installed as part of the `setup-poetry.sh` script.
+This project uses a custom set of scripts to help manage the development and build process. These scripts are located in the **ci/scripts** directory. These scripts are intended to be run through the [**poethepoet**](https://github.com/nat-n/poethepoet) plugin, which is installed as part of the `setup-poetry.sh` script.
 
 To list all available scripts, run `poetry run poe`. Run a script using `poetry <script>` or `poetry run poe <script>`.
 
-Note that scripts listed in the `ci/scripts` directory must be prefixed with `poetry run poe <command>`, while scripts listed in the [`pyproject.toml`](/pyproject.toml) file can also be run through `poetry <command>`.
+Note that scripts listed in the **ci/scripts** directory must be prefixed with `poetry run poe <command>`, while scripts listed in the [**pyproject.toml**](/pyproject.toml) file can also be run through `poetry <command>`.
 
-For example, to run the `test` script, simply run `poetry test` or `poetry run poe test`. Only the latter option is available for CI scripts to avoid namespace pollution of Poetry commands.
+For example, to run the **test** script, simply run `poetry test` or `poetry run poe test`. Only the latter option is available for CI scripts to avoid namespace pollution of Poetry commands.
 
-It's recommended to run the `resolve-modules` and `sort-imports` CI scripts before commiting; these scripts will ensure that all module namespaces can properly be resolved and that all imports are sorted correctly. These scripts will run automatically on the pre-commit git hook, but can be run manually by running `poetry run poe resolve-modules` and `poetry run poe sort-imports`.
+It's recommended to run the **resolve-modules** and **sort-imports** CI scripts before commiting; these scripts will ensure that all module namespaces can properly be resolved and that all imports are sorted correctly. These scripts will run automatically on the pre-commit git hook, but can be run manually by running `poetry run poe resolve-modules` and `poetry run poe sort-imports`.
 
 ## License
 [BSD 3-Clause License](https://github.com/Qonfused/OCE-Build/blob/main/LICENSE).
