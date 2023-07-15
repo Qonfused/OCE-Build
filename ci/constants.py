@@ -27,8 +27,8 @@ PROJECT_ROOT = PathResolver(__file__).parents[1]
 PROJECT_NAMESPACES = _enumerate_modules(PROJECT_ROOT)
 """The project's root namespaces."""
 
-MOCK_PATH = PROJECT_ROOT.joinpath('ci', 'mock')
-"""The project's test mock directory."""
+EXAMPLE_PATH = PROJECT_ROOT.joinpath('docs', 'example', 'src')
+"""The project's example project directory."""
 
 ################################################################################
 #                          Python Installation Schemes                         #
@@ -65,7 +65,7 @@ __all__ = [
   "PROJECT_ENTRYPOINT",
   "PROJECT_ROOT",
   "PROJECT_NAMESPACES",
-  "MOCK_PATH",
+  "EXAMPLE_PATH",
   "STDLIB_MODULES",
   "PLATSTDLIB_MODULES",
   "PLATLIB_MODULES",

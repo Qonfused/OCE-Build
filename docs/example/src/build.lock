@@ -7,6 +7,17 @@ cacheKey: 0
 # Manual changes might be lost - proceed with caution!
 
 dependencies:
+  ACPI:
+    SSDT-A:
+      path: './ACPI/SSDT-A.dsl'
+      resolution: 'SSDT-A@file:ACPI/SSDT-A.dsl#checksum=40f7c7e450563729fbf9305af5ba30f97b24e2d48f4f08482ad58cd1c79972f1'
+      specifier: 'SSDT-A@file:ACPI/SSDT-A.dsl'
+      kind: SSDT
+    SSDT-B:
+      path: './ACPI/SSDT-B.dsl'
+      resolution: 'SSDT-B@file:../../example/src/ACPI/SSDT-B.dsl#checksum=5985e6d767efdaa3381c0970b3a603399c632d1e5ef786be596aa24b26ada1a9'
+      specifier: 'SSDT-B@file:../../example/src/ACPI/SSDT-B.dsl'
+      kind: SSDT
   Kexts:
     AirportItlwm-BigSur:
       build: DEBUG

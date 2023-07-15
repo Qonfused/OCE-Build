@@ -3,6 +3,8 @@ build: DEBUG
 version: latest
 ---
 ACPI:
+  SSDT-A: "file:ACPI/SSDT-A.dsl"
+  SSDT-B: "file:../../example/src/ACPI/SSDT-B.dsl"
   SSDT-PNLF: "*"
 Drivers:
   - AudioDxe
