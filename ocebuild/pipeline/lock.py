@@ -14,13 +14,13 @@ from ocebuild.parsers.dict import merge_dict, nested_del, nested_get, nested_set
 from ocebuild.parsers.regex import re_match, re_search
 from ocebuild.parsers.yaml import parse_yaml, write_yaml
 from ocebuild.sources.resolver import *
-from ocebuild.version import __version__
 
 
 LOCKFILE_METADATA = {
-  'version': __version__,
-  # The cache key denotes the revision of the lockfile (e.g. when it's updated)
-  'cacheKey': 0 #TODO: Implement cache system
+  # The version key denotes the revision of the resolved dependencies.
+  'version': 0,
+  # The cache key is incremented when the dependency cache is revalidated.
+  'cacheKey': 0
 }
 """The current metadata for the lockfile system."""
 
@@ -203,7 +203,8 @@ def read_lockfile(lockfile_path: str) -> Tuple[dict, dict]:
   """Reads a lockfile from the specified path."""
   with open(lockfile_path, 'r', encoding='UTF-8') as f:
     lockfile, frontmatter = parse_yaml(f, frontmatter=True)
-    metadata = nested_get(frontmatter, 'metadata', default={})
+  metadata = nested_get(frontmatter, ['metadata'], default={})
+
   return lockfile, metadata
 
 def write_lockfile(lockfile_path: str,
@@ -220,9 +221,12 @@ def write_lockfile(lockfile_path: str,
     metadata: The lockfile metadata to write. (Optional)
   """
 
+  # Format lockfile metadata
+  if not metadata: metadata = LOCKFILE_METADATA
+  metadata['version'] += 1
+
   # Format lockfile header
-  metadata_entry = ['---', *write_yaml(metadata or LOCKFILE_METADATA), '---']
-  file_header = [*metadata_entry, LOCKFILE_WARNING_COMMENT]
+  file_header = ['---', *write_yaml(metadata), '---', LOCKFILE_WARNING_COMMENT]
 
   # Merge existing lockfile with new dependency entries
   root = 'dependencies'
@@ -315,15 +319,12 @@ def resolve_specifiers(build_config: dict,
       entry_path = ['dependencies', category, name]
       # Check if the resolution is already in the lockfile
       if   force:
-        # Remove the entry from the lockfile (if it exists)
         try: nested_del(lockfile, entry_path)
         except KeyError: pass
       elif update and (lockfile_entry := nested_get(lockfile, entry_path)):
-        if 'resolution' in resolver_props:
-          if resolver_props['resolution'] == lockfile_entry['resolution']:
-            continue
-          else:
-            nested_del(lockfile, entry_path)
+        if resolution := nested_get(resolver_props, ['resolution']):
+          if resolution == lockfile_entry['resolution']: continue
+          else: nested_del(lockfile, entry_path)
 
       # Extract additional properties from the entry
       ext, kind = _category_extension(category)

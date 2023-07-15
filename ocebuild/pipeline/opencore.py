@@ -110,7 +110,11 @@ def extract_opencore_directory(resolvers: dict,
   Returns:
     A PathResolver to the extracted OpenCore directory.
   """
-  url = nested_get(lockfile, ['dependencies', 'OpenCorePkg', 'OpenCore', 'url'])
+
+  entry_path = ['dependencies', 'OpenCorePkg', 'OpenCore']
+  url = nested_get(lockfile, [*entry_path, 'url'])
+  if not url: url = nested_get(resolvers, [*entry_path[2:], 'url'])
+
   with extract_opencore_archive(url, target=target) as opencore_pkg:
     OC_DIR = opencore_pkg.joinpath('EFI', 'OC')
     

@@ -140,7 +140,7 @@ def get_lockfile(cwd: Union[str, PathResolver],
             hint="Try running `ocebuild lock` first.")
   else:
     debug(msg=f"Creating a new lockfile at '{LOCK_FILE.relative(cwd)}'.")
-    lockfile = {}
+    lockfile, metadata = {}, {}
   
   return lockfile, metadata, LOCK_FILE
 
@@ -198,6 +198,7 @@ def resolve_lockfile(env: CLIEnv,
           hint='Check the build configuration for errors.')
 
   # Validate that the lockfile matches the build configuration
+  resolved = { k:v for k,v in resolvers.items() if v['__resolver'] }
   if check:
     debug(msg='(--check) Validating lockfile entries...')
     try:
@@ -207,21 +208,23 @@ def resolve_lockfile(env: CLIEnv,
     else:
       echo('Lockfile validation succeeded.', fg='green', exit=0)
   # Handle updating the lockfile
-  elif not lockfile or (update or force):
-    resolved = { k:v for k,v in resolvers.items() if v['__resolver'] }
-    if len(resolved):
-      # Write lockfile to disk
-      debug(msg='Writing lockfile to disk...')
-      write_lockfile(LOCKFILE, lockfile, resolved, metadata)
-      # Display written lockfile entries
-      msg = f'Added {len(resolved)} new entries'
+  elif (update or force) or not lockfile:
+    # Write lockfile to disk
+    echo('Writing lockfile to disk...')
+    write_lockfile(LOCKFILE, lockfile, resolved, metadata)
+    # Display written lockfile entries
+    if resolved:
+      msg = f'Done. Added {len(resolved)} new entries'
       if env.verbose:
         echo(f"{msg}:", fg='white')
         print_pending_resolvers(resolved)
       else:
         echo(f"{msg}.", fg='white')
     else:
-      echo('Lockfile is up to date.', fg='white')
+      echo('Done.', fg='white')
+  # No new resolvers
+  else:
+    echo('Lockfile is up to date.', fg='white')
   
   return lockfile, resolvers
 
