@@ -184,7 +184,10 @@ def error(msg: str,
   
   sys_exit(1)
 
-def abort(msg: str, hint: Optional[str]=None) -> None:
+def abort(msg: str,
+          hint: Optional[str]=None,
+          traceback: bool=True
+          ) -> None:
   """Stylized abort message for the CLI.
 
   This function is a wrapper for `error()` that exits with a non-zero exit code.
@@ -194,6 +197,7 @@ def abort(msg: str, hint: Optional[str]=None) -> None:
   Args:
     msg: The abort message to print.
     hint: A hint to print after the abort message. (Optional)
+    traceback: Whether to print a traceback; enabled by default. (Optional)
   
   Example:
     >>> abort('This is an abort message.')
@@ -201,7 +205,7 @@ def abort(msg: str, hint: Optional[str]=None) -> None:
     # (rich.console `print_exception()` traceback)
   """
   caller = inspect.stack()[1].filename
-  error(msg=msg, hint=hint, label='Abort', traceback=True, suppress=[caller])
+  error(msg, 'Abort', hint, traceback, suppress=[caller])
 
 ################################################################################
 #                           CLI Interactive Utilities                          #

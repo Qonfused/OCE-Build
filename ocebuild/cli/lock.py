@@ -18,7 +18,7 @@ from rich.table import Table
 
 from ._lib import abort, cli_command, CLIEnv, debug, echo, error, progress_bar
 
-from ocebuild.pipeline.lock import read_lockfile, resolve_specifiers
+from ocebuild.pipeline.lock import read_lockfile, resolve_specifiers, validate_dependencies, write_lockfile
 from ocebuild.sources.resolver import PathResolver, ResolverType
 
 
@@ -141,27 +141,6 @@ def get_lockfile(cwd: Union[str, PathResolver],
   
   return lockfile, metadata, LOCK_FILE
 
-def validate_lockfile(lockfile: dict, build_config: dict) -> None:
-  """Verifies that the lockfile is consistent with the build file.
-  
-  Args:
-    lockfile: The lockfile dictionary.
-    build_config: The build configuration dictionary.
-
-  Raises:
-    AssertionError: If the lockfile does not match the build file.
-  """
-  lockfile_keys = set(lockfile.keys())
-  buildcfg_keys = set(k for e in build_config.values() for k in e.keys())
-  if lockfile_keys == buildcfg_keys:
-    return # Pass: Lockfile is consistent with the build file.
-  elif lockfile_keys.issubset(buildcfg_keys):
-    raise AssertionError('Lockfile is missing new build configuration entries.')
-  elif buildcfg_keys.issubset(lockfile_keys):
-    raise AssertionError('Lockfile contains outdated build configuration entries.')
-  else:
-    raise AssertionError('Lockfile is inconsistent with the build file.')
-
 def resolve_lockfile(env: CLIEnv,
                      cwd: Union[str, PathResolver],
                      check: bool=False,
@@ -219,9 +198,9 @@ def resolve_lockfile(env: CLIEnv,
   if check:
     debug(msg='(--check) Validating lockfile entries...')
     try:
-      validate_lockfile(lockfile, build_config)
+      validate_dependencies(lockfile, build_config)
     except AssertionError as e:
-      echo(e, fg='red', exit=1)
+      abort(msg=e, traceback=False)
     else:
       echo('Lockfile validation succeeded.', fg='green', exit=0)
   # Handle updating the lockfile
@@ -235,6 +214,9 @@ def resolve_lockfile(env: CLIEnv,
         print_pending_resolvers(resolved)
       else:
         echo(f"{msg}.", fg='white')
+      # Write lockfile to disk
+      debug(msg='Writing lockfile to disk...')
+      write_lockfile(LOCKFILE, lockfile, resolved, metadata)
     else:
       echo('Lockfile is up to date.', fg='white')
   
@@ -265,12 +247,11 @@ def cli(env, cwd, check, update, force):
 
 
 __all__ = [
-  # Functions (7)
+  # Functions (6)
   "rich_resolver",
   "rich_commit",
   "print_pending_resolvers",
   "get_lockfile",
-  "validate_lockfile",
   "resolve_lockfile",
   "cli"
 ]
