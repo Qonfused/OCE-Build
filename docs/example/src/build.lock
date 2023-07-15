@@ -41,7 +41,7 @@ dependencies:
       kind: Kext
     VoodooI2C:
       build: DEBUG
-      url: 'https://github.com/VoodooI2C/VoodooI2C/releases/download/2.8/VoodooI2C-Debug-Symbols-2.8.zip'
+      url: 'https://github.com/VoodooI2C/VoodooI2C/releases/download/2.8/VoodooI2C-2.8.zip'
       version: 2.8
       resolution: 'VoodooI2C/VoodooI2C@github:2.8#commit=17a5f58227a164b426011fd077a5c549766474b3'
       specifier: 'VoodooI2C/VoodooI2C@github:2.8'

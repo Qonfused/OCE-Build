@@ -114,6 +114,10 @@ class GitHubResolver(BaseResolver):
 
     # Get the release assets for a given release url
     assets = release_catalog['assets']
+    exclusion_list = {'debug-symbols'}
+    assets = list(filter(lambda a: not any(s in a['name'].lower()
+                                           for s in exclusion_list),
+                         assets))
     if not len(assets):
       raise ValueError(f'Release catalog for {name} has no assets.')
     
