@@ -12,6 +12,7 @@ from typing import Generator, Iterator, List, Literal, Optional, Union
 
 from ocebuild.filesystem.archives import extract_archive
 from ocebuild.filesystem.posix import glob, move, remove
+from ocebuild.parsers.dict import nested_get
 from ocebuild.sources.github import github_archive_url
 from ocebuild.sources.resolver import PathResolver
 
@@ -109,10 +110,7 @@ def extract_opencore_directory(resolvers: dict,
   Returns:
     A PathResolver to the extracted OpenCore directory.
   """
-  url = resolvers['OpenCore']['url']
-  #TODO: Add OpenCore to the lockfile
-  del resolvers['OpenCore']
-
+  url = nested_get(lockfile, ['dependencies', 'OpenCorePkg', 'OpenCore', 'url'])
   with extract_opencore_archive(url, target=target) as opencore_pkg:
     OC_DIR = opencore_pkg.joinpath('EFI', 'OC')
     
