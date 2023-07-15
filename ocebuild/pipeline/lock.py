@@ -76,22 +76,20 @@ def _format_resolver(resolver: Union[ResolverType, None],
   else:
     return '*' if as_specifier else None
 
-  # Add the resolver or specifier version/commit
-  if isinstance(resolver, GitHubResolver):
-    if as_specifier and 'tag' in resolver_props:
-      resolution += f":{resolver_props['tag']}"
-    elif 'version' in resolver_props:
-      resolution += f":{resolver_props['version']}"
-    elif 'commit' in resolver_props:
-      resolution += f"#commit={resolver_props['commit']}"
-  else:
-    if isinstance(resolver, DortaniaResolver):
-      resolution += f":{resolver.__specifier__}"
-    elif isinstance(resolver, PathResolver):
-      resolution += f":{resolver.path.relative_to(base_path)}"
-    # Add the resolver checksum
-    if 'checksum' in resolver_props:
-      resolution += f"#checksum={resolver_props['checksum']}"
+  # Add the resolver or specifier version
+  if as_specifier and 'tag' in resolver_props:
+    resolution += f":{resolver_props['tag']}"
+  if 'version' in resolver_props:
+    resolution += f":{resolver_props['version']}"
+  elif isinstance(resolver, PathResolver):
+    resolution += f":{resolver.path.relative_to(base_path)}"
+  
+  # Add the resolver checksum
+  if 'commit' in resolver_props:
+    resolution += f"#commit={resolver_props['commit']}"
+  elif 'checksum' in resolver_props:
+    resolution += f"#checksum={resolver_props['checksum']}"
+    
   
   return resolution
 

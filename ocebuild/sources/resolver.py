@@ -5,7 +5,7 @@
 """Custom specifier resolver classes and methods."""
 
 from difflib import get_close_matches
-from hashlib import sha1
+from hashlib import sha256
 from inspect import signature
 from pathlib import Path
 from re import split
@@ -332,7 +332,7 @@ class PathResolver(BaseResolver, cls := type(Path())):
     
     # Get checksum of the resolved filepath
     from .binary import get_digest
-    self.checksum = get_digest(resolved_path, algorithm=sha1)
+    self.checksum = get_digest(resolved_path, algorithm=sha256)
     
     #TODO: Handle additional path type verifications here
     return resolved_path

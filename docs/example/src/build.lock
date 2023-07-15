@@ -12,52 +12,52 @@ dependencies:
       build: DEBUG
       url: 'https://github.com/OpenIntelWireless/itlwm/releases/download/v2.3.0-alpha/AirportItlwm-Big_Sur-v2.3.0-DEBUG-alpha-f1cad0f.zip'
       version: 2.3.0
-      resolution: 'OpenIntelWireless/itlwm@github:2.3.0'
+      resolution: 'OpenIntelWireless/itlwm@github:2.3.0#commit=bd47afe94836e178402bf9ca7bb031d35ea6d90b'
       specifier: 'OpenIntelWireless/itlwm@github:^2.1.0'
       kind: Kext
     AirportItlwm-Ventura:
       build: DEBUG
-      kind: Kext
-      resolution: 'OpenIntelWireless/itlwm@github:2.3.0'
-      specifier: 'OpenIntelWireless/itlwm@github:^2.2.0'
       url: 'https://github.com/OpenIntelWireless/itlwm/releases/download/v2.3.0-alpha/AirportItlwm-Ventura-v2.3.0-DEBUG-alpha-f1cad0f.zip'
       version: 2.3.0
-    Foo:
+      resolution: 'OpenIntelWireless/itlwm@github:2.3.0#commit=bd47afe94836e178402bf9ca7bb031d35ea6d90b'
+      specifier: 'OpenIntelWireless/itlwm@github:^2.2.0'
       kind: Kext
+    Foo:
       path: ./Kexts/UTBMap.kext
-      resolution: 'Foo@file:Kexts/UTBMap.kext#checksum=febc5fe3982bb19b597cfc583a7fcefeac1a20a8'
+      resolution: 'Foo@file:Kexts/UTBMap.kext#checksum=872f8d5644ba2358dead1fdd657979dd76c1408546efa9411a44e8a8106e6732'
       specifier: 'Foo@file:Kexts/UTBMap.kext'
+      kind: Kext
     RestrictEvents:
       build: DEBUG
-      kind: Kext
+      url: 'https://github.com/acidanthera/RestrictEvents/suites/13511383482/artifacts/742567994'
       resolution: 'acidanthera/RestrictEvents@github#commit=e5c52564f5bca1aebbd916f2753f5a58809703a8'
       specifier: 'acidanthera/RestrictEvents@github'
-      url: 'https://github.com/acidanthera/RestrictEvents/suites/13511383482/artifacts/742567994'
+      kind: Kext
     RestrictEvents-1:
       build: DEBUG
-      kind: Kext
+      url: 'https://github.com/acidanthera/RestrictEvents/suites/13511383482/artifacts/742567994'
       resolution: 'acidanthera/RestrictEvents@github#commit=e5c52564f5bca1aebbd916f2753f5a58809703a8'
       specifier: 'acidanthera/RestrictEvents@github#commit=e5c52564f5bca1aebbd916f2753f5a58809703a8'
-      url: 'https://github.com/acidanthera/RestrictEvents/suites/13511383482/artifacts/742567994'
+      kind: Kext
     VoodooI2C:
       build: DEBUG
-      kind: Kext
-      resolution: 'VoodooI2C/VoodooI2C@github:2.8'
-      specifier: 'VoodooI2C/VoodooI2C@github:2.8'
       url: 'https://github.com/VoodooI2C/VoodooI2C/releases/download/2.8/VoodooI2C-Debug-Symbols-2.8.zip'
       version: 2.8
+      resolution: 'VoodooI2C/VoodooI2C@github:2.8#commit=17a5f58227a164b426011fd077a5c549766474b3'
+      specifier: 'VoodooI2C/VoodooI2C@github:2.8'
+      kind: Kext
     WhateverGreen:
       build: DEBUG
-      kind: Kext
-      resolution: 'acidanthera/WhateverGreen@github:latest'
-      specifier: 'acidanthera/WhateverGreen@github:latest'
       url: 'https://github.com/dortania/build-repo/releases/download/WhateverGreen-de66827/WhateverGreen-1.6.6-DEBUG.zip'
       version: 1.6.6
+      resolution: 'acidanthera/WhateverGreen@github:1.6.6#commit=de66827310e05afc08e81b3ef418c75851681e2a'
+      specifier: 'acidanthera/WhateverGreen@github'
+      kind: Kext
   OpenCorePkg:
     OpenCore:
       build: DEBUG
-      kind: Binary
-      resolution: 'acidanthera/OpenCorePkg@github:0.9.3'
-      specifier: 'acidanthera/OpenCorePkg@github:latest'
       url: 'https://github.com/acidanthera/OpenCorePkg/releases/download/0.9.3/OpenCore-0.9.3-DEBUG.zip'
       version: 0.9.3
+      resolution: 'acidanthera/OpenCorePkg@github:0.9.3#commit=d52fc46ba650ce1afe00c354331a0657a533ef18'
+      specifier: 'acidanthera/OpenCorePkg@github:latest'
+      kind: Binary

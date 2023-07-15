@@ -39,18 +39,20 @@ def rich_resolver(resolver: ResolverType,
 
   if resolver is None: return None
   elif 'path' in resolver_props:
-    path = PathResolver(resolver.path)
-    name, filepath = resolution.split('@file:')
-    resolution_str = f'file:{filepath}' \
+    _path = PathResolver(resolver.path)
+    # _checksum = resolver_props['__resolver'].checksum
+    name, resolution_str = resolution.split('@file:')
+    resolution_str = f'file:{resolution_str}' \
       .replace(':', '[/dim cyan][dim]:[/dim][dim yellow]', 1) \
-      .replace(path.name, f'[bold yellow]{path.name}', 1) \
+      .replace(_path.name, f'[bold yellow]{_path.name}', 1) \
       .replace('#', '[/bold yellow][/dim yellow][dim]#[dim bold]') \
       .replace('=', '[/dim bold][dim]=')
   elif 'url' in resolver_props:
+    _has_version = ':' in resolution
     name, resolution_str = resolution.split('@')
     resolution_str = resolution_str \
       .replace(':', '[/dim cyan][dim]:[/dim][green]', 1) \
-      .replace('#', '[/dim cyan][dim]#[dim bold]') \
+      .replace('#', f'{ "[/green]" if _has_version else "[/dim cyan]" }[dim]#[dim bold]') \
       .replace('=', '[/dim bold][dim]=')
 
   return f"[cyan]{name}[/cyan][dim cyan]@{resolution_str}"
@@ -65,7 +67,8 @@ def rich_commit(commit: str, algorithm='SHA1') -> str:
   Returns:
     A rich formatted commit or checksum hash.
   """
-  return f"[dim bold]{algorithm}[/dim bold][dim]:{commit[:7]}…"
+  pad = len(str.ljust(algorithm, len('SHA256'))) - len(algorithm)
+  return f"[dim bold]{algorithm}[/dim bold][dim]: {commit[:7 + pad]}…[/dim]"
 
 def print_pending_resolvers(resolvers: dict) -> None:
   """Prints the resolved specifiers for the given resolvers.
@@ -97,16 +100,16 @@ def print_pending_resolvers(resolvers: dict) -> None:
                                      resolution=entry['resolution'])
     # Show additional information if in debug mode.
     from ._lib import DEBUG
-    checksum = None if not DEBUG else \
-      props['commit'] if 'commit' in props else \
-        props['checksum'] if 'checksum' in props else \
+    checksum_entry = None if not DEBUG else \
+      rich_commit(props['commit'], 'SHA1') if 'commit' in props else \
+        rich_commit(props['checksum'], 'SHA256') if 'checksum' in props else \
           None
     # Add resolver entry to the table.
     table.add_row(f"[bold]{type_entry}" if type_entry else '[dim]..',
                   f"[cyan]{name}",
                   (f"[green]{entry['version']}[/green]" if 'version' in entry \
                     else '[dim]-')
-                  + (f" [dim]({rich_commit(checksum)})" if checksum else ''),
+                  + (f" [dim]({checksum_entry})" if checksum_entry else ''),
                   resolution_entry if '__resolver' in entry else '')
 
   Console().print(table)
@@ -207,16 +210,16 @@ def resolve_lockfile(env: CLIEnv,
   elif not lockfile or (update or force):
     resolved = { k:v for k,v in resolvers.items() if v['__resolver'] }
     if len(resolved):
-      # Display pending lockfile entries
-      msg = f'Resolved {len(resolved)} new entries (of {len(resolvers)})'
+      # Write lockfile to disk
+      debug(msg='Writing lockfile to disk...')
+      write_lockfile(LOCKFILE, lockfile, resolved, metadata)
+      # Display written lockfile entries
+      msg = f'Added {len(resolved)} new entries'
       if env.verbose:
         echo(f"{msg}:", fg='white')
         print_pending_resolvers(resolved)
       else:
         echo(f"{msg}.", fg='white')
-      # Write lockfile to disk
-      debug(msg='Writing lockfile to disk...')
-      write_lockfile(LOCKFILE, lockfile, resolved, metadata)
     else:
       echo('Lockfile is up to date.', fg='white')
   
