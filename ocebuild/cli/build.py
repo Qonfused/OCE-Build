@@ -114,10 +114,14 @@ def extract_opencore_pkg(cwd: Union[str, PathResolver],
 
 @cli_command(name='build')
 @click.option("-c", "--cwd",
-              type=click.Path(file_okay=False),
+              type=click.Path(exists=True,
+                              file_okay=False,
+                              readable=True,
+                              writable=True,
+                              path_type=PathResolver),
               help="Use the specified directory as the working directory.")
 @click.option("-o", "--out",
-              type=click.Path(file_okay=False),
+              type=click.Path(path_type=PathResolver),
               help="Use the specified directory as the output directory.")
 @click.option("--clean",
               is_flag=True,

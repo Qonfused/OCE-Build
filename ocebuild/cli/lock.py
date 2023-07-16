@@ -231,7 +231,11 @@ def resolve_lockfile(env: CLIEnv,
 
 @cli_command(name='lock')
 @click.option("-c", "--cwd",
-              type=click.Path(file_okay=False),
+              type=click.Path(exists=True,
+                              file_okay=False,
+                              readable=True,
+                              writable=True,
+                              path_type=PathResolver),
               help="Use the specified directory as the working directory.")
 @click.option("--check",
               is_flag=True,
