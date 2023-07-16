@@ -2,6 +2,7 @@
 .env
 !/.github
 !/.vscode
+!/.editorconfig
 !/.gitattributes
 !/.gitignore
 !/.pre-commit-config.yaml
