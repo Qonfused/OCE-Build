@@ -2,7 +2,7 @@
 # Copyright (c) 2023, Cory Bennett. All rights reserved.
 # SPDX-License-Identifier: BSD-3-Clause
 ##
-"""Methods for retrieving and handling Kext packages."""
+"""Methods for retrieving and handling Kext packages and binaries."""
 
 from contextlib import contextmanager
 from shutil import rmtree, unpack_archive
@@ -60,11 +60,11 @@ def extract_kext_archive(url: str,
           # Build plist dictionary from filestream
           plist = parse_plist(file)
           # Extract Kext bundle properties
-          name = plist['CFBundleName'][1]
-          identifier = plist['CFBundleIdentifier'][1]
-          version = plist['CFBundleVersion'][1]
-          executable = plist['CFBundleExecutable'][1]
-          libraries = { k:v[1] for k,v in plist['OSBundleLibraries'].items()
+          name = plist['CFBundleName']
+          identifier = plist['CFBundleIdentifier']
+          version = plist['CFBundleVersion']
+          executable = plist['CFBundleExecutable']
+          libraries = { k:v for k,v in plist['OSBundleLibraries'].items()
                             # Ignore self-dependencies
                         if (not k == identifier and
                             # Ignore Apple-provided libraries
