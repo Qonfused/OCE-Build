@@ -3,8 +3,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 ##
 
-from datetime import datetime, timezone
-
 import pytest
 
 from .dict import nested_get
@@ -17,48 +15,6 @@ from ocebuild.sources.github import github_file_url, github_tag_names
 from ocebuild.versioning.semver import get_version
 
 
-def test_parse_plist_types():
-  assert parse_plist_types(*('array', [])) == \
-    []
-  assert parse_plist_types(*('data', 'AQ==')) == \
-    ('data', '01')
-  assert parse_plist_types('date', '2020-01-01T00:00:00Z') == \
-    ('date', datetime(2020, 1, 1, 0, 0, tzinfo=timezone.utc))
-  assert parse_plist_types('dict', {}) == \
-    {}
-  assert parse_plist_types('real', '1.0') == \
-    ('float', 1.0)
-  assert parse_plist_types('integer',  '1') == \
-    ('int', 1)
-  assert parse_plist_types('string', 'Foo') == \
-    ('string', 'Foo')
-  assert parse_plist_types('true', '') == \
-    ('bool', True)
-  assert parse_plist_types('false', '') == \
-    ('bool', False)
-  
-def test_write_plist_types():
-  mock_default = ('dict', '')
-  assert write_plist_types([], defaults=('array', None)) == \
-    ['<array>', '</array>']
-  assert write_plist_types(('data', '01'), mock_default) == \
-    ['<data>AQ==</data>']
-  assert write_plist_types(('date', datetime(2020, 1, 1, 0, 0, tzinfo=timezone.utc)),
-                                mock_default) == \
-    ['<date>2020-01-01T00:00:00Z</date>']
-  assert write_plist_types({}, defaults=('dict', None)) == \
-    ['<dict>', '</dict>']
-  assert write_plist_types(('float', 1.0), mock_default) == \
-    ['<real>1.0</real>']
-  assert write_plist_types(('int', 1), mock_default) == \
-    ['<integer>1</integer>']
-  assert write_plist_types(('string', 'Foo'), mock_default) == \
-    ['<string>Foo</string>']
-  assert write_plist_types(('bool', True), mock_default) == \
-    ['<true/>']
-  assert write_plist_types(('bool', False), mock_default) == \
-    ['<false/>']
-
 def test_parse_plist():
   url = github_file_url('acidanthera/OpenCorePkg',
                         path='Docs/Sample.plist',
@@ -66,7 +22,7 @@ def test_parse_plist():
                         tag='0.9.3',
                         raw=True)
   with request(url).text(encoding='utf-8') as file:
-    sample_plist = parse_plist([l.rstrip() for l in file])
+    sample_plist = parse_plist(file)
     # Validate schema
     entries = [
       # ACPI
@@ -125,22 +81,11 @@ def test_parse_plist():
       (dict,  ['UEFI', 'Quirks']),
       (list,  ['UEFI', 'ReservedMemory']),
     ]
-    for _type, _tree in entries:
-      assert (val := nested_get(sample_plist, _tree)) is not None
-      if isinstance(val, tuple):
-        _type, _val = val
-        # Handle stringified types
-        if (isinstance(_type, str)):
-          if   _type == 'bool':     _type = bool
-          elif _type == 'string':   _type = str
-        assert isinstance(_val, _type)
-      else:
-        assert isinstance(val, _type)
     # Deep compare
     assert nested_get(sample_plist, ['DeviceProperties']) == {
       'Add': {
         'PciRoot(0x0)/Pci(0x1b,0x0)': {
-          'layout-id': ('data', '01000000')
+          'layout-id': b'\x01\x00\x00\x00'
         }
       },
       'Delete': {}
@@ -154,12 +99,12 @@ def test_write_plist():
     # Parse sample config.plist to dict
     config_plist_filepath = opencore_dir.joinpath('EFI', 'OC', 'config.plist')
     with open(config_plist_filepath, 'r', encoding='utf-8') as file:
-      sample_plist = parse_plist([l.rstrip() for l in file])
+      sample_plist = parse_plist(file)
     # Write parsed config.plist as plist
     output_plist_filepath = opencore_dir.joinpath('EFI', 'OC', 'parsed.plist')
     with open(output_plist_filepath, 'w') as f:
       lines = write_plist(sample_plist)
-      f.writelines("\n".join(lines))
+      f.writelines(lines)
     # Validate output with ocvalidate binary
     ocvalidate_binary = f'ocvalidate{get_binary_ext()}'
     stdout = wrap_binary(args=[output_plist_filepath],

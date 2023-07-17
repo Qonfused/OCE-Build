@@ -4,320 +4,63 @@
 ##
 """Parser for converting property list to a Python dictionary."""
 
-import re
-from base64 import b64decode, b64encode
-from datetime import datetime
-from io import TextIOWrapper
+from io import BufferedReader, TextIOWrapper
+from plistlib import dumps, InvalidFileException, loads, PlistFormat
+from xml.parsers.expat import ExpatError
 
-from typing import List, Optional, Tuple, Union
-
-from ._lib import update_cursor
-from .dict import flatten_dict, nested_get, nested_set
-from .regex import re_search
+from typing import Union
 
 
-PLIST_SCHEMA = {
-  '1.0': [
-    '<?xml version="1.0" encoding="UTF-8"?>',
-    '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">',
-    '<plist version="1.0">',
-    '<dict>',
-    '</dict>',
-    '</plist>'
-  ]
-}
-"""Base Apple property list schemas.
-@see https://www.apple.com/DTDs/PropertyList-1.0.dtd
-"""
+PLIST_FORMATS = { 'xml': PlistFormat.FMT_XML,
+                  'binary': PlistFormat.FMT_BINARY }
+"""Mapping of format names to plistlib `PlistFormat` enum values."""
 
-def parse_plist_types(stype: str,
-                      value: str
-                      ) -> Union[Tuple[str, any],  None]:
-  """Parse property list types to Python types.
-
-  Args:
-    stype: Property list type (literal).
-    value: Property list value.
-
-  Returns:
-    Tuple of (type, value) for the given type.
-  """
-  entry = None
-  try:
-    if   stype == 'array':    entry = []
-    elif stype == 'data':     entry = ('data', b64decode(value.encode()).hex().upper())
-    elif stype == 'date':     entry = (stype, datetime.fromisoformat(value.replace("Z", "+00:00")))
-    elif stype == 'dict':     entry = {}
-    elif stype == 'real':     entry = ('float', float(value))
-    elif stype == 'integer':  entry = ('int', int(value))
-    elif stype == 'string':   entry = ('string', value)
-    elif stype == 'true':     entry = ('bool', True)
-    elif stype == 'false':    entry = ('bool', False)
-  except: pass # De-op
-  return entry
-
-def write_plist_types(value: Union[Tuple[str, any], any],
-                      defaults: Union[Tuple[str, any], any]=('dict', None)
-                      ) -> List[str]:
-  """Parse Python types to property list entries.
-
-  Args:
-    value: Tuple of type (literal) and value.
-    defaults: Fallback tuple of type (literal) and value.
-
-  Returns:
-    A list of property list entries.
-  """
-
-  # Extract native type and value
-  stype, svalue = defaults
-  if svalue is not None:
-    stype  = value[0] if isinstance(value, tuple) else 'string'
-    svalue = value[1] if isinstance(value, tuple) else ''
+def parse_plist(lines: Union[str, bytes, BufferedReader, TextIOWrapper],
+                fmt: Union[None, PlistFormat] = None,
+                dict_type=dict
+               ) -> dict:
+  """Parses a native dictionary from a plist.
   
-    # Handle empty entries
-    try:
-      if not len(svalue):
-        if type(svalue) == dict: stype = 'dict'
-        if type(svalue) == list: stype = 'array'
-    except: pass
-  # Parse entry value
-  entry  = None
-  if   stype == 'date':   svalue = str(svalue).replace(' ', 'T').replace('+00:00', 'Z')
-  elif stype == 'string': pass
-  # Handle alternate serialized types
-  elif stype == 'float':  stype = 'real'
-  elif stype == 'int':    stype = 'integer'
-  # Handle alternate serialized values
-  elif stype == 'data':   svalue = b64encode(bytes.fromhex(svalue)).decode()
-  # Handle alternate entry schemas
-  elif stype == 'bool':
-    entry = [f'<{(stype := str(svalue).lower())}/>']
-  else:
-    entry = [f'<{stype}>', f'</{stype}>']
-  # Default entry schema
-  if entry is None:
-    entry = [f'<{stype}>{svalue}</{stype}>']
-
-  return entry
-
-def parse_plist(lines: Union[List[str], TextIOWrapper],
-                config: Optional[dict]=None
-                ) -> dict:
-  """Parses a property list into a Python dictionary.
-
   Args:
     lines: Property list (plist) lines.
-    config: Dictionary to be populated.
+    fmt: Format of the plist file.
+    dict_type: Type of dictionary to return.
 
   Returns:
-    Dictionary populated from plist entries.
+    A dictionary containing the parsed plist.
   """
-  if config is None: config = dict()
-
-  cursor = {
-    'keys': [],
-    'level': 0,
-    'indent': 0,
-    'skip': (def_flag := False),
-    'prev_line': None
-  }
-  for line in lines:
-    # Skip empty lines
-    if len(lnorm := line.lstrip()) == 0:
-      continue
-    # Skip multiline comments
-    if lnorm.startswith('<!--') or (__comment_end := lnorm.endswith('-->')):
-      cursor['skip'] = __comment_end
-      continue
-    if cursor['skip']:
-      continue
-
-    level = len(line[:-len(lnorm)])
-    # Skip root or closing properties
-    if lnorm.startswith('</') or level == 0: continue
-
-    # Update cursor position
-    if (lnorm := lnorm.rstrip()).endswith('</key>'):
-      key = lnorm[len('<key>'):-len('</key>')]
-      update_cursor(level, key, cursor)
-    # Update dictionary values
-    elif lnorm.startswith('<'):
-      # Attempt single-line extraction of type and value
-      stype = re.findall('<([a-z]+)/?>', lnorm, re.IGNORECASE)[0]
-      value = re.findall('<[a-z]+>(.*)</[a-z]+>', lnorm, re.IGNORECASE)
-      if len(value): value = value[0]
-
-      # Parse property list types to Python types
-      entry = parse_plist_types(stype, value)
-      if entry is None: continue
-
-      # Extract and validate parent tree level
-      tree = cursor['keys']
-      while len(tree)-1 >= level / max(1, cursor['indent']):
-        cursor['level'] -= cursor['indent']
-        # Handle object arrays separately
-        if cursor['prev_line'].lstrip().startswith(f'</{stype}>'):
-          tree.pop(-1)
-        # Handle dictionary keys separately
-        else:
-          tree.pop(-2)
-
-      # Handle object and array traversal
-      ptree = tree[:-1] if stype != 'dict' else tree
-      prev_value = nested_get(config, ptree)
-      # Handle nested object arrays
-      while tree and (prev_value is None):
-        ptree = tree[:-1]
-        prev_value = nested_get(config, ptree)
-      # Add non-keyed entries
-      if tree[-1] in prev_value:
-        # Handle pure array values
-        if isinstance(prev_value[tree[-1]], list):
-          prev_value = prev_value[tree[-1]]
-          prev_value.append(entry)
-          nested_set(config, tree, prev_value)
-          continue
-      
-      # Add new dict entries
-      if isinstance(prev_value, dict) or prev_value is None:
-        nested_set(config, tree, entry)
-      # Add new object array entries
-      elif isinstance(prev_value, list):
-        if stype == 'dict':
-          # Always append dictionaries to arrays
-          prev_value.append(entry)
-          nested_set(config, ptree, prev_value)
-        else:
-          # Add new key to last dictionary in array
-          *tree, key = tree
-          prev_value[-1][key] = entry
-          nested_set(config, tree, prev_value)
-      # Update cursor position
-      cursor['prev_line'] = line
-    # Reached invalid line
-    else: pass #TODO: Handle multi-line values
-      # raise Exception(f'Invalid line at position {i}:\n\n{line}')
-
-  return config
+  try:
+    if isinstance(lines, (BufferedReader, TextIOWrapper)):
+      lines = lines.read()
+    if isinstance(lines, str):
+      lines = str.encode(lines)
+    return loads(lines, fmt=fmt, dict_type=dict_type)
+  except InvalidFileException as e:
+    raise ValueError('Invalid plist header.')
+  except ExpatError as e:
+    raise ValueError(f'Invalid plist: {e}')
 
 def write_plist(config: dict,
-                lines: Optional[List[str]]=None,
-                ) -> List[str]:
-  """Writes a property list from a Python dictionary.
-
+                fmt: PlistFormat = PLIST_FORMATS['xml'],
+                sort_keys: bool=False
+                ) -> str:
+  """Writes a native dictionary to a plist.
+  
   Args:
-    lines: Property list (plist) lines.
     config: Dictionary to be written.
+    fmt: Format of the plist file.
+    sort_keys: Whether to sort the keys in the output.
 
   Returns:
-    Property list (plist) populated from dictionary entries.
+    A string containing the written plist.
   """
-  if lines is None: lines = PLIST_SCHEMA['1.0']
-
-  def try_index(*args: Union[str, int]) -> int:
-    try: return lines.index(*args)
-    except: return -1
-  cursor = { 'line': 0, 'indent': 2 }
-  for (keys, value) in flatten_dict(config).items():
-    # Validate root dicitonary entry
-    head = try_index('<dict>')
-    if head == -1: raise Exception(f'Invalid property list: No root found.')
-
-    # Seek or create head index for current tree level
-    for j, key in enumerate(tree := str(keys).split('.')):
-      padding = (" "*cursor['indent'])*(j+1)
-
-      # Create parent dictionary for object arrays
-      is_root_key = (j == len(tree)-1)
-      if isinstance(key, int):
-        num_entries = 0
-        if not isinstance(nested_get(config, tree[:-1]), list):
-          # Seek to current array index
-          while not (has_array_index := key == (num_entries - 1)):
-            line_padding = (line := lines[head])[:-len(line.lstrip())]
-            if line == f'{padding[:-2]}</array>': break
-            elif line == f'{line_padding}<dict>': num_entries += 1
-            head += 1
-          # Skip end of previous array entry
-          if (has_entries := lines[head-1] != f'{padding[:-2]}<array>'):
-            while lines[head-1] != f'{padding}</dict>': head += 1
-            head -= 1
-          # Create new array entry
-          if not (has_entries and has_array_index):
-            if has_entries: head += 1
-            lines[head:head] = [f'{padding}<dict>', f'{padding}</dict>']
-            head += 1
-        # # Handle pure array entries
-        # else:
-        #   # print(re_search(r'<key>(.*)</key>', lines[head-1]))
-        #   print(tree, key)
-        #   print(lines[head-1])
-        #   print(lines[head])
-        # #   print(entry)
-        # #   print()
-        # Seek to end of entry
-        continue
-      # Insert array indices as additional keys
-      elif (re_match := re.search(r'(.*)\[([0-9]+)\]', key)):
-        key, idx = re_match.groups()
-        tree[j] = key
-        tree[j+1:j+1] = [int(idx)]
-      
-      # Search for key in current level
-      key_ln = f'{padding}<key>{key}</key>'
-      if (index := try_index(key_ln, head)) == -1:
-        # Always append to end of dictionary
-        if not lines[head].lstrip().startswith('</dict>'):
-          while not lines[head-1].startswith(f'{padding}</'):
-            head += 1
-            if lines[head].startswith(f'{padding}<key>'): head += 1
-            if lines[head].startswith(f'{padding[:-2]}</'): break
-            
-        # Append new entry to head
-        defaults = ('dict' if not re_match else 'array',
-                    '' if is_root_key else None)
-        lns = [f'{padding}{v}' for v in write_plist_types(value, defaults)]
-        # Handle creating pure array entries
-        if is_root_key and not isinstance(nested_get(config, tree[:-1]), dict):
-          # Create new array field
-          if tree[-1] == 0:
-            lines[head:head] = [key_ln,
-                                f'{padding}<array>', f'{padding}</array>']
-            head += 2
-          entry = list(map(lambda s: f'  {s}', lns))
-        # Handle creating keyed entries
-        else:
-          entry = [key_ln, *lns]
-    
-        # Create root entries
-        lines[head:head] = entry
-        head += len(entry) - 1
-      else:
-        # Seek end of level
-        if index >= head: head = index + 1
-        for line in lines[head:]:
-          if len(padding) < len(line[:-len(line.lstrip())]): head += 1
-          else: break
-        head += 1
-        # Handle appending new pure array entries
-        if is_root_key and not isinstance(nested_get(config, tree[:-1]), dict):
-          # Seek end of array
-          while lines[head] != f'{padding}</array>': head += 1
-          # Append new entry to array
-          lns = [f'{padding}  {v}' for v in write_plist_types(value, defaults)]
-          lines[head:head] = lns
-          head += len(entry) - 1
-
-  return lines
+  return dumps(config, fmt=fmt, sort_keys=sort_keys).decode(encoding='UTF-8')
 
 
 __all__ = [
   # Constants (1)
-  "PLIST_SCHEMA",
-  # Functions (4)
-  "parse_plist_types",
-  "write_plist_types",
+  "PLIST_FORMATS",
+  # Functions (2)
   "parse_plist",
   "write_plist"
 ]
