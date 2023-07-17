@@ -18,9 +18,9 @@ def test_write_yaml_types():
   assert write_yaml_types([],
                                 schema='annotated') == \
     ('Array  ', '(empty)')
-  assert write_yaml_types(('data', '01'),
+  assert write_yaml_types(('data', b'\x01\x00\x00\x00'),
                                 schema='annotated') == \
-    ('Data   ', '<01>')
+    ('Data   ', '<01000000>')
   assert write_yaml_types(('date', datetime(2020, 1, 1, 0, 0, tzinfo=timezone.utc)),
                                 schema='annotated') == \
     ('Date   ', "2020-01-01T00:00:00Z")

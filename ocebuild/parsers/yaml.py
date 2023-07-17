@@ -13,6 +13,7 @@ from typing import List, Literal, Optional, Tuple, Union
 from ._lib import _append_tags, _apply_macro, update_cursor
 from .dict import flatten_dict, nested_get, nested_set
 from .regex import re_search
+from .types import decode_data, encode_data
 
 
 def parse_yaml_types(stype: str,
@@ -34,8 +35,7 @@ def parse_yaml_types(stype: str,
     # Parse annotated types
     if   stype == 'Date':     stype = 'date';   svalue = datetime.fromisoformat(value.replace("Z", "+00:00"))
     elif stype == 'Boolean':  stype = 'bool';   svalue = value.lower() == 'true'
-    elif stype == 'Data':     stype = 'data';   svalue = "".join(map(lambda s: re_search(r'[a-zA-Z0-9 ]+', s),
-                                                                     value.split()))
+    elif stype == 'Data':     stype = 'data';   svalue = encode_data(value)
     elif stype == 'Dict':     stype = 'dict';   svalue = {}
     elif stype == 'Number':
       if '.' in value:        stype = 'float';  svalue = float(value)
@@ -70,7 +70,7 @@ def write_yaml_types(value: Union[Tuple[str, any], any],
     # Parse native types
     if   stype == 'date':     stype = 'Date   '; svalue = str(svalue).replace(' ', 'T').replace('+00:00', 'Z')
     elif stype == 'bool':     stype = 'Boolean'; svalue = str(svalue).lower()
-    elif stype == 'data':     stype = 'Data   '; svalue = f'<{svalue}>'
+    elif stype == 'data':     stype = 'Data   '; svalue = f"<{decode_data(svalue, format='hex')}>"
     elif stype == 'dict':     stype = 'Dict   '; svalue = '(empty)'
     elif stype == 'float':    stype = 'Number '; svalue = str(float(svalue))
     elif stype == 'int':      stype = 'Number '; svalue = str(int(svalue))
@@ -167,7 +167,10 @@ def parse_yaml(lines: List[str],
       continue
     # Handle preprocessor macros
     elif (macro := tokens[0]).startswith('@'):
-      _apply_macro(macro, flags, tokens, cursor, frontmatter_dict)
+      # Fix comma-separated macro flags
+      if macro[-1] == ',':
+        for token in tokens[1:]: macro += token
+      _apply_macro(macro, flags, cursor, frontmatter_dict)
       continue
     # Skip through macro checking scope
     elif cursor['skip']:

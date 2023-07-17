@@ -48,7 +48,6 @@ def _append_tags(cursor: dict,
 
 def _apply_macro(macro: str,
                  flags: List[str],
-                 tokens: List[str],
                  cursor: dict,
                  frontmatter_dict: dict
                  ) -> None:
@@ -62,9 +61,7 @@ def _apply_macro(macro: str,
     frontmatter_dict: The frontmatter dictionary.
   """
 
-  # Fix comma-separated macro flags
-  if macro[-1] == ',':
-    for token in tokens[1:]: macro += token
+  # Check if macro has flag
   flag = re_search(r'\((.*)\)', macro, group=1)
   if flag is not None: macro = macro[:-len(f'({flag})')]
 
