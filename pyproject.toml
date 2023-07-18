@@ -69,6 +69,10 @@ poetry_command = "" # Run tasks via `poetry <task>` with the poethepoet plugin.
 cmd     = "pytest --cov=ocebuild"
 help    = "Runs project tests with a short coverage report."
 
+[tool.poe.tasks.lint]
+cmd     = "pylint --rcfile ci/tools/pylint/.pylintrc ocebuild"
+help    = "Runs project linter with a short report."
+
 ################################################################################
 #                               Test Configuration                             #
 ################################################################################

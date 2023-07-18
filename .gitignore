@@ -8,7 +8,7 @@
 !/.gitattributes
 !/.gitignore
 !/.pre-commit-config.yaml
-!/.pylintrc
+!/**/.pylintrc
 
 # Build artifacts
 dist/

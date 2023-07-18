@@ -1,6 +1,7 @@
 {
   "files.associations": {
-    "*.lock": "yaml"
+    "*.lock": "yaml",
+    "*pylintrc*": "ini",
   },
   "files.exclude": {
     "**/.pytest_cache": true,
