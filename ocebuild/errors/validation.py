@@ -6,6 +6,8 @@
 ##
 """Validation methods used for testing and at runtime."""
 
+#pylint: disable=cell-var-from-loop
+
 from contextlib import suppress
 from functools import partial
 from os import PathLike
@@ -50,12 +52,12 @@ def validate_path_tree(path: Union[str, "PathLike[str]"],
   """
   # Verify path exists
   root_dir = PathResolver(path)
-  for tree, flag in flatten_dict(tree, delimiter).items():
+  for ftree, flag in flatten_dict(tree, delimiter).items():
     # Create error partial for re-use
-    absolute_path = root_dir.joinpath(*tree.split('/'))
+    absolute_path = root_dir.joinpath(*ftree.split('/'))
     name = absolute_path.name
     path = str(absolute_path)[len(str(root_dir))+1:]
-    kind = 'file' if flag == 'f' or flag == 'file' else 'directory'
+    kind = 'file' if flag in ('f', 'file') else 'directory'
     err = partial(PathValidationError, name=name, kind=kind, path=path)
     # Verify path exists
     def path_exists() -> bool:
@@ -65,7 +67,7 @@ def validate_path_tree(path: Union[str, "PathLike[str]"],
     if flag == '*':
       # Verify subdirectory is populated
       def is_populated() -> bool:
-        return bool(len(set(absolute_path.iterdir())))
+        return bool(set(absolute_path.iterdir()))
       validate(is_populated, err, msg=f"Path '{name}' is empty (at {path})")
     elif flag in ('f', 'file', 'd', 'dir'):
       # Verify path type matches flag

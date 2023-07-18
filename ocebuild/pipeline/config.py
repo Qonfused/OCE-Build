@@ -104,14 +104,14 @@ def merge_configs(base: Union[str, PathResolver],
     {...}
   """
   base_config, _ = read_config(base)
-  
+
   # Parse config patches
   for filepath in patches:
     patch, frontmatter = read_config(filepath)
     if isinstance(frontmatter, dict) and 'tags' in frontmatter:
       apply_preprocessor_tags(base_config, patch, frontmatter['tags'])
     base_config = merge_dict(base_config, patch)
-  
+
   return base_config
 
 def read_config(filepath: str) -> Tuple[Dict, Union[Dict, None]]:

@@ -4,5 +4,6 @@
 # Copyright (c) 2023, Cory Bennett. All rights reserved.
 # SPDX-License-Identifier: BSD-3-Clause
 ##
+"""CI/CD Pipeline for Python Projects"""
 
 from ci.constants import *

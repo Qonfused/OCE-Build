@@ -9,15 +9,16 @@ from os import environ as os_environ
 from typing import Union
 
 
-class __EnvironWrapper:
+class __EnvironWrapper: #pylint: disable=invalid-name
   """Simple class to securely read environment variables."""
 
   def __init__(self):
     # Attempt to load environmental variables from a dotfile
     try:
-      from dotenv import load_dotenv #type: ignore (PEP 484)
+      from dotenv import load_dotenv #pylint: disable=import-outside-toplevel
       load_dotenv()
-    except: pass #pragma no cover
+    except ImportError: #pragma no cover
+      pass
 
   def has(self, token: str) -> bool:
     """Checks if the given environment variable is set."""

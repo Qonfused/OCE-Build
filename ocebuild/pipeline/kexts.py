@@ -47,7 +47,7 @@ def extract_kext_archive(url: str,
   """
   tmpdir: PathResolver=None
   try:
-    kexts = dict()
+    kexts = {}
     with extract_archive(url, persist=True) as tmpdir:
       # Handle nested archives
       for archive in tmpdir.glob('**/*.zip'):
@@ -82,7 +82,7 @@ def extract_kext_archive(url: str,
           "dependencies": libraries
         }
     # Filter build targets if provided in extract path
-    if any([ build.lower() in e['__extract'].lower() for e in kexts.values() ]):
+    if any(build.lower() in e['__extract'].lower() for e in kexts.values()):
       kexts = { k:v for k,v in kexts.items()
                 if build.lower() in v['__extract'].lower() }
     # Yield the kexts dictionary.

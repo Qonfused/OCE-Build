@@ -47,7 +47,7 @@ AST_TYPES_STMTS = [
 
 def _get_parent_tree(package: Union[str, PathResolver]) -> str:
   """Returns the parent tree of a package."""
-  ptree = PathResolver(package).relative_to(PROJECT_ROOT).parents[1].__str__()
+  ptree = str(PathResolver(package).relative_to(PROJECT_ROOT).parents[1])
   if ptree == '.': ptree = ''
   else: ptree += '.'
   return ptree
@@ -86,32 +86,33 @@ def get_local_statements(filepath: Union[str, PathResolver]
       - A list of all local names in the file.
       - A dictionary of all local names and their types.
   """
-  is_import = lambda n: any([ isinstance(n, t) for t in AST_TYPES_IMPORTS ])
-  is_def = lambda n: any([ isinstance(n, t) for t in AST_TYPES_STMTS ])
+  def is_import(n): return any(isinstance(n, t) for t in AST_TYPES_IMPORTS)
+  def is_def(n): return any(isinstance(n, t) for t in AST_TYPES_STMTS)
 
   names: List[str]=[]
   types: Dict[str, List[str]] = OrderedDict()
   for kind in ('Constants', 'Variables', 'Functions', 'Classes'):
     types[kind] = []
   # Enumerate ast nodes for names and node types
-  body = parse(open(filepath, 'r').read()).body
-  local_stmts = [n for n in body if is_def(n) and not is_import(n)]
-  for s in local_stmts:
-    if isinstance(s, Assign):
-      for n in s.targets:
-        names.append(name := n.id)
-        # Tag node as a constant if it is uppercase
-        if str(name).isupper():
-          types['Constants'].append(name)
-        # Otherwise, tag as a variable
-        else:
-          types['Variables'].append(name)
-    else:
-      names.append(name := s.name)
-      if isinstance(s, FunctionDef) or isinstance(s, AsyncFunctionDef):
-        types['Functions'].append(name)
-      elif isinstance(s, ClassDef):
-        types['Classes'].append(name)
+  with open(filepath, 'r', encoding='UTF-8') as file:
+    body = parse(file.read()).body
+    local_stmts = [n for n in body if is_def(n) and not is_import(n)]
+    for s in local_stmts:
+      if isinstance(s, Assign):
+        for n in s.targets:
+          names.append(name := n.id)
+          # Tag node as a constant if it is uppercase
+          if str(name).isupper():
+            types['Constants'].append(name)
+          # Otherwise, tag as a variable
+          else:
+            types['Variables'].append(name)
+      else:
+        names.append(name := s.name)
+        if isinstance(s, (FunctionDef, AsyncFunctionDef)):
+          types['Functions'].append(name)
+        elif isinstance(s, ClassDef):
+          types['Classes'].append(name)
 
   return names, types
 
@@ -129,7 +130,7 @@ def get_variable_docstring(statement: str,
   """
   with open(filepath, 'r', encoding='UTF-8') as module_file:
     file_text = module_file.read()
-    docstring = re_search(f'(?s)^{statement}\s?.*?\n^"""(.*?)"""$', file_text,
+    docstring = re_search(f'(?s)^{statement}\\s?.*?\n^"""(.*?)"""$', file_text,
                           group=1,
                           multiline=True)
     return docstring
@@ -149,9 +150,9 @@ def get_public_exports(filepath: Union[str, PathResolver],
   module = import_module(module_path)
   names, types = get_local_statements(filepath)
   exports: List[str] = []
-  for s in module.__dir__():
+  for s in dir(module):
     # Remove external module imports
-    export = module.__getattribute__(s)
+    export = getattr(module, s)
     if hasattr(export, '__loader__'): continue
     try: assert export.__module__ == module_path
     except AssertionError:
@@ -174,8 +175,8 @@ def get_public_exports(filepath: Union[str, PathResolver],
 
     # Otherwise, add to exports
     exports.append(s)
-  
-  export_types = dict()
+
+  export_types = {}
   for k,v in types.items():
     filtered_names = list(filter(lambda n: n in exports, v))
     if filtered_names: export_types[k] = filtered_names
@@ -209,7 +210,7 @@ def get_file_header(filepath: Union[str, PathResolver]):
         elif not has_pragma_line and line.startswith('#pragma'):
           has_pragma_line = True
         # Preserve header linebreaks
-        elif not len(line): pass
+        elif not line: pass
         # Skip all other lines
         elif not all([is_spdx_header, is_docstring]):
           break
@@ -255,7 +256,7 @@ def generate_api_exports(filepath: Union[str, PathResolver],
       replacement_entries += ',\n'.join(map(lambda e: f'  "{e}"', statements))
       if not idx+1 == len(module_exports): replacement_entries += ','
     replacement_text = f'__all__ = [\n{replacement_entries}\n]'
-    if not len(replacement_entries):
+    if not replacement_entries:
       replacement_text = '__all__ = []'
     # Replace text
     if public_exports:
@@ -279,7 +280,7 @@ def _main(entrypoint: Optional[str]=None) -> None:
 
     # Filter package file SPDX headers
     package_lines = get_file_header(package)
-    if not len(package_lines): continue
+    if not package_lines: continue
     pragma_line = package_lines[0] if '#pragma' in package_lines[0] else ''
 
     # Enumerate each module in the package
@@ -290,15 +291,15 @@ def _main(entrypoint: Optional[str]=None) -> None:
         f_pragma_line =  module_file.readline()
         if not f_pragma_line.startswith('#pragma'): f_pragma_line = ''
         # Add implicit package imports
-        if not 'no-implicit' in f_pragma_line:
+        if 'no-implicit' not in f_pragma_line:
           package_lines.append(f'from {module_path} import *')
         # Add explicit public API exports
-        if not 'preserve-exports' in f_pragma_line:
+        if 'preserve-exports' not in f_pragma_line:
           generate_api_exports(filepath, module_path)
 
     # Update package file
     if not 'no-implicit' in pragma_line:
-      package_text = '\n'.join(package_lines)
+      package_text = '\n'.join(package_lines) + '\n'
       PathResolver(package).write_text(package_text, encoding='UTF-8')
 
 if __name__ == '__main__':

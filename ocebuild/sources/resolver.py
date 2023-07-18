@@ -4,6 +4,8 @@
 ##
 """Custom specifier resolver classes and methods."""
 
+#pylint: disable=C0103,R1725,W0401,W0613,W0614,W0622,W1113,E0602
+
 from difflib import get_close_matches
 from hashlib import sha256
 from inspect import signature
@@ -97,18 +99,18 @@ class GitHubResolver(BaseResolver):
     self.tag = tag
     self.workflow = workflow
     self.commit = commit
-  
+
   @staticmethod
-  def extract_asset(self: Union[TGitHubResolver, TDortaniaResolver],
+  def extract_asset(resolver: Union[TGitHubResolver, TDortaniaResolver],
                     name: str,
                     url: str,
                     build: Optional[Literal['RELEASE', 'DEBUG']]=None
                     ) -> str:
     """Extracts the closest matching asset from a GitHub release url."""
     if '/releases/' not in url:
-      raise ValueError(f'URL must resolve to a GitHub release.')
+      raise ValueError('URL must resolve to a GitHub release.')
     if build is None: build = 'RELEASE'
-    self.build = build
+    resolver.build = build
 
     release_catalog = github_release_catalog(url)
 
@@ -118,32 +120,34 @@ class GitHubResolver(BaseResolver):
     assets = list(filter(lambda a: not any(s in a['name'].lower()
                                            for s in exclusion_list),
                          assets))
-    if not len(assets):
+    if not assets:
       raise ValueError(f'Release catalog for {name} has no assets.')
-    
+
     name_parts = split('-|_| ', name.lower())
     def get_match(arr: List[dict], cutoff=0.25):
       """Finds the closest kext bundle in a list of release assets."""
       closest = get_close_matches(name, [a['name'] for a in arr], n=1, cutoff=cutoff)
-      if not closest or not any([ s in closest[0].lower() for s in name_parts ]):
+      if not closest or not any(s in closest[0].lower() for s in name_parts):
         raise ValueError(f'Unable to resolve {name}.')
       return next(a['browser_download_url'] for a in arr if a['name'] == closest[0])
 
     # Get the asset with the closest name to the resolver and build target
     asset = None
-    has_name = lambda asset: all([ s in asset['name'].lower() for s in name_parts ])
-    has_build = lambda asset: build.lower() in asset['name'].lower()
+    def with_name(asset):
+      return all(s in asset['name'].lower() for s in name_parts)
+    def with_build(asset):
+      return build.lower() in asset['name'].lower()
     # Handle ambiguous or close matches
-    if arr := list(filter(lambda a: has_name(a) and has_build(a), assets)):
+    if arr := list(filter(lambda a: with_name(a) and with_build(a), assets)):
       asset = get_match(arr)
     # Handle case where there are no build targets
-    elif arr := list(filter(lambda a: has_name(a) and not has_build(a), assets)):
+    elif arr := list(filter(lambda a: with_name(a) and not with_build(a), assets)):
       asset = get_match(arr)
     # Handle case where there is no clear resolution of the desired kext
     # i.e. there is no release asset with the same name and build
-    elif arr := list(filter(lambda a: not (has_name(a) and has_build(a)), assets)):
+    elif arr := list(filter(lambda a: not (with_name(a) and with_build(a)), assets)):
       asset = get_match(arr)
-    
+
     # Store the asset version
     release_version = get_version(release_catalog['tag_name'])
     if not release_version:
@@ -155,9 +159,9 @@ class GitHubResolver(BaseResolver):
           .replace(f'-{build.lower()}', '')
         version_parts = asset_metastring.split('.')[:-1]
         release_version = get_version(".".join(version_parts))
-      except: pass
+      except: pass #pylint: disable=bare-except,multiple-statements
     if release_version:
-      self.version = ".".join(map(str, release_version.release))
+      resolver.version = ".".join(map(str, release_version.release))
 
     return asset
 
@@ -166,7 +170,8 @@ class GitHubResolver(BaseResolver):
               ) -> str:
     """Returns a URL based on the class parameters."""
     params = dict(self)
-  
+    repo = params['repository']
+
     # Return raw file url
     if self.has_any('path'):
       return github_file_url(**params, raw=True)
@@ -179,12 +184,13 @@ class GitHubResolver(BaseResolver):
       params['tag'] = resolve_version_specifier(versions=tags,
                                                 specifier=input_tag)
       if params['tag'] is None:
-        raise ValueError(f"{params['repository']} - Could not resolve a tag for '{input_tag}'")
+        raise ValueError(f"{repo} - Could not resolve a tag for '{input_tag}'")
       # Handle non-standard semver tags
       if params['tag'] not in tags:
-        tag_matches = get_close_matches(params['tag'], tags)
+        tag = params['tag']
+        tag_matches = get_close_matches(tag, tags)
         if not tag_matches:
-          raise ValueError(f"{params['repository']} - No matching tags found for '{params['tag']}'")
+          raise ValueError(f"{repo} - No matching tags found for '{tag}'")
         params['tag'] = tag_matches[0]
       # Get the commit hash for the resolved tag
       self.commit = next((c for t,c in zip(tags, commits) if t == params['tag']),
@@ -195,13 +201,13 @@ class GitHubResolver(BaseResolver):
       if not self.has_any('commit'):
         self.commit = commit
       return url
-  
+
     # Return the latest release (default) or by tag
     release_url = github_release_url(**params)
     if (name := self.__name__):
       # Return release asset url if name is provided
       return self.extract_asset(self, name, url=release_url, build=build)
-  
+
     return release_url
 
 class DortaniaResolver(BaseResolver):
@@ -218,9 +224,10 @@ class DortaniaResolver(BaseResolver):
 
     # Public properties
     self.commit = commit
-  
+
   @staticmethod
-  def has_build(plugin: str): return has_build(plugin=plugin)
+  def has_build(plugin: str):
+    return has_build(plugin=plugin)
 
   def resolve(self: TDortaniaResolver,
               build: Optional[Literal['RELEASE', 'DEBUG']]=None
@@ -229,7 +236,7 @@ class DortaniaResolver(BaseResolver):
     if not build: build = self.build
     plugin = self.__name__
     params = dict(self)
-  
+
     # Resolve build commit sha
     commit_sha: str
     if self.has_any('commit'):
@@ -237,7 +244,7 @@ class DortaniaResolver(BaseResolver):
     else:
       commit_sha = get_latest_sha(plugin)
       self.commit = commit_sha
-    
+
     # Return the latest build (default) or by commit sha
     release_url = dortania_release_url(plugin, commit=commit_sha)
     if build is not None:
@@ -246,7 +253,7 @@ class DortaniaResolver(BaseResolver):
                                           name=plugin,
                                           url=release_url,
                                           build=build)
-  
+
     return release_url
 
 class PathResolver(BaseResolver, cls := type(Path())):
@@ -269,9 +276,9 @@ class PathResolver(BaseResolver, cls := type(Path())):
     try:
       super(cls, self).__init__(path, *args)
     # Instantiates a new Path subclass using the `__new__` method.
-    except:
+    except: #pylint: disable=bare-except
       self.__cls__ = super().__new__(cls, path, *args, **kwargs)
-  
+
   def __getattribute__(self: TPathResolver, name: str) -> Any:
     """Retrieves from the instantiated class or subclass."""
     self_attr = super().__getattribute__(name)
@@ -287,10 +294,12 @@ class PathResolver(BaseResolver, cls := type(Path())):
       # Return class attribute
       return cls_attr
     # Return the class attribute (if it exists)
-    except:
+    except: #pylint: disable=bare-except
       return self_attr
 
-  def glob(self: TPathResolver, pattern: str) -> Generator[TPathResolver, any, None]:
+  def glob(self: TPathResolver,
+           pattern: str
+           ) -> Generator[TPathResolver, any, None]:
     """Iterates from a directory or from a file's parent directory."""
     glob_iter = None
     if self.resolve().is_file():
@@ -309,10 +318,8 @@ class PathResolver(BaseResolver, cls := type(Path())):
     if from_parent and self.resolve().is_file():
       parent_dir = parent_dir.parent
     return self.relative_to(parent_dir).as_posix()
-  
-  def resolve(self: TPathResolver,
-              strict: bool = False
-              ) -> cls:
+
+  def resolve(self: TPathResolver, strict: bool = False) -> cls:
     """Resolves a filepath based on the class parameters.
 
     If the path exists, the checksum is calculated and stored.
@@ -333,11 +340,11 @@ class PathResolver(BaseResolver, cls := type(Path())):
     # Fall back to initializing and calling a new cls subclass
     else:
       resolved_path = cls(self.path).resolve()
-    
+
     # Get checksum of the resolved filepath
-    from .binary import get_digest
+    from .binary import get_digest #pylint: disable=import-outside-toplevel
     self.checksum = get_digest(resolved_path, algorithm=sha256)
-    
+
     #TODO: Handle additional path type verifications here
     return resolved_path
 

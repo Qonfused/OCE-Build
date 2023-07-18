@@ -2,7 +2,9 @@
 # Copyright (c) 2023, Cory Bennett. All rights reserved.
 # SPDX-License-Identifier: BSD-3-Clause
 ##
-""""""
+"""Methods for handling and resolving lock files."""
+
+#pylint: disable=wildcard-import,unused-wildcard-import
 
 from os import getcwd
 
@@ -64,7 +66,7 @@ def _format_resolver(resolver: Union[ResolverType, None],
     The formatted resolver string.
   """
   resolution: str = ''
-  resolver_props = dict(resolver) if resolver is not None else dict()
+  resolver_props = dict(resolver) if resolver is not None else {}
 
   # Add the resolver or specifier name
   if isinstance(resolver, GitHubResolver):
@@ -83,14 +85,13 @@ def _format_resolver(resolver: Union[ResolverType, None],
     resolution += f":{resolver_props['version']}"
   elif isinstance(resolver, PathResolver):
     resolution += f":{resolver.path.relative_to(base_path)}"
-  
+
   # Add the resolver checksum
   if 'commit' in resolver_props:
     resolution += f"#commit={resolver_props['commit']}"
   elif 'checksum' in resolver_props:
     resolution += f"#checksum={resolver_props['checksum']}"
-    
-  
+
   return resolution
 
 def _format_dependency_entry(entry: Dict[str, any]) -> dict:
@@ -122,19 +123,19 @@ def parse_semver_params(entry: Union[str, dict],
   Returns:
     The parameters dictionary.
   """
-  if parameters is None: parameters = dict()
+  if parameters is None: parameters = {}
   # Release tag
-  if (prefix := re_match(f'^=', specifier)):
+  if (prefix := re_match('^=', specifier)):
     parameters['tag'] = specifier[len(prefix):]
   params = ('tag', 'branch', 'workflow', 'commit')
   # (Priority: 1) Named specifier parameters
-  if re_match(f'^#[a-zA-Z\\-]+=', specifier):
+  if re_match('^#[a-zA-Z\\-]+=', specifier):
     for k in params:
       if (prefix := re_match(f'#.*?{k}=', specifier)):
         #TODO: Add separation for multiple parameters (,)
         parameters[k] = specifier[len(prefix):]
   # (Priority: 2) Unnamed specifier parameters
-  elif (prefix := re_match(f'^#', specifier)):
+  elif (prefix := re_match('^#', specifier)):
     pattern = specifier[len(prefix):]
     # Test for whether matched string is a valid hash sha
     if (sha_long := re_search(r'\b[0-9a-fA-F]{40}\b', pattern)):
@@ -165,7 +166,7 @@ def parse_specifier(name: str,
     The resolver class for the specifier.
   """
   specifier = entry['specifier'] if isinstance(entry, dict) else entry
-  parameters: Dict[str, str]=dict()
+  parameters: Dict[str, str]={}
   resolver_props = { '__name__': name, '__specifier__': specifier }
 
   # Specifier is a wildcard
@@ -181,12 +182,12 @@ def parse_specifier(name: str,
     semver_specifier = specifier[len(repository):]
     parameters = parse_semver_params(entry, semver_specifier, parameters)
     return GitHubResolver(**parameters, **resolver_props)
-  
+
   # Specifier points to a Dortania build (or latest)
   if DortaniaResolver.has_build(name):
     parameters = parse_semver_params(entry, specifier, parameters)
     return DortaniaResolver(**parameters, **resolver_props)
-  
+
   # Specifier points to a local file
   if specifier.startswith('file:'):
     specifier = specifier \
@@ -195,7 +196,7 @@ def parse_specifier(name: str,
   if (filepath := PathResolver(base_path, specifier)).exists():
     parameters['path'] = filepath
     return PathResolver(**parameters, **resolver_props)
-  
+
   # No resolver matched
   return None
 
@@ -234,7 +235,7 @@ def write_lockfile(lockfile_path: str,
     entry = _format_dependency_entry(resolver)
     category = resolver['__category']
     lockfile = merge_dict(lockfile, { root: { category: { key: entry } } })
-  
+
   # Parse lockfile into YAML
   lockfile_entry = write_yaml(lockfile, lines=file_header)
 
@@ -284,13 +285,13 @@ def resolve_specifiers(build_config: dict,
     elif specifier in lockfile: continue
 
     # Resolve the specifier
-    resolver_props = dict(__category=category, __resolver=resolver)
+    resolver_props = { "__category": category, "__resolver": resolver }
     try:
       if resolver is None:
         nested_set(build_config, [category, name, 'specifier'], '*')
       elif isinstance(resolver, PathResolver):
         # Resolve the path for the specifier
-        path = resolver.resolve(strict=True)
+        path = resolver.resolve(strict=True) #pylint: disable=E1123
         resolver_props['path'] = f'./{path.relative_to(base_path)}'
       elif isinstance(resolver, (GitHubResolver, DortaniaResolver)):
         # Extract the build type (default to OpenCore build type)
@@ -306,7 +307,7 @@ def resolve_specifiers(build_config: dict,
           resolver_props['version'] = props['version']
       else:
         raise ValueError(f'Invalid resolver: {resolver}')
-      
+
       # Format the resolution
       resolver_props['resolution'] = _format_resolver(resolver,
                                                       base_path=base_path)
@@ -328,8 +329,9 @@ def resolve_specifiers(build_config: dict,
 
       # Extract additional properties from the entry
       ext, kind = _category_extension(category)
+      default_path = f'EFI/OC/{category}/{name}{ext}'
       resolver_props['__filepath'] = nested_get(entry, ['__filepath'],
-                                                default=f'EFI/OC/{category}/{name}{ext}')
+                                                default=default_path)
       resolver_props['kind'] = nested_get(entry, ['__kind'], default=kind)
 
       # Add the resolver to the list of resolvers
@@ -355,7 +357,7 @@ def validate_dependencies(lockfile: dict, build_config: dict) -> None:
   buildcfg_keys = set(k for c,d in build_config.items()
                           for k,e in d.items()
                             if e.get('specifier') != '*')
-  
+
   if lockfile_keys == buildcfg_keys:
     return # Pass: Lockfile is consistent with the build file.
   elif lockfile_keys.issubset(buildcfg_keys):

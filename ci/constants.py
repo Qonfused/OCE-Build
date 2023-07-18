@@ -2,6 +2,7 @@
 # Copyright (c) 2023, Cory Bennett. All rights reserved.
 # SPDX-License-Identifier: BSD-3-Clause
 ##
+"""Constants used by the CI system."""
 
 from sys import builtin_module_names
 from sysconfig import get_paths

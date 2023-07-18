@@ -33,7 +33,7 @@ class RequestWrapper():
   def json(self, *args, **kargs) -> any:
     """Return the response as JSON."""
     return json_load(self._wrapped_response, *args, **kargs)
-  
+
   def text(self, *args, **kargs) -> TextIOWrapper:
     """Return the response as text."""
     return TextIOWrapper(self._wrapped_response, *args, **kargs)
@@ -53,6 +53,7 @@ def request(url: Union[str, Request], *args, **kwargs) -> any:
     The response from urlopen wrapped in a RequestWrapper class.
   """
   try:
+    #pylint: disable=consider-using-with
     response = urlopen(url, context=skip_ssl_verify(), *args, **kwargs)
     return RequestWrapper(response)
   except HTTPError as e:

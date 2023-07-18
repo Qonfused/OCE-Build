@@ -36,9 +36,9 @@ def parse_plist(lines: Union[str, bytes, BufferedReader, TextIOWrapper],
       lines = str.encode(lines)
     return loads(lines, fmt=fmt, dict_type=dict_type)
   except InvalidFileException as e:
-    raise ValueError('Invalid plist header.')
+    raise ValueError('Invalid plist header.') from e
   except ExpatError as e:
-    raise ValueError(f'Invalid plist: {e}')
+    raise ValueError(f'Invalid plist: {e}') from e
 
 def write_plist(config: dict,
                 fmt: PlistFormat = PLIST_FORMATS['xml'],

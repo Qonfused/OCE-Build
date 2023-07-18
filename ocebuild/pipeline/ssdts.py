@@ -71,13 +71,13 @@ def sort_ssdt_symbols(filepaths: List[Union[str, PathResolver]]) -> OrderedDict:
   for ssdt, filepath in sorted(zip(ssdt_names, filepaths)):
     with open(filepath, 'r', encoding='UTF-8') as file:
       namespace = parse_ssdt_namespace(file)
-    dependency_tree[ssdt] = [k for k in namespace['imports'].keys()]
+    dependency_tree[ssdt] = list(namespace['imports'].keys())
     for symbol in namespace['statements']:
       if not symbol in dependency_tree:
         dependency_tree[symbol] = [ssdt]
       else:
         dependency_tree[symbol].append(ssdt)
-  
+
   # Sort table load order
   sorted_dependencies = OrderedDict()
   table = 'DSDT'
@@ -88,11 +88,11 @@ def sort_ssdt_symbols(filepaths: List[Union[str, PathResolver]]) -> OrderedDict:
       sorted_dependencies[table] = [s for s,d in dependency_tree.items()
                                     if table in d]
     # Handle DSDT dependencies
-    elif not table in sorted_dependencies:
-      sorted_dependencies[table] = list()
-    elif not table in ssdt_names:
+    elif table not in sorted_dependencies:
+      sorted_dependencies[table] = []
+    elif table not in ssdt_names:
       sorted_dependencies[table].append(symbol)
-  
+
   # Sort table dependencies by root -> alphabetically
   for k, arr in sorted_dependencies.items():
     sorted_dependencies[k] = sorted(arr, key=lambda s: (s.count('.'), s))

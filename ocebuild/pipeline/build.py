@@ -2,7 +2,7 @@
 # Copyright (c) 2023, Cory Bennett. All rights reserved.
 # SPDX-License-Identifier: BSD-3-Clause
 ##
-""""""
+"""Methods for handling and manipulating the build configuration."""
 
 from itertools import chain
 
@@ -12,7 +12,7 @@ from ocebuild.parsers.dict import nested_get, nested_set
 from ocebuild.parsers.yaml import parse_yaml
 
 
-def __set_var_default(build_vars: dict, name: str, default: str):
+def _set_var_default(build_vars: dict, name: str, default: str):
   """Set a variable to a default value if it is not already set."""
   if not (variable := nested_get(build_vars, ['variables', name])):
     variable = default
@@ -42,16 +42,16 @@ def read_build_file(filepath: str,
   """
   with open(filepath, 'r', encoding='UTF-8') as f:
     build_config, build_vars = parse_yaml(f, frontmatter=True)
-  
+
   # Extract the OpenCore build configuration
-  version = __set_var_default(build_vars, 'version', 'latest')
-  build = __set_var_default(build_vars, 'build', 'RELEASE')
-  target = __set_var_default(build_vars, 'target', 'X64')
+  version = _set_var_default(build_vars, 'version', 'latest')
+  build = _set_var_default(build_vars, 'build', 'RELEASE')
+  target = _set_var_default(build_vars, 'target', 'X64')
 
   # Add additional flags from the build configuration
   flags = nested_get(build_vars, ['flags'])
-  if not build in flags:  flags += [build]
-  if not target in flags: flags += [target]
+  if build not in flags:  flags += [build]
+  if target not in flags: flags += [target]
 
   # Normalize the entries in the build configuration
   if normalize_entries:

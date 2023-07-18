@@ -25,13 +25,13 @@ OPENCORE_BINARY_DATA_URL = github_archive_url('acidanthera/OcBinaryData',
                                               branch='master')
 
 def _iterate_entries(opencore_pkg: PathResolver,
-                     OC_DIR: PathResolver
+                     opencore_dir: PathResolver
                      ) -> Generator[PathResolver, any, None]:
   """Iterate over the entries in the build configuration."""
-  for category in map(lambda p: p.name, OC_DIR.iterdir()):
+  for category in map(lambda p: p.name, opencore_dir.iterdir()):
     if category not in ('ACPI', 'Drivers', 'Kexts', 'Tools'): continue
     for path in map(lambda p: p.relative_to(opencore_pkg).as_posix(),
-                    OC_DIR.joinpath(category).iterdir()):
+                    opencore_dir.joinpath(category).iterdir()):
       yield path
 
 @contextmanager
@@ -55,7 +55,7 @@ def extract_opencore_archive(url: str,
     with extract_archive(url) as pkg:
       # Extract EFI binaries and tree structure
       EFI_DIR = move(glob(pkg, pattern=f'**/{target}/EFI', first=True), tmp_dir)
-      
+
       # Extract documentation files
       DOCS_DIR = EFI_DIR.joinpath('..', 'Docs')
       changelog_doc = glob(pkg, pattern='**/Docs/Changelog.md', first=True)
@@ -72,19 +72,21 @@ def extract_opencore_archive(url: str,
 
       # Extract ACPI samples
       acpi_samples = glob(pkg, pattern='**/Docs/AcpiSamples/Binaries/*.aml')
-      for file in acpi_samples: move(file, EFI_DIR.joinpath('OC', 'ACPI'))
+      for file in acpi_samples:
+        move(file, EFI_DIR.joinpath('OC', 'ACPI'))
 
       # Extract bundled utilities
       UTILITIES_DIR = EFI_DIR.joinpath('..', 'Utilities')
-      for dir in glob(pkg, pattern='**/Utilities/*/'): move(dir, UTILITIES_DIR)
+      for dir_ in glob(pkg, pattern='**/Utilities/*/'):
+        move(dir_, UTILITIES_DIR)
 
     # Clone latest additional OpenCore binaries not shipped in the main package
     with extract_archive(OPENCORE_BINARY_DATA_URL) as pkg:
-      for dir in glob(EFI_DIR, pattern='**/OC/*/'):
-        extract = glob(pkg, pattern=f'**/{dir.name}/', first=True)
+      for dir_ in glob(EFI_DIR, pattern='**/OC/*/'):
+        extract = glob(pkg, pattern=f'**/{dir_.name}/', first=True)
         if extract and extract.exists():
-          copytree(extract, dir, dirs_exist_ok=True)
-    
+          copytree(extract, dir_, dirs_exist_ok=True)
+
     # Yield the temporary directory.
     yield PathResolver(tmp_dir)
   finally:
@@ -120,12 +122,12 @@ def extract_opencore_directory(resolvers: dict,
 
   with extract_opencore_archive(url, target=target) as opencore_pkg:
     OC_DIR = opencore_pkg.joinpath('EFI', 'OC')
-    
+
     # Handle interactive mode for iterator
     iterator = set(_iterate_entries(opencore_pkg, OC_DIR))
     num_entries = len(iterator)
     if __wrapper is not None: iterator = __wrapper(iterator, *args, **kwargs)
-    
+
     # Iterate over the entries in the extracted OpenCore package
     bundled = set(v['__filepath'] for v in resolvers.values()
                   if v['specifier'] == '*')

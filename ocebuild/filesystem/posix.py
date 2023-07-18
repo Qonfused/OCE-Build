@@ -105,7 +105,7 @@ def glob(directory: Union[str, "PathLike[str]"],
       exclude_matches |= set(PathResolver(directory).glob(s))
     matches = list(set(matches) - exclude_matches)
   if first:
-    return matches[0] if len(matches) else None
+    return matches[0] if matches else None
   return matches
 
 

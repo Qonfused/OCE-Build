@@ -66,7 +66,8 @@ def get_version(string: str) -> Union[vpkg.Version, None]:
   """
   try:
     return vpkg.parse(get_version_str(string))
-  except: pass
+  except vpkg.InvalidVersion:
+    return None
 
 def compare_version(v1: Union[str, vpkg.Version],
                     v2: Union[str, vpkg.Version],
@@ -135,7 +136,7 @@ def resolve_version_specifier(versions: List[str],
   # Handle named specifiers
   if specifier == 'latest': return str(sorted_versions[-1])
   if specifier == 'oldest': return str(sorted_versions[0])
-  
+
   # Find the version in the sorted list
   version_str = get_version_str(specifier)
   version = get_version(version_str)
@@ -199,8 +200,8 @@ def get_minimum_version(dependencies: Dict[str, Tuple[str, str]],
   """
   versions = set(k[1] for k in list(chain(*dependencies.values()))
                  if k[0] == library)
-  (versions := list(versions)).sort(key=lambda v: vpkg.Version(v))
-  return (library, f'^{str(versions[-1])}' if len(versions) else None)
+  (versions := list(versions)).sort(key=vpkg.Version)
+  return (library, f'^{str(versions[-1])}' if versions else None)
 
 def sort_dependencies(dependencies: Dict[str, Tuple[str, str]],
                      ) -> Generator[Tuple[str, str], any, None]:

@@ -4,6 +4,8 @@
 ##
 """Methods for formatting and retrieving GitHub source URLs."""
 
+#pylint: disable=consider-using-f-string,bare-except
+
 from datetime import datetime, timedelta
 from functools import partial
 from urllib.request import Request
@@ -239,7 +241,7 @@ def github_release_url(repository: str,
     >>> github_release_url('foo/bar', tag='v1.0.0')
     # -> "https://github.com/foo/bar/releases/tag/v1.0.0"
   """
-  
+
   try:
     if not tag:
       tags_catalog = github_api_request(f'/repos/{repository}/tags').json()
@@ -277,7 +279,7 @@ def github_artifacts_url(repository: str,
     artifacts_endpoint = f'/repos/{repository}/actions/artifacts'
     catalog = github_api_request(artifacts_endpoint).json()
     for workflow_run in catalog['artifacts']:
-      id = workflow_run['id']
+      r_id = workflow_run['id']
       w_id = nested_get(workflow_run, ['workflow_run', 'id'])
       head_branch = nested_get(workflow_run, ['workflow_run', 'head_branch'])
       head_sha = nested_get(workflow_run, ['workflow_run', 'head_sha'])
@@ -287,7 +289,7 @@ def github_artifacts_url(repository: str,
       if commit and commit != head_sha: continue
       # Return the first matching artifact url
       if (suite_id := github_suite_id(repository, head_sha, w_id)):
-        url = f'https://github.com/{repository}/suites/{suite_id}/artifacts/{id}'
+        url = f'https://github.com/{repository}/suites/{suite_id}/artifacts/{r_id}'
         if get_commit: return url, head_sha
         return url
   except:

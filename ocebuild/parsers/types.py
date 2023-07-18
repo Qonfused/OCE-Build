@@ -46,12 +46,12 @@ def encode_data(value: str) -> bytes:
   else:
     raise ValueError(f'Invalid data format: {value}')
 
-def decode_data(value: bytes, format: str='base64') -> str:
+def decode_data(value: bytes, enc: str='base64') -> str:
   """Decodes a binary representation to a base64 string.
   
   Args:
     value: The binary representation to decode.
-    format: The format to return the string in. Valid values are 'base64' and 'hex'.
+    enc: The encoding format to return. Valid values are 'base64' and 'hex'.
   
   Raises:
     ValueError: If the format is not a valid format.
@@ -59,12 +59,12 @@ def decode_data(value: bytes, format: str='base64') -> str:
   Returns:
     A base64 or hex string representation of the binary data.
   """
-  if format == 'base64':
+  if enc == 'base64':
     return _encode_base64(value).decode('UTF-8').strip()
-  elif format == 'hex':
+  elif enc == 'hex':
     return hexlify(value).decode('UTF-8').strip()
   else:
-    raise ValueError(f'Unrecognized data format: {format}')
+    raise ValueError(f'Unrecognized data format: {enc}')
 
 
 __all__ = [

@@ -46,13 +46,13 @@ def get_build_file(cwd: Union[str, PathResolver]
     else:
       error(msg="Could not find 'build.{yml,yaml}'",
             hint="Try running `ocebuild init` first.")
-  except Exception as e:
+  except Exception as e: #pylint: disable=broad-exception-caught
     abort(msg=f"Encountered an error while reading '{BUILD_FILE.name}': {e}",
           hint='Check the build configuration for errors.',)
-  else: 
+  else:
     PROJECT_DIR = PathResolver(BUILD_FILE.parent)
     debug(msg=f"Using '{PROJECT_DIR.relative('.')}' as the project root.")
-  
+
   return build_config, build_vars, flags, BUILD_FILE, PROJECT_DIR
 
 def extract_opencore_pkg(cwd: Union[str, PathResolver],
@@ -78,9 +78,10 @@ def extract_opencore_pkg(cwd: Union[str, PathResolver],
   try:
     with Progress(transient=True) as progress:
       bar = progress_bar('Extracting OpenCore package', wrap=progress)
+      target = build_vars['variables']['target']
       OC_DIR = extract_opencore_directory(resolvers,
                                           lockfile,
-                                          target=build_vars['variables']['target'],
+                                          target=target,
                                           out_dir=out_dir,
                                           # Interactive arguments
                                           __wrapper=bar)
@@ -103,8 +104,8 @@ def extract_opencore_pkg(cwd: Union[str, PathResolver],
   except PathValidationError as e:
     error(msg=f'Failed to extract the OpenCore package: {e}',
           hint='Check the OpenCore build configuration for errors.')
-  except Exception as e:
-    abort(msg=f'Encountered an error while extracting the OpenCore package')
+  except Exception: #pylint: disable=broad-exception-caught
+    abort(msg='Encountered an error while extracting the OpenCore package')
   else:
     OC_DIR = PathResolver(cwd, OC_DIR.resolve())
     debug(msg=f"Extracted OpenCore binaries to '{OC_DIR.relative(cwd)}'.")
@@ -137,7 +138,7 @@ def cli(env, cwd, out, clean, update, force):
 
   if not cwd: cwd = getcwd()
   else: debug(msg=f"(--cwd) Using '{cwd}' as the working directory.")
-  
+
   if not out: out = 'dist'
   else: debug(msg=f"(--out) Using '{out}' as the build directory.")
 
@@ -147,7 +148,7 @@ def cli(env, cwd, out, clean, update, force):
     debug(msg='(--clean) Cleaning the output directory...')
     try:
       remove(BUILD_DIR)
-    except Exception:
+    except Exception: #pylint: disable=broad-exception-caught
       abort(msg=f'Failed to clean the output directory ({BUILD_DIR})',
             hint='Check the output directory permissions.')
 
@@ -155,10 +156,10 @@ def cli(env, cwd, out, clean, update, force):
   build_config, build_vars, flags, *_, PROJECT_DIR = get_build_file(cwd)
 
   # Read the lockfile
-  from .lock import resolve_lockfile
+  from .lock import resolve_lockfile #pylint: disable=import-outside-toplevel
   lockfile, resolvers = resolve_lockfile(env, cwd, update, force,
                                          build_config=build_config,
-                                         PROJECT_DIR=PROJECT_DIR)
+                                         project_dir=PROJECT_DIR)
 
   # Extract the OpenCore package to the output directory
   OC_DIR = extract_opencore_pkg(cwd,
@@ -166,6 +167,8 @@ def cli(env, cwd, out, clean, update, force):
                                 resolvers, lockfile,
                                 out_dir=BUILD_DIR)
 
+  #FIXME: This is a temporary workaround until the build system is plugged-in.
+  _ = OC_DIR, flags
 
 __all__ = [
   # Functions (3)

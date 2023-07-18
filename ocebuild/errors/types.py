@@ -12,6 +12,7 @@ class GitHubRateLimit(Exception):
                rate_limit: dict):
     super().__init__(message)
     #TODO: Include rate limit information.
+    self.rate_limit = rate_limit
 
 class PathValidationError(Exception):
   """Indicates that a path does not match a given tree schema."""

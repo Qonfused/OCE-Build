@@ -25,7 +25,7 @@ version = SimpleNamespace(major=int(_MAJOR_VERSION),
                           pre_release=_PRE_RELEASE,
                           build=int(_BUILD))
 """Represents the current version of the project."""
-    
+
 def bump_version(major: Optional[bool]=None,
                  minor: Optional[bool]=None,
                  patch: Optional[bool]=None,
@@ -33,8 +33,6 @@ def bump_version(major: Optional[bool]=None,
                  build: Optional[bool]=None
                  ) -> str:
   """Bumps the project current version."""
-
-  global version
 
   # Handle semver components
   if   major:
@@ -46,8 +44,8 @@ def bump_version(major: Optional[bool]=None,
   # Handle increment of pre-release versions
   if   pre_release:
     version.pre_release = pre_release
-    if '.' in _PRE_RELEASE and _PRE_RELEASE.split(".")[0] == pre_release:
-      version.pre_release += f'.{int(_PRE_RELEASE.split(".")[-1]) + 1}'
+    if _PRE_RELEASE.split(".", maxsplit=1)[0] == pre_release:
+      version.pre_release += f'.{int(_PRE_RELEASE.rsplit(".", maxsplit=1)[-1]) + 1}'
     elif pre_release not in ('dev', 'release'):
       version.pre_release += '.1'
   # Handle increment and reset of build versions
@@ -58,13 +56,13 @@ def bump_version(major: Optional[bool]=None,
 
   return format_version(version)
 
-def format_version(version: SimpleNamespace) -> str:
+def format_version(version_: SimpleNamespace) -> str:
   """Formats the current version's semver components."""
-  base_semver = f'{version.major}.{version.minor}.{version.patch}'
-  if version.pre_release:
-    base_semver += f'-{version.pre_release}'
-  if version.build:
-    base_semver += f'+{version.build}'
+  base_semver = f'{version_.major}.{version_.minor}.{version_.patch}'
+  if version_.pre_release:
+    base_semver += f'-{version_.pre_release}'
+  if version_.build:
+    base_semver += f'+{version_.build}'
   return base_semver
 
 
@@ -94,7 +92,7 @@ def _main(**kwargs) -> None:
                f"__version__    = '{version_str}'")
     # Write to file
     PathResolver(version_file).write_text(file_text, encoding='UTF-8')
-  
+
   # Update project config file
   project_cfg = PathResolver(PROJECT_ROOT, 'pyproject.toml')
   with open(project_cfg, 'r', encoding='UTF-8') as file:

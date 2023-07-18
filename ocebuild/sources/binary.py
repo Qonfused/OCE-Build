@@ -6,6 +6,8 @@
 ##
 """Binary helper functions."""
 
+#pylint: disable=redefined-builtin
+
 import subprocess
 from hashlib import sha256
 from os import chmod
@@ -21,9 +23,12 @@ from ocebuild.errors._lib import disable_exception_traceback
 def get_binary_ext(platform: Literal['Windows', 'Darwin', 'Linux']=system()
                    ) -> str:
   """Gets a platform-dependent extension for vendored binaries."""
-  if   platform == 'Windows': return '.exe'
-  elif platform == 'Darwin':  return ''
-  elif platform == 'Linux':   return '.linux'
+  if   platform == 'Windows':
+    return '.exe'
+  elif platform == 'Darwin':
+    return ''
+  elif platform == 'Linux':
+    return '.linux'
 
 def _get_stream_hash(stream, hash) -> str:
   """Gets a digest for a stream."""
@@ -96,7 +101,7 @@ def wrap_binary(args: List[str],
     persist: Whether to persist the binary on disk.
 
   Raises:
-    Exception: If the binary returns a non-zero exit code.
+    RuntimeError: If the binary returns a non-zero exit code.
 
   Returns:
     The stdout of the binary.
@@ -104,6 +109,7 @@ def wrap_binary(args: List[str],
   if not isinstance(args, list): args = [args]
   chmod(binary_path := binary_path, 0o755)
   process = subprocess.run([binary_path, *args],
+                            check=False,
                             stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE,
                             encoding='UTF-8')
@@ -113,7 +119,7 @@ def wrap_binary(args: List[str],
   if process.returncode: #pragma: no cover
     with disable_exception_traceback():
       stderr_name = PathResolver(binary_path).name
-      raise Exception(f'({stderr_name}) {process.stderr.strip()}')
+      raise RuntimeError(f'({stderr_name}) {process.stderr.strip()}')
   return process.stdout
 
 __all__ = [

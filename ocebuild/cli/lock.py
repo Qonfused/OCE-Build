@@ -39,20 +39,21 @@ def rich_resolver(resolver: ResolverType,
 
   if resolver is None: return None
   elif 'path' in resolver_props:
-    _path = PathResolver(resolver.path)
+    path_ = PathResolver(resolver.path)
     # _checksum = resolver_props['__resolver'].checksum
     name, resolution_str = resolution.split('@file:')
     resolution_str = f'file:{resolution_str}' \
       .replace(':', '[/dim cyan][dim]:[/dim][dim yellow]', 1) \
-      .replace(_path.name, f'[bold yellow]{_path.name}', 1) \
+      .replace(path_.name, f'[bold yellow]{path_.name}', 1) \
       .replace('#', '[/bold yellow][/dim yellow][dim]#[dim bold]') \
       .replace('=', '[/dim bold][dim]=')
   elif 'url' in resolver_props:
-    _has_version = ':' in resolution
+    has_version_ = ':' in resolution
+    close_color_ = "[/green]" if has_version_ else "[/dim cyan]"
     name, resolution_str = resolution.split('@')
     resolution_str = resolution_str \
       .replace(':', '[/dim cyan][dim]:[/dim][green]', 1) \
-      .replace('#', f'{ "[/green]" if _has_version else "[/dim cyan]" }[dim]#[dim bold]') \
+      .replace('#', f'{ close_color_ }[dim]#[dim bold]') \
       .replace('=', '[/dim bold][dim]=')
 
   return f"[cyan]{name}[/cyan][dim cyan]@{resolution_str}"
@@ -99,7 +100,7 @@ def print_pending_resolvers(resolvers: dict) -> None:
                                      resolver_props=entry,
                                      resolution=entry['resolution'])
     # Show additional information if in debug mode.
-    from ._lib import DEBUG
+    from ._lib import DEBUG #pylint: disable=import-outside-toplevel
     checksum_entry = None if not DEBUG else \
       rich_commit(props['commit'], 'SHA1') if 'commit' in props else \
         rich_commit(props['checksum'], 'SHA256') if 'checksum' in props else \
@@ -135,13 +136,13 @@ def get_lockfile(cwd: Union[str, PathResolver],
     debug(msg=f"Found lockfile at '{LOCK_FILE.relative(cwd)}'.")
     try:
       lockfile, metadata = read_lockfile(lockfile_path=LOCK_FILE)
-    except Exception as e:
+    except Exception as e: #pylint: disable=broad-exception-caught
       error(msg=f"Encountered an error while reading '{LOCK_FILE.name}': {e}",
             hint="Try running `ocebuild lock` first.")
   else:
     debug(msg=f"Creating a new lockfile at '{LOCK_FILE.relative(cwd)}'.")
     lockfile, metadata = {}, {}
-  
+
   return lockfile, metadata, LOCK_FILE
 
 def resolve_lockfile(env: CLIEnv,
@@ -150,7 +151,7 @@ def resolve_lockfile(env: CLIEnv,
                      update: bool=False,
                      force: bool=False,
                      build_config: Optional[dict]=None,
-                     PROJECT_DIR: Optional[PathResolver]=None
+                     project_dir: Optional[PathResolver]=None
                      ) -> Tuple[dict, dict, PathResolver]:
   """Resolves the project's lockfile.
   
@@ -161,7 +162,7 @@ def resolve_lockfile(env: CLIEnv,
     update: Whether to update the lockfile.
     force: Whether to force the lockfile update.
     build_config: The build configuration. (Optional)
-    PROJECT_DIR: The project directory. (Optional)
+    project_dir: The project directory. (Optional)
 
   Returns:
     A tuple containing:
@@ -170,13 +171,13 @@ def resolve_lockfile(env: CLIEnv,
   """
 
   # Read the build configuration
-  if not (build_config or PROJECT_DIR):
-    from .build import get_build_file
-    build_config, *_, PROJECT_DIR = get_build_file(cwd)
-  
+  if not (build_config or project_dir):
+    from .build import get_build_file #pylint: disable=import-outside-toplevel
+    build_config, *_, project_dir = get_build_file(cwd)
+
   # Read the lockfile
-  lockfile, metadata, LOCKFILE = get_lockfile(cwd, project_dir=PROJECT_DIR)
-  
+  lockfile, metadata, LOCKFILE = get_lockfile(cwd, project_dir=project_dir)
+
   # Resolve the specifiers in the build configuration
   if update: debug(msg='(--update) Updating lockfile entries...')
   if force:  debug(msg='(--force) Forcing lockfile update...')
@@ -184,7 +185,7 @@ def resolve_lockfile(env: CLIEnv,
     with Progress(transient=True) as progress:
       bar = progress_bar('Resolving lockfile entries', wrap=progress)
       resolvers = resolve_specifiers(build_config, lockfile,
-                                     base_path=PROJECT_DIR,
+                                     base_path=project_dir,
                                      update=update,
                                      force=force,
                                      # Interactive arguments
@@ -193,7 +194,7 @@ def resolve_lockfile(env: CLIEnv,
         echo(calls=[{'msg': '\nNothing to build.', 'fg': 'white' },
                     'Try running with `--update` or `--force` to regenerate a build.'],
              exit=0)
-  except Exception as e:
+  except Exception as e: #pylint: disable=broad-exception-caught
     abort(msg=f'Failed to resolve build specifiers: {e}',
           hint='Check the build configuration for errors.')
 
@@ -225,7 +226,7 @@ def resolve_lockfile(env: CLIEnv,
   # No new resolvers
   else:
     echo('Lockfile is up to date.', fg='white')
-  
+
   return lockfile, resolvers
 
 
@@ -253,7 +254,8 @@ def cli(env, cwd, check, update, force):
   else: debug(msg=f"(--cwd) Using '{cwd}' as the working directory.")
 
   # Process the lockfile
-  lockfile, resolvers = resolve_lockfile(env, cwd, check, update, force)
+  resolve_lockfile(env, cwd, check, update, force)
+  # lockfile, resolvers = resolve_lockfile(env, cwd, check, update, force)
 
 
 __all__ = [

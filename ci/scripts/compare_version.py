@@ -6,6 +6,7 @@
 ##
 """Compares a python version against a set of min/max constraints."""
 
+import sys
 from argparse import ArgumentParser
 from platform import python_version as platform_version
 
@@ -24,14 +25,13 @@ def _main(python_version: Optional[str] = None,
   print(  f'python version: {version}')
 
   # Compare against min/max version (if provided)
-  result: bool=True
-  if (min_version):
+  if min_version:
     print(f'min version:    {min_version}')
     result = pkgv.parse(min_version) <= pkgv.parse(version)
-  if (max_version):
+  if max_version:
     print(f'max version:    {max_version}')
     result = pkgv.parse(max_version) >= pkgv.parse(version)
-  
+
   # Return result as boolean
   print(  f'result:         {result}')
   return result
@@ -40,7 +40,7 @@ if __name__ == "__main__":
   parser = ArgumentParser()
   parser.add_argument(["--version", "--python-version"],
                       dest='python_version',
-                      help='The python version to compare against (Default: system python version)')
+                      help='The python version to compare against.')
   parser.add_argument(['--min', '--minimum'],
                       dest='min_version',
                       help='The minimum python version allowed.')
@@ -49,10 +49,10 @@ if __name__ == "__main__":
                       help='The maximum python version allowed.')
   args = parser.parse_args()
 
-  result = _main(python_version=args.python_version,
-                 min_version=args.min_version,
-                 max_version=args.max_version)
-  exit(int(not result))
+  res = _main(python_version=args.python_version,
+              min_version=args.min_version,
+              max_version=args.max_version)
+  sys.exit(int(not res))
 
 
 __all__ = []

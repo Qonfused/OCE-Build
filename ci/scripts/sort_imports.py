@@ -96,7 +96,7 @@ def sort_imports_block(imports_block: str) -> str:
   for i,s in enumerate(import_statements):
     if s.lower().startswith('import'): continue
     modules = set(map(lambda s: s.strip(),
-                  re_sub(f'^from .*? import ', '', s).split(',')))
+                  re_sub('^from .*? import ', '', s).split(',')))
     # Sort modules alphabetically.
     modules = sorted(modules,
                      key=lambda s: (s.isupper(),
@@ -104,7 +104,7 @@ def sort_imports_block(imports_block: str) -> str:
                                     len(s)))
     # Replace import statement with sorted modules.
     import_statements[i] = f'from {module_name(s)} import {", ".join(modules)}'
-  
+
   # Group import statements by source.
   import_groups = list(map(lambda s: (s,sorting_rules(s)), import_statements))
   import_groups.sort(key = itemgetter(1))

@@ -16,7 +16,7 @@ from rich.progress import Progress, track
 from ocebuild.errors._lib import wrap_exception
 
 
-CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
+CONTEXT_SETTINGS = { "help_option_names": ['-h', '--help'] }
 """Shared context settings for the CLI."""
 
 ################################################################################
@@ -31,20 +31,22 @@ DEBUG: bool=False
 
 class CLIEnv:
   """Shared CLI environment."""
-  
+
   global VERBOSE, DEBUG
   def __init__(self,
-               verbose: bool=VERBOSE,
-               debug: bool=DEBUG):
-    self.verbose = verbose
-    self.debug = debug
+               verbose_flag: bool=VERBOSE,
+               debug_flag: bool=DEBUG):
+    self.verbose = verbose_flag
+    self.debug = debug_flag
 
-  def __setattr__(self, __name: str, __value: any) -> None:
+  def __setattr__(self, name: str, value: any) -> None:
     """Sets an attribute on the CLI environment."""
     global VERBOSE, DEBUG
-    if   __name == 'verbose': VERBOSE = __value
-    elif __name == 'debug': DEBUG = __value
-    super().__setattr__(__name, __value)
+    if name == 'verbose':
+      VERBOSE = value
+    elif name == 'debug':
+      DEBUG = value
+    super().__setattr__(name, value)
 
 def cli_command(name: Optional[str]=None):
   """Factory for creating a shared environment for CLI commands.
@@ -74,10 +76,10 @@ def cli_command(name: Optional[str]=None):
     @click.make_pass_decorator(CLIEnv)
     @functools_wraps(func)
     def _command_wrapper(env:CLIEnv,
-                          *args,
-                          verbose: bool,
-                          debug: bool,
-                          **kwargs):
+                         *args,
+                         verbose: bool, #pylint: disable=redefined-outer-name
+                         debug: bool,   #pylint: disable=redefined-outer-name
+                         **kwargs):
       """Simple environment wrapper for CLI commands."""
       env.verbose = verbose
       env.debug = debug
@@ -115,14 +117,13 @@ def debug(msg: str, *args, **kwargs):
     >>> debug('This is a debug message.')
     # -> DEBUG: This is a debug message.
   """
-  global DEBUG
   if not DEBUG: return
   echo(msg=f"DEBUG: {msg}", *args, dim=True, **kwargs)
 
 def echo(msg: Optional[str]=None,
          *args,
          calls: Optional[List[Union[str, dict]]]=None,
-         exit: Optional[int]=None,
+         exit: Optional[int]=None, #pylint: disable=redefined-builtin
          **kwargs
          ) -> None:
   """Stylized echo for the CLI.
@@ -142,8 +143,10 @@ def echo(msg: Optional[str]=None,
     click.echo(click.style(msg, *args, **kwargs))
   elif calls:
     for call in calls:
-      if   isinstance(call, dict):  echo(*args, **call, **kwargs)
-      elif isinstance(call, str):   echo(msg=call, *args, **kwargs)
+      if isinstance(call, dict):
+        echo(*args, **call, **kwargs)
+      elif isinstance(call, str):
+        echo(msg=call, *args, **kwargs)
   if exit is not None:
     sys_exit(exit)
 
@@ -174,14 +177,14 @@ def error(msg: str,
     calls.append({ "msg": f"{padding}{hint}" })
   calls[-1]['msg'] += '\n'
   echo(calls=calls)
-  
+
   # Wrap the public traceback frames if specified
   if traceback:
     if not suppress: suppress = []
     wrap_exception(suppress=[__file__, *suppress],
                    hide_modules=[click],
                    use_rich=True)
-  
+
   sys_exit(1)
 
 def abort(msg: str,

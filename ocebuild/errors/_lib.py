@@ -61,10 +61,10 @@ def wrap_exception(suppress: Optional[List[str]]=None,
   e_type, e, tb = exc_info()
 
   # Delayed import to avoid circular dependency
-  from ocebuild.sources.resolver import PathResolver
-  __module = str(PathResolver(module_path).parent)
+  from ocebuild.sources.resolver import PathResolver #pylint: disable=import-outside-toplevel
+  module = str(PathResolver(module_path).parent)
   hidden_module_paths = \
-    set([str(PathResolver(m.__file__).parent) for m in hide_modules])
+    set(str(PathResolver(m.__file__).parent) for m in hide_modules)
 
   tb_frame = tb
   tb_prev = None
@@ -75,7 +75,7 @@ def wrap_exception(suppress: Optional[List[str]]=None,
     if not tb_frame: break
     # Don't include hidden modules (if specified)
     is_hidden_module = \
-      any([m in frame.filename for m in hidden_module_paths])
+      any(m in frame.filename for m in hidden_module_paths)
     # Don't include internal frames (if specified)
     is_internal_frame = \
       suppress_internal and frame.name.startswith('_')
@@ -86,21 +86,21 @@ def wrap_exception(suppress: Optional[List[str]]=None,
         prev_frame.filename == frame.filename and \
         prev_frame.lineno == frame.lineno and \
         prev_frame.name == frame.name
-    
+
     # Prune the traceback linked list
     if is_hidden_module or is_internal_frame or is_duplicate_frame:
       if tb_prev: tb_prev.tb_next = None
-    elif suppress_stdlib and not __module in (path := frame.filename):
+    elif suppress_stdlib and not module in (path := frame.filename):
       excluded_paths.append(path)
     elif hide_suppressed:
       if tb_prev: tb_prev.tb_next = tb_frame
       tb_prev = tb_frame
     tb_frame = tb_frame.tb_next
     prev_frame = frame
-  
+
   if use_rich:
-    _rich_traceback_omit = True
-    from rich.console import Console
+    _rich_traceback_omit = True #pylint: disable=invalid-name,unused-variable
+    from rich.console import Console #pylint: disable=import-outside-toplevel
     Console().print_exception(show_locals=True,
                               suppress=excluded_paths,
                               max_frames=max_frames)

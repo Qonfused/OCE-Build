@@ -4,6 +4,10 @@
 ##
 """Parser for converting annotated YAML to a Python dictionary."""
 
+#pylint: disable=cell-var-from-loop
+
+#TODO: Refactor to use regex parsers
+
 import re
 from datetime import datetime
 from shlex import split
@@ -12,7 +16,6 @@ from typing import List, Literal, Optional, Tuple, Union
 
 from ._lib import _append_tags, _apply_macro, update_cursor
 from .dict import flatten_dict, nested_get, nested_set
-from .regex import re_search
 from .types import decode_data, encode_data
 
 
@@ -33,15 +36,31 @@ def parse_yaml_types(stype: str,
   svalue = None
   if schema == 'annotated':
     # Parse annotated types
-    if   stype == 'Date':     stype = 'date';   svalue = datetime.fromisoformat(value.replace("Z", "+00:00"))
-    elif stype == 'Boolean':  stype = 'bool';   svalue = value.lower() == 'true'
-    elif stype == 'Data':     stype = 'data';   svalue = encode_data(value)
-    elif stype == 'Dict':     stype = 'dict';   svalue = {}
+    if   stype == 'Date':
+      stype = 'date'
+      svalue = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    elif stype == 'Boolean':
+      stype = 'bool'
+      svalue = value.lower() == 'true'
+    elif stype == 'Data':
+      stype = 'data'
+      svalue = encode_data(value)
+    elif stype == 'Dict':
+      stype = 'dict'
+      svalue = {}
     elif stype == 'Number':
-      if '.' in value:        stype = 'float';  svalue = float(value)
-      else:                   stype = 'int';    svalue = int(value)
-    elif stype == 'Array':    stype = 'list';   svalue = []
-    elif stype == 'String':   stype = 'string'; svalue = value
+      if '.' in value:
+        stype = 'float'
+        svalue = float(value)
+      else:
+        stype = 'int'
+        svalue = int(value)
+    elif stype == 'Array':
+      stype = 'list'
+      svalue = []
+    elif stype == 'String':
+      stype = 'string'
+      svalue = value
     # Handle generic or string types
     if isinstance(svalue, str) and svalue[0] in ('"', "'"):
       svalue = svalue[1:-1]
@@ -68,40 +87,54 @@ def write_yaml_types(value: Union[Tuple[str, any], any],
 
   if schema == 'annotated':
     # Parse native types
-    if   stype == 'date':     stype = 'Date   '; svalue = str(svalue).replace(' ', 'T').replace('+00:00', 'Z')
-    elif stype == 'bool':     stype = 'Boolean'; svalue = str(svalue).lower()
-    elif stype == 'data':     stype = 'Data   '; svalue = f"<{decode_data(svalue, format='hex')}>"
-    elif stype == 'dict':     stype = 'Dict   '; svalue = '(empty)'
-    elif stype == 'float':    stype = 'Number '; svalue = str(float(svalue))
-    elif stype == 'int':      stype = 'Number '; svalue = str(int(svalue))
-    elif stype == 'list':     stype = 'Array  '; svalue = '(empty)'
-    elif stype == 'string':   stype = 'String '; svalue = f'"{svalue}"'
+    if   stype == 'date':
+      stype = 'Date   '; svalue = str(svalue).replace(' ', 'T').replace('+00:00', 'Z')
+    elif stype == 'bool':
+      stype = 'Boolean'; svalue = str(svalue).lower()
+    elif stype == 'data':
+      stype = 'Data   '; svalue = f"<{decode_data(svalue, enc='hex')}>"
+    elif stype == 'dict':
+      stype = 'Dict   '; svalue = '(empty)'
+    elif stype == 'float':
+      stype = 'Number '; svalue = str(float(svalue))
+    elif stype == 'int':
+      stype = 'Number '; svalue = str(int(svalue))
+    elif stype == 'list':
+      stype = 'Array  '; svalue = '(empty)'
+    elif stype == 'string':
+      stype = 'String '; svalue = f'"{svalue}"'
     else:
-      stype =         stype.rjust(len('       ')).capitalize()
+      max_size = len('Boolean')
+      stype = stype.rjust(max_size).capitalize()
       svalue = str(value if not isinstance(value, tuple) else value[1])
   elif schema == 'yaml':
     # Parse native types
-    if   stype == 'bool':     svalue = str(svalue).lower()
-    elif stype == 'dict':     svalue = ''
-    elif stype == 'list':     svalue = ''
-    elif stype == 'string':   svalue = f'"{svalue}"'
-    else:                     svalue = str(svalue)
+    if   stype == 'bool':
+      svalue = str(svalue).lower()
+    elif stype == 'dict':
+      svalue = ''
+    elif stype == 'list':
+      svalue = ''
+    elif stype == 'string':
+      svalue = f'"{svalue}"'
+    else:
+      svalue = str(svalue)
     # Escape control and reserved characters
     # @see https://symfony.com/doc/current/reference/formats/yaml.html
-    reserve_chars = [':',     '{',    '}',    '[',    ']',    ',',    '&',
+    reserve_chars = (':',     '{',    '}',    '[',    ']',    ',',    '&',
                      '*',     '#',    '?',    '|',    '-',    '<',    '>',
-                     '=',     '!',    '%',    '@',    '`']
-    control_chars = ['\0',    '\x01', '\x02', '\x03', '\x04', '\x05', '\x06',
+                     '=',     '!',    '%',    '@',    '`')
+    control_chars = ('\0',    '\x01', '\x02', '\x03', '\x04', '\x05', '\x06',
                      '\a',    '\b',   '\t',   '\n',   '\v',   '\f',   '\r',
                      '\x0e',  '\x0f', '\x10', '\x11', '\x12', '\x13', '\x14',
                      '\x15',  '\x16', '\x17', '\x18', '\x19', '\x1a', r'\e',
                      '\x1c',  '\x1d', '\x1e', '\x1f', r'\N',  r'\_',  r'\L',
-                     r'\P']
-    if any([c for c in control_chars if c in svalue]):
+                     r'\P')
+    if any(c for c in control_chars if c in svalue):
       svalue = f'"{svalue}"'
-    elif any([c for c in reserve_chars if c in svalue]):
+    elif any(c for c in reserve_chars if c in svalue):
       svalue = f'\'{svalue}\''
-  
+
   return stype, svalue
 
 def parse_yaml(lines: List[str],
@@ -115,15 +148,18 @@ def parse_yaml(lines: List[str],
     lines: YAML lines.
     config: Dictionary to be populated.
     flags: List of preprocessor flags.
-    frontmatter: 
+    frontmatter: Flag to control frontmatter parsing.
+
+  Raises:
+    ValueError: If YAML parser reaches an invalid line.
 
   Returns:
     Dictionary populated from YAML entries.
   """
-  if config is None: config = dict()
+  if config is None: config = {}
   if flags is None: flags = []
   frontmatter_dict = { 'variables': {}, 'tags': [] }
-  
+
   i = 0
   cursor = {
     'keys': [],
@@ -135,8 +171,8 @@ def parse_yaml(lines: List[str],
     'has_tag': None,
     'tag_tree': None
   }
-  for _line in lines:
-    i += 1; line = _line.rstrip()
+  for line_ in lines:
+    i += 1; line = line_.rstrip()
     # Skip empty lines
     if len(lnorm := line.lstrip()) == 0:
       continue
@@ -149,7 +185,7 @@ def parse_yaml(lines: List[str],
       continue
 
     # Extract tokens from line
-    tokens = [p for p in split(lnorm) if (p != '|' and p != '-')]
+    tokens = [p for p in split(lnorm) if p not in ('|', '-')]
     key = tokens[0][:-1] if (num_tokens := len(tokens)) else None
     def get_schema(schema: Literal['annotated', 'yaml']
                    ) -> Union[Tuple[str, str], str]:
@@ -157,7 +193,7 @@ def parse_yaml(lines: List[str],
         return parse_yaml_types(tokens[1], ' '.join(tokens[2:]), schema)
       elif schema == 'yaml':
         return ' '.join(tokens[1:])
-    
+
     # Handle parsing frontmatter variables
     if cursor['is_frontmatter']:
       value = get_schema('yaml')
@@ -179,7 +215,7 @@ def parse_yaml(lines: List[str],
     #TODO: Handle parsing frontmatter variables
     # def get_frontmatter():
     #   """Replaces variables with frontmatter values"""
-    
+
     # Handle non-dict yaml arrays
     if lnorm.startswith('- ') and ': ' not in lnorm:
       # Extract correct value from tokens
@@ -191,7 +227,7 @@ def parse_yaml(lines: List[str],
       cursor['keys'] = cursor['keys'][:-1]
       cursor['level'] -= cursor['indent']
       cursor['upshift'] = False
-    
+
     # Update cursor position
     level = len(line[:-len(lnorm)])
     if num_tokens == 1 and tokens[0].endswith(':'):
@@ -209,7 +245,7 @@ def parse_yaml(lines: List[str],
         tree.pop(-1)
         cursor['level'] -= cursor['indent']
       prev_value = nested_get(config, tree)
-      
+
       # Handle initial array values
       if lnorm.startswith('-'):
         obj = { key: entry } if num_tokens > 1 else key
@@ -235,10 +271,11 @@ def parse_yaml(lines: List[str],
           # Update array
           nested_set(config, tree, prev_value)
     # Reached invalid line
-    else: raise Exception(f'Invalid line at position {i}:\n\n{line}')
+    else:
+      raise ValueError(f'Invalid line at position {i}:\n\n{line}')
 
     _append_tags(cursor, frontmatter_dict)
-  
+
   if frontmatter:
     frontmatter_dict['flags'] = flags
     return config, frontmatter_dict
@@ -265,7 +302,7 @@ def write_yaml(config: dict,
 
   # Pre-process and prettify tree indentations
   trees = []; max_tree_len = 0
-  for keys in flat_dict.keys():
+  for keys in flat_dict:
     # Seek or create head index for current tree level
     for j, key in enumerate(tree := str(keys).split('.')):
       # Avoid parsing literal array indices
@@ -275,7 +312,7 @@ def write_yaml(config: dict,
         key, idx = re_match.groups()
         tree[j] = key
         tree[j+1:j+1] = [int(idx)]
-      
+
       # Update trees entries
       if j == len(tree)-1: trees.append(tree)
       else: continue
@@ -284,8 +321,8 @@ def write_yaml(config: dict,
       if schema == 'annotated':
         tree_len = cursor['indent']*j + len(f"{key}:")
         # Update max tree length
-        if max_tree_len < tree_len: max_tree_len = tree_len
-        
+        max_tree_len = max(max_tree_len, tree_len)
+
   # Write entries to lines
   for (tree, value) in zip(trees, flat_dict.values()):
     # Seek or create head index for current tree level
@@ -301,7 +338,7 @@ def write_yaml(config: dict,
       # Add new key entry to last dict
       padding = (" "*cursor['indent'])*j
       entry = None
-      if (is_root_key := (j == len(tree)-1)):
+      if is_root_key := j == len(tree)-1:
         # Handle indentation for first array item
         if isinstance(tree[j-1], int) and tree[:j] != cursor['keys'][:j]:
           padding = f'{padding[:-2]}- '
@@ -318,7 +355,7 @@ def write_yaml(config: dict,
 
       # Update cursor position
       if is_root_key: cursor['keys'] = tree[:j+1]
-      
+
   return lines
 
 

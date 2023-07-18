@@ -31,12 +31,12 @@ def _main():
   try:
     cli.add_command(build)
     cli.add_command(lock)
-    cli()
+    cli() #pylint: disable=no-value-for-parameter
   # Cleanup the CLI environment on exit.
   except SystemExit as e:
     os_exit(e.code or 0)
   # Catch any unhandled exceptions.
-  except Exception:
+  except Exception: #pylint: disable=broad-exception-caught
     issues_url = _format_url("https://github.com/Qonfused/OCE-Build/issues")
     abort(msg="An unexpected error occurred.",
           hint=f"Please report this issue at {issues_url}.")

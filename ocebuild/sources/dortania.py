@@ -32,8 +32,9 @@ def is_latest_build() -> bool:
   global DORTANIA_LAST_UPDATED
 
   timestamp = datetime.now(tz=timezone.utc)
+  if not DORTANIA_LAST_UPDATED:
+    pass #de-op
   # Only re-validate 30 minutes after the last update
-  if not DORTANIA_LAST_UPDATED: pass
   elif (timestamp - DORTANIA_LAST_UPDATED) <= timedelta(minutes=30):
     return True
 
@@ -70,12 +71,8 @@ def get_latest_sha(plugin: str) -> str:
   if not DORTANIA_LATEST_BUILDS or not is_latest_build():
     DORTANIA_LATEST_BUILDS = request(dortania_file_url('latest.json')).json()
   # Returns the latest build sha
-  try:
-    return nested_get(DORTANIA_LATEST_BUILDS,
-                      keys=[plugin, 'versions', 0, 'commit', 'sha'])
-  except:
-    raise
-    # raise ValueError(f'Plugin {plugin} has no builds listed.')
+  return nested_get(DORTANIA_LATEST_BUILDS,
+                    keys=[plugin, 'versions', 0, 'commit', 'sha'])
 
 ################################################################################
 #                        URL formatting/retrieval functions                    #

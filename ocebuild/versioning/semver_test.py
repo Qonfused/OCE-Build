@@ -96,8 +96,8 @@ def test_resolve_version_specifier():
   assert resolve_version_specifier(versions, 'oldest') == '1.2.2'
 
   # Fallthrough
-  assert resolve_version_specifier(versions, 'foo') == None
-  assert resolve_version_specifier([], '1.2.3') == None
+  assert resolve_version_specifier(versions, 'foo') is None
+  assert resolve_version_specifier([], '1.2.3') is None
 
 def test_get_minimum_version(): pass # Not implemented
 

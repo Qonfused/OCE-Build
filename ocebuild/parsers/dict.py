@@ -22,14 +22,14 @@ def flatten_dict(dic: dict,
   flat_dict: dict={}
   def recurse_flatten(v: any, prefix: str='') -> None:
     if isinstance(v, dict):
-      if not len(entries := v.items()):
+      if not (entries := v.items()):
         flat_dict[prefix[1:]] = ('dict', v)
       else:
         for k, v2 in entries:
           p2 = f"{prefix}{delimiter}{k}"
           recurse_flatten(v2, p2)
     elif isinstance(v, list):
-      if not len(v):
+      if not v:
         flat_dict[prefix[1:]] = ('list', v)
       else:
         for i, v2 in enumerate(v):
@@ -55,9 +55,11 @@ def nested_get(dic: dict,
     The value at the end of the keys list.
   """
   try:
-    for key in keys: dic = dic[key]
+    for key in keys:
+      dic = dic[key]
     return dic
-  except: return default
+  except KeyError:
+    return default
 
 def nested_set(dic: dict,
                keys: List[str],
