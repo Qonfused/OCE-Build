@@ -5,14 +5,18 @@
 """Methods for retrieving and handling OpenCore packages."""
 
 from contextlib import contextmanager
-from shutil import copy, copytree, rmtree
-from tempfile import mkdtemp
+from hashlib import sha256
+from shutil import copy, copyfile, copytree, rmtree
+from tempfile import mkdtemp, NamedTemporaryFile
 
-from typing import Generator, Iterator, List, Literal, Optional, Union
+from typing import Generator, Iterator, Literal, Optional, Union
+
+from mmap import mmap, PROT_READ
 
 from ocebuild.filesystem.archives import extract_archive
 from ocebuild.filesystem.posix import glob, move, remove
 from ocebuild.parsers.dict import nested_get
+from ocebuild.sources.binary import get_stream_digest
 from ocebuild.sources.github import github_archive_url
 from ocebuild.sources.resolver import PathResolver
 
@@ -29,7 +33,6 @@ def _iterate_entries(opencore_pkg: PathResolver,
     for path in map(lambda p: p.relative_to(opencore_pkg).as_posix(),
                     OC_DIR.joinpath(category).iterdir()):
       yield path
-
 
 @contextmanager
 def extract_opencore_archive(url: str,
@@ -139,11 +142,68 @@ def extract_opencore_directory(resolvers: dict,
         copytree(opencore_pkg, out_dir, dirs_exist_ok=True)
         return PathResolver(out_dir, OC_DIR.relative_to(opencore_pkg))
 
+def get_opencore_checksum(file_path: Union[str, PathResolver],
+                          algorithm=sha256
+                          ) -> str:
+  """Computes the SHA256 checksum of the OpenCore binary.
+  
+  This will compute the checksum of the `OpenCore.efi` binary, substituting the
+  embedded public key when using vaulting. Modifications are made to a copy of
+  the file within a temporary directory, which is validated and deleted after
+  computing the checksum.
+
+  Args:
+    file_path: The path to the OpenCore binary.
+    algorithm: The hashlib algorithm to use. Defaults to SHA256.
+
+  Raises:
+    AssertionError: If the file checksum does not match the expected value.
+    RuntimeError: If the vault header is not found (i.e. the file is malformed).
+
+  Returns:
+    The SHA256 checksum of the OpenCore binary.
+  """
+
+  # Copy the file contents to the temporary file
+  file_path = PathResolver(file_path)
+  with NamedTemporaryFile(mode="r+b", suffix='-OpenCore.efi') as f:
+    copyfile(file_path.resolve(), f.name)
+    file_checksum = file_path.checksum
+    f.seek(0)
+
+    # Get the offset of the vault header
+    vault_header = b'=BEGIN OC VAULT='
+    with mmap(f.fileno(), 0, PROT_READ) as mf:
+      offset = mf.find(vault_header)
+      if offset != -1:
+        f.seek(offset + len(vault_header))
+      else:
+        raise RuntimeError('No vault header found in the file')
+
+    # Extract and replace the public key
+    public_key = f.read(528)
+    if has_public_key := any(byte for byte in public_key):
+      f.seek(offset + len(vault_header))
+      f.write(b'\x00' * 528)
+
+    # Compute the de-vaulted checksum
+    checksum = get_stream_digest(stream=f, algorithm=algorithm)
+
+    # Verify that the extraction is reversible
+    if has_public_key:
+      f.seek(offset + len(vault_header))
+      f.write(public_key)
+    if not file_checksum == get_stream_digest(stream=f, algorithm=algorithm):
+      raise AssertionError('Checksum extraction failed')
+
+  return checksum
+
 
 __all__ = [
   # Constants (1)
   "OPENCORE_BINARY_DATA_URL",
-  # Functions (2)
+  # Functions (3)
   "extract_opencore_archive",
-  "extract_opencore_directory"
+  "extract_opencore_directory",
+  "get_opencore_checksum"
 ]
