@@ -2,10 +2,13 @@
 .env
 !/.github
 !/.vscode*
+!/.clang-format
 !/.editorconfig
+!/.env-example
 !/.gitattributes
 !/.gitignore
 !/.pre-commit-config.yaml
+!/.pylintrc
 
 # Build artifacts
 dist/
