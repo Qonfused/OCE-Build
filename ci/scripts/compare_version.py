@@ -25,6 +25,7 @@ def _main(python_version: Optional[str] = None,
   print(  f'python version: {version}')
 
   # Compare against min/max version (if provided)
+  result = True
   if min_version:
     print(f'min version:    {min_version}')
     result = pkgv.parse(min_version) <= pkgv.parse(version)
@@ -38,20 +39,18 @@ def _main(python_version: Optional[str] = None,
 
 if __name__ == "__main__":
   parser = ArgumentParser()
-  parser.add_argument(["--version", "--python-version"],
-                      dest='python_version',
+  parser.add_argument('--version', '--python-version',
+                      nargs='?',
                       help='The python version to compare against.')
-  parser.add_argument(['--min', '--minimum'],
-                      dest='min_version',
+  parser.add_argument('--min', '--min-version',
                       help='The minimum python version allowed.')
-  parser.add_argument(['--max', '--maximum'],
-                      dest='max_version',
+  parser.add_argument('--max', '--max-version',
                       help='The maximum python version allowed.')
   args = parser.parse_args()
 
-  res = _main(python_version=args.python_version,
-              min_version=args.min_version,
-              max_version=args.max_version)
+  res = _main(python_version=args.version,
+              min_version=args.min,
+              max_version=args.max)
   sys.exit(int(not res))
 
 

@@ -48,7 +48,7 @@ script  = "ci.scripts.compare_version:_main"
 help    = "[CI] Compares a python version against a set of min/max constraints."
 
   [[tool.poe.tasks.compare-version.args]]
-  name = "python-version"
+  name = "python_version"
   options = ["--version", "--python-version"]
   type = "string"
   help = "The python version to compare against (Default: system python version)"
