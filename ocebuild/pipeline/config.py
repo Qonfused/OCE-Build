@@ -17,15 +17,15 @@ def apply_preprocessor_tags(a: dict,
                             tags: List[Tuple[str, List[str], Union[str, None]]]
                             ) -> None:
   """Applies preprocessor tags from dict `b` on dict `a`.
-  
+
   Args:
     a: The dict to apply preprocessor tags to.
     b: The dict annotated by the preprocessor tags.
     tags: The preprocessor tags to apply.
-  
+
   Raises:
     ValueError: If the tag is not recognized.
-  
+
   Notes:
     Preprocessor tags are applied in the following order:
     - @append: Append values from `b` to `a`.
@@ -116,13 +116,13 @@ def merge_configs(base: Union[str, PathResolver],
 
 def read_config(filepath: str) -> Tuple[Dict, Union[Dict, None]]:
   """Reads a configuration file.
-  
+
   Args:
     filepath: The path to the configuration file.
 
   Raises:
     ValueError: If the file extension is not supported.
-  
+
   Returns:
     A tuple containing:
       - The configuration file.

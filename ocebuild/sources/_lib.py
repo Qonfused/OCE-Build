@@ -40,7 +40,7 @@ class RequestWrapper():
 
 def request(url: Union[str, Request], *args, **kwargs) -> any:
   """Simple wrapper over urlopen for skipping SSL verification.
-  
+
   Args:
     url: The url to open.
     *args: Additional arguments to pass to urlopen.
@@ -48,7 +48,7 @@ def request(url: Union[str, Request], *args, **kwargs) -> any:
 
   Raises:
     HTTPError: If the url could not be retrieved.
-  
+
   Returns:
     The response from urlopen wrapped in a RequestWrapper class.
   """

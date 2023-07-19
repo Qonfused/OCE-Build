@@ -26,7 +26,7 @@ def get_version_str(string: str) -> Union[str, None]:
 
   Returns:
     The version string.
-  
+
   Example:
     >>> get_version_string('^1.0.0')
     # -> '1.0.0'
@@ -55,7 +55,7 @@ def get_version(string: str) -> Union[vpkg.Version, None]:
 
   Returns:
     The version string.
-  
+
   Example:
     >>> get_version('^1.0.0')
     # -> <Version('1.0.0')>
@@ -74,7 +74,7 @@ def compare_version(v1: Union[str, vpkg.Version],
                     operator: str
                     ) -> bool:
   """Compares a version to the version specifier.
-  
+
   Args:
     v1: The version.
     v2: The version specifier.
@@ -104,7 +104,7 @@ def resolve_version_specifier(versions: List[str],
 
   Returns:
     The resolved version (if available).
-  
+
   Examples:
     >>> resolve_version_specifier(['1.2.3', '1.2.4', '1.3.0'], '~1.2.3')
     # -> '1.2.4'
@@ -184,7 +184,7 @@ def get_minimum_version(dependencies: Dict[str, Tuple[str, str]],
 
   Returns:
     A tuple of the library name and the minimum version.
-  
+
   Example:
     >>> dependencies = {
     ...   'lib1': [('lib2', '2.0.0')],
@@ -215,7 +215,7 @@ def sort_dependencies(dependencies: Dict[str, Tuple[str, str]],
 
   Raises:
     ValueError: If a cycle is detected in the dependency tree.
-  
+
   Example:
     >>> dependencies = {
     ...   'lib1': [('lib2', '2.0.0')],

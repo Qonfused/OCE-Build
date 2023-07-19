@@ -152,16 +152,16 @@ Groups:
 
 def parse_definition_block(string: str) -> OrderedDict:
   """Parses arguments from a definition block line.
-  
+
   Args:
     string: A definition block line.
-  
+
   Returns:
     A dictionary of definition block arguments.
-  
+
   Raises:
     ValueError: If the line is not a valid definition block.
-  
+
   Example:
     >>> parse_definition_block('DefinitionBlock ("", "DSDT", 2, "_ASUS_", ...)')
     OrderedDict([('AMLFileName', ''),
@@ -192,13 +192,13 @@ def parse_definition_block(string: str) -> OrderedDict:
 
 def parse_ssdt_namespace(lines: Union[List[str], TextIOWrapper]) -> dict:
   """Parses an SSDT's namespace for imports and statement exports.
-  
+
   Args:
     lines: A list of SSDT lines.
-  
+
   Returns:
     A dictionary of extracted SSDT information.
-  
+
   Example:
     >>> parse_ssdt_namespace(open('path/to/ssdt.dsl', encoding='UTF-8'))
     >>> with open('path/to/ssdt.dsl', encoding='UTF-8') as ssdt_file:

@@ -38,15 +38,15 @@ def validate_path_tree(path: Union[str, "PathLike[str]"],
                        delimiter: str='/'
                        ) -> Literal[True]:
   """Validates a given path matches a tree schema.
-  
+
   Args:
     path: The path to validate.
     tree: The tree schema to validate against.
     delimiter: The delimiter to use when flattening the tree.
-  
+
   Raises:
     PathValidationError: If the path does not match the tree schema.
-  
+
   Returns:
     True if the path matches the tree schema.
   """

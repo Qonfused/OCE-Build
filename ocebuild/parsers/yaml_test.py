@@ -56,7 +56,7 @@ def test_parse_yaml():
   assert parse_yaml(file)
   file.seek(0)
   assert parse_yaml(file)
-  
+
   # Validate parsing List[str] input
   file = open('docs/example/src/build.yml', 'r', encoding='UTF-8')
   assert parse_yaml(lines=[l.rstrip() for l in file])

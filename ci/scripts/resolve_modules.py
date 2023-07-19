@@ -75,7 +75,7 @@ def recurse_modules(entrypoint: Union[str, PathResolver]) -> List[str]:
 def get_local_statements(filepath: Union[str, PathResolver]
                          ) -> Tuple[List[str], Dict[str, List[str]]]:
   """Returns a list of local statements from a file.
-  
+
   This is used to differentiate local statements from import statements.
 
   Args:
@@ -120,11 +120,11 @@ def get_variable_docstring(statement: str,
                            filepath: Union[str, PathResolver]
                            ) -> Union[str, None]:
   """Returns the docstring for a variable.
-  
+
   Args:
     statement: The name of the variable to retrieve the docstring for.
     filepath: The path to the file containing the variable.
-  
+
   Returns:
     The docstring for the variable, or None if it does not exist.
   """
@@ -139,11 +139,11 @@ def get_public_exports(filepath: Union[str, PathResolver],
                        module_path: str
                        ) -> dict[str, list[str]]:
   """Returns a list of public API exports from a module.
-  
+
   Args:
     filepath: The path to the module file.
     module_path: The path to the module.
-  
+
   Returns:
     A dictionary of public API exports from the module, ordered by AST type.
   """
@@ -223,7 +223,7 @@ def generate_api_exports(filepath: Union[str, PathResolver],
                          module_path: str
                          ) -> None:
   """Generates a module's API exports.
-  
+
   This is controlled through the `__all__` variable, which is generated
   by this function for each module. This function also preserves the
   module's docstring and SPDX header, as well as any preprocessor flags.

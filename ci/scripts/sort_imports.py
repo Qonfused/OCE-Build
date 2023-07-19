@@ -25,7 +25,7 @@ RE_IMPORT_BLOCK = r'(?s)(\n*^(?:from|import).*^(?:from|import).*?\n*$)'
 
 def module_name(s: str) -> str:
   """Returns the root module name of an import statement.
-  
+
   Examples:
     >>> package_name('import os')
     # -> 'os'
@@ -40,7 +40,7 @@ def module_name(s: str) -> str:
 
 def package_name(s: str) -> str:
   """Returns the root package name of an import statement.
-  
+
   Examples:
     >>> package_name('import os')
     # -> 'os'

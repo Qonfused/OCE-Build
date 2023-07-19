@@ -19,7 +19,7 @@ def _append_tags(cursor: dict,
                  defer_tree: bool=False
                  ) -> None:
   """Append tag to frontmatter if entries marked with tag.
-  
+
   Args:
     cursor: The cursor dictionary.
     frontmatter_dict: The frontmatter dictionary.
@@ -52,7 +52,7 @@ def _apply_macro(macro: str,
                  frontmatter_dict: dict
                  ) -> None:
   """Applies preprocessor macros to parser cursor or frontmatter.
-  
+
   Args:
     macro: The macro to apply.
     flags: The current flags.

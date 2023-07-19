@@ -27,10 +27,10 @@ from ocebuild.sources.resolver import PathResolver
 def get_build_file(cwd: Union[str, PathResolver]
                    ) -> Tuple[dict, dict, List[str], PathResolver, PathResolver]:
   """Reads the build file configuration.
-  
+
   Args:
     cwd: The current working directory.
-  
+
   Returns:
     A tuple containing:
       - The build configuration.
@@ -64,7 +64,7 @@ def extract_opencore_pkg(cwd: Union[str, PathResolver],
                          out_dir: Union[str, PathResolver]
                          ) -> PathResolver:
   """Extracts the OpenCore package to the output directory.
-  
+
   Args:
     cwd: The current working directory.
     build_config: The build configuration.
@@ -72,7 +72,7 @@ def extract_opencore_pkg(cwd: Union[str, PathResolver],
     resolvers: The source resolvers.
     lockfile: The lockfile.
     out_dir: The output directory.
-  
+
   Returns:
     The path to the extracted OpenCore package.
   """

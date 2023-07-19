@@ -286,7 +286,7 @@ def write_yaml(config: dict,
                schema: Literal['annotated', 'yaml']='yaml'
                ) -> List[str]:
   """Writes a Python dictionary to YAML.
-  
+
   Args:
     lines: YAML lines.
     config: Dictionary to be written.

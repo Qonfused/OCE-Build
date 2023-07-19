@@ -50,7 +50,7 @@ def github_rate_limit(kind: str='core', raise_error: float=False) -> int:
 
   Returns:
     Remaining API calls allowed.
-  
+
   Raises:
     Exception: If the rate limit has been exceeded.
   """
@@ -170,7 +170,7 @@ def github_file_url(repository: str,
 
   Returns:
     URL of the file.
-  
+
   Example:
     >>> github_file_url('foo/bar', path='file.json')
     # -> "https://github.com/foo/bar/blob/main/file.json"
@@ -206,7 +206,7 @@ def github_archive_url(repository: str,
 
   Returns:
     URL of the archive.
-  
+
   Example:
     >>> github_archive_url('foo/bar')
     # -> "https://github.com/foo/bar/archive/refs/heads/main.tar.gz"
@@ -234,7 +234,7 @@ def github_release_url(repository: str,
 
   Returns:
     URL of the release.
-  
+
   Example:
     >>> github_release_url('foo/bar')
     # -> "https://github.com/foo/bar/releases/latest/v2.0.0"

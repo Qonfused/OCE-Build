@@ -80,7 +80,7 @@ def get_latest_sha(plugin: str) -> str:
 
 def dortania_file_url(filepath: str) -> str:
   """Formats a Dortania build repo file URL.
-  
+
   Args:
     file: The remote filepath of the file.
 
@@ -95,11 +95,11 @@ def dortania_file_url(filepath: str) -> str:
 def dortania_release_url(plugin: str,
                          commit: Optional[str]=None) -> str:
   """Formats a Dortania build release URL.
-  
+
   Args:
     plugin: The plugin to get the release URL for.
     commit: The commit to get the release URL for. Defaults to the latest build.
-  
+
   Returns:
     The formatted Dortania build release URL.
   """

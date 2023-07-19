@@ -35,10 +35,10 @@ LOCKFILE_WARNING_COMMENT = '''
 
 def _category_extension(category: str) -> Tuple[str, str]:
   """Determine the file extension for the category.
-  
+
   Args:
     category: The category to determine the file extension for.
-  
+
   Returns:
     A tuple containing:
       - The file extension for the category.
@@ -56,12 +56,12 @@ def _format_resolver(resolver: Union[ResolverType, None],
                      base_path: str=getcwd(),
                      as_specifier: bool=False) -> str:
   """Formats a resolver string for lockfile resolution.
-  
+
   Args:
     resolver: The resolver to format.
     base_path: The base path to use for relative paths.
     as_specifier: Whether to instead format the specifier. (Optional)
-  
+
   Returns:
     The formatted resolver string.
   """
@@ -96,11 +96,11 @@ def _format_resolver(resolver: Union[ResolverType, None],
 
 def _format_dependency_entry(entry: Dict[str, any]) -> dict:
   """Formats a lockfile entry for writing.
-  
+
   Args:
     name: The name of the entry to format.
     entry: The entry to format.
-  
+
   Returns:
     The formatted entry dictionary.
   """
@@ -114,12 +114,12 @@ def parse_semver_params(entry: Union[str, dict],
                         specifier: str,
                         parameters: Optional[dict]) -> Dict[str, str]:
   """Parses a semver version entry or specifier for parameters.
-  
+
   Args:
     entry: The entry to parse additional properties from.
     specifier: The specifier string to parse.
     parameters: The parameters dictionary to mutate. (Optional)
-  
+
   Returns:
     The parameters dictionary.
   """
@@ -156,12 +156,12 @@ def parse_specifier(name: str,
                     base_path: Optional[str]=getcwd()
                     ) -> Union[GitHubResolver, PathResolver, DortaniaResolver, None]:
   """Parses a specifier string for a resolver class.
-  
+
   Args:
     name: The name of the entry to parse.
     entry: The entry to parse.
     base_path: The base path to use for relative paths. (Optional)
-  
+
   Returns:
     The resolver class for the specifier.
   """
@@ -214,7 +214,7 @@ def write_lockfile(lockfile_path: str,
                    metadata: Optional[dict]=None,
                    ) -> None:
   """Writes a lockfile to the specified path.
-  
+
   Args:
     lockfile_path: The path to write the lockfile to.
     lockfile: The lockfile to write.
@@ -252,7 +252,7 @@ def resolve_specifiers(build_config: dict,
                        **kwargs
                        ) -> dict:
   """Resolves the specifiers for each entry in the build configuration.
-  
+
   Args:
     build_config: The build configuration to resolve specifiers for.
     lockfile: The lockfile to resolve specifiers against.
@@ -262,7 +262,7 @@ def resolve_specifiers(build_config: dict,
     *args: Additional arguments to pass to the optional iterator wrapper.
     __wrapper: A wrapper function to apply to the iterator. (Optional)
     **kwargs: Additional keyword arguments to pass to the optional iterator wrapper.
-  
+
   Raises:
     ValueError: If a resolver or the build configuration is invalid.
 
@@ -341,7 +341,7 @@ def resolve_specifiers(build_config: dict,
 
 def validate_dependencies(lockfile: dict, build_config: dict) -> None:
   """Verifies that the lockfile is consistent with the build file.
-  
+
   Args:
     lockfile: The lockfile dictionary.
     build_config: The build configuration dictionary.

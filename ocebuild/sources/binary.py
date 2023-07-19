@@ -57,11 +57,11 @@ def _get_dir_digest(directory, hash):
 
 def get_digest(filepath, algorithm=sha256) -> str:
   """Gets a digest for a file or directory.
-  
+
   Args:
     filepath: The path to the file or directory.
     algorithm: The hashlib algorithm to use. Defaults to SHA256.
-  
+
   Returns:
     A hex digest of the file or directory.
   """
@@ -77,11 +77,11 @@ def get_digest(filepath, algorithm=sha256) -> str:
 
 def get_stream_digest(stream, algorithm=sha256) -> str:
   """Gets a digest for a stream.
-  
+
   Args:
     stream: The stream to read.
     algorithm: The hashlib algorithm to use. Defaults to SHA256.
-  
+
   Returns:
     A hex digest of the stream.
   """
@@ -94,7 +94,7 @@ def wrap_binary(args: List[str],
                 persist: bool=True
                 ) -> str:
   """Wraps a binary and returns stdout.
-  
+
   Args:
     args: The arguments to pass to the binary.
     binary_path: The path to the binary.

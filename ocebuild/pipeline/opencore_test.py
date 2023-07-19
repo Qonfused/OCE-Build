@@ -16,7 +16,7 @@ def test_extract_opencore_archive():
   latest_tag = sorted(github_tag_names('acidanthera/OpenCorePkg'),
                        key=lambda t: get_version(t))[-1]
   url = f'https://github.com/acidanthera/OpenCorePkg/releases/download/{latest_tag}/OpenCore-{latest_tag}-DEBUG.zip'
-  
+
   with extract_opencore_archive(url) as pkg:
     # Verify tree structure exists
     efi_tree = {
@@ -36,7 +36,7 @@ def test_extract_opencore_archive():
             'Audio': '*',
             'Font': '*',
             'Image': {
-              'Acidanthera': { 
+              'Acidanthera': {
                 'Chardonnay': '*',
                 'GoldenGate': '*',
                 'Syrah': '*'

@@ -20,7 +20,7 @@ def parse_plist(lines: Union[str, bytes, BufferedReader, TextIOWrapper],
                 dict_type=dict
                ) -> dict:
   """Parses a native dictionary from a plist.
-  
+
   Args:
     lines: Property list (plist) lines.
     fmt: Format of the plist file.
@@ -45,7 +45,7 @@ def write_plist(config: dict,
                 sort_keys: bool=False
                 ) -> str:
   """Writes a native dictionary to a plist.
-  
+
   Args:
     config: Dictionary to be written.
     fmt: Format of the plist file.

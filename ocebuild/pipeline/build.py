@@ -29,11 +29,11 @@ def read_build_file(filepath: str,
                     normalize_entries: bool=True
                     ) -> Tuple[dict, dict, List[str]]:
   """Read the build configuration from the specified build file.
-  
+
   Args:
     filepath: The path to the build file.
     normalize_entries: Whether to normalize the entries in the build file.
-  
+
   Returns:
     A tuple containing:
       - The build configuration.

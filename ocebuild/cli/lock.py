@@ -27,7 +27,7 @@ def rich_resolver(resolver: ResolverType,
                    resolution: str
                    ) -> Union[str, None]:
   """Returns a rich formatted specifier resolver.
-  
+
   Args:
     resolver: The resolver class.
     resolver_props: The resolver properties.
@@ -60,7 +60,7 @@ def rich_resolver(resolver: ResolverType,
 
 def rich_commit(commit: str, algorithm='SHA1') -> str:
   """Returns a rich formatted commit or chechsum hash.
-  
+
   Args:
     commit: The commit or checksum hash.
     algorithm: The algorithm used to generate the hash.
@@ -79,7 +79,7 @@ def print_pending_resolvers(resolvers: dict) -> None:
     - Name: The resolver name.
     - Version: The resolver version, optionally with the commit or checksum hash.
     - Resolution: The specifier resolution.
-  
+
   Args:
     resolvers: A dictionary of resolver entries.
   """
@@ -119,7 +119,7 @@ def get_lockfile(cwd: Union[str, PathResolver],
                  project_dir: Union[str, PathResolver]
                  ) -> Tuple[dict, PathResolver]:
   """Reads the project's lockfile.
-  
+
   Args:
     cwd: The current working directory.
     project_dir: The project directory.
@@ -154,7 +154,7 @@ def resolve_lockfile(env: CLIEnv,
                      project_dir: Optional[PathResolver]=None
                      ) -> Tuple[dict, dict, PathResolver]:
   """Resolves the project's lockfile.
-  
+
   Args:
     env: The CLI environment.
     cwd: The current working directory.

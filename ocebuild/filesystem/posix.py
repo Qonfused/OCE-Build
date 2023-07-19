@@ -14,10 +14,10 @@ from ocebuild.sources.resolver import PathResolver
 
 def remove(path: Union[str, "PathLike[str]"]) -> None:
   """Removes a file or directory.
-  
+
   Args:
     path: Path to the file or directory.
-  
+
   Raises:
     ValueError: If the path is not a file or directory.
   """
@@ -36,10 +36,10 @@ def rename(path: Union[str, "PathLike[str]"],
   Args:
     path: Path to the file or directory.
     name: New name for the file or directory.
-  
+
   Returns:
     The renamed path.
-    
+
   Raises:
     FileNotFoundError: If the file or directory does not exist.
     OSError: If the file or directory cannot be renamed.

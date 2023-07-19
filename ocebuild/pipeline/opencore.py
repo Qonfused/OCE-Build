@@ -41,12 +41,12 @@ def extract_opencore_archive(url: str,
                              persist: bool=False
                              ) -> Generator[PathResolver, any, None]:
   """Extracts the contents of an OpenCore archive and yields a temporary directory.
-  
+
   Args:
     url: The URL of the OpenCore archive to extract.
     target: The target EFI architecture to extract. Defaults to 'X64'.
     persist: Whether to persist the temporary directory. Defaults to False.
-  
+
   Yields:
     A temporary directory containing the extracted contents.
   """
@@ -103,7 +103,7 @@ def extract_opencore_directory(resolvers: dict,
                                **kwargs
                                ) -> Union[PathResolver, None]:
   """Extracts the OpenCore pacakge from the build OpenCore configuration.
-  
+
   Args:
     resolvers: The build configuration resolvers.
     lockfile: The build configuration lockfile.
@@ -149,7 +149,7 @@ def get_opencore_checksum(file_path: Union[str, PathResolver],
                           algorithm=sha256
                           ) -> str:
   """Computes the SHA256 checksum of the OpenCore binary.
-  
+
   This will compute the checksum of the `OpenCore.efi` binary, substituting the
   embedded public key when using vaulting. Modifications are made to a copy of
   the file within a temporary directory, which is validated and deleted after

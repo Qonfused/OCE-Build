@@ -18,7 +18,7 @@ from ocebuild import __file__ as module_path
 @contextmanager
 def disable_exception_traceback(tracebacklimit: int=0):
   """Suppresses stack trace information from an exception.
-  
+
   Args:
     tracebacklimit: The number of stack frames to show. Defaults to 0.
 
@@ -40,7 +40,7 @@ def wrap_exception(suppress: Optional[List[str]]=None,
                    max_frames: int=100,
                    use_rich: bool=False):
   """Hides internal stackframes with an optional stylized stack trace.
-  
+
   Args:
     suppress: A list of paths to suppress from the stack trace.
     suppress_internal: Whether to suppress internal frames (default: True).

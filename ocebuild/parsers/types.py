@@ -19,7 +19,7 @@ RE_VALID_HEX = r'^([a-fA-F0-9]{2})*$'
 
 def encode_data(value: str) -> bytes:
   """Encodes a base64 or hexadecimal string to a binary representation.
-  
+
   Args:
     value: The base64 or hexadecimal string to encode.
 
@@ -48,11 +48,11 @@ def encode_data(value: str) -> bytes:
 
 def decode_data(value: bytes, enc: str='base64') -> str:
   """Decodes a binary representation to a base64 string.
-  
+
   Args:
     value: The binary representation to decode.
     enc: The encoding format to return. Valid values are 'base64' and 'hex'.
-  
+
   Raises:
     ValueError: If the format is not a valid format.
 

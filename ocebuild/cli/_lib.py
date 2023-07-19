@@ -50,7 +50,7 @@ class CLIEnv:
 
 def cli_command(name: Optional[str]=None):
   """Factory for creating a shared environment for CLI commands.
-  
+
   Args:
     name: The name of the command. Defaults to the function name.
 
@@ -93,10 +93,10 @@ def cli_command(name: Optional[str]=None):
 
 def _format_url(url: str) -> str:
   """Formats a URL for the CLI.
-  
+
   Args:
     url: The URL to format.
-  
+
   Returns:
     A rich-formatted URL.
   """
@@ -107,7 +107,7 @@ def debug(msg: str, *args, **kwargs):
 
   This function is a wrapper for `echo()` that only prints if the global
   `DEBUG` flag is set.
-  
+
   Args:
     msg: The message to print.
     *args: Additional arguments to pass to `echo()`.
@@ -127,7 +127,7 @@ def echo(msg: Optional[str]=None,
          **kwargs
          ) -> None:
   """Stylized echo for the CLI.
-  
+
   Args:
     msg: The message to print.
     *args: Additional arguments to pass to `click.echo()`.
@@ -157,14 +157,14 @@ def error(msg: str,
           suppress: Optional[List[str]]=None
           ) -> None:
   """Stylized error message for the CLI.
-  
+
   Args:
     msg: The error message to print.
     label: The label to print before the error message.
     hint: A hint to print after the error message. (Optional)
     traceback: Whether to print a traceback. (Optional)
     suppress: A list of filepaths to suppress from the traceback. (Optional)
-  
+
   Example:
     >>> error('This is an error message.')
     # -> Error: This is an error message.
@@ -201,7 +201,7 @@ def abort(msg: str,
     msg: The abort message to print.
     hint: A hint to print after the abort message. (Optional)
     traceback: Whether to print a traceback; enabled by default. (Optional)
-  
+
   Example:
     >>> abort('This is an abort message.')
     # -> Abort: This is an abort message.
@@ -220,14 +220,14 @@ def progress_bar(description: str,
                  **kwargs
                  ) -> Generator[Iterator, any, None]:
   """Stylized progress bar for the CLI.
-  
+
   Args:
     description: The description to display for the progress bar.
     *args: Additional arguments to pass to `rich.track()`.
     wrap: The function to wrap the progress bar with. (Optional)
       This can be a parent rich.Progress() context, or a custom wrapper.
     **kwargs: Additional keyword arguments to pass to `rich.track()`.
-  
+
   Returns:
     A partial for a generator that yields an iterator for the progress bar.
   """

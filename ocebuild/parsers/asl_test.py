@@ -25,7 +25,7 @@ def test_RE_BLOCK_ARGS():
                      multiline=True)
   assert regex_fn(string='Method ("Name", 0, "Serialized") {}') == \
     '"Name", 0, "Serialized"'
-    
+
   assert regex_fn(string='DefinitionBlock ("", "SSDT", 2, "SSDTA", "TEST", 0x00000000)') == \
     '"", "SSDT", 2, "SSDTA", "TEST", 0x00000000'
 
@@ -113,7 +113,7 @@ def test_parse_ssdt_namespace():
                                  ('SB.BAZ', 'Device'),
                                  ('SB.BAZ.HID', 'Name'),
                                  ('SB.PCI0.QUUX', 'Name')])}
-    
+
   # Test against SSDT-B
   with open(f'{EXAMPLE_PATH}/ACPI/SSDT-B.dsl', encoding='UTF-8') as ssdt_file:
     assert parse_ssdt_namespace(ssdt_file) == \
