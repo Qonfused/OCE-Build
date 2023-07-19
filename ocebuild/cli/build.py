@@ -18,6 +18,7 @@ from ._lib import abort, cli_command, debug, error, progress_bar
 from ocebuild.errors import PathValidationError
 from ocebuild.filesystem import glob, remove
 from ocebuild.parsers.dict import nested_get
+from ocebuild.pipeline import config, kexts, ssdts
 from ocebuild.pipeline.build import read_build_file
 from ocebuild.pipeline.opencore import extract_opencore_directory
 from ocebuild.sources.resolver import PathResolver
@@ -167,8 +168,6 @@ def cli(env, cwd, out, clean, update, force):
                                 resolvers, lockfile,
                                 out_dir=BUILD_DIR)
 
-  #FIXME: This is a temporary workaround until the build system is plugged-in.
-  _ = OC_DIR, flags
 
 __all__ = [
   # Functions (3)

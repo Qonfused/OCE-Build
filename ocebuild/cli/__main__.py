@@ -13,6 +13,7 @@ import click
 from ._lib import _format_url, abort, CLIEnv, CONTEXT_SETTINGS
 from .build import cli as build
 from .lock import cli as lock
+from .patch import cli as patch
 
 from ocebuild.version import __version__
 
@@ -31,6 +32,7 @@ def _main():
   try:
     cli.add_command(build)
     cli.add_command(lock)
+    cli.add_command(patch)
     cli() #pylint: disable=no-value-for-parameter
   # Cleanup the CLI environment on exit.
   except SystemExit as e:

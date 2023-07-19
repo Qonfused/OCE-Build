@@ -178,6 +178,8 @@ def resolve_lockfile(env: CLIEnv,
   # Read the lockfile
   lockfile, metadata, LOCKFILE = get_lockfile(cwd, project_dir=project_dir)
 
+  #TODO: Remove lockfile entries that are not in the build configuration
+
   # Resolve the specifiers in the build configuration
   if update: debug(msg='(--update) Updating lockfile entries...')
   if force:  debug(msg='(--force) Forcing lockfile update...')
