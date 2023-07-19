@@ -1,5 +1,6 @@
 {
   "recommendations": [
+      "mikestead.dotenv",
       "editorconfig.editorconfig",
       // Markdown extensions
       "bierner.github-markdown-preview",
