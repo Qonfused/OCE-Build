@@ -11,6 +11,8 @@ from urllib.request import Request
 
 from typing import Generator, Union
 
+from .cache import UNPACK_DIR
+
 from ocebuild.parsers.regex import re_match
 from ocebuild.sources import request
 from ocebuild.sources.resolver import PathResolver
@@ -48,9 +50,10 @@ def extract_archive(url: Union[str, Request],
       elif '.' in url:
         extension = f'.{url.split(".")[-1]}'
       else:
-        extension = url.split("/")[-1]
+        extension = url.rsplit("/", maxsplit=1)[-1]
       # Write archive to a temporary file.
-      with NamedTemporaryFile(suffix=extension) as tmp_file:
+      with NamedTemporaryFile(suffix=f'-{filename or extension}',
+                              dir=UNPACK_DIR) as tmp_file:
         tmp_file.write(response.read())
         tmp_file.seek(0)
         # Extract the zip file to the temporary directory.

@@ -14,6 +14,7 @@ from typing import Generator, Iterator, Literal, Optional, Union
 from mmap import mmap, PROT_READ
 
 from ocebuild.filesystem.archives import extract_archive
+from ocebuild.filesystem.cache import UNPACK_DIR
 from ocebuild.filesystem.posix import glob, move, remove
 from ocebuild.parsers.dict import nested_get
 from ocebuild.sources.binary import get_stream_digest
@@ -168,7 +169,9 @@ def get_opencore_checksum(file_path: Union[str, PathResolver],
 
   # Copy the file contents to the temporary file
   file_path = PathResolver(file_path)
-  with NamedTemporaryFile(mode="r+b", suffix='-OpenCore.efi') as f:
+  with NamedTemporaryFile(mode="r+b",
+                          suffix='-OpenCore.efi',
+                          dir=UNPACK_DIR) as f:
     copyfile(file_path.resolve(), f.name)
     file_checksum = file_path.checksum
     f.seek(0)

@@ -14,6 +14,7 @@ from tempfile import mkdtemp, NamedTemporaryFile
 
 from typing import Callable, Generator, List, Optional, Union
 
+from ocebuild.filesystem.cache import UNPACK_DIR
 from ocebuild.parsers.asl import parse_ssdt_namespace
 from ocebuild.sources import request
 from ocebuild.sources.binary import get_binary_ext, wrap_binary
@@ -37,7 +38,9 @@ def extract_iasl_binary(url: Optional[str]=None,
     A subprocess wrapper for the extracted iasl binary.
   """
   binary = f'iasl{get_binary_ext()}'
-  tmp_file = NamedTemporaryFile(suffix=f'-{binary}', delete=False)
+  tmp_file = NamedTemporaryFile(suffix=f'-{binary}',
+                                delete=not cache,
+                                dir=UNPACK_DIR)
   try:
     # Fetch the iasl binary appropriate for the current platform
     if not url:

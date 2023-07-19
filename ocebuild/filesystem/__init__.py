@@ -5,4 +5,5 @@
 """Shared filesystem utilities."""
 
 from ocebuild.filesystem.archives import *
+from ocebuild.filesystem.cache import *
 from ocebuild.filesystem.posix import *
