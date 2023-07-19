@@ -26,7 +26,7 @@ dependencies:
       resolution: 'OpenIntelWireless/itlwm@github:2.3.0#commit=bd47afe94836e178402bf9ca7bb031d35ea6d90b'
       specifier: 'OpenIntelWireless/itlwm@github:^2.1.0'
       kind: Kext
-    AirportItlwm-Ventura:
+    AirportItlwmVentura:
       build: DEBUG
       url: 'https://github.com/OpenIntelWireless/itlwm/releases/download/v2.3.0-alpha/AirportItlwm-Ventura-v2.3.0-DEBUG-alpha-f1cad0f.zip'
       version: 2.3.0
@@ -59,9 +59,9 @@ dependencies:
       kind: Kext
     WhateverGreen:
       build: DEBUG
-      url: 'https://github.com/dortania/build-repo/releases/download/WhateverGreen-de66827/WhateverGreen-1.6.6-DEBUG.zip'
+      url: 'https://github.com/dortania/build-repo/releases/download/WhateverGreen-c7c8dc7/WhateverGreen-1.6.6-DEBUG.zip'
       version: 1.6.6
-      resolution: 'acidanthera/WhateverGreen@github:1.6.6#commit=de66827310e05afc08e81b3ef418c75851681e2a'
+      resolution: 'acidanthera/WhateverGreen@github:1.6.6#commit=c7c8dc70381af3b48a4b65c177acf8835da080eb'
       specifier: 'acidanthera/WhateverGreen@github'
       kind: Kext
   OpenCorePkg:

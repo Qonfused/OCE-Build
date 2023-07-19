@@ -6,6 +6,7 @@
 
 #pylint: disable=C0103,R1725,W0401,W0613,W0614,W0622,W1113,E0602
 
+import re
 from difflib import get_close_matches
 from hashlib import sha256
 from inspect import signature
@@ -123,7 +124,8 @@ class GitHubResolver(BaseResolver):
     if not assets:
       raise ValueError(f'Release catalog for {name} has no assets.')
 
-    name_parts = split('-|_| ', name.lower())
+    # Split tokens on capital letters, dashes, and underscores
+    name_parts = split('-|_| ', re.sub( r"([A-Z])", r"-\1", name).lower())
     def get_match(arr: List[dict], cutoff=0.25):
       """Finds the closest kext bundle in a list of release assets."""
       closest = get_close_matches(name, [a['name'] for a in arr], n=1, cutoff=cutoff)

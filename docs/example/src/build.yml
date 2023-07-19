@@ -17,7 +17,7 @@ Drivers:
   - Rts5227S
 Kexts:
   WhateverGreen: latest
-  AirportItlwm-Ventura:
+  AirportItlwmVentura:
     specifier: OpenIntelWireless/itlwm=^2.2.0
     properties:
       MaxKernel: "22.99.99"
