@@ -2,14 +2,15 @@
 # Copyright (c) 2023, Cory Bennett. All rights reserved.
 # SPDX-License-Identifier: BSD-3-Clause
 ##
-"""Methods for retrieving and handling SSDT binaries."""
+"""Methods for retrieving and handling SSDT binaries and source code."""
 
 from collections import OrderedDict
 from contextlib import contextmanager
 from functools import partial
 from graphlib import TopologicalSorter
 from os import unlink
-from tempfile import NamedTemporaryFile
+from shutil import copyfile, rmtree, which
+from tempfile import mkdtemp, NamedTemporaryFile
 
 from typing import Callable, Generator, List, Optional, Union
 
@@ -22,14 +23,16 @@ from ocebuild.sources.resolver import PathResolver
 
 @contextmanager
 def extract_iasl_binary(url: Optional[str]=None,
+                        cache: bool=True,
                         persist: bool=False
                         ) -> Generator[Callable[[List[str]], str], any, None]:
   """Extracts an iasl binary and yields a subprocess wrapper.
-  
+
   Args:
     url: The URL to the iasl binary.
+    cache: Whether to cache the extracted iasl binary.
     persist: Whether to persist the extracted binary.
-  
+
   Yields:
     A subprocess wrapper for the extracted iasl binary.
   """
@@ -38,9 +41,7 @@ def extract_iasl_binary(url: Optional[str]=None,
   try:
     # Fetch the iasl binary appropriate for the current platform
     if not url:
-      url = github_file_url('Qonfused/iASL',
-                            path=binary,
-                            raw=True)
+      url = github_file_url('Qonfused/iASL', path=binary, raw=True)
     # Fetch and extract the iasl binary to a temporary file
     with request(url) as response:
       tmp_file.seek(0)
@@ -52,15 +53,72 @@ def extract_iasl_binary(url: Optional[str]=None,
     # Cleanup after context exits
     if not persist: unlink(tmp_file.name)
 
+@contextmanager
+def iasl_wrapper(cache: bool=True
+                 ) -> Generator[Callable[[List[str]], str], any, None]:
+  """Returns a subprocess wrapper for an existing or extracted iasl binary.
+
+  By default, this method will attempt to locate an existing iasl binary on the
+  system. If one is not found, it will extract a temporary iasl binary from the
+  Qonfused/iASL repository.
+
+  Args:
+    cache: Whether to cache the extracted iasl binary.
+
+  Yields:
+    A subprocess wrapper for the iasl binary.
+  """
+  tmp_wrapper = None
+  try:
+    # Check if iasl is already installed
+    if (path := which('iasl')):
+      iasl = partial(wrap_binary, binary_path=path)
+    # Otherwise, extract a temporary iasl binary
+    elif not tmp_wrapper:
+      with extract_iasl_binary(cache=True, persist=True) as tmp_wrapper:
+        iasl = tmp_wrapper
+    #TODO: Add option to provide -da or -e flag w/ user-provided DSDT/SSDTs
+    # @see https://www.tonymacx86.com/threads/guide-patching-laptop-dsdt-ssdts.152573/
+    # @see https://github.com/acpica/acpica/issues/414#issuecomment-432378819
+    yield iasl
+  finally:
+    if tmp_wrapper:
+      PathResolver(iasl.keywords['binary_path']).unlink()
+
+@contextmanager
+def translate_ssdts(filepaths: List[Union[str, PathResolver]],
+                    persist: bool=False
+                    ) -> Generator[List[PathResolver], any, None]:
+  """Decompiles or compiles SSDT tables using iasl.
+
+  Args:
+    filepaths: A list of filepaths to SSDT *.aml or *.dsl files.
+    persist: Whether to persist the SSDT files.
+
+  Yields:
+    A list of filepaths to the compiled + decompiled SSDT files.
+  """
+  tmp_dir = PathResolver(mkdtemp())
+  try:
+    with iasl_wrapper() as iasl:
+      for filepath in map(PathResolver, filepaths):
+        tmp_copy = tmp_dir.joinpath(filepath.name)
+        copyfile(filepath, tmp_copy)
+        iasl(['-ve', tmp_copy])
+    yield list(map(PathResolver, tmp_dir.iterdir()))
+  finally:
+    # Cleanup after context exits
+    if not persist: rmtree(tmp_dir)
+
 def sort_ssdt_symbols(filepaths: List[Union[str, PathResolver]]) -> OrderedDict:
   """Sorts the injection order of SSDT tables by resolving symbolic references.
 
   This is a naive implementation that does not prune conditional branches or
   build flags outside of standard ACPI spec.
-  
+
   Args:
-    filepaths: A list of filepaths to SSDT files.
-  
+    filepaths: A list of filepaths to SSDT *.dsl files.
+
   Returns:
     An ordered dictionary of SSDT table names with their exported symbols.
   """
@@ -101,7 +159,9 @@ def sort_ssdt_symbols(filepaths: List[Union[str, PathResolver]]) -> OrderedDict:
 
 
 __all__ = [
-  # Functions (2)
+  # Functions (4)
   "extract_iasl_binary",
+  "iasl_wrapper",
+  "translate_ssdts",
   "sort_ssdt_symbols"
 ]
