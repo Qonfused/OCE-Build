@@ -73,6 +73,11 @@ help    = "Runs project tests with a short coverage report."
 cmd     = "pylint --rcfile ci/tools/pylint/.pylintrc ocebuild"
 help    = "Runs project linter with a short report."
 
+[tool.poe.tasks.lint-diff]
+shell   = "git diff --name-only | sed '/.*\\.py/!d' | xargs poetry lint"
+interpreter = ["posix", "bash"]
+help    = "Runs the lint command only on changed files."
+
 ################################################################################
 #                               Test Configuration                             #
 ################################################################################
