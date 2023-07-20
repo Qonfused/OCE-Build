@@ -1,22 +1,27 @@
 name: Python CI
 on:
-  # Skips build process for changes to only **docs** or **.github** directories.
+  # Enables trigger for commits or PRs when making changes to python namespaces.
   push:
-    branches:
-      - 'main'
     paths:
+      # Python namespaces
+      - 'ci/**'
+      - 'ocebuild/**'
+      # Python configuration
+      - 'poetry.lock'
+      - 'pyproject.toml'
+      # Exclusions
       - '!.github/**'
       - '!docs/**'
-      - '!.gitattributes'
-      - '!.gitignore'
-      - 'ocebuild/**'
-  # Enables trigger for pull requests on making changes to **ocebuild** directory.
+      - '!scripts/**'
   pull_request:
-    branches:
-      - 'main'
-      - 'development'
+    types: [ opened, synchronize, closed ]
     paths:
-      - 'ocebuild/**'
+      # Python namespaces
+      - 'ci/**.py'
+      - 'ocebuild/**.py'
+      # Python configuration
+      - 'poetry.lock'
+      - 'pyproject.toml'
   workflow_dispatch:
 jobs:
   # Runs test suite
@@ -163,16 +168,16 @@ jobs:
           # An alternative template for the comment for pull requests.
           COMMENT_TEMPLATE: |
             ### Python Coverage: `{{ coverage.info.percent_covered | pct }}`
-            
+
             Line Coverage Summary:
             | (Files)                                    | Diff (Changed Lines)                  | Covered Lines                                                                                                        | Missing Lines                                                                                                        | Excluded Lines                                                                                                         | (Total)                            |
             | ------------------------------------------ | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
             | {{ diff_coverage.files.items() | length }} | {{ diff_coverage.num_changed_lines }} | {{ coverage.info.covered_lines }} ({{ (coverage.info.covered_lines|int / coverage.info.num_statements|int) | pct }}) | {{ coverage.info.missing_lines }} ({{ (coverage.info.missing_lines|int / coverage.info.num_statements|int) | pct }}) | {{ coverage.info.excluded_lines }} ({{ (coverage.info.excluded_lines|int / coverage.info.num_statements|int) | pct }}) | {{ coverage.info.num_statements }} |
-            
+
             {%if diff_coverage.files -%}
             <details>
             <summary>Diff Coverage Details (click to unfold)</summary>
-            
+
             | (#)              | File (^Test)                                                                                                                                                                                                                                                   | Diff (%)                                                                                                                      | Covered Lines                                                                                                         | Missing Lines                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Excluded Lines                                                                                                                                                         | (Total)                                            |
             | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
             {% for filename, diff_file_coverage in diff_coverage.files | dictsort -%}
@@ -198,7 +203,7 @@ jobs:
             {%- endif %}
 
             Last updated: `{{ coverage.meta.timestamp }}`
-            
+
             {{ marker }}
       - name: Store Pull Request comment to be posted
         uses: actions/upload-artifact@v3
