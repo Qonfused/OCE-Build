@@ -181,9 +181,6 @@ def resolve_lockfile(env: CLIEnv,
   # Read the lockfile
   lockfile, metadata, LOCKFILE = get_lockfile(cwd, project_dir=project_dir)
 
-  # Remove lockfile entries that are not in the build configuration
-  removed = prune_lockfile(build_config, lockfile)
-
   # Resolve the specifiers in the build configuration
   if update: debug(msg='(--update) Updating lockfile entries...')
   if force:  debug(msg='(--force) Forcing lockfile update...')
@@ -203,9 +200,15 @@ def resolve_lockfile(env: CLIEnv,
   except Exception as e: #pylint: disable=broad-exception-caught
     abort(msg=f'Failed to resolve build specifiers: {e}',
           hint='Check the build configuration for errors.')
+  else:
+    removed, resolved = [], {}
+    if (update or force) or not lockfile:
+      # Remove lockfile entries that are not in the build configuration
+      removed = prune_lockfile(build_config, lockfile)
+      # Filter out non-resolver entries
+      resolved = { k:v for k,v in resolvers.items() if v['__resolver'] }
 
   # Validate that the lockfile matches the build configuration
-  resolved = { k:v for k,v in resolvers.items() if v['__resolver'] }
   if check:
     debug(msg='(--check) Validating lockfile entries...')
     try:
@@ -215,7 +218,7 @@ def resolve_lockfile(env: CLIEnv,
     else:
       echo('Lockfile validation succeeded.', fg='green', exit=0)
   # Handle updating the lockfile
-  elif (update or force) or not lockfile:
+  elif resolved or removed:
     # Display added lockfile entries
     if resolved:
       msg = f'Added {len(resolved)} new entries'
@@ -228,14 +231,15 @@ def resolve_lockfile(env: CLIEnv,
     if removed:
       msg = f'Removed {len(removed)} entries'
       echo(f"{msg}.", fg='white')
-
     # Write lockfile to disk
     echo('Writing lockfile to disk...')
     write_lockfile(LOCKFILE, lockfile, resolved, metadata)
     echo('Done.', fg='white')
   # No new resolvers
-  else:
+  elif lockfile and (update or force):
     echo('Lockfile is up to date.', fg='white')
+  else:
+    echo('Lockfile is in sync.', fg='white')
 
   return lockfile, resolvers
 
