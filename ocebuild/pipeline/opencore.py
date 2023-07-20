@@ -4,26 +4,65 @@
 ##
 """Methods for retrieving and handling OpenCore packages."""
 
-from contextlib import contextmanager
 from hashlib import sha256
-from shutil import copy, copyfile, copytree, rmtree
+from shutil import copy, copyfile, copytree
 from tempfile import mkdtemp, NamedTemporaryFile
 
 from typing import Generator, Iterator, Literal, Optional, Union
 
 from mmap import mmap, PROT_READ
 
-from ocebuild.filesystem.archives import extract_archive
 from ocebuild.filesystem.cache import UNPACK_DIR
 from ocebuild.filesystem.posix import glob, move, remove
-from ocebuild.parsers.dict import nested_get
 from ocebuild.sources.binary import get_stream_digest
-from ocebuild.sources.github import github_archive_url
 from ocebuild.sources.resolver import PathResolver
 
 
-OPENCORE_BINARY_DATA_URL = github_archive_url('acidanthera/OcBinaryData',
-                                              branch='master')
+def extract_opencore_archive(pkg: PathResolver,
+                             target: Literal['IA32', 'X64']='X64'):
+  """"""
+  tmp_dir = mkdtemp(dir=UNPACK_DIR)
+
+  # Extract EFI binaries and tree structure
+  EFI_DIR = move(glob(pkg, pattern=f'**/{target}/EFI', first=True), tmp_dir)
+
+  # Extract documentation files
+  DOCS_DIR = EFI_DIR.joinpath('..', 'Docs')
+  changelog_doc = glob(pkg, pattern='**/Docs/Changelog.md', first=True)
+  move(changelog_doc, DOCS_DIR)
+  config_doc = glob(pkg, pattern='**/Docs/Configuration.pdf', first=True)
+  move(config_doc, DOCS_DIR)
+  diff_doc = glob(pkg, pattern='**/Docs/Differences.pdf', first=True)
+  move(diff_doc, DOCS_DIR)
+
+  # Extract sample config.plist
+  sample_plist = glob(pkg, pattern='**/Docs/Sample.plist', first=True)
+  copy(sample_plist, DOCS_DIR)
+  move(sample_plist, EFI_DIR.joinpath('OC'), name='config.plist')
+
+  # Extract ACPI samples
+  acpi_samples = glob(pkg, pattern='**/Docs/AcpiSamples/Binaries/*.aml')
+  for file in acpi_samples:
+    move(file, EFI_DIR.joinpath('OC', 'ACPI'))
+
+  # Extract bundled utilities
+  UTILITIES_DIR = EFI_DIR.joinpath('..', 'Utilities')
+  for dir_ in glob(pkg, pattern='**/Utilities/*/'):
+    move(dir_, UTILITIES_DIR)
+
+  # Overwrite package directory with changes
+  remove(pkg)
+
+  return PathResolver(EFI_DIR.parent)
+
+def extract_ocbinary_archive(pkg: PathResolver, oc_pkg: PathResolver) -> None:
+  """"""
+  for dir_ in oc_pkg.joinpath('EFI', 'OC').iterdir():
+    extract = glob(pkg, pattern=f'**/{dir_.name}/', first=True)
+    if extract and extract.exists():
+      copytree(extract, dir_, dirs_exist_ok=True)
+  # Cleanup
+  remove(pkg)
 
 def _iterate_entries(opencore_pkg: PathResolver,
                      opencore_dir: PathResolver
@@ -35,73 +74,13 @@ def _iterate_entries(opencore_pkg: PathResolver,
                     opencore_dir.joinpath(category).iterdir()):
       yield path
 
-@contextmanager
-def extract_opencore_archive(url: str,
-                             target: Literal['IA32', 'X64']='X64',
-                             persist: bool=False
-                             ) -> Generator[PathResolver, any, None]:
-  """Extracts the contents of an OpenCore archive and yields a temporary directory.
-
-  Args:
-    url: The URL of the OpenCore archive to extract.
-    target: The target EFI architecture to extract. Defaults to 'X64'.
-    persist: Whether to persist the temporary directory. Defaults to False.
-
-  Yields:
-    A temporary directory containing the extracted contents.
-  """
-  tmp_dir = mkdtemp()
-  try:
-    # Extract specified OpenCore package
-    with extract_archive(url) as pkg:
-      # Extract EFI binaries and tree structure
-      EFI_DIR = move(glob(pkg, pattern=f'**/{target}/EFI', first=True), tmp_dir)
-
-      # Extract documentation files
-      DOCS_DIR = EFI_DIR.joinpath('..', 'Docs')
-      changelog_doc = glob(pkg, pattern='**/Docs/Changelog.md', first=True)
-      move(changelog_doc, DOCS_DIR)
-      config_doc = glob(pkg, pattern='**/Docs/Configuration.pdf', first=True)
-      move(config_doc, DOCS_DIR)
-      diff_doc = glob(pkg, pattern='**/Docs/Differences.pdf', first=True)
-      move(diff_doc, DOCS_DIR)
-
-      # Extract sample config.plist
-      sample_plist = glob(pkg, pattern='**/Docs/Sample.plist', first=True)
-      copy(sample_plist, DOCS_DIR)
-      move(sample_plist, EFI_DIR.joinpath('OC'), name='config.plist')
-
-      # Extract ACPI samples
-      acpi_samples = glob(pkg, pattern='**/Docs/AcpiSamples/Binaries/*.aml')
-      for file in acpi_samples:
-        move(file, EFI_DIR.joinpath('OC', 'ACPI'))
-
-      # Extract bundled utilities
-      UTILITIES_DIR = EFI_DIR.joinpath('..', 'Utilities')
-      for dir_ in glob(pkg, pattern='**/Utilities/*/'):
-        move(dir_, UTILITIES_DIR)
-
-    # Clone latest additional OpenCore binaries not shipped in the main package
-    with extract_archive(OPENCORE_BINARY_DATA_URL) as pkg:
-      for dir_ in glob(EFI_DIR, pattern='**/OC/*/'):
-        extract = glob(pkg, pattern=f'**/{dir_.name}/', first=True)
-        if extract and extract.exists():
-          copytree(extract, dir_, dirs_exist_ok=True)
-
-    # Yield the temporary directory.
-    yield PathResolver(tmp_dir)
-  finally:
-    # Cleanup after context exits
-    if not persist: rmtree(tmp_dir)
-
-def extract_opencore_directory(resolvers: dict,
-                               lockfile: dict,
-                               target: str,
-                               out_dir: Union[str, PathResolver],
-                               *args,
-                               __wrapper: Optional[Iterator]=None,
-                               **kwargs
-                               ) -> Union[PathResolver, None]:
+def prune_opencore_archive(opencore_pkg: PathResolver,
+                           resolvers: dict,
+                           out_dir: Union[str, PathResolver],
+                           *args,
+                           __wrapper: Optional[Iterator]=None,
+                           **kwargs
+                           ) -> Union[PathResolver, None]:
   """Extracts the OpenCore pacakge from the build OpenCore configuration.
 
   Args:
@@ -117,33 +96,27 @@ def extract_opencore_directory(resolvers: dict,
     A PathResolver to the extracted OpenCore directory.
   """
 
-  entry_path = ['dependencies', 'OpenCorePkg', 'OpenCore']
-  url = nested_get(lockfile, [*entry_path, 'url'])
-  if not url: url = nested_get(resolvers, [*entry_path[2:], 'url'])
+  oc_dir = opencore_pkg.joinpath('EFI', 'OC')
+  # Handle interactive mode for iterator
+  iterator = set(_iterate_entries(opencore_pkg, oc_dir))
+  num_entries = len(iterator)
+  if __wrapper is not None: iterator = __wrapper(iterator, *args, **kwargs)
 
-  with extract_opencore_archive(url, target=target) as opencore_pkg:
-    OC_DIR = opencore_pkg.joinpath('EFI', 'OC')
-
-    # Handle interactive mode for iterator
-    iterator = set(_iterate_entries(opencore_pkg, OC_DIR))
-    num_entries = len(iterator)
-    if __wrapper is not None: iterator = __wrapper(iterator, *args, **kwargs)
-
-    # Iterate over the entries in the extracted OpenCore package
-    bundled = set(v['__filepath'] for v in resolvers.values()
-                  if v['specifier'] == '*')
-    for idx, path in enumerate(iterator):
-      # Include only binaries that are specified as bundled in the build config
-      if path not in bundled:
-        remove(opencore_pkg.joinpath(path))
-      else:
-        #TODO: Add entry under OpenCore's `bundled` property
-        bundled.discard(path)
-        del resolvers[PathResolver(path).stem]
-      # Copy the remaining files to the output directory
-      if idx + 1 == num_entries: # This stalls the iterator until completion
-        copytree(opencore_pkg, out_dir, dirs_exist_ok=True)
-        return PathResolver(out_dir, OC_DIR.relative_to(opencore_pkg))
+  # Iterate over the entries in the extracted OpenCore package
+  bundled = set(v['__filepath'] for v in resolvers.values()
+                if v['specifier'] == '*')
+  for idx, path in enumerate(iterator):
+    # Include only binaries that are specified as bundled in the build config
+    if path not in bundled:
+      remove(opencore_pkg.joinpath(path))
+    else:
+      #TODO: Add entry under OpenCore's `bundled` property
+      bundled.discard(path)
+      del resolvers[PathResolver(path).stem]
+    # Copy the remaining files to the output directory
+    if idx + 1 == num_entries: # This stalls the iterator until completion
+      copytree(opencore_pkg, out_dir, dirs_exist_ok=True)
+      return PathResolver(out_dir, oc_dir.relative_to(opencore_pkg))
 
 def get_opencore_checksum(file_path: Union[str, PathResolver],
                           algorithm=sha256
@@ -205,10 +178,9 @@ def get_opencore_checksum(file_path: Union[str, PathResolver],
 
 
 __all__ = [
-  # Constants (1)
-  "OPENCORE_BINARY_DATA_URL",
-  # Functions (3)
+  # Functions (4)
   "extract_opencore_archive",
-  "extract_opencore_directory",
+  "extract_ocbinary_archive",
+  "prune_opencore_archive",
   "get_opencore_checksum"
 ]

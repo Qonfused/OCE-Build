@@ -22,11 +22,11 @@ def test_GitHubResolver():
                         ).resolve() == \
     'https://github.com/acidanthera/RestrictEvents/releases/tag/1.0.9'
   # Test raw file url resolution
-  assert GitHubResolver(repository='acidanthera/RestrictEvents',
-                        branch='force-vmm-install',
-                        path='RestrictEvents/Info.plist'
+  assert GitHubResolver(repository='Qonfused/DiskArbitrationFixup',
+                        branch='master',
+                        path='DiskArbitrationFixup/Info.plist'
                         ).resolve() == \
-    'https://raw.githubusercontent.com/acidanthera/RestrictEvents/force-vmm-install/RestrictEvents/Info.plist'
+    'https://raw.githubusercontent.com/Qonfused/DiskArbitrationFixup/5670dddc49cfaf5b5fb54b0335f98a4df7ada1a0/DiskArbitrationFixup/Info.plist'
   # Test artifact url resolution
   assert GitHubResolver(repository='acidanthera/RestrictEvents',
                         branch='force-vmm-install',
@@ -34,7 +34,8 @@ def test_GitHubResolver():
                         ).resolve() == \
     'https://github.com/acidanthera/RestrictEvents/suites/13511383482/artifacts/742567994'
   # Test latest release url resolution
-  assert GitHubResolver(repository='acidanthera/RestrictEvents').resolve()
+  assert GitHubResolver(repository='acidanthera/RestrictEvents',
+                        branch='master').resolve()
 
 def test_DortaniaResolver(): pass # Not implemented
 

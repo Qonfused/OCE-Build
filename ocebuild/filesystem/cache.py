@@ -25,7 +25,7 @@ def _get_temp_dir(prefix: str="ocebuild-cache-") -> PathResolver:
   """Return the path to a directory that can be used for ephemeral caching."""
   tmpdir = mkdtemp(prefix=prefix)
   cache_dirs = sorted(set(_iter_temp_dir(prefix, PathResolver(tmpdir).parent)),
-                      key=lambda d: d.stat().st_ctime)
+                      key=lambda d: -d.stat().st_ctime)
   # Remove all but the most recent cache directory
   for i,d in enumerate(cache_dirs):
     if i: remove(d)

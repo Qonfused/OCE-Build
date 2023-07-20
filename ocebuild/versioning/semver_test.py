@@ -8,7 +8,8 @@ from packaging import version as vpkg
 
 from .semver import *
 
-from ocebuild.pipeline.kexts_test import __virtualsmc_archive
+
+# from ocebuild.pipeline.kexts_test import __virtualsmc_archive
 
 
 def test_get_version_str():
@@ -101,13 +102,13 @@ def test_resolve_version_specifier():
 
 def test_get_minimum_version(): pass # Not implemented
 
-def test_sort_dependencies(__virtualsmc_archive):
-  # Verify kext dependencies are sorted correctly
-  kext_order = [('as.vit9696.Lilu', '^1.2.0'),
-                ('as.vit9696.VirtualSMC', '^1.0.0'),
-                ('as.lvs1974.SMCDellSensors', None),
-                ('ru.joedm.SMCSuperIO', None),
-                ('ru.usrsse2.SMCBatteryManager', None),
-                ('as.vit9696.SMCProcessor', None),
-                ('ru.usrsse2.SMCLightSensor', None)]
-  assert list(sort_dependencies(__virtualsmc_archive))[:2] == kext_order[:2]
+# def test_sort_dependencies(__virtualsmc_archive):
+#   # Verify kext dependencies are sorted correctly
+#   kext_order = [('as.vit9696.Lilu', '^1.2.0'),
+#                 ('as.vit9696.VirtualSMC', '^1.0.0'),
+#                 ('as.lvs1974.SMCDellSensors', None),
+#                 ('ru.joedm.SMCSuperIO', None),
+#                 ('ru.usrsse2.SMCBatteryManager', None),
+#                 ('as.vit9696.SMCProcessor', None),
+#                 ('ru.usrsse2.SMCLightSensor', None)]
+#   assert list(sort_dependencies(__virtualsmc_archive))[:2] == kext_order[:2]

@@ -8,7 +8,7 @@ import pytest
 from .dict import nested_get
 from .plist import *
 
-from ocebuild.pipeline.opencore import extract_opencore_archive
+from ocebuild.filesystem.archives import extract_archive
 from ocebuild.sources import request
 from ocebuild.sources.binary import get_binary_ext, wrap_binary
 from ocebuild.sources.github import github_file_url, github_tag_names
@@ -95,13 +95,13 @@ def test_write_plist():
   latest_tag = sorted(github_tag_names('acidanthera/OpenCorePkg'),
                        key=lambda t: get_version(t))[-1]
   url = f'https://github.com/acidanthera/OpenCorePkg/releases/download/{latest_tag}/OpenCore-{latest_tag}-DEBUG.zip'
-  with extract_opencore_archive(url) as opencore_dir:
+  with extract_archive(url) as opencore_dir:
     # Parse sample config.plist to dict
-    config_plist_filepath = opencore_dir.joinpath('EFI', 'OC', 'config.plist')
+    config_plist_filepath = opencore_dir.joinpath('Docs', 'Sample.plist')
     with open(config_plist_filepath, 'r', encoding='utf-8') as file:
       sample_plist = parse_plist(file)
     # Write parsed config.plist as plist
-    output_plist_filepath = opencore_dir.joinpath('EFI', 'OC', 'parsed.plist')
+    output_plist_filepath = opencore_dir.joinpath('Docs', 'Sample.plist')
     with open(output_plist_filepath, 'w') as f:
       lines = write_plist(sample_plist)
       f.writelines(lines)

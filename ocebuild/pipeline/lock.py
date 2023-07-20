@@ -165,22 +165,25 @@ def parse_specifier(name: str,
   Returns:
     The resolver class for the specifier.
   """
-  specifier = entry['specifier'] if isinstance(entry, dict) else entry
+  specifier = nested_get(entry, ['specifier'], default=entry)
+  if not isinstance(specifier, str): specifier = ''
   parameters: Dict[str, str]={}
   resolver_props = { '__name__': name, '__specifier__': specifier }
-
-  # Specifier is a wildcard
-  if not specifier or specifier == '*': return None
 
   # Specifier points to a github repository
   if isinstance(entry, dict) and 'repository' in entry:
     # Add repository name to specifier if provided as an object parameter
     delimiter = '=' if not specifier.startswith('#') else ''
-    specifier = delimiter.join([entry['repository'], specifier])
+    if specifier:
+      specifier = delimiter.join([entry['repository'], specifier])
+    else:
+      specifier = entry['repository']
   if (repository := re_match(r'[a-zA-Z0-9\-]+\/[a-zA-Z0-9\-]+', specifier)):
     parameters['repository'] = repository
     semver_specifier = specifier[len(repository):]
     parameters = parse_semver_params(entry, semver_specifier, parameters)
+    # Handle optional flags
+    if 'tarball' in entry: parameters['tarball'] = entry['tarball']
     return GitHubResolver(**parameters, **resolver_props)
 
   # Specifier points to a Dortania build (or latest)

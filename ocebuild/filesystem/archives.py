@@ -36,7 +36,7 @@ def extract_archive(url: Union[str, Request],
     print(tmp_dir)
     # -> "/tmp/xxxxxx"
   """
-  tmp_dir = mkdtemp()
+  tmp_dir = mkdtemp(dir=UNPACK_DIR)
   try:
     #TODO: If github file url, test `raw.githubusercontent` redirect,
     #      otherwise parse and extract from an archive url.

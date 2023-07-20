@@ -87,6 +87,7 @@ class GitHubResolver(BaseResolver):
                workflow: Optional[str]=None,
                commit: Optional[str]=None,
                *args,
+               tarball: Optional[bool]=False,
                **kwargs):
     # Ensure MRO is cooperative with subclassing
     super(GitHubResolver, self).__init__()
@@ -100,6 +101,8 @@ class GitHubResolver(BaseResolver):
     self.tag = tag
     self.workflow = workflow
     self.commit = commit
+    # Optional flags
+    self.tarball = tarball
 
   @staticmethod
   def extract_asset(resolver: Union[TGitHubResolver, TDortaniaResolver],
@@ -174,8 +177,27 @@ class GitHubResolver(BaseResolver):
     params = dict(self)
     repo = params['repository']
 
+    # Handle case where a commit is not normally resolved
+    def _clamp_commit():
+      """Clamp down ambiguous commit resolution"""
+      if not self.has_any('commit'):
+        # Resolve the latest commit for the given branch
+        _args = { k:v for k,v in params.items() if k in ('repository', 'branch') }
+        _commit = get_latest_commit(**_args)
+        self.commit = _commit
+        params['commit'] = _commit
+
+    # Return archive url
+    if params.get('tarball'):
+      _clamp_commit()
+      _args = { k:v for k,v in params.items() if k not in ('tarball') }
+      return github_archive_url(**_args)
+    else:
+      del params['tarball']
+
     # Return raw file url
     if self.has_any('path'):
+      _clamp_commit()
       return github_file_url(**params, raw=True)
 
     # Resolve version tag

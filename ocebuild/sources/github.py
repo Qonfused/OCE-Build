@@ -73,6 +73,13 @@ def github_rate_limit(kind: str='core', raise_error: float=False) -> int:
     with disable_exception_traceback():
       raise GitHubRateLimit(msg, rate_limit)
 
+def get_latest_commit(repository: str,
+                      branch: str='main'):
+  """Get the latest commit of a branch in a GitHub repository."""
+  response = github_api_request(f'/repos/{repository}/commits/{branch}')
+  if (commit := response.json()):
+    return commit['sha']
+
 ################################################################################
 #                     Parameter formatting/retrieval functions                 #
 ################################################################################
@@ -298,9 +305,10 @@ def github_artifacts_url(repository: str,
 
 
 __all__ = [
-  # Functions (9)
+  # Functions (10)
   "github_api_request",
   "github_rate_limit",
+  "get_latest_commit",
   "github_suite_id",
   "github_tag_names",
   "github_release_catalog",

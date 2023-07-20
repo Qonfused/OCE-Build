@@ -5,11 +5,17 @@
 """Methods for handling and manipulating the build configuration."""
 
 from itertools import chain
+from shutil import unpack_archive
+from tempfile import mkdtemp
 
-from typing import List, Tuple
+from typing import Iterator, List, Optional, Tuple
 
+from ocebuild.filesystem import copy
+from ocebuild.filesystem.archives import extract_archive
+from ocebuild.filesystem.cache import UNPACK_DIR
 from ocebuild.parsers.dict import nested_get, nested_set
 from ocebuild.parsers.yaml import parse_yaml
+from ocebuild.sources.resolver import PathResolver
 
 
 def _set_var_default(build_vars: dict, name: str, default: str):
@@ -61,6 +67,14 @@ def read_build_file(filepath: str,
         'specifier': version,
         'repository': 'acidanthera/OpenCorePkg',
         'build': build
+      },
+      'OcBinaryData': {
+        '__filepath': 'EFI/OC/.',
+        'specifier': 'latest',
+        'repository': 'acidanthera/OcBinaryData',
+        'branch': 'master',
+        'build': build,
+        'tarball': True
       }
     }
     for category, entries in build_config.items():
@@ -78,8 +92,38 @@ def read_build_file(filepath: str,
 
   return build_config, build_vars, flags
 
+def unpack_build_entries(resolvers: dict,
+                         project_dir: PathResolver,
+                         *args,
+                         __wrapper: Optional[Iterator]=None,
+                         **kwargs) -> dict:
+  """Unpacks the build entries from the build configuration."""
+
+  # Handle interactive mode for iterator
+  iterator = resolvers.items()
+  if __wrapper is not None: iterator = __wrapper(iterator, *args, **kwargs)
+
+  extracted = {}
+  for name, entry in iterator:
+    tmpdir: PathResolver
+    # Handle extracting remote entries
+    if (url := entry.get('url')):
+      with extract_archive(url, persist=True) as tmpdir:
+        for archive in tmpdir.glob('**/*.zip'):
+          unpack_archive(archive, tmpdir.joinpath(archive.name))
+    # Handle extracting local entries
+    elif (path := entry.get('path')):
+      tmpdir = PathResolver(mkdtemp(dir=UNPACK_DIR))
+      src = project_dir.joinpath(path)
+      copy(src, tmpdir.joinpath(tmpdir, src.name))
+    # Update extracted paths
+    nested_set(extracted, [entry['__category'], name], tmpdir)
+
+  return extracted
+
 
 __all__ = [
-  # Functions (1)
-  "read_build_file"
+  # Functions (2)
+  "read_build_file",
+  "unpack_build_entries"
 ]

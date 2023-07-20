@@ -4,95 +4,59 @@
 ##
 """Methods for retrieving and handling Kext packages and binaries."""
 
-from contextlib import contextmanager
-from shutil import rmtree, unpack_archive
+from typing import Literal, Union
 
-from typing import Generator, Literal
-
-from ocebuild.filesystem.archives import extract_archive
 from ocebuild.parsers.plist import parse_plist
 from ocebuild.sources.resolver import PathResolver
 
 
-@contextmanager
-def extract_kext_archive(url: str,
-                         build: Literal['RELEASE', 'DEBUG']='RELEASE',
-                         persist: bool=False
-                         ) -> Generator[dict, any, None]:
-  """Extracts Kexts from a URL and yields a temporary extraction dictionary.
+def parse_kext_plist(filepath: Union[str, PathResolver]) -> dict:
+  """Parses the Info.plist of a Kext."""
+  with open(filepath, 'r', encoding='UTF-8') as file:
+    # Build plist dictionary from filestream
+    plist = parse_plist(file)
+  # Extract Kext bundle properties
+  name = plist['CFBundleName']
+  identifier = plist['CFBundleIdentifier']
+  version = plist['CFBundleVersion']
+  executable = plist['CFBundleExecutable']
+  libraries = { k:v for k,v in plist['OSBundleLibraries'].items()
+                    # Ignore self-dependencies
+                if (not k == identifier and
+                    # Ignore Apple-provided libraries
+                    not k.startswith('com.apple.')) }
+  return {
+    "identifier": identifier,
+    "version": version,
+    "executable": executable,
+    "dependencies": libraries
+  }
 
-  Args:
-    url: URL of the archive file.
-    persist: Flag to disable cleanup of the temporary directory.
+def extract_kexts(directory: Union[str, PathResolver],
+                  build: Literal['RELEASE', 'DEBUG']='RELEASE',
+                  ) -> list:
+  """Extracts the metadata of all Kexts in a directory."""
+  kexts = {}
+  for plist_path in directory.glob('**/*.kext/Contents/Info.plist'):
+    kext_path = PathResolver(plist_path).parents[1].as_posix()
+    extract_path = f'.{str(kext_path).split(directory.as_posix())[1]}'
+    plist_props = parse_kext_plist(plist_path)
+    # Update kext dictionary
+    kexts[plist_props['name']] = {
+      "__extract": extract_path,
+      "__path": kext_path,
+      **plist_props
+    }
+  # Filter build targets if provided in extract path
+  if any(build.lower() in e['__extract'].lower() for e in kexts.values()):
+    kexts = { k:v for k,v in kexts.items()
+              if build.lower() in v['__extract'].lower() }
 
-  Yields:
-    kexts (dict): Dictionary of extracted kexts.
-
-  Example:
-    >>> with extract_kexts('https://example.com/foo.zip') as kexts:
-    ...   print(kexts)
-    # -> {
-    #   'Foo': {
-    #     '__extract': './Foo.kext'
-    #     '__path': Path('/tmp/foo/Foo.kext'),
-    #     '__url': 'https://example.com/foo.zip',
-    #     'identifier': 'com.example.foo',
-    #     'version': '1.0.0',
-    #     'dependencies': {
-    #       'com.example.bar': '1.0.0'
-    #     }
-    #   },
-    #   'Bar': { ... }
-    # }
-  """
-  tmpdir: PathResolver=None
-  try:
-    kexts = {}
-    with extract_archive(url, persist=True) as tmpdir:
-      # Handle nested archives
-      for archive in tmpdir.glob('**/*.zip'):
-        unpack_archive(archive, tmpdir.joinpath(archive.name))
-      # Extract metadata from all included kexts
-      for plist_path in tmpdir.glob('**/*.kext/Contents/Info.plist'):
-        kext_path = PathResolver(plist_path).parents[1].as_posix()
-        extract_path = f'.{str(kext_path).split(tmpdir.as_posix())[1]}'
-        with open(plist_path, 'r', encoding='UTF-8') as file:
-          # Build plist dictionary from filestream
-          plist = parse_plist(file)
-          # Extract Kext bundle properties
-          name = plist['CFBundleName']
-          identifier = plist['CFBundleIdentifier']
-          version = plist['CFBundleVersion']
-          executable = plist['CFBundleExecutable']
-          libraries = { k:v for k,v in plist['OSBundleLibraries'].items()
-                            # Ignore self-dependencies
-                        if (not k == identifier and
-                            # Ignore Apple-provided libraries
-                            not k.startswith('com.apple.')) }
-          # Cleanup
-          del plist
-        # Update kext dictionary
-        kexts[name] = {
-          "__extract": extract_path,
-          "__path": kext_path,
-          "__url": url,
-          "identifier": identifier,
-          "version": version,
-          "executable": executable,
-          "dependencies": libraries
-        }
-    # Filter build targets if provided in extract path
-    if any(build.lower() in e['__extract'].lower() for e in kexts.values()):
-      kexts = { k:v for k,v in kexts.items()
-                if build.lower() in v['__extract'].lower() }
-    # Yield the kexts dictionary.
-    yield kexts
-  finally:
-    # Cleanup after context exits
-    if tmpdir and not persist: rmtree(tmpdir)
+  return kexts
 
 
 __all__ = [
-  # Functions (1)
-  "extract_kext_archive"
+  # Functions (2)
+  "parse_kext_plist",
+  "extract_kexts"
 ]

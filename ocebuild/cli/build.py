@@ -15,12 +15,10 @@ from rich.progress import Progress
 
 from ._lib import abort, cli_command, debug, error, progress_bar
 
-from ocebuild.errors import PathValidationError
 from ocebuild.filesystem import glob, remove
 from ocebuild.parsers.dict import nested_get
-from ocebuild.pipeline import config, kexts, ssdts
-from ocebuild.pipeline.build import read_build_file
-from ocebuild.pipeline.opencore import extract_opencore_directory
+from ocebuild.pipeline import config, kexts, opencore, ssdts
+from ocebuild.pipeline.build import read_build_file, unpack_build_entries
 from ocebuild.sources.resolver import PathResolver
 
 
@@ -55,63 +53,6 @@ def get_build_file(cwd: Union[str, PathResolver]
     debug(msg=f"Using '{PROJECT_DIR.relative('.')}' as the project root.")
 
   return build_config, build_vars, flags, BUILD_FILE, PROJECT_DIR
-
-def extract_opencore_pkg(cwd: Union[str, PathResolver],
-                         build_config: dict,
-                         build_vars: dict,
-                         resolvers: dict,
-                         lockfile: dict,
-                         out_dir: Union[str, PathResolver]
-                         ) -> PathResolver:
-  """Extracts the OpenCore package to the output directory.
-
-  Args:
-    cwd: The current working directory.
-    build_config: The build configuration.
-    build_vars: The build variables.
-    resolvers: The source resolvers.
-    lockfile: The lockfile.
-    out_dir: The output directory.
-
-  Returns:
-    The path to the extracted OpenCore package.
-  """
-  try:
-    with Progress(transient=True) as progress:
-      bar = progress_bar('Extracting OpenCore package', wrap=progress)
-      target = build_vars['variables']['target']
-      OC_DIR = extract_opencore_directory(resolvers,
-                                          lockfile,
-                                          target=target,
-                                          out_dir=out_dir,
-                                          # Interactive arguments
-                                          __wrapper=bar)
-    # Validate that the OpenCore directory was extracted
-    if not OC_DIR:
-      raise RuntimeError('The OpenCore package was not extracted.')
-    if not (OC_DIR.exists() and set(OC_DIR.iterdir())):
-      raise PathValidationError('The extracted OpenCore package is empty.',
-                                name=OC_DIR.name,
-                                path=OC_DIR,
-                                kind='Directory')
-    # Validate that the OpenCore binary was extracted
-    oc_config = nested_get(build_config, ['OpenCorePkg', 'OpenCore'])
-    oc_binary = PathResolver(out_dir, oc_config['__filepath'])
-    if not (oc_binary.exists() and OC_DIR.joinpath(oc_binary.name).exists()):
-      raise PathValidationError('The extracted OpenCore package is malformed.',
-                                name=oc_binary.name,
-                                path=oc_binary,
-                                kind='Binary')
-  except PathValidationError as e:
-    error(msg=f'Failed to extract the OpenCore package: {e}',
-          hint='Check the OpenCore build configuration for errors.')
-  except Exception: #pylint: disable=broad-exception-caught
-    abort(msg='Encountered an error while extracting the OpenCore package')
-  else:
-    OC_DIR = PathResolver(cwd, OC_DIR.resolve())
-    debug(msg=f"Extracted OpenCore binaries to '{OC_DIR.relative(cwd)}'.")
-
-  return OC_DIR
 
 
 @cli_command(name='build')
@@ -158,20 +99,39 @@ def cli(env, cwd, out, clean, update, force):
 
   # Read the lockfile
   from .lock import resolve_lockfile #pylint: disable=import-outside-toplevel
-  lockfile, resolvers = resolve_lockfile(env, cwd, update, force,
+  lockfile, resolvers = resolve_lockfile(env, cwd,
+                                         update=update,
+                                         force=force,
                                          build_config=build_config,
                                          project_dir=PROJECT_DIR)
 
+  # Unpack all build entries to a temporary directory
+  with Progress(transient=True) as progress:
+    bar = progress_bar('Extracting build packages', wrap=progress)
+    unpacked_entries = unpack_build_entries(resolvers,
+                                            project_dir=PROJECT_DIR,
+                                            # Interactive arguments
+                                            __wrapper=bar)
+
   # Extract the OpenCore package to the output directory
-  OC_DIR = extract_opencore_pkg(cwd,
-                                build_config, build_vars,
-                                resolvers, lockfile,
-                                out_dir=BUILD_DIR)
+  if opencore_pkg := nested_get(unpacked_entries, ['OpenCorePkg', 'OpenCore']):
+    with Progress(transient=True) as progress:
+      bar = progress_bar('Extracting OpenCore package', wrap=progress)
+      target = build_vars['variables']['target']
+      opencore_pkg = opencore.extract_opencore_archive(pkg=opencore_pkg,
+                                                       target=target)
+      # Extract additional OpenCore binaries not shipped in the main package
+      if binary_pkg := nested_get(unpacked_entries, ['OpenCorePkg', 'OcBinaryData']):
+        opencore.extract_ocbinary_archive(pkg=binary_pkg, oc_pkg=opencore_pkg)
+      # Prune remaining files from the OpenCore package
+      opencore.prune_opencore_archive(opencore_pkg, resolvers,
+                                      out_dir=BUILD_DIR,
+                                      # Interactive arguments
+                                      __wrapper=bar)
 
 
 __all__ = [
-  # Functions (3)
+  # Functions (2)
   "get_build_file",
-  "extract_opencore_pkg",
   "cli"
 ]

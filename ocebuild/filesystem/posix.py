@@ -5,11 +5,29 @@
 """Methods for handling cross-platform file system operations."""
 
 from os import PathLike, rename as os_rename
-from shutil import move as shutil_move, rmtree
+from shutil import copy as _copy, copytree, move as shutil_move, rmtree
 
 from typing import Generator, List, Optional, Union
 
 from ocebuild.sources.resolver import PathResolver
+
+
+def copy(src: Union[str, "PathLike[str]"],
+         dest: Union[str, "PathLike[str]"]
+         ) -> None:
+  """Copies a file or directory.
+
+  Args:
+    path: Path to the file or directory.
+
+  Raises:
+    ValueError: If the path is not a file or directory.
+  """
+  src = PathResolver(src)
+  if src.is_file(): _copy(src, dest)
+  elif src.is_dir(): copytree(src, dest)
+  else:
+    raise ValueError(f'Path is not a file or directory: {src}')
 
 
 def remove(path: Union[str, "PathLike[str]"]) -> None:
@@ -110,7 +128,8 @@ def glob(directory: Union[str, "PathLike[str]"],
 
 
 __all__ = [
-  # Functions (4)
+  # Functions (5)
+  "copy",
   "remove",
   "rename",
   "move",
