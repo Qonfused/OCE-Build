@@ -8,7 +8,7 @@
 
 from os import getcwd
 
-from typing import Dict, Iterator, Optional, Tuple, Union
+from typing import Dict, Iterator, List, Optional, Tuple, Union
 
 from .build import _iterate_entries
 
@@ -245,6 +245,23 @@ def write_lockfile(lockfile_path: str,
   with open(lockfile_path, 'w', encoding='UTF-8') as f:
     f.write("\n".join(lockfile_entry))
 
+def prune_lockfile(build_config: dict, lockfile: dict) -> List[dict]:
+  """Prunes the lockfile of entries that are not in the build configuration.
+
+  Args:
+    build_config: The build configuration to prune against.
+    lockfile: The lockfile to prune.
+
+  Returns:
+    A list of removed lockfile entries.
+  """
+  removed = [{ '__tree': ['dependencies', c, k], **e }
+              for c in build_config.keys()
+                for k,e in nested_get(lockfile, ['dependencies', c], {}).items()
+                  if not nested_get(build_config, [c, k])]
+  for k in removed: nested_del(lockfile, k['__tree'])
+  return removed
+
 def resolve_specifiers(build_config: dict,
                        lockfile: dict,
                        base_path: str=getcwd(),
@@ -337,6 +354,15 @@ def resolve_specifiers(build_config: dict,
                                                 default=default_path)
       resolver_props['kind'] = nested_get(entry, ['__kind'], default=kind)
 
+      # Extract revision key
+      if resolver_props['__resolver'] is not None:
+        _props = dict(resolver_props['__resolver'])
+        def format_revision(key, algorithm='SHA256'):
+          if key in _props:
+            return " ".join(["{", f"{algorithm}: {_props.get(key)}", "}"])
+        resolver_props['revision'] = \
+          format_revision('commit', 'SHA1') or format_revision('checksum')
+
       # Add the resolver to the list of resolvers
       resolvers[name] = resolver_props
 
@@ -379,11 +405,12 @@ __all__ = [
   # Constants (2)
   "LOCKFILE_METADATA",
   "LOCKFILE_WARNING_COMMENT",
-  # Functions (6)
+  # Functions (7)
   "parse_semver_params",
   "parse_specifier",
   "read_lockfile",
   "write_lockfile",
+  "prune_lockfile",
   "resolve_specifiers",
   "validate_dependencies"
 ]

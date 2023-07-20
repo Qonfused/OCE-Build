@@ -20,15 +20,15 @@ from rich.table import Table
 
 from ._lib import abort, cli_command, CLIEnv, debug, echo, error, progress_bar
 
-from ocebuild.parsers.dict import nested_del, nested_get
+from ocebuild.parsers.yaml import parse_yaml
 from ocebuild.pipeline.lock import *
 from ocebuild.sources.resolver import PathResolver, ResolverType
 
 
 def rich_resolver(resolver: ResolverType,
-                   resolver_props: dict,
-                   resolution: str
-                   ) -> Union[str, None]:
+                  resolver_props: dict,
+                  resolution: str
+                  ) -> Union[str, None]:
   """Returns a rich formatted specifier resolver.
 
   Args:
@@ -61,18 +61,19 @@ def rich_resolver(resolver: ResolverType,
 
   return f"[cyan]{name}[/cyan][dim cyan]@{resolution_str}"
 
-def rich_commit(commit: str, algorithm='SHA1') -> str:
-  """Returns a rich formatted commit or chechsum hash.
+def rich_revision(revision: str) -> str:
+  """Returns a rich formatted revision hash.
 
   Args:
-    commit: The commit or checksum hash.
-    algorithm: The algorithm used to generate the hash.
+    revision: The revision entry.
 
   Returns:
     A rich formatted commit or checksum hash.
   """
+  entry = parse_yaml([revision[1:-1].strip()])
+  algorithm, checksum = next(iter(entry.items()))
   pad = len(str.ljust(algorithm, len('SHA256'))) - len(algorithm)
-  return f"[dim bold]{algorithm}[/dim bold][dim]: {commit[:7 + pad]}…[/dim]"
+  return f"[dim bold]{algorithm}[/dim bold][dim]: {checksum[:7 + pad]}…[/dim]"
 
 def print_pending_resolvers(resolvers: dict) -> None:
   """Prints the resolved specifiers for the given resolvers.
@@ -105,9 +106,8 @@ def print_pending_resolvers(resolvers: dict) -> None:
     # Show additional information if in debug mode.
     from ._lib import DEBUG #pylint: disable=import-outside-toplevel
     checksum_entry = None if not DEBUG else \
-      rich_commit(props['commit'], 'SHA1') if 'commit' in props else \
-        rich_commit(props['checksum'], 'SHA256') if 'checksum' in props else \
-          None
+      rich_revision(entry['revision']) if 'revision' in entry else \
+        None
     # Add resolver entry to the table.
     table.add_row(f"[bold]{type_entry}" if type_entry else '[dim]..',
                   f"[cyan]{name}",
@@ -182,11 +182,7 @@ def resolve_lockfile(env: CLIEnv,
   lockfile, metadata, LOCKFILE = get_lockfile(cwd, project_dir=project_dir)
 
   # Remove lockfile entries that are not in the build configuration
-  removed = [{ '__tree': ['dependencies', c, k], **e }
-              for c in build_config.keys()
-                for k,e in nested_get(lockfile, ['dependencies', c], {}).items()
-                  if not nested_get(build_config, [c, k])]
-  for k in removed: nested_del(lockfile, k['__tree'])
+  removed = prune_lockfile(build_config, lockfile)
 
   # Resolve the specifiers in the build configuration
   if update: debug(msg='(--update) Updating lockfile entries...')
@@ -275,7 +271,7 @@ def cli(env, cwd, check, update, force):
 __all__ = [
   # Functions (6)
   "rich_resolver",
-  "rich_commit",
+  "rich_revision",
   "print_pending_resolvers",
   "get_lockfile",
   "resolve_lockfile",

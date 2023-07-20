@@ -10,6 +10,7 @@
 
 import re
 from datetime import datetime
+from json import loads as json_loads
 from shlex import split
 
 from typing import List, Literal, Optional, Tuple, Union
@@ -245,6 +246,14 @@ def parse_yaml(lines: List[str],
         tree.pop(-1)
         cursor['level'] -= cursor['indent']
       prev_value = nested_get(config, tree)
+
+      # Handle inline objects or arrays
+      if len(tokens) >= 2:
+        if len(tokens) > 3 and tokens[1] in ('{', '['):
+          tokens = [tokens[0], ' '.join(tokens[1:])]
+          entry = tokens[1]
+        elif tokens[1][0] == '{' and tokens[1][-1] == '}':
+          entry = tokens[1]
 
       # Handle initial array values
       if lnorm.startswith('-'):
