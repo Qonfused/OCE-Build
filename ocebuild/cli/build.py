@@ -13,7 +13,7 @@ from typing import List, Tuple, Union
 import click
 from rich.progress import Progress
 
-from ._lib import abort, cli_command, debug, error, progress_bar
+from ._lib import abort, cli_command, debug, echo, error, progress_bar
 
 from ocebuild.filesystem import glob, remove
 from ocebuild.parsers.dict import nested_get
@@ -104,6 +104,10 @@ def cli(env, cwd, out, clean, update, force):
                                          force=force,
                                          build_config=build_config,
                                          project_dir=PROJECT_DIR)
+  if not any(e['__resolver'] for e in resolvers.values()):
+    echo(calls=[{'msg': '\nNothing to build.', 'fg': 'white' },
+                'Try running with `--update` or `--force` to regenerate a build.'],
+         exit=0)
 
   # Unpack all build entries to a temporary directory
   with Progress(transient=True) as progress:

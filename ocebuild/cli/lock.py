@@ -193,10 +193,6 @@ def resolve_lockfile(env: CLIEnv,
                                      force=force,
                                      # Interactive arguments
                                      __wrapper=bar)
-      if not resolvers:
-        echo(calls=[{'msg': '\nNothing to build.', 'fg': 'white' },
-                    'Try running with `--update` or `--force` to regenerate a build.'],
-             exit=0)
   except Exception as e: #pylint: disable=broad-exception-caught
     abort(msg=f'Failed to resolve build specifiers: {e}',
           hint='Check the build configuration for errors.')
