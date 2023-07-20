@@ -14,7 +14,6 @@ repos:
     entry: poetry run poe resolve-modules
     language: system
     types: [python]
-    fail_fast: true
     pass_filenames: false
   - id: ci:sort-imports
     name: 'ci: sort-imports'
