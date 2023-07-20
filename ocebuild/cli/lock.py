@@ -6,6 +6,8 @@
 ##
 """CLI entrypoint for the lock command."""
 
+#pylint: disable=wildcard-import,unused-wildcard-import
+
 from os import getcwd
 
 from typing import Optional, Tuple, Union
@@ -18,7 +20,8 @@ from rich.table import Table
 
 from ._lib import abort, cli_command, CLIEnv, debug, echo, error, progress_bar
 
-from ocebuild.pipeline.lock import read_lockfile, resolve_specifiers, validate_dependencies, write_lockfile
+from ocebuild.parsers.dict import nested_del, nested_get
+from ocebuild.pipeline.lock import *
 from ocebuild.sources.resolver import PathResolver, ResolverType
 
 
@@ -178,7 +181,12 @@ def resolve_lockfile(env: CLIEnv,
   # Read the lockfile
   lockfile, metadata, LOCKFILE = get_lockfile(cwd, project_dir=project_dir)
 
-  #TODO: Remove lockfile entries that are not in the build configuration
+  # Remove lockfile entries that are not in the build configuration
+  removed = [{ '__tree': ['dependencies', c, k], **e }
+              for c in build_config.keys()
+                for k,e in nested_get(lockfile, ['dependencies', c], {}).items()
+                  if not nested_get(build_config, [c, k])]
+  for k in removed: nested_del(lockfile, k['__tree'])
 
   # Resolve the specifiers in the build configuration
   if update: debug(msg='(--update) Updating lockfile entries...')
@@ -212,19 +220,23 @@ def resolve_lockfile(env: CLIEnv,
       echo('Lockfile validation succeeded.', fg='green', exit=0)
   # Handle updating the lockfile
   elif (update or force) or not lockfile:
-    # Write lockfile to disk
-    echo('Writing lockfile to disk...')
-    write_lockfile(LOCKFILE, lockfile, resolved, metadata)
-    # Display written lockfile entries
+    # Display added lockfile entries
     if resolved:
-      msg = f'Done. Added {len(resolved)} new entries'
+      msg = f'Added {len(resolved)} new entries'
       if env.verbose:
         echo(f"{msg}:", fg='white')
         print_pending_resolvers(resolved)
       else:
         echo(f"{msg}.", fg='white')
-    else:
-      echo('Done.', fg='white')
+    # Display removed lockfile entries
+    if removed:
+      msg = f'Removed {len(removed)} entries'
+      echo(f"{msg}.", fg='white')
+
+    # Write lockfile to disk
+    echo('Writing lockfile to disk...')
+    write_lockfile(LOCKFILE, lockfile, resolved, metadata)
+    echo('Done.', fg='white')
   # No new resolvers
   else:
     echo('Lockfile is up to date.', fg='white')
