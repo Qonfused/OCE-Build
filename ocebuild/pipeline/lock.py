@@ -296,13 +296,16 @@ def resolve_specifiers(build_config: dict,
   if __wrapper is not None: iterator = __wrapper(iterator, *args, **kwargs)
   # Resolve the specifiers for each entry in the build configuration
   for category, name, entry in iterator:
+    # Skip updating entries if not specified
+    entry_path = ['dependencies', category, name]
+    lockfile_entry = nested_get(lockfile, entry_path)
+    if lockfile_entry and not (force or update): continue
+
     # Prune matching resolvers and remove outdated entries from lockfile
     resolver = parse_specifier(name, entry, base_path=base_path)
     specifier = _format_resolver(resolver,
                                  base_path=base_path,
                                  as_specifier=True)
-    if   force or update: pass #de-op
-    elif specifier in lockfile: continue
 
     # Resolve the specifier
     resolver_props = { "__category": category, "__resolver": resolver }
@@ -337,12 +340,10 @@ def resolve_specifiers(build_config: dict,
     except FileNotFoundError:
       continue #TODO: Add warning
     else:
-      entry_path = ['dependencies', category, name]
       # Check if the resolution is already in the lockfile
-      if   force:
-        try: nested_del(lockfile, entry_path)
-        except KeyError: pass
-      elif update and (lockfile_entry := nested_get(lockfile, entry_path)):
+      if force and lockfile_entry:
+        nested_del(lockfile, entry_path)
+      elif update and lockfile_entry:
         if resolution := nested_get(resolver_props, ['resolution']):
           if resolution == lockfile_entry['resolution']: continue
           else: nested_del(lockfile, entry_path)
