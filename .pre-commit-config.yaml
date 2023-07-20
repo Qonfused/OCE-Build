@@ -10,13 +10,13 @@ repos:
 - repo: local
   hooks:
   - id: ci:resolve-modules
-    name: 'ci: resolve-modules'
+    name: 'ci:resolve-modules'
     entry: poetry run poe resolve-modules
     language: system
     types: [python]
     pass_filenames: false
   - id: ci:sort-imports
-    name: 'ci: sort-imports'
+    name: 'ci:sort-imports'
     entry: poetry run poe sort-imports
     language: system
     types: [python]
