@@ -105,7 +105,7 @@ def github_suite_id(repository: str,
       if status and suite['status'] != status: continue
       # Enumerate suites for matching workflow ids
       for run in github_api_request(url=check_runs_url).json()['check_runs']:
-        if f'/runs/{workflow_id}/jobs/' in run['details_url']:
+        if f'/runs/{workflow_id}/job' in run['details_url']:
           return nested_get(run, ['check_suite', 'id'])
     # No matching suite found
     return None
@@ -286,6 +286,9 @@ def github_artifacts_url(repository: str,
     artifacts_endpoint = f'/repos/{repository}/actions/artifacts'
     catalog = github_api_request(artifacts_endpoint).json()
     for workflow_run in catalog['artifacts']:
+      # Skip expired artifacts
+      if workflow_run['expired']: continue
+      # Extract workflow properties
       r_id = workflow_run['id']
       w_id = nested_get(workflow_run, ['workflow_run', 'id'])
       head_branch = nested_get(workflow_run, ['workflow_run', 'head_branch'])
