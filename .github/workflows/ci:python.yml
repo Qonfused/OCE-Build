@@ -4,21 +4,17 @@ on:
   push:
     paths:
       # Python namespaces
-      - 'ci/**'
-      - 'ocebuild/**'
+      - 'ci/**/*.py'
+      - 'ocebuild/**/*.py'
       # Python configuration
       - 'poetry.lock'
       - 'pyproject.toml'
-      # Exclusions
-      - '!.github/**'
-      - '!docs/**'
-      - '!scripts/**'
   pull_request:
     types: [ opened, synchronize, closed ]
     paths:
       # Python namespaces
-      - 'ci/**.py'
-      - 'ocebuild/**.py'
+      - 'ci/**/*.py'
+      - 'ocebuild/**/*.py'
       # Python configuration
       - 'poetry.lock'
       - 'pyproject.toml'
