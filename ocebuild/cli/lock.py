@@ -6,8 +6,6 @@
 ##
 """CLI entrypoint for the lock command."""
 
-#pylint: disable=wildcard-import,unused-wildcard-import
-
 from os import getcwd
 
 from typing import List, Optional, Tuple, Union
@@ -18,7 +16,7 @@ from rich.console import Console
 from rich.progress import Progress
 from rich.table import Table
 
-from ._lib import abort, cli_command, CLIEnv, debug, echo, error, progress_bar
+from ._lib import *
 
 from ocebuild.parsers.yaml import parse_yaml
 from ocebuild.pipeline.lock import *

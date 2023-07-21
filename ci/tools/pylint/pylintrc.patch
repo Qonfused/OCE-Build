@@ -1,7 +1,7 @@
-diff --git a/pylintrc-google b/pylintrc
-index 140a876..0f1c20b 100644
+diff --git a/pylintrc-google b/.pylintrc
+index 140a876..6685e5b 100644
 --- a/pylintrc-google
-+++ b/pylintrc
++++ b/.pylintrc
 @@ -12,10 +12,10 @@ ignore=third_party
  
  # Files or directories matching the regex patterns are skipped. The regex
@@ -15,16 +15,17 @@ index 140a876..0f1c20b 100644
  
  # List of plugins (as comma separated values of python modules names) to load,
  # usually to register additional checkers.
-@@ -146,6 +146,8 @@ disable=abstract-method,
+@@ -146,6 +146,9 @@ disable=abstract-method,
          wrong-import-order,
          xrange-builtin,
          zip-builtin-not-iterating,
 +        keyword-arg-before-vararg, # This has a specific use case for API methods
-+        multiple-statements        # For brevity, we allow multiple statements per line
++        multiple-statements,       # For brevity, we allow multiple statements per line
++        wildcard-import,unused-wildcard-import, # We allow wildcard imports
  
  
  [REPORTS]
-@@ -193,7 +195,7 @@ property-classes=abc.abstractproperty,cached_property.cached_property,cached_pro
+@@ -193,7 +196,7 @@ property-classes=abc.abstractproperty,cached_property.cached_property,cached_pro
  function-rgx=^(?:(?P<exempt>setUp|tearDown|setUpModule|tearDownModule)|(?P<camel_case>_?[A-Z][a-zA-Z0-9]*)|(?P<snake_case>_?[a-z][a-z0-9_]*))$
  
  # Regular expression matching correct variable names
@@ -33,7 +34,7 @@ index 140a876..0f1c20b 100644
  
  # Regular expression matching correct constant names
  const-rgx=^(_?[A-Z][A-Z0-9_]*|__[a-z0-9_]+__|_?[a-z][a-z0-9_]*)$
-@@ -211,10 +213,10 @@ class-attribute-rgx=^(_?[A-Z][A-Z0-9_]*|__[a-z0-9_]+__|_?[a-z][a-z0-9_]*)$
+@@ -211,10 +214,10 @@ class-attribute-rgx=^(_?[A-Z][A-Z0-9_]*|__[a-z0-9_]+__|_?[a-z][a-z0-9_]*)$
  inlinevar-rgx=^[a-z][a-z0-9_]*$
  
  # Regular expression matching correct class names
@@ -46,7 +47,7 @@ index 140a876..0f1c20b 100644
  
  # Regular expression matching correct method names
  method-rgx=(?x)^(?:(?P<exempt>_[a-z0-9_]+__|runTest|setUp|tearDown|setUpTestCase|tearDownTestCase|setupSelf|tearDownClass|setUpClass|(test|assert)_*[A-Z0-9][a-zA-Z0-9_]*|next)|(?P<camel_case>_{0,2}[A-Z][a-zA-Z0-9_]*)|(?P<snake_case>_{0,2}[a-z][a-z0-9_]*))$
-@@ -259,14 +261,14 @@ generated-members=
+@@ -259,14 +262,14 @@ generated-members=
  [FORMAT]
  
  # Maximum number of characters on a single line.
@@ -63,7 +64,7 @@ index 140a876..0f1c20b 100644
    ^\s*(from\s+\S+\s+)?import\s+.+$)
  
  # Allow the body of an if to be on the same line as the test if there is no
-@@ -299,7 +301,7 @@ notes=TODO
+@@ -299,7 +302,7 @@ notes=TODO
  
  # This flag controls whether inconsistent-quotes generates a warning when the
  # character used as a quote delimiter is used inconsistently within a module.
@@ -72,7 +73,7 @@ index 140a876..0f1c20b 100644
  
  
  [VARIABLES]
-@@ -427,3 +429,10 @@ valid-metaclass-classmethod-first-arg=mcs
+@@ -427,3 +430,10 @@ valid-metaclass-classmethod-first-arg=mcs
  overgeneral-exceptions=builtins.StandardError,
                         builtins.Exception,
                         builtins.BaseException

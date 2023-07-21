@@ -12,4 +12,4 @@
 __PWD__=$(pwd); cd "$( dirname "${BASH_SOURCE[0]}" )"
 
 # Generate patch
-git diff --patch --no-index pylintrc-google pylintrc > pylintrc.patch
+git diff --patch --no-index pylintrc-google .pylintrc > pylintrc.patch

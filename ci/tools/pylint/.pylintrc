@@ -147,7 +147,8 @@ disable=abstract-method,
         xrange-builtin,
         zip-builtin-not-iterating,
         keyword-arg-before-vararg, # This has a specific use case for API methods
-        multiple-statements        # For brevity, we allow multiple statements per line
+        multiple-statements,       # For brevity, we allow multiple statements per line
+        wildcard-import,unused-wildcard-import, # We allow wildcard imports
 
 
 [REPORTS]

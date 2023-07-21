@@ -4,8 +4,6 @@
 ##
 """Methods for handling and resolving lock files."""
 
-#pylint: disable=wildcard-import,unused-wildcard-import
-
 from collections import OrderedDict
 from os import getcwd
 
