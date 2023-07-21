@@ -355,19 +355,24 @@ class PathResolver(BaseResolver, cls := type(Path())):
       The resolved filepath wrapped in a PathResolver instance.
     """
     resolved_path: cls
-    # Check if path has called the `__init__` method - Python 3.12+
-    if '_raw_paths' in dir(self):
-      resolved_path = super(cls, self).resolve(strict)
-    # Fall back to calling initialized `__cls__` subclass
-    elif '__cls__' in dir(self):
-      resolved_path = self.__cls__.resolve(strict)
-    # Fall back to initializing and calling a new cls subclass
-    else:
-      resolved_path = cls(self.path).resolve()
+    try:
+      # Check if path has called the `__init__` method - Python 3.12+
+      if '_raw_paths' in dir(self):
+        resolved_path = super(cls, self).resolve(strict)
+      # Fall back to calling initialized `__cls__` subclass
+      elif '__cls__' in dir(self):
+        resolved_path = self.__cls__.resolve(strict)
+      # Fall back to initializing and calling a new cls subclass
+      else:
+        resolved_path = cls(self.path).resolve(strict)
+    except AttributeError:
+      # Create a new PathResolver instance
+      resolved_path = PathResolver(self).resolve(strict)
 
-    # Get checksum of the resolved filepath
-    from .binary import get_digest #pylint: disable=import-outside-toplevel
-    self.checksum = get_digest(resolved_path, algorithm=sha256)
+    if strict or resolved_path.exists():
+      # Get checksum of the resolved filepath
+      from .binary import get_digest #pylint: disable=import-outside-toplevel
+      self.checksum = get_digest(resolved_path, algorithm=sha256)
 
     #TODO: Handle additional path type verifications here
     return resolved_path
