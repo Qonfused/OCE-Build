@@ -119,6 +119,7 @@ def unpack_build_entries(resolvers: List[dict],
     # Skip wildcard specifiers
     elif entry.get('specifier') == '*': continue
     # Update extracted paths
+    entry['__extracted'] = tmpdir
     nested_set(extracted, [entry['__category'], entry['name']], tmpdir)
 
   return extracted

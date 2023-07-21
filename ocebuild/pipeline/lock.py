@@ -6,9 +6,10 @@
 
 #pylint: disable=wildcard-import,unused-wildcard-import
 
+from collections import OrderedDict
 from os import getcwd
 
-from typing import Dict, Iterator, List, Optional, Tuple, Union
+from typing import Dict, Generator, Iterator, List, Optional, Tuple, Union
 
 from .build import _iterate_entries
 
@@ -98,15 +99,39 @@ def _format_dependency_entry(entry: Dict[str, any]) -> dict:
   """Formats a lockfile entry for writing.
 
   Args:
-    name: The name of the entry to format.
     entry: The entry to format.
 
   Returns:
     The formatted entry dictionary.
   """
-  excluded_keys = ('name',)
-  public_keys = { k: v for k,v in entry.items()
-                  if not (k[0] == '_' or k in excluded_keys) }
+  exclude_keys = ('name',)
+  def _is_private_key(k: str) -> bool:
+    """Determines whether a key is private."""
+    return k[0] == '_' or k in exclude_keys
+
+  sorted_keys = (
+    # Resolver properties
+    'build',
+    'version',
+    'url',
+    'path',
+    # Revalidation metadata
+    'resolution',
+    'specifier',
+    'kind',
+    'revision',
+  )
+  def _try_index(k: str) -> int:
+    """Attempts to find the index of the key in the sorted keys list."""
+    try: return sorted_keys.index(k)
+    except ValueError: return len(sorted_keys) + 1
+
+  def sorted_public_entry(d: dict) -> Generator[tuple, any, None]:
+    """Iterates over a dictionary in sorted order."""
+    for k,v in sorted(d.items(), key=lambda e: _try_index(e[0])):
+      if not _is_private_key(k): yield k,v
+  public_keys = OrderedDict((k,v) for k,v in sorted_public_entry(entry))
+
   return public_keys
 
 #TODO: Handle resolving packages from lockfile
@@ -313,75 +338,85 @@ def resolve_specifiers(build_config: dict,
   if __wrapper is not None: iterator = __wrapper(iterator, *args, **kwargs)
   # Resolve the specifiers for each entry in the build configuration
   for category, name, entry in iterator:
-    # Skip updating entries if not specified
     entry_path = ['dependencies', category, name]
     lockfile_entry = nested_get(lockfile, entry_path)
-    if lockfile_entry and not (force or update): continue
 
-    # Prune matching resolvers and remove outdated entries from lockfile
+    # Handle any necessary resolver preprocessing
     resolver = parse_specifier(name, entry, base_path=base_path)
+    if resolver is None:
+      nested_set(build_config, [category, name, 'specifier'], '*')
     specifier = _format_resolver(resolver, base_path, as_specifier=True)
 
-    # Resolve the specifier
-    resolver_props = { "__category": category, "__resolver": resolver }
-    try:
-      if resolver is None:
-        nested_set(build_config, [category, name, 'specifier'], '*')
-      elif isinstance(resolver, PathResolver):
-        # Resolve the path for the specifier
-        path = resolver.resolve(strict=True) #pylint: disable=E1123
-        resolver_props['path'] = f'./{path.relative_to(base_path)}'
-      elif isinstance(resolver, (GitHubResolver, DortaniaResolver)):
-        # Extract the build type (default to OpenCore build type)
-        build = nested_get(entry, ['build'], default=default_build)
-        resolver_props['build'] = build
+    # Extract additional properties from the entry
+    ext, kind_ = _category_extension(category)
+    filepath = nested_get(entry, ['__filepath'],
+                          default=f'EFI/OC/{category}/{name}{ext}')
+    kind = nested_get(entry, ['__kind'], default=kind_)
 
-        # Resolve the URL for the specifier
-        url = resolver.resolve(build=build)
-        resolver_props['url'] = url
+    # Assign default resolver properties
+    resolver_props = {
+      "__category": category,
+      '__filepath': filepath,
+      "__resolver": resolver,
+      "name": name,
+      "specifier": specifier,
+      "kind": kind
+    }
 
-        # Extract the version or commit from the resolver
-        if 'version' in (props := dict(resolver)):
-          resolver_props['version'] = props['version']
+    # Skip updating entries if not specified
+    if lockfile_entry and not (force or update):
+      # Reserve the `__resolver` key for revalidated entries
+      resolver_props['__resolver'] = None
+      resolvers.append({ **resolver_props, **lockfile_entry })
+    # Otherwise, prune matching resolvers and outdated entries from lockfile
+    elif resolver is not None:
+      try:
+        if isinstance(resolver, PathResolver):
+          # Resolve the path for the specifier
+          path = resolver.resolve(strict=True) #pylint: disable=E1123
+          resolver_props['path'] = f'./{path.relative_to(base_path)}'
+        elif isinstance(resolver, (GitHubResolver, DortaniaResolver)):
+          # Extract the build type (default to OpenCore build type)
+          build = nested_get(entry, ['build'], default=default_build)
+          resolver_props['build'] = build
+
+          # Resolve the URL for the specifier
+          url = resolver.resolve(build=build)
+          resolver_props['url'] = url
+
+          # Extract the version or commit from the resolver
+          if 'version' in (props := dict(resolver)):
+            resolver_props['version'] = props['version']
+        else:
+          raise ValueError(f'Invalid resolver: {resolver}')
+
+        # Format the resolution
+        resolver_props['resolution'] = _format_resolver(resolver, base_path)
+      except ValueError:
+        continue #TODO: Add warning
+      except FileNotFoundError:
+        continue #TODO: Add warning
       else:
-        raise ValueError(f'Invalid resolver: {resolver}')
+        # Check if the resolution is already in the lockfile
+        if force and lockfile_entry:
+          nested_del(lockfile, entry_path)
+        elif update and lockfile_entry:
+          if resolution := nested_get(resolver_props, ['resolution']):
+            if resolution == lockfile_entry['resolution']: continue
+            else: nested_del(lockfile, entry_path)
 
-      # Format the resolution
-      resolver_props['resolution'] = _format_resolver(resolver, base_path)
-      resolver_props['specifier'] = specifier
-    except ValueError:
-      continue #TODO: Add warning
-    except FileNotFoundError:
-      continue #TODO: Add warning
-    else:
-      # Check if the resolution is already in the lockfile
-      if force and lockfile_entry:
-        nested_del(lockfile, entry_path)
-      elif update and lockfile_entry:
-        if resolution := nested_get(resolver_props, ['resolution']):
-          if resolution == lockfile_entry['resolution']: continue
-          else: nested_del(lockfile, entry_path)
+        # Extract revision key
+        if resolver_props['__resolver'] is not None:
+          #pylint: disable=cell-var-from-loop
+          props_ = dict(resolver_props['__resolver'])
+          def format_revision(key, algorithm='SHA256'):
+            if key in props_:
+              return " ".join(["{", f"{algorithm}: {props_.get(key)}", "}"])
+          resolver_props['revision'] = \
+            format_revision('commit', 'SHA1') or format_revision('checksum')
 
-      # Extract additional properties from the entry
-      ext, kind = _category_extension(category)
-      default_path = f'EFI/OC/{category}/{name}{ext}'
-      resolver_props['__filepath'] = nested_get(entry, ['__filepath'],
-                                                default=default_path)
-      resolver_props['kind'] = nested_get(entry, ['__kind'], default=kind)
-
-      # Extract revision key
-      if resolver_props['__resolver'] is not None:
-        #pylint: disable=cell-var-from-loop
-        props_ = dict(resolver_props['__resolver'])
-        def format_revision(key, algorithm='SHA256'):
-          if key in props_:
-            return " ".join(["{", f"{algorithm}: {props_.get(key)}", "}"])
-        resolver_props['revision'] = \
-          format_revision('commit', 'SHA1') or format_revision('checksum')
-
-      # Add the resolver to the list of resolvers
-      resolver_props['name'] = name
-      resolvers.append(resolver_props)
+        # Add the resolver to the list of resolvers
+        resolvers.append(resolver_props)
 
   return resolvers
 

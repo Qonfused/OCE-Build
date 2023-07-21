@@ -23,16 +23,16 @@ dependencies:
   Kexts:
     AirportItlwm-BigSur:
       build: DEBUG
-      url: 'https://github.com/OpenIntelWireless/itlwm/releases/download/v2.3.0-alpha/AirportItlwm-Big_Sur-v2.3.0-DEBUG-alpha-f1cad0f.zip'
       version: 2.3.0
+      url: 'https://github.com/OpenIntelWireless/itlwm/releases/download/v2.3.0-alpha/AirportItlwm-Big_Sur-v2.3.0-DEBUG-alpha-f1cad0f.zip'
       resolution: 'OpenIntelWireless/itlwm@github:2.3.0#commit=bd47afe94836e178402bf9ca7bb031d35ea6d90b'
       specifier: 'OpenIntelWireless/itlwm@github:^2.1.0'
       kind: Kext
       revision: '{ SHA1: bd47afe94836e178402bf9ca7bb031d35ea6d90b }'
     AirportItlwmVentura:
       build: DEBUG
-      url: 'https://github.com/OpenIntelWireless/itlwm/releases/download/v2.3.0-alpha/AirportItlwm-Ventura-v2.3.0-DEBUG-alpha-f1cad0f.zip'
       version: 2.3.0
+      url: 'https://github.com/OpenIntelWireless/itlwm/releases/download/v2.3.0-alpha/AirportItlwm-Ventura-v2.3.0-DEBUG-alpha-f1cad0f.zip'
       resolution: 'OpenIntelWireless/itlwm@github:2.3.0#commit=bd47afe94836e178402bf9ca7bb031d35ea6d90b'
       specifier: 'OpenIntelWireless/itlwm@github:^2.2.0'
       kind: Kext
@@ -45,16 +45,16 @@ dependencies:
       revision: '{ SHA256: 872f8d5644ba2358dead1fdd657979dd76c1408546efa9411a44e8a8106e6732 }'
     VoodooI2C:
       build: DEBUG
-      url: 'https://github.com/VoodooI2C/VoodooI2C/releases/download/2.8/VoodooI2C-2.8.zip'
       version: 2.8
+      url: 'https://github.com/VoodooI2C/VoodooI2C/releases/download/2.8/VoodooI2C-2.8.zip'
       resolution: 'VoodooI2C/VoodooI2C@github:2.8#commit=17a5f58227a164b426011fd077a5c549766474b3'
       specifier: 'VoodooI2C/VoodooI2C@github:2.8'
       kind: Kext
       revision: '{ SHA1: 17a5f58227a164b426011fd077a5c549766474b3 }'
     WhateverGreen:
       build: DEBUG
-      url: 'https://github.com/dortania/build-repo/releases/download/WhateverGreen-c7c8dc7/WhateverGreen-1.6.6-DEBUG.zip'
       version: 1.6.6
+      url: 'https://github.com/dortania/build-repo/releases/download/WhateverGreen-c7c8dc7/WhateverGreen-1.6.6-DEBUG.zip'
       resolution: 'acidanthera/WhateverGreen@github:1.6.6#commit=c7c8dc70381af3b48a4b65c177acf8835da080eb'
       specifier: 'acidanthera/WhateverGreen@github'
       kind: Kext
@@ -69,8 +69,8 @@ dependencies:
       revision: '{ SHA1: 4e7e1b7465aae297d706afe5de5c4d1572d86917 }'
     OpenCore:
       build: DEBUG
-      url: 'https://github.com/acidanthera/OpenCorePkg/releases/download/0.9.3/OpenCore-0.9.3-DEBUG.zip'
       version: 0.9.3
+      url: 'https://github.com/acidanthera/OpenCorePkg/releases/download/0.9.3/OpenCore-0.9.3-DEBUG.zip'
       resolution: 'acidanthera/OpenCorePkg@github:0.9.3#commit=d52fc46ba650ce1afe00c354331a0657a533ef18'
       specifier: 'acidanthera/OpenCorePkg@github:latest'
       kind: Binary

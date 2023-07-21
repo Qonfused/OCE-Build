@@ -105,9 +105,15 @@ def cli(env, cwd, out, clean, update, force):
                                          force=force,
                                          build_config=build_config,
                                          project_dir=PROJECT_DIR)
-  if not any(e['__resolver'] for e in resolvers):
+  # Prepend build directory to resolver paths
+  for e in resolvers:
+    e['__filepath'] = BUILD_DIR.joinpath(e['__filepath']).resolve()
+  #TODO: Handle skipping builds if the lockfile and build dir is up to date
+  has_pending_build = any(e['specifier'] != '*' and not e['__filepath'].exists()
+                          for e in resolvers)
+  if not (has_pending_build or BUILD_DIR.exists()):
     echo(calls=[{'msg': '\nNothing to build.', 'fg': 'white' },
-                'Try running with `--update` or `--force` to regenerate a build.'],
+                'Try running with --update or --force to regenerate a build.'],
          exit=0)
 
   # Unpack all build entries to a temporary directory
