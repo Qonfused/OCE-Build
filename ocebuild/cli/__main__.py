@@ -19,8 +19,7 @@ from ocebuild.version import __version__
 
 
 @click.group(context_settings=CONTEXT_SETTINGS)
-@click.version_option(message='ocebuild-cli %(version)s',
-                      version=__version__)
+@click.version_option(message='ocebuild-cli %(version)s', version=__version__)
 @click.pass_context
 def cli(ctx):
   """Main runner for the CLI."""

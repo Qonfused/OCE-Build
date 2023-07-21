@@ -73,7 +73,7 @@ def rich_revision(revision: str) -> str:
   pad = len(str.ljust(algorithm, len('SHA256'))) - len(algorithm)
   return f"[dim bold]{algorithm}[/dim bold][dim]: {checksum[:7 + pad]}…[/dim]"
 
-def print_pending_resolvers(resolvers: List[dict]) -> None:
+def format_resolvers(resolvers: List[dict]) -> Table:
   """Prints the resolved specifiers for the given resolvers.
 
   Resolvers are presented in a table with the following columns:
@@ -84,6 +84,9 @@ def print_pending_resolvers(resolvers: List[dict]) -> None:
 
   Args:
     resolvers: A dictionary of resolver entries.
+
+  Returns:
+    A rich formatted table of the resolved specifiers.
   """
 
   table = Table(box=box.ROUNDED)
@@ -113,7 +116,7 @@ def print_pending_resolvers(resolvers: List[dict]) -> None:
                   + (f" [dim]({checksum_entry})" if checksum_entry else ''),
                   resolution_entry if '__resolver' in entry else '')
 
-  Console().print(table)
+  return table
 
 def get_lockfile(cwd: Union[str, PathResolver],
                  project_dir: Union[str, PathResolver]
@@ -194,6 +197,7 @@ def resolve_lockfile(env: CLIEnv,
     abort(msg=f'Failed to resolve build specifiers: {e}',
           hint='Check the build configuration for errors.')
   else:
+    info(f'Resolved {len(resolvers)} total entries.')
     removed, resolved = [], {}
     if (update or force) or not lockfile:
       # Remove lockfile entries that are not in the build configuration
@@ -209,7 +213,7 @@ def resolve_lockfile(env: CLIEnv,
     except AssertionError as e:
       abort(msg=e, traceback=False)
     else:
-      success('Lockfile validation succeeded.', fg='green')
+      success('Lockfile validation succeeded.')
       exit(0)
   # Handle updating the lockfile
   elif resolved or removed:
@@ -217,18 +221,17 @@ def resolve_lockfile(env: CLIEnv,
     if resolved:
       msg = f'Added {len(resolved)} new entries'
       if env.verbose:
-        echo(f"{msg}:", fg='white')
-        print_pending_resolvers(resolved)
+        info(f'{msg}:')
+        echo(format_resolvers(resolved))
       else:
-        echo(f"{msg}.", fg='white')
+        info(f'{msg}.')
     # Display removed lockfile entries
     if removed:
       msg = f'Removed {len(removed)} entries'
-      echo(f"{msg}.", fg='white')
+      echo(f"{msg}.")
     # Write lockfile to disk
-    echo('Writing lockfile to disk...')
     write_lockfile(LOCKFILE, lockfile, resolved, metadata)
-    echo('Done.', fg='white')
+    success(f"Lockfile written to '{LOCKFILE.relative(cwd)}'.")
   # No new resolvers
   elif lockfile and (update or force):
     success('Lockfile is up to date.')
@@ -270,7 +273,7 @@ __all__ = [
   # Functions (6)
   "rich_resolver",
   "rich_revision",
-  "print_pending_resolvers",
+  "format_resolvers",
   "get_lockfile",
   "resolve_lockfile",
   "cli"

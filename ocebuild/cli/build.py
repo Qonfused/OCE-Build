@@ -41,17 +41,17 @@ def get_build_file(cwd: Union[str, PathResolver]
   BUILD_FILE = glob(cwd, '**/build.yml', include='**/build.yaml', first=True)
   try:
     if BUILD_FILE:
-      debug(msg=f"Found build configuration at '{BUILD_FILE.relative(cwd)}'.")
+      debug(f"Found build configuration at '{BUILD_FILE.relative(cwd)}'.")
       build_config, build_vars, flags = read_build_file(filepath=BUILD_FILE)
     else:
-      error(msg="Could not find 'build.{yml,yaml}'",
-            hint="Try running `ocebuild init` first.")
+      error("Could not find 'build.{yml,yaml}'",
+            "Try running `ocebuild init` first.")
   except Exception as e: #pylint: disable=broad-exception-caught
-    abort(msg=f"Encountered an error while reading '{BUILD_FILE.name}': {e}",
-          hint='Check the build configuration for errors.',)
+    abort(f"Encountered an error while reading '{BUILD_FILE.name}': {e}",
+          'Check the build configuration for errors.')
   else:
     PROJECT_DIR = PathResolver(BUILD_FILE.parent)
-    debug(msg=f"Using '{PROJECT_DIR.relative('.')}' as the project root.")
+    debug(f"Using '{PROJECT_DIR.relative('.')}' as the project root.")
 
   return build_config, build_vars, flags, BUILD_FILE, PROJECT_DIR
 
@@ -80,20 +80,20 @@ def cli(env, cwd, out, clean, update, force):
   """Builds the project's OpenCore EFI directory."""
 
   if not cwd: cwd = getcwd()
-  else: debug(msg=f"(--cwd) Using '{cwd}' as the working directory.")
+  else: debug(f"(--cwd) Using '{cwd}' as the working directory.")
 
   if not out: out = 'dist'
-  else: debug(msg=f"(--out) Using '{out}' as the build directory.")
+  else: debug(f"(--out) Using '{out}' as the build directory.")
 
   # Prepare the build directory
   BUILD_DIR = PathResolver(cwd, out)
   if clean:
-    debug(msg='(--clean) Cleaning the output directory...')
+    debug('(--clean) Cleaning the output directory...')
     try:
       remove(BUILD_DIR)
     except Exception: #pylint: disable=broad-exception-caught
-      abort(msg=f'Failed to clean the output directory ({BUILD_DIR})',
-            hint='Check the output directory permissions.')
+      abort(f'Failed to clean the output directory ({BUILD_DIR})',
+            'Check the output directory permissions.')
 
   # Read the build configuration
   build_config, build_vars, flags, *_, PROJECT_DIR = get_build_file(cwd)
@@ -112,9 +112,11 @@ def cli(env, cwd, out, clean, update, force):
   has_pending_build = any(e['specifier'] != '*' and not e['__filepath'].exists()
                           for e in resolvers)
   if not (has_pending_build or BUILD_DIR.exists()):
-    echo(calls=[{'msg': '\nNothing to build.', 'fg': 'white' },
-                'Try running with --update or --force to regenerate a build.'],
-         exit=0)
+    echo("\n".join(('\n[white]Nothing to build.[/white]',
+                  'Try running with --update or --force to regenerate a build.')),
+         log=True)
+    exit(0)
+
 
   # Unpack all build entries to a temporary directory
   with Progress(transient=True) as progress:
@@ -123,7 +125,7 @@ def cli(env, cwd, out, clean, update, force):
                                             project_dir=PROJECT_DIR,
                                             # Interactive arguments
                                             __wrapper=bar)
-  success(f'Extracted {len(unpacked_entries)} build packages.')
+  info(f'Extracted {len(unpacked_entries)} build packages.')
 
   # Extract the OpenCore package to the output directory
   if opencore_pkg := nested_get(unpacked_entries, ['OpenCorePkg', 'OpenCore']):
@@ -140,7 +142,7 @@ def cli(env, cwd, out, clean, update, force):
                                       out_dir=BUILD_DIR,
                                       # Interactive arguments
                                       __wrapper=bar)
-    success(f'Extracted OpenCore package to {BUILD_DIR}.')
+    success(f"Extracted OpenCore package to '{BUILD_DIR}'.")
     # Cleanup resolver entries
     prune_resolver_entry(resolvers, key='__category', value='OpenCorePkg')
 

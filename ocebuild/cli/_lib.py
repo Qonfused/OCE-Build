@@ -6,18 +6,35 @@
 
 import inspect
 from functools import partial, wraps as functools_wraps
-from sys import exit as sys_exit
 
-from typing import Callable, Generator, Iterator, List, Optional, Union
+from typing import Callable, Generator, Iterator, List, Optional
 
 import click
+from rich.console import Console
+from rich.logging import RichHandler
 from rich.progress import Progress, track
+from rich.theme import Theme
 
 from ocebuild.errors._lib import wrap_exception
+from ocebuild.parsers.dict import nested_get
 
 
 CONTEXT_SETTINGS = { "help_option_names": ['-h', '--help'] }
 """Shared context settings for the CLI."""
+
+LOGGING_THEME = {
+  "logging.level.debug":    "dim",
+  "logging.level.info":     "blue",
+  "logging.level.success":  "green",
+  "logging.level.error":    "red",
+}
+
+console_wrapper = partial(Console,
+                          theme=Theme(LOGGING_THEME),
+                          log_path=False)
+"""A wrapper for the rich.console Console class instance.
+@internal
+"""
 
 ################################################################################
 #                            CLI Environment Utilities                         #
@@ -28,6 +45,11 @@ VERBOSE: bool=False
 
 DEBUG: bool=False
 """Global debug flag for the CLI."""
+
+console = console_wrapper()
+"""A shared rich.console Console class instance.
+@internal
+"""
 
 class CLIEnv:
   """Shared CLI environment."""
@@ -41,11 +63,12 @@ class CLIEnv:
 
   def __setattr__(self, name: str, value: any) -> None:
     """Sets an attribute on the CLI environment."""
-    global VERBOSE, DEBUG
+    global VERBOSE, DEBUG, console
     if name == 'verbose':
       VERBOSE = value
     elif name == 'debug':
       DEBUG = value
+      console = console_wrapper(log_path=value)
     super().__setattr__(name, value)
 
 def cli_command(name: Optional[str]=None):
@@ -92,67 +115,81 @@ def cli_command(name: Optional[str]=None):
 ################################################################################
 
 def _format_url(url: str) -> str:
-  """Formats a URL for the CLI.
+  """Formats a URL for the CLI."""
+  return f'[bold][link={url}]{url}[/link][/bold]'
+
+def _format_label(msg: str,
+                  label: str,
+                  color: Optional[str]=None,
+                  hint: Optional[str]=None,
+                  ) -> str:
+  """Formats a multi-line labeled message for the CLI."""
+  color = nested_get(LOGGING_THEME, [f"logging.level.{label.lower()}"],
+                     default=color)
+  padding = " " * (8 - len(label))
+  fmt_msg = f"[{color}][bold]{label}[/bold]: {padding}[/{color}]{msg}"
+  if hint:
+    indent = ' ' * len(label) + 2
+    fmt_msg += f"\n{indent}{padding}{hint}"
+  return fmt_msg
+
+def echo(msg: str, *args, log: bool=True, **kwargs) -> None:
+  """Stylized echo for the CLI.
 
   Args:
-    url: The URL to format.
+    msg: The message to print.
+    *args: Additional arguments to pass to `console.print()`.
+    **kwargs: Additional keyword arguments to pass to `console.print()`.
 
-  Returns:
-    A rich-formatted URL.
+  Example:
+    >>> echo('This is a message.')
+    # -> This is a message.
   """
-  return click.style(url, fg="blue", underline=True, bold=True)
+  if log:
+    fn = partial(console.log, _stack_offset=3)
+  else:
+    fn = console.print
+  fn(msg, *args, markup=True, **kwargs)
+
+def traceback_wrapper(suppress: List[any]):
+  """Wraps exception traceback frames and formats a traceback with rich."""
+  if not suppress: suppress = []
+  wrap_exception(suppress=[__file__, *suppress],
+                 hide_modules=[click],
+                 use_rich=True)
+
+################################################################################
+#                              CLI Logging Utilities                           #
+################################################################################
+
+#TODO: Refactor to use the native logging hook
+# @see https://rich.readthedocs.io/en/stable/logging.html
 
 def debug(msg: str, *args, **kwargs):
   """Prints a debug message.
 
   This function is a wrapper for `echo()` that only prints if the global
   `DEBUG` flag is set.
-
-  Args:
-    msg: The message to print.
-    *args: Additional arguments to pass to `echo()`.
-    **kwargs: Additional keyword arguments to pass to `echo()`.
-
-  Example:
-    >>> debug('This is a debug message.')
-    # -> DEBUG: This is a debug message.
   """
-  if not DEBUG: return
-  echo(msg=f"DEBUG: {msg}", *args, dim=True, **kwargs)
+  if DEBUG:
+    echo(_format_label(msg, 'DEBUG'), *args, log=True, **kwargs)
 
-def echo(msg: Optional[str]=None,
-         *args,
-         calls: Optional[List[Union[str, dict]]]=None,
-         exit: Optional[int]=None, #pylint: disable=redefined-builtin
-         **kwargs
-         ) -> None:
-  """Stylized echo for the CLI.
+def info(msg: str, *args, **kwargs):
+  """Prints an info message.
 
-  Args:
-    msg: The message to print.
-    *args: Additional arguments to pass to `click.echo()`.
-    calls: A list of additional calls to `echo()`.
-    exit: The exit code to exit with. (Optional)
-    **kwargs: Additional keyword arguments to pass to `click.echo()`.
-
-  Example:
-    >>> echo('This is a message.')
-    # -> This is a message.
+  This function is a wrapper for `echo()` that only prints if the global
+  `VERBOSE` flag is set.
   """
-  if msg:
-    click.echo(click.style(msg, *args, **kwargs))
-  elif calls:
-    for call in calls:
-      if isinstance(call, dict):
-        echo(*args, **call, **kwargs)
-      elif isinstance(call, str):
-        echo(msg=call, *args, **kwargs)
-  if exit is not None:
-    sys_exit(exit)
+  if VERBOSE:
+    echo(_format_label(msg, 'INFO'), *args, log=True, **kwargs)
+
+def success(msg: str, *args, **kwargs):
+  """Prints a success message."""
+  echo(_format_label(msg, 'SUCCESS'), *args, log=True, **kwargs)
 
 def error(msg: str,
-          label: str='Error',
           hint: Optional[str]=None,
+          label: str='Error',
           traceback: bool=False,
           suppress: Optional[List[str]]=None
           ) -> None:
@@ -169,42 +206,11 @@ def error(msg: str,
     >>> error('This is an error message.')
     # -> Error: This is an error message.
   """
-
-  header = click.style(f'{label}: ', fg="red", bold=True)
-  calls = [{ "msg": f"\n{header}{msg}", "fg": "red" }]
-  if hint:
-    padding = ' ' * len(f'{label}: ')
-    calls.append({ "msg": f"{padding}{hint}" })
-  calls[-1]['msg'] += '\n'
-  echo(calls=calls)
+  echo(_format_label(msg, label, hint=hint), log=True)
 
   # Wrap the public traceback frames if specified
   if traceback:
-    if not suppress: suppress = []
-    wrap_exception(suppress=[__file__, *suppress],
-                   hide_modules=[click],
-                   use_rich=True)
-
-  sys_exit(1)
-
-def success(msg: str, label: str='Success') -> None:
-  """Stylized error message for the CLI.
-
-  Args:
-    msg: The error message to print.
-    label: The label to print before the error message.
-    hint: A hint to print after the error message. (Optional)
-    traceback: Whether to print a traceback. (Optional)
-    suppress: A list of filepaths to suppress from the traceback. (Optional)
-
-  Example:
-    >>> error('This is an error message.')
-    # -> Error: This is an error message.
-  """
-
-  header = click.style(f'{label}: ', fg="green", bold=True)
-  calls = [{ "msg": f"{header}{msg}", "fg": "white" }]
-  echo(calls=calls)
+    traceback_wrapper(suppress=suppress)
 
 def abort(msg: str,
           hint: Optional[str]=None,
@@ -227,7 +233,7 @@ def abort(msg: str,
     # (rich.console `print_exception()` traceback)
   """
   caller = inspect.stack()[1].filename
-  error(msg, 'Abort', hint, traceback, suppress=[caller])
+  error(msg, hint, 'Abort', traceback, suppress=[caller])
 
 ################################################################################
 #                           CLI Interactive Utilities                          #
@@ -262,12 +268,14 @@ def progress_bar(description: str,
 __all__ = [
   # Constants (1)
   "CONTEXT_SETTINGS",
-  # Functions (7)
+  # Functions (9)
   "cli_command",
-  "debug",
   "echo",
-  "error",
+  "traceback_wrapper",
+  "debug",
+  "info",
   "success",
+  "error",
   "abort",
   "progress_bar",
   # Classes (1)
