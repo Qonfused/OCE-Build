@@ -5,6 +5,7 @@
 """Shared CLI utilities."""
 
 import inspect
+from datetime import datetime
 from functools import partial, wraps as functools_wraps
 
 from typing import Callable, Generator, Iterator, List, Optional
@@ -13,11 +14,15 @@ import click
 from rich.console import Console
 from rich.logging import RichHandler
 from rich.progress import Progress, track
+from rich.text import Text
 from rich.theme import Theme
 
 from ocebuild.errors._lib import wrap_exception
 from ocebuild.parsers.dict import nested_get
 
+
+START_TIME = datetime.now()
+"""The start time of the CLI."""
 
 CONTEXT_SETTINGS = { "help_option_names": ['-h', '--help'] }
 """Shared context settings for the CLI."""
@@ -29,9 +34,18 @@ LOGGING_THEME = {
   "logging.level.error":    "red",
 }
 
+def render_time(log_time: datetime) -> Text:
+  """Renders a datetime object as a relative duration string.
+  @internal
+  """
+  seconds = (log_time - START_TIME).total_seconds()
+  duration = datetime.utcfromtimestamp(seconds)
+  return Text(duration.strftime('%Mm %Ss'))
+
 console_wrapper = partial(Console,
                           theme=Theme(LOGGING_THEME),
-                          log_path=False)
+                          log_path=False,
+                          log_time_format=render_time)
 """A wrapper for the rich.console Console class instance.
 @internal
 """
@@ -129,7 +143,7 @@ def _format_label(msg: str,
   padding = " " * (8 - len(label))
   fmt_msg = f"[{color}][bold]{label}[/bold]: {padding}[/{color}]{msg}"
   if hint:
-    indent = ' ' * len(label) + 2
+    indent = ' ' * (len(label) + 2)
     fmt_msg += f"\n{indent}{padding}{hint}"
   return fmt_msg
 
@@ -266,7 +280,8 @@ def progress_bar(description: str,
 
 
 __all__ = [
-  # Constants (1)
+  # Constants (2)
+  "START_TIME",
   "CONTEXT_SETTINGS",
   # Functions (9)
   "cli_command",
