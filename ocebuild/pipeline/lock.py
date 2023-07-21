@@ -104,7 +104,9 @@ def _format_dependency_entry(entry: Dict[str, any]) -> dict:
   Returns:
     The formatted entry dictionary.
   """
-  public_keys = { k: v for k,v in entry.items() if not k[0] == '_' }
+  excluded_keys = ('name')
+  public_keys = { k: v for k,v in entry.items()
+                  if not (k[0] == '_' or k in excluded_keys) }
   return public_keys
 
 #TODO: Handle resolving packages from lockfile
@@ -234,9 +236,10 @@ def write_lockfile(lockfile_path: str,
 
   # Merge existing lockfile with new dependency entries
   root = 'dependencies'
-  for key, resolver in resolvers.items():
+  for resolver in resolvers:
     entry = _format_dependency_entry(resolver)
     category = resolver['__category']
+    key = resolver['name']
     lockfile = merge_dict(lockfile, { root: { category: { key: entry } } })
 
   # Parse lockfile into YAML
@@ -262,6 +265,20 @@ def prune_lockfile(build_config: dict, lockfile: dict) -> List[dict]:
   for k in removed: nested_del(lockfile, k['__tree'])
   return removed
 
+def prune_resolver_entry(resolvers: List[dict], key: str, value: any) -> None:
+  """Prunes a resolver entry from the list of resolvers.
+
+  Args:
+    resolvers: The list of resolvers to prune from.
+    key: The key to prune by.
+    value: The value to prune by.
+
+  Raises:
+    ValueError: If the resolver entry does not exist.
+  """
+  for e in resolvers.copy():
+    if key in e and e[key] == value: resolvers.remove(e)
+
 def resolve_specifiers(build_config: dict,
                        lockfile: dict,
                        base_path: str=getcwd(),
@@ -270,7 +287,7 @@ def resolve_specifiers(build_config: dict,
                        *args,
                        __wrapper: Optional[Iterator]=None,
                        **kwargs
-                       ) -> dict:
+                       ) -> List[dict]:
   """Resolves the specifiers for each entry in the build configuration.
 
   Args:
@@ -289,7 +306,7 @@ def resolve_specifiers(build_config: dict,
   Returns:
     The resolved build configuration.
   """
-  resolvers = {}
+  resolvers = []
   default_build = nested_get(build_config, ['OpenCorePkg', 'OpenCore', 'build'])
   # Handle interactive mode for iterator
   iterator = _iterate_entries(build_config)
@@ -303,9 +320,7 @@ def resolve_specifiers(build_config: dict,
 
     # Prune matching resolvers and remove outdated entries from lockfile
     resolver = parse_specifier(name, entry, base_path=base_path)
-    specifier = _format_resolver(resolver,
-                                 base_path=base_path,
-                                 as_specifier=True)
+    specifier = _format_resolver(resolver, base_path, as_specifier=True)
 
     # Resolve the specifier
     resolver_props = { "__category": category, "__resolver": resolver }
@@ -326,14 +341,13 @@ def resolve_specifiers(build_config: dict,
         resolver_props['url'] = url
 
         # Extract the version or commit from the resolver
-        if   'version' in (props := dict(resolver)):
+        if 'version' in (props := dict(resolver)):
           resolver_props['version'] = props['version']
       else:
         raise ValueError(f'Invalid resolver: {resolver}')
 
       # Format the resolution
-      resolver_props['resolution'] = _format_resolver(resolver,
-                                                      base_path=base_path)
+      resolver_props['resolution'] = _format_resolver(resolver, base_path)
       resolver_props['specifier'] = specifier
     except ValueError:
       continue #TODO: Add warning
@@ -365,7 +379,8 @@ def resolve_specifiers(build_config: dict,
           format_revision('commit', 'SHA1') or format_revision('checksum')
 
       # Add the resolver to the list of resolvers
-      resolvers[name] = resolver_props
+      resolver_props['name'] = name
+      resolvers.append(resolver_props)
 
   return resolvers
 
@@ -406,12 +421,13 @@ __all__ = [
   # Constants (2)
   "LOCKFILE_METADATA",
   "LOCKFILE_WARNING_COMMENT",
-  # Functions (7)
+  # Functions (8)
   "parse_semver_params",
   "parse_specifier",
   "read_lockfile",
   "write_lockfile",
   "prune_lockfile",
+  "prune_resolver_entry",
   "resolve_specifiers",
   "validate_dependencies"
 ]

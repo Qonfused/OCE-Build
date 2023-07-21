@@ -12,6 +12,8 @@ from typing import Generator, Iterator, Literal, Optional, Union
 
 from mmap import mmap, PROT_READ
 
+from .lock import prune_resolver_entry
+
 from ocebuild.filesystem.cache import UNPACK_DIR
 from ocebuild.filesystem.posix import glob, move, remove
 from ocebuild.sources.binary import get_stream_digest
@@ -103,8 +105,7 @@ def prune_opencore_archive(opencore_pkg: PathResolver,
   if __wrapper is not None: iterator = __wrapper(iterator, *args, **kwargs)
 
   # Iterate over the entries in the extracted OpenCore package
-  bundled = set(v['__filepath'] for v in resolvers.values()
-                if v['specifier'] == '*')
+  bundled = set(v['__filepath'] for v in resolvers if v['specifier'] == '*')
   for idx, path in enumerate(iterator):
     # Include only binaries that are specified as bundled in the build config
     if path not in bundled:
@@ -112,7 +113,7 @@ def prune_opencore_archive(opencore_pkg: PathResolver,
     else:
       #TODO: Add entry under OpenCore's `bundled` property
       bundled.discard(path)
-      del resolvers[PathResolver(path).stem]
+      prune_resolver_entry(resolvers, key='name', value=PathResolver(path).stem)
     # Copy the remaining files to the output directory
     if idx + 1 == num_entries: # This stalls the iterator until completion
       copytree(opencore_pkg, out_dir, dirs_exist_ok=True)

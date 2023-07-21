@@ -10,7 +10,7 @@
 
 from os import getcwd
 
-from typing import Optional, Tuple, Union
+from typing import List, Optional, Tuple, Union
 
 import click
 from rich import box
@@ -75,7 +75,7 @@ def rich_revision(revision: str) -> str:
   pad = len(str.ljust(algorithm, len('SHA256'))) - len(algorithm)
   return f"[dim bold]{algorithm}[/dim bold][dim]: {checksum[:7 + pad]}…[/dim]"
 
-def print_pending_resolvers(resolvers: dict) -> None:
+def print_pending_resolvers(resolvers: List[dict]) -> None:
   """Prints the resolved specifiers for the given resolvers.
 
   Resolvers are presented in a table with the following columns:
@@ -95,7 +95,7 @@ def print_pending_resolvers(resolvers: dict) -> None:
   table.add_column('Resolution', justify='left')
 
   prev_type = None
-  for name, entry in resolvers.items():
+  for entry in resolvers:
     # Extract the resolver type and resolution properties.
     type_entry = entry['__category'] if entry['__category'] != prev_type else None
     if type_entry: prev_type = type_entry
@@ -110,7 +110,7 @@ def print_pending_resolvers(resolvers: dict) -> None:
         None
     # Add resolver entry to the table.
     table.add_row(f"[bold]{type_entry}" if type_entry else '[dim]..',
-                  f"[cyan]{name}",
+                  f"[cyan]{entry['name']}",
                   (f"[green]{entry['version']}[/green]" if 'version' in entry \
                     else '[dim]-')
                   + (f" [dim]({checksum_entry})" if checksum_entry else ''),
@@ -202,7 +202,7 @@ def resolve_lockfile(env: CLIEnv,
       # Remove lockfile entries that are not in the build configuration
       removed = prune_lockfile(build_config, lockfile)
       # Filter out non-resolver entries
-      resolved = { k:v for k,v in resolvers.items() if v['__resolver'] }
+      resolved = [ e for e in resolvers if e['__resolver'] ]
 
   # Validate that the lockfile matches the build configuration
   if check:

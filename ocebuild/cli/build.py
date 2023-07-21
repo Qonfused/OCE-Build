@@ -19,6 +19,7 @@ from ocebuild.filesystem import glob, remove
 from ocebuild.parsers.dict import nested_get
 from ocebuild.pipeline import config, kexts, opencore, ssdts
 from ocebuild.pipeline.build import read_build_file, unpack_build_entries
+from ocebuild.pipeline.lock import prune_resolver_entry
 from ocebuild.sources.resolver import PathResolver
 
 
@@ -104,7 +105,7 @@ def cli(env, cwd, out, clean, update, force):
                                          force=force,
                                          build_config=build_config,
                                          project_dir=PROJECT_DIR)
-  if not any(e['__resolver'] for e in resolvers.values()):
+  if not any(e['__resolver'] for e in resolvers):
     echo(calls=[{'msg': '\nNothing to build.', 'fg': 'white' },
                 'Try running with `--update` or `--force` to regenerate a build.'],
          exit=0)
@@ -132,6 +133,8 @@ def cli(env, cwd, out, clean, update, force):
                                       out_dir=BUILD_DIR,
                                       # Interactive arguments
                                       __wrapper=bar)
+    # Cleanup resolver entries
+    prune_resolver_entry(resolvers, key='__category', value='OpenCorePkg')
 
 
 __all__ = [

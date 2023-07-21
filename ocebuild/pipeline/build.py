@@ -92,7 +92,7 @@ def read_build_file(filepath: str,
 
   return build_config, build_vars, flags
 
-def unpack_build_entries(resolvers: dict,
+def unpack_build_entries(resolvers: List[dict],
                          project_dir: PathResolver,
                          *args,
                          __wrapper: Optional[Iterator]=None,
@@ -100,11 +100,11 @@ def unpack_build_entries(resolvers: dict,
   """Unpacks the build entries from the build configuration."""
 
   # Handle interactive mode for iterator
-  iterator = resolvers.items()
+  iterator = resolvers
   if __wrapper is not None: iterator = __wrapper(iterator, *args, **kwargs)
 
   extracted = {}
-  for name, entry in iterator:
+  for entry in iterator:
     tmpdir: PathResolver
     # Handle extracting remote entries
     if (url := entry.get('url')):
@@ -120,7 +120,7 @@ def unpack_build_entries(resolvers: dict,
     elif (specifier := entry.get('specifier')) == '*':
       continue
     # Update extracted paths
-    nested_set(extracted, [entry['__category'], name], tmpdir)
+    nested_set(extracted, [entry['__category'], entry['name']], tmpdir)
 
   return extracted
 
