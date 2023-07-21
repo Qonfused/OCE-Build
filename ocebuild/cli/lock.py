@@ -99,7 +99,6 @@ def print_pending_resolvers(resolvers: List[dict]) -> None:
     # Extract the resolver type and resolution properties.
     type_entry = entry['__category'] if entry['__category'] != prev_type else None
     if type_entry: prev_type = type_entry
-    props = dict(entry['__resolver']) if '__resolver' in entry else {}
     resolution_entry = rich_resolver(resolver=entry['__resolver'],
                                      resolver_props=entry,
                                      resolution=entry['resolution'])

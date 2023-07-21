@@ -10,7 +10,6 @@
 
 import re
 from datetime import datetime
-from json import loads as json_loads
 from shlex import split
 
 from typing import List, Literal, Optional, Tuple, Union

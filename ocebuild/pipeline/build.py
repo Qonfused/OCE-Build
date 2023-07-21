@@ -116,9 +116,8 @@ def unpack_build_entries(resolvers: List[dict],
       tmpdir = PathResolver(mkdtemp(dir=UNPACK_DIR))
       src = project_dir.joinpath(path)
       copy(src, tmpdir.joinpath(tmpdir, src.name))
-    # Handle wildcard specifiers
-    elif (specifier := entry.get('specifier')) == '*':
-      continue
+    # Skip wildcard specifiers
+    elif entry.get('specifier') == '*': continue
     # Update extracted paths
     nested_set(extracted, [entry['__category'], entry['name']], tmpdir)
 

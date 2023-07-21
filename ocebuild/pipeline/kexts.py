@@ -26,6 +26,7 @@ def parse_kext_plist(filepath: Union[str, PathResolver]) -> dict:
                     # Ignore Apple-provided libraries
                     not k.startswith('com.apple.')) }
   return {
+    "name": name,
     "identifier": identifier,
     "version": version,
     "executable": executable,

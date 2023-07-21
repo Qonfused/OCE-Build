@@ -22,7 +22,7 @@ from ocebuild.sources.resolver import PathResolver
 
 def extract_opencore_archive(pkg: PathResolver,
                              target: Literal['IA32', 'X64']='X64'):
-  """"""
+  """Extracts the contents of an OpenCore archive to a temporary directory."""
   tmp_dir = mkdtemp(dir=UNPACK_DIR)
 
   # Extract EFI binaries and tree structure
@@ -58,7 +58,7 @@ def extract_opencore_archive(pkg: PathResolver,
   return PathResolver(EFI_DIR.parent)
 
 def extract_ocbinary_archive(pkg: PathResolver, oc_pkg: PathResolver) -> None:
-  """"""
+  """Extracts OcBinaryData resources to an existing OpenCore archive."""
   for dir_ in oc_pkg.joinpath('EFI', 'OC').iterdir():
     extract = glob(pkg, pattern=f'**/{dir_.name}/', first=True)
     if extract and extract.exists():

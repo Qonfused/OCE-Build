@@ -104,7 +104,7 @@ def _format_dependency_entry(entry: Dict[str, any]) -> dict:
   Returns:
     The formatted entry dictionary.
   """
-  excluded_keys = ('name')
+  excluded_keys = ('name',)
   public_keys = { k: v for k,v in entry.items()
                   if not (k[0] == '_' or k in excluded_keys) }
   return public_keys
@@ -371,10 +371,11 @@ def resolve_specifiers(build_config: dict,
 
       # Extract revision key
       if resolver_props['__resolver'] is not None:
-        _props = dict(resolver_props['__resolver'])
+        #pylint: disable=cell-var-from-loop
+        props_ = dict(resolver_props['__resolver'])
         def format_revision(key, algorithm='SHA256'):
-          if key in _props:
-            return " ".join(["{", f"{algorithm}: {_props.get(key)}", "}"])
+          if key in props_:
+            return " ".join(["{", f"{algorithm}: {props_.get(key)}", "}"])
         resolver_props['revision'] = \
           format_revision('commit', 'SHA1') or format_revision('checksum')
 
