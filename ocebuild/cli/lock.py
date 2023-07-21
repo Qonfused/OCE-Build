@@ -209,7 +209,8 @@ def resolve_lockfile(env: CLIEnv,
     except AssertionError as e:
       abort(msg=e, traceback=False)
     else:
-      echo('Lockfile validation succeeded.', fg='green', exit=0)
+      success('Lockfile validation succeeded.', fg='green')
+      exit(0)
   # Handle updating the lockfile
   elif resolved or removed:
     # Display added lockfile entries
@@ -230,9 +231,9 @@ def resolve_lockfile(env: CLIEnv,
     echo('Done.', fg='white')
   # No new resolvers
   elif lockfile and (update or force):
-    echo('Lockfile is up to date.', fg='white')
+    success('Lockfile is up to date.')
   else:
-    echo('Lockfile is in sync.', fg='white')
+    success('Lockfile is in sync.')
 
   return lockfile, resolvers
 

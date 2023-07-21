@@ -187,6 +187,25 @@ def error(msg: str,
 
   sys_exit(1)
 
+def success(msg: str, label: str='Success') -> None:
+  """Stylized error message for the CLI.
+
+  Args:
+    msg: The error message to print.
+    label: The label to print before the error message.
+    hint: A hint to print after the error message. (Optional)
+    traceback: Whether to print a traceback. (Optional)
+    suppress: A list of filepaths to suppress from the traceback. (Optional)
+
+  Example:
+    >>> error('This is an error message.')
+    # -> Error: This is an error message.
+  """
+
+  header = click.style(f'{label}: ', fg="green", bold=True)
+  calls = [{ "msg": f"{header}{msg}", "fg": "white" }]
+  echo(calls=calls)
+
 def abort(msg: str,
           hint: Optional[str]=None,
           traceback: bool=True
@@ -243,11 +262,12 @@ def progress_bar(description: str,
 __all__ = [
   # Constants (1)
   "CONTEXT_SETTINGS",
-  # Functions (6)
+  # Functions (7)
   "cli_command",
   "debug",
   "echo",
   "error",
+  "success",
   "abort",
   "progress_bar",
   # Classes (1)

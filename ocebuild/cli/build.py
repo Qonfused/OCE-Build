@@ -123,6 +123,7 @@ def cli(env, cwd, out, clean, update, force):
                                             project_dir=PROJECT_DIR,
                                             # Interactive arguments
                                             __wrapper=bar)
+  success(f'Extracted {len(unpacked_entries)} build packages.')
 
   # Extract the OpenCore package to the output directory
   if opencore_pkg := nested_get(unpacked_entries, ['OpenCorePkg', 'OpenCore']):
@@ -139,6 +140,7 @@ def cli(env, cwd, out, clean, update, force):
                                       out_dir=BUILD_DIR,
                                       # Interactive arguments
                                       __wrapper=bar)
+    success(f'Extracted OpenCore package to {BUILD_DIR}.')
     # Cleanup resolver entries
     prune_resolver_entry(resolvers, key='__category', value='OpenCorePkg')
 
