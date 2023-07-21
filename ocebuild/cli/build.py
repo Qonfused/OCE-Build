@@ -16,6 +16,7 @@ from rich.progress import Progress
 from ._lib import *
 
 from ocebuild.filesystem import glob, remove
+from ocebuild.filesystem.cache import UNPACK_DIR
 from ocebuild.parsers.dict import nested_get
 from ocebuild.pipeline import config, kexts, opencore, ssdts
 from ocebuild.pipeline.build import read_build_file, unpack_build_entries
@@ -41,7 +42,7 @@ def get_build_file(cwd: Union[str, PathResolver]
   BUILD_FILE = glob(cwd, '**/build.yml', include='**/build.yaml', first=True)
   try:
     if BUILD_FILE:
-      debug(f"Found build configuration at '{BUILD_FILE.relative(cwd)}'.")
+      info(f"Found build configuration at '{BUILD_FILE.relative(cwd)}'.")
       build_config, build_vars, flags = read_build_file(filepath=BUILD_FILE)
     else:
       error("Could not find 'build.{yml,yaml}'",
@@ -92,7 +93,7 @@ def cli(env, cwd, out, clean, update, force):
     try:
       remove(BUILD_DIR)
     except Exception: #pylint: disable=broad-exception-caught
-      abort(f'Failed to clean the output directory ({BUILD_DIR})',
+      abort(f"Failed to clean the output directory ('{BUILD_DIR}')",
             'Check the output directory permissions.')
 
   # Read the build configuration
@@ -119,13 +120,15 @@ def cli(env, cwd, out, clean, update, force):
 
 
   # Unpack all build entries to a temporary directory
+  debug(f"Unpacking packages to {UNPACK_DIR}")
   with Progress(transient=True) as progress:
-    bar = progress_bar('Extracting build packages', wrap=progress)
+    bar = progress_bar('Unpacking packages', wrap=progress)
     unpacked_entries = unpack_build_entries(resolvers,
                                             project_dir=PROJECT_DIR,
                                             # Interactive arguments
                                             __wrapper=bar)
-  info(f'Extracted {len(unpacked_entries)} build packages.')
+    num_packages = len([e['name'] for e in resolvers if '__extracted' in e])
+  info(f'Unpacked {num_packages} packages.')
 
   # Extract the OpenCore package to the output directory
   if opencore_pkg := nested_get(unpacked_entries, ['OpenCorePkg', 'OpenCore']):
@@ -137,14 +140,14 @@ def cli(env, cwd, out, clean, update, force):
       # Extract additional OpenCore binaries not shipped in the main package
       if binary_pkg := nested_get(unpacked_entries, ['OpenCorePkg', 'OcBinaryData']):
         opencore.extract_ocbinary_archive(pkg=binary_pkg, oc_pkg=opencore_pkg)
+      # Cleanup resolver entries
+      prune_resolver_entry(resolvers, key='__category', value='OpenCorePkg')
       # Prune remaining files from the OpenCore package
       opencore.prune_opencore_archive(opencore_pkg, resolvers,
                                       out_dir=BUILD_DIR,
                                       # Interactive arguments
                                       __wrapper=bar)
     success(f"Extracted OpenCore package to '{BUILD_DIR}'.")
-    # Cleanup resolver entries
-    prune_resolver_entry(resolvers, key='__category', value='OpenCorePkg')
 
 
 __all__ = [

@@ -136,14 +136,14 @@ def get_lockfile(cwd: Union[str, PathResolver],
 
   LOCK_FILE = PathResolver(project_dir, 'build.lock')
   if LOCK_FILE.exists():
-    debug(msg=f"Found lockfile at '{LOCK_FILE.relative(cwd)}'.")
+    info(msg=f"Found lockfile at '{LOCK_FILE.relative(cwd)}'.")
     try:
       lockfile, metadata = read_lockfile(lockfile_path=LOCK_FILE)
     except Exception as e: #pylint: disable=broad-exception-caught
       error(msg=f"Encountered an error while reading '{LOCK_FILE.name}': {e}",
             hint="Try running `ocebuild lock` first.")
   else:
-    debug(msg=f"Creating a new lockfile at '{LOCK_FILE.relative(cwd)}'.")
+    info(msg=f"Creating a new lockfile at '{LOCK_FILE.relative(cwd)}'.")
     lockfile, metadata = {}, {}
 
   return lockfile, metadata, LOCK_FILE
@@ -155,7 +155,7 @@ def resolve_lockfile(env: CLIEnv,
                      force: bool=False,
                      build_config: Optional[dict]=None,
                      project_dir: Optional[PathResolver]=None
-                     ) -> Tuple[dict, dict, PathResolver]:
+                     ) -> Tuple[dict, List[dict], PathResolver]:
   """Resolves the project's lockfile.
 
   Args:
@@ -221,8 +221,7 @@ def resolve_lockfile(env: CLIEnv,
     if resolved:
       msg = f'Added {len(resolved)} new entries'
       if env.verbose:
-        info(f'{msg}:')
-        echo(format_resolvers(resolved))
+        info(f'{msg}:', format_resolvers(resolved))
       else:
         info(f'{msg}.')
     # Display removed lockfile entries

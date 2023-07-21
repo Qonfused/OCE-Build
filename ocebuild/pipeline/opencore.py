@@ -117,6 +117,7 @@ def prune_opencore_archive(opencore_pkg: PathResolver,
     # Copy the remaining files to the output directory
     if idx + 1 == num_entries: # This stalls the iterator until completion
       copytree(opencore_pkg, out_dir, dirs_exist_ok=True)
+      remove(opencore_pkg)
       return PathResolver(out_dir, oc_dir.relative_to(opencore_pkg))
 
 def get_opencore_checksum(file_path: Union[str, PathResolver],

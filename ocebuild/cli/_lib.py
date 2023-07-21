@@ -42,13 +42,14 @@ def render_time(log_time: datetime) -> Text:
   duration = datetime.utcfromtimestamp(seconds)
   return Text(duration.strftime('%Mm %Ss'))
 
-console_wrapper = partial(Console,
+_console_wrapper = partial(Console,
                           theme=Theme(LOGGING_THEME),
                           log_path=False,
                           log_time_format=render_time)
-"""A wrapper for the rich.console Console class instance.
-@internal
-"""
+"""A wrapper for the rich.console Console class instance."""
+
+console = _console_wrapper()
+"""A shared rich.console Console class instance."""
 
 ################################################################################
 #                            CLI Environment Utilities                         #
@@ -59,11 +60,6 @@ VERBOSE: bool=False
 
 DEBUG: bool=False
 """Global debug flag for the CLI."""
-
-console = console_wrapper()
-"""A shared rich.console Console class instance.
-@internal
-"""
 
 class CLIEnv:
   """Shared CLI environment."""
@@ -82,7 +78,7 @@ class CLIEnv:
       VERBOSE = value
     elif name == 'debug':
       DEBUG = value
-      console = console_wrapper(log_path=value)
+      console = _console_wrapper(log_path=value)
     super().__setattr__(name, value)
 
 def cli_command(name: Optional[str]=None):
@@ -186,7 +182,7 @@ def debug(msg: str, *args, **kwargs):
   `DEBUG` flag is set.
   """
   if DEBUG:
-    echo(_format_label(msg, 'DEBUG'), *args, log=True, **kwargs)
+    echo(_format_label(f"[dim]{msg}[/dim]", 'DEBUG'), *args, log=True, **kwargs)
 
 def info(msg: str, *args, **kwargs):
   """Prints an info message.
@@ -205,7 +201,8 @@ def error(msg: str,
           hint: Optional[str]=None,
           label: str='Error',
           traceback: bool=False,
-          suppress: Optional[List[str]]=None
+          suppress: Optional[List[str]]=None,
+          **kwargs
           ) -> None:
   """Stylized error message for the CLI.
 
@@ -220,7 +217,8 @@ def error(msg: str,
     >>> error('This is an error message.')
     # -> Error: This is an error message.
   """
-  echo(_format_label(msg, label, hint=hint), log=True)
+  color = nested_get(LOGGING_THEME, [f"logging.level.error"])
+  echo(_format_label(msg, label, color, hint), log=True, **kwargs)
 
   # Wrap the public traceback frames if specified
   if traceback:
@@ -247,7 +245,7 @@ def abort(msg: str,
     # (rich.console `print_exception()` traceback)
   """
   caller = inspect.stack()[1].filename
-  error(msg, hint, 'Abort', traceback, suppress=[caller])
+  error(msg, hint, 'Abort', traceback, suppress=[caller], _stack_offset=4)
 
 ################################################################################
 #                           CLI Interactive Utilities                          #
@@ -280,9 +278,12 @@ def progress_bar(description: str,
 
 
 __all__ = [
-  # Constants (2)
+  # Constants (3)
   "START_TIME",
   "CONTEXT_SETTINGS",
+  "LOGGING_THEME",
+  # Variables (1)
+  "console",
   # Functions (9)
   "cli_command",
   "echo",
