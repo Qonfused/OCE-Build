@@ -39,8 +39,7 @@ def extract_opencore_archive(pkg: PathResolver,
 
   # Extract sample config.plist
   sample_plist = glob(pkg, pattern='**/Docs/Sample.plist', first=True)
-  copy(sample_plist, DOCS_DIR)
-  move(sample_plist, EFI_DIR.joinpath('OC'), name='config.plist')
+  move(sample_plist, DOCS_DIR)
 
   # Extract ACPI samples
   acpi_samples = glob(pkg, pattern='**/Docs/AcpiSamples/Binaries/*.aml')

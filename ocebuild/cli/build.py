@@ -148,6 +148,15 @@ def cli(env, cwd, out, clean, update, force):
                                       __wrapper=bar)
     success(f"Extracted OpenCore package to '{BUILD_DIR}'.")
 
+  # Extract remaining packages to the output directory
+  if unpacked_entries:
+    with Progress(transient=True) as progress:
+      bar = progress_bar('Extracting packages', wrap=progress)
+      extracted = extract_build_entries(build_vars, lockfile, unpacked_entries,
+                                        build_dir=BUILD_DIR,
+                                        # Interactive arguments
+                                        __wrapper=bar)
+
 
 __all__ = [
   # Functions (2)

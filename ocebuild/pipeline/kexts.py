@@ -6,6 +6,7 @@
 
 from typing import Literal, Union
 
+from ocebuild.parsers.dict import nested_get
 from ocebuild.parsers.plist import parse_plist
 from ocebuild.sources.resolver import PathResolver
 
@@ -16,21 +17,22 @@ def parse_kext_plist(filepath: Union[str, PathResolver]) -> dict:
     # Build plist dictionary from filestream
     plist = parse_plist(file)
   # Extract Kext bundle properties
-  name = plist['CFBundleName']
-  identifier = plist['CFBundleIdentifier']
-  version = plist['CFBundleVersion']
-  executable = plist['CFBundleExecutable']
-  libraries = { k:v for k,v in plist['OSBundleLibraries'].items()
-                    # Ignore self-dependencies
-                if (not k == identifier and
-                    # Ignore Apple-provided libraries
-                    not k.startswith('com.apple.')) }
+  name = nested_get(plist, ['CFBundleName'])
+  identifier = nested_get(plist, ['CFBundleIdentifier'])
+  version = nested_get(plist, ['CFBundleVersion'])
+  executable = nested_get(plist, ['CFBundleExecutable'])
+  libraries = nested_get(plist, ['OSBundleLibraries'], default={})
+  dependencies = { k:v for k,v in libraries.items()
+                       # Ignore self-dependencies
+                   if (not k == identifier and
+                       # Ignore Apple-provided libraries
+                       not k.startswith('com.apple.')) }
   return {
     "name": name,
     "identifier": identifier,
     "version": version,
     "executable": executable,
-    "dependencies": libraries
+    "dependencies": dependencies
   }
 
 def extract_kexts(directory: Union[str, PathResolver],
@@ -38,7 +40,7 @@ def extract_kexts(directory: Union[str, PathResolver],
                   ) -> list:
   """Extracts the metadata of all Kexts in a directory."""
   kexts = {}
-  for plist_path in directory.glob('**/*.kext/Contents/Info.plist'):
+  for plist_path in directory.glob('**/*.kext/**/Info.plist'):
     kext_path = PathResolver(plist_path).parents[1].as_posix()
     extract_path = f'.{str(kext_path).split(directory.as_posix())[1]}'
     plist_props = parse_kext_plist(plist_path)
@@ -46,6 +48,7 @@ def extract_kexts(directory: Union[str, PathResolver],
     kexts[plist_props['name']] = {
       "__extract": extract_path,
       "__path": kext_path,
+      "plist": plist_path,
       **plist_props
     }
   # Filter build targets if provided in extract path

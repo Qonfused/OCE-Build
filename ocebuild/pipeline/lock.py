@@ -5,11 +5,10 @@
 """Methods for handling and resolving lock files."""
 
 from collections import OrderedDict
+from itertools import chain
 from os import getcwd
 
 from typing import Dict, Generator, Iterator, List, Optional, Tuple, Union
-
-from .build import _iterate_entries
 
 from ocebuild.parsers.dict import merge_dict, nested_del, nested_get, nested_set
 from ocebuild.parsers.regex import re_match, re_search
@@ -302,6 +301,12 @@ def prune_resolver_entry(resolvers: List[dict], key: str, value: any) -> None:
   for e in resolvers.copy():
     if key in e and e[key] == value: resolvers.remove(e)
 
+def _iterate_build_entries(build_config: dict) -> List[Tuple[str, str, dict]]:
+  """Iterate over the entries in the build configuration."""
+  def group_entries(category: str, entries: dict):
+    return [(category, name, entry) for name, entry in entries.items()]
+  return list(chain(*[group_entries(c,d) for c,d in build_config.items()]))
+
 def resolve_specifiers(build_config: dict,
                        lockfile: dict,
                        base_path: str=getcwd(),
@@ -331,9 +336,11 @@ def resolve_specifiers(build_config: dict,
   """
   resolvers = []
   default_build = nested_get(build_config, ['OpenCorePkg', 'OpenCore', 'build'])
+
   # Handle interactive mode for iterator
-  iterator = _iterate_entries(build_config)
+  iterator = _iterate_build_entries(build_config)
   if __wrapper is not None: iterator = __wrapper(iterator, *args, **kwargs)
+
   # Resolve the specifiers for each entry in the build configuration
   for category, name, entry in iterator:
     entry_path = ['dependencies', category, name]
