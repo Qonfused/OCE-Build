@@ -89,6 +89,7 @@ def cli(env, cwd, out, clean, update, force):
 
   # Prepare the build directory
   BUILD_DIR = PathResolver(cwd, out)
+  debug(f"Using '{BUILD_DIR}' as the build directory.")
   if clean:
     debug('(--clean) Cleaning the output directory...')
     try:
