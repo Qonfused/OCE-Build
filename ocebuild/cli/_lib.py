@@ -161,12 +161,13 @@ def echo(msg: str, *args, log: bool=True, **kwargs) -> None:
     fn = console.print
   fn(msg, *args, markup=True, **kwargs)
 
-def traceback_wrapper(suppress: List[any]):
+def traceback_wrapper(suppress: List[any], **kwargs):
   """Wraps exception traceback frames and formats a traceback with rich."""
   if not suppress: suppress = []
   wrap_exception(suppress=[__file__, *suppress],
                  hide_modules=[click],
-                 use_rich=True)
+                 use_rich=True,
+                 **kwargs)
 
 ################################################################################
 #                              CLI Logging Utilities                           #
@@ -202,6 +203,7 @@ def error(msg: str,
           label: str='Error',
           traceback: bool=False,
           suppress: Optional[List[str]]=None,
+          hide_locals: bool=False,
           **kwargs
           ) -> None:
   """Stylized error message for the CLI.
@@ -222,7 +224,7 @@ def error(msg: str,
 
   # Wrap the public traceback frames if specified
   if traceback:
-    traceback_wrapper(suppress=suppress)
+    traceback_wrapper(suppress=suppress, hide_locals=hide_locals)
 
 def abort(msg: str,
           hint: Optional[str]=None,
@@ -245,7 +247,9 @@ def abort(msg: str,
     # (rich.console `print_exception()` traceback)
   """
   caller = inspect.stack()[1].filename
-  error(msg, hint, 'Abort', traceback, suppress=[caller], _stack_offset=4)
+  error(msg, hint, 'Abort', traceback, suppress=[caller],
+        hide_locals=True,
+        _stack_offset=4)
 
 ################################################################################
 #                           CLI Interactive Utilities                          #

@@ -37,6 +37,7 @@ def wrap_exception(suppress: Optional[List[str]]=None,
                    suppress_stdlib: bool=False,
                    hide_modules: Optional[List[ModuleType]]=None,
                    hide_suppressed: bool=True,
+                   hide_locals: bool=True,
                    max_frames: int=100,
                    use_rich: bool=False):
   """Hides internal stackframes with an optional stylized stack trace.
@@ -45,7 +46,9 @@ def wrap_exception(suppress: Optional[List[str]]=None,
     suppress: A list of paths to suppress from the stack trace.
     suppress_internal: Whether to suppress internal frames (default: True).
     suppress_stdlib: Whether to suppress standard library frames (default: False).
+    hide_modules: A list of modules to hide from the stack trace.
     hide_suppressed: Whether to hide suppressed frames (default: True).
+    hide_locals: Whether to hide local variables (default: True).
     max_frames: The maximum number of frames to show (default: 100).
     use_rich: Whether to use rich to display the stack trace (default: False).
 
@@ -101,7 +104,7 @@ def wrap_exception(suppress: Optional[List[str]]=None,
   if use_rich:
     _rich_traceback_omit = True #pylint: disable=invalid-name,unused-variable
     from rich.console import Console #pylint: disable=import-outside-toplevel
-    Console().print_exception(show_locals=True,
+    Console().print_exception(show_locals=not hide_locals,
                               suppress=excluded_paths,
                               max_frames=max_frames)
     sys.exit(1)
