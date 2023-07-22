@@ -10,12 +10,11 @@ from os import _exit as os_exit
 
 import click
 
-from ._lib import _format_url, abort, CLIEnv, CONTEXT_SETTINGS
-from .build import cli as build
-from .lock import cli as lock
-from .patch import cli as patch
-
 from ocebuild.version import __version__
+
+from ocebuild_cli._lib import CLIEnv, CONTEXT_SETTINGS
+from ocebuild_cli.commands import cli_commands
+from ocebuild_cli.logging import _format_url, abort
 
 
 @click.group(context_settings=CONTEXT_SETTINGS)
@@ -29,9 +28,8 @@ def cli(ctx):
 def _main():
   """Entry point for the CLI."""
   try:
-    cli.add_command(build)
-    cli.add_command(lock)
-    cli.add_command(patch)
+    for command in cli_commands:
+      cli.add_command(command)
     cli() #pylint: disable=no-value-for-parameter
   # Cleanup the CLI environment on exit.
   except SystemExit as e:

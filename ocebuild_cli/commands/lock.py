@@ -14,11 +14,14 @@ import click
 from rich import box
 from rich.table import Table
 
-from ._lib import *
-
 from ocebuild.parsers.yaml import parse_yaml
 from ocebuild.pipeline.lock import *
 from ocebuild.sources.resolver import PathResolver, ResolverType
+
+import ocebuild_cli._lib as lib
+from ocebuild_cli._lib import cli_command
+from ocebuild_cli.interactive import Progress, progress_bar
+from ocebuild_cli.logging import *
 
 
 def rich_resolver(resolver: ResolverType,
@@ -102,9 +105,8 @@ def format_resolvers(resolvers: List[dict]) -> Table:
                                      resolver_props=entry,
                                      resolution=entry['resolution'])
     # Show additional information if in debug mode.
-    from ._lib import DEBUG #pylint: disable=import-outside-toplevel
-    checksum_entry = None if not DEBUG else \
-      rich_revision(entry['revision']) if 'revision' in entry else \
+    checksum_entry = \
+      rich_revision(entry['revision']) if lib.DEBUG and 'revision' in entry else \
         None
     # Add resolver entry to the table.
     table.add_row(f"[bold]{type_entry}" if type_entry else '[dim]..',
@@ -146,8 +148,7 @@ def get_lockfile(cwd: Union[str, PathResolver],
 
   return lockfile, metadata, LOCK_FILE
 
-def resolve_lockfile(env: CLIEnv,
-                     cwd: Union[str, PathResolver],
+def resolve_lockfile(cwd: Union[str, PathResolver],
                      check: bool=False,
                      update: bool=False,
                      force: bool=False,
@@ -218,7 +219,7 @@ def resolve_lockfile(env: CLIEnv,
     # Display added lockfile entries
     if resolved:
       msg = f'Added {len(resolved)} new entries'
-      if env.verbose:
+      if lib.VERBOSE:
         info(f'{msg}:', format_resolvers(resolved))
       else:
         info(f'{msg}.')
@@ -262,8 +263,8 @@ def cli(env, cwd, check, update, force):
   else: debug(msg=f"(--cwd) Using '{cwd}' as the working directory.")
 
   # Process the lockfile
-  resolve_lockfile(env, cwd, check, update, force)
-  # lockfile, resolvers = resolve_lockfile(env, cwd, check, update, force)
+  resolve_lockfile(cwd, check, update, force)
+  # lockfile, resolvers = resolve_lockfile(cwd, check, update, force)
 
 
 __all__ = [

@@ -8,10 +8,12 @@
 
 import click
 
-from ._lib import *
-
 from ocebuild.pipeline.config import merge_configs, read_config
 from ocebuild.sources.resolver import PathResolver
+
+from ocebuild_cli._lib import cli_command
+from ocebuild_cli.interactive import Progress, progress_bar
+from ocebuild_cli.logging import *
 
 
 @cli_command(name='patch')

@@ -59,7 +59,7 @@ pytest-cov  = ">=3,<5"
 ################################################################################
 
 [tool.poetry.scripts]
-ocebuild = "ocebuild.cli.__main__:_main"
+ocebuild = "ocebuild_cli.__main__:_main"
 
 [tool.poe]
 include = [ "ci/scripts/tasks.toml" ]

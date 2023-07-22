@@ -12,8 +12,6 @@ from typing import List, Tuple, Union
 
 import click
 
-from ._lib import *
-
 from ocebuild.filesystem import glob, remove
 from ocebuild.filesystem.cache import UNPACK_DIR
 from ocebuild.parsers.dict import nested_get
@@ -21,6 +19,10 @@ from ocebuild.pipeline import config, kexts, opencore, ssdts
 from ocebuild.pipeline.build import *
 from ocebuild.pipeline.lock import prune_resolver_entry
 from ocebuild.sources.resolver import PathResolver
+
+from ocebuild_cli._lib import cli_command
+from ocebuild_cli.interactive import Progress, progress_bar
+from ocebuild_cli.logging import *
 
 
 def get_build_file(cwd: Union[str, PathResolver]
@@ -100,7 +102,7 @@ def cli(env, cwd, out, clean, update, force):
 
   # Read the lockfile
   from .lock import resolve_lockfile #pylint: disable=import-outside-toplevel
-  lockfile, resolvers = resolve_lockfile(env, cwd,
+  lockfile, resolvers = resolve_lockfile(cwd,
                                          update=update,
                                          force=force,
                                          build_config=build_config,
