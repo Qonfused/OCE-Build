@@ -46,15 +46,15 @@ def extract_kexts(directory: Union[str, PathResolver],
     plist_props = parse_kext_plist(plist_path)
     # Update kext dictionary
     kexts[plist_props['name']] = {
-      "__extract": extract_path,
-      "__path": kext_path,
+      "__path": extract_path,
+      "__extracted": kext_path,
       "plist": plist_path,
       **plist_props
     }
   # Filter build targets if provided in extract path
-  if any(build.lower() in e['__extract'].lower() for e in kexts.values()):
+  if any(build.lower() in e['__path'].lower() for e in kexts.values()):
     kexts = { k:v for k,v in kexts.items()
-              if build.lower() in v['__extract'].lower() }
+              if build.lower() in v['__path'].lower() }
 
   return kexts
 

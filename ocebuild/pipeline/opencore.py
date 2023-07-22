@@ -5,10 +5,10 @@
 """Methods for retrieving and handling OpenCore packages."""
 
 from hashlib import sha256
-from shutil import copy, copyfile, copytree
+from shutil import copyfile, copytree
 from tempfile import mkdtemp, NamedTemporaryFile
 
-from typing import Generator, Iterator, Literal, Optional, Union
+from typing import Generator, Iterator, List, Literal, Optional, Union
 
 from mmap import mmap, PROT_READ
 
@@ -76,19 +76,17 @@ def _iterate_entries(opencore_pkg: PathResolver,
       yield path
 
 def prune_opencore_archive(opencore_pkg: PathResolver,
-                           resolvers: dict,
-                           out_dir: Union[str, PathResolver],
+                           resolvers: List[dict],
                            *args,
                            __wrapper: Optional[Iterator]=None,
                            **kwargs
-                           ) -> Union[PathResolver, None]:
+                           ) -> None:
   """Extracts the OpenCore pacakge from the build OpenCore configuration.
 
   Args:
     resolvers: The build configuration resolvers.
     lockfile: The build configuration lockfile.
     target: The target EFI architecture to extract.
-    out_dir: The output directory to extract the OpenCore package to.
     *args: Additional arguments to pass to the optional iterator wrapper.
     __wrapper: A wrapper function to apply to the iterator. (Optional)
     **kwargs: Additional keyword arguments to pass to the optional iterator wrapper.
@@ -100,24 +98,18 @@ def prune_opencore_archive(opencore_pkg: PathResolver,
   oc_dir = opencore_pkg.joinpath('EFI', 'OC')
   # Handle interactive mode for iterator
   iterator = set(_iterate_entries(opencore_pkg, oc_dir))
-  num_entries = len(iterator)
   if __wrapper is not None: iterator = __wrapper(iterator, *args, **kwargs)
 
   # Iterate over the entries in the extracted OpenCore package
   bundled = set(v['__filepath'] for v in resolvers if v['specifier'] == '*')
-  for idx, path in enumerate(iterator):
+  for path in iterator:
     # Include only binaries that are specified as bundled in the build config
-    if path not in bundled:
-      remove(opencore_pkg.joinpath(path))
-    else:
+    if any(str(p).find(path) != -1 for p in bundled):
       #TODO: Add entry under OpenCore's `bundled` property
       bundled.discard(path)
       prune_resolver_entry(resolvers, key='name', value=PathResolver(path).stem)
-    # Copy the remaining files to the output directory
-    if idx + 1 == num_entries: # This stalls the iterator until completion
-      copytree(opencore_pkg, out_dir, dirs_exist_ok=True)
-      remove(opencore_pkg)
-      return PathResolver(out_dir, oc_dir.relative_to(opencore_pkg))
+    else:
+      remove(opencore_pkg.joinpath(path))
 
 def get_opencore_checksum(file_path: Union[str, PathResolver],
                           algorithm=sha256

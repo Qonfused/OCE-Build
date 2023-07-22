@@ -184,7 +184,7 @@ def resolve_lockfile(cwd: Union[str, PathResolver],
   if update: debug(msg='(--update) Updating lockfile entries...')
   if force:  debug(msg='(--force) Forcing lockfile update...')
   try:
-    with Progress(transient=True) as progress:
+    with Progress() as progress:
       bar = progress_bar('Resolving lockfile entries', wrap=progress)
       resolvers = resolve_specifiers(build_config, lockfile,
                                      base_path=project_dir,

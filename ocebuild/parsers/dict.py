@@ -108,7 +108,7 @@ def merge_dict(a: dict, b: dict) -> dict:
       # Build output dictionary, merging values with common keys recursively
       return { k: merge_recurse(a.get(k), b.get(k), path + [k]) for k in keys }
     # Append array values by default
-    elif isinstance(a, list) and isinstance(b, list):
+    elif isinstance(a, (list, tuple)) and isinstance(b, (list, tuple)):
       return a + b
     # Override values of `a` with `b` if present in both
     else: return a if b is None else b

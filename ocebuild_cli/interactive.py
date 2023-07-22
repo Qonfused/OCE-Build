@@ -21,15 +21,18 @@ class log_progress(rich_progress):
   def get_renderables(self):
     """Renders the progress bar into a `console.log` aligned table"""
     time = _format_time(datetime.now())
-    renderable = self.make_tasks_table(self.tasks)
+    lpadding = len(time) + 1
+    # Construct renderables
+    time_renderable = time if not self.finished else f"[dim]{time}[/dim]"
+    tasks_renderable = self.make_tasks_table(self.tasks)
     # Construct grid
     grid = Table.grid(expand=False)
-    grid.add_column(no_wrap=True, min_width=len(time) + 1)
+    grid.add_column(no_wrap=True, min_width=lpadding)
     grid.add_column(no_wrap=True)
-    grid.add_row(f"[cyan]{time}[/cyan]", renderable)
+    grid.add_row(f"[cyan]{time_renderable}[/cyan]", tasks_renderable)
     yield grid
 
-Progress = partial(log_progress, console=Console.CONSOLE)
+Progress = partial(log_progress, console=Console.CONSOLE, transient=True)
 """A customized `log_progress` class wrapper."""
 
 def progress_bar(description: str,

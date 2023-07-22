@@ -38,7 +38,7 @@ def _format_label(msg: str,
     fmt_msg += f"\n{indent}{padding}{hint}"
   return fmt_msg
 
-def echo(msg: str, *args, log: bool=True, **kwargs) -> None:
+def echo(msg: str='', *args, log: bool=True, **kwargs) -> None:
   """Stylized echo for the CLI.
 
   Args:
@@ -84,7 +84,7 @@ def success(msg: str, *args, **kwargs):
 
 def error(msg: str,
           hint: Optional[str]=None,
-          label: str='Error',
+          label: str='ERROR',
           traceback: bool=False,
           suppress: Optional[List[str]]=None,
           hide_locals: bool=False,
@@ -131,7 +131,7 @@ def abort(msg: str,
     # (rich.console `print_exception()` traceback)
   """
   caller = inspect.stack()[1].filename
-  error(msg, hint, 'Abort', traceback, suppress=[caller],
+  error(msg, hint, 'ABORT', traceback, suppress=[caller],
         hide_locals=True,
         _stack_offset=4)
 

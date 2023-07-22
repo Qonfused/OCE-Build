@@ -13,7 +13,8 @@ from ocebuild.sources.resolver import PathResolver
 
 
 def copy(src: Union[str, "PathLike[str]"],
-         dest: Union[str, "PathLike[str]"]
+         dest: Union[str, "PathLike[str]"],
+         **kwargs
          ) -> None:
   """Copies a file or directory.
 
@@ -24,8 +25,8 @@ def copy(src: Union[str, "PathLike[str]"],
     ValueError: If the path is not a file or directory.
   """
   src = PathResolver(src)
-  if src.is_file(): _copy(src, dest)
-  elif src.is_dir(): copytree(src, dest)
+  if src.is_file(): _copy(src, dest, **kwargs)
+  elif src.is_dir(): copytree(src, dest, **kwargs)
   else:
     raise ValueError(f'Path is not a file or directory: {src}')
 
@@ -69,7 +70,8 @@ def rename(path: Union[str, "PathLike[str]"],
 
 def move(src: Union[str, "PathLike[str]"],
          target: Union[str, "PathLike[str]"],
-         name: Optional[str]=None
+         name: Optional[str]=None,
+         **kwargs
          ) -> PathResolver:
   """Moves a file or directory to a new location.
 
@@ -87,7 +89,7 @@ def move(src: Union[str, "PathLike[str]"],
   dest = PathResolver(target, name if name else PathResolver(src).name)
   if not (parent_dir := dest.parent).is_dir() and str(parent_dir) != '.':
     parent_dir.mkdir(parents=True, exist_ok=True)
-  shutil_move(str(src), parent_dir if not name else dest)
+  shutil_move(str(src), parent_dir if not name else dest, kwargs)
   return dest
 
 def glob(directory: Union[str, "PathLike[str]"],

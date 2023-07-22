@@ -45,7 +45,7 @@ def __virtualsmc_archive():
 #     # Verify only 1 kext is extracted
 #     assert len(kexts) == 1 and 'WhateverGreen' in kexts
 #     # Verify kext props are extracted
-#     assert kexts['WhateverGreen']['__extract'] == \
+#     assert kexts['WhateverGreen']['__path'] == \
 #       './WhateverGreen-1.6.6-DEBUG.zip/WhateverGreen.kext'
 #     assert kexts['WhateverGreen']['__url'] == url
 #     assert kexts['WhateverGreen']['version'] == '1.6.6'

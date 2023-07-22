@@ -349,8 +349,10 @@ def resolve_specifiers(build_config: dict,
     # Handle any necessary resolver preprocessing
     resolver = parse_specifier(name, entry, base_path=base_path)
     if resolver is None:
-      nested_set(build_config, [category, name, 'specifier'], '*')
-    specifier = _format_resolver(resolver, base_path, as_specifier=True)
+      specifier = '*'
+      nested_set(build_config, [category, name, 'specifier'], specifier)
+    else:
+      specifier = _format_resolver(resolver, base_path, as_specifier=True)
 
     # Extract additional properties from the entry
     ext, kind_ = _category_extension(category)
@@ -374,6 +376,8 @@ def resolve_specifiers(build_config: dict,
       resolver_props['__resolver'] = None
       resolvers.append({ **resolver_props, **lockfile_entry })
     # Otherwise, prune matching resolvers and outdated entries from lockfile
+    elif specifier == '*':
+      resolvers.append(resolver_props)
     elif resolver is not None:
       try:
         if isinstance(resolver, PathResolver):
