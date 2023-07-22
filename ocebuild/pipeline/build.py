@@ -11,12 +11,13 @@ from tempfile import mkdtemp
 
 from typing import Iterator, List, Optional, Tuple
 
-from ocebuild.filesystem import copy, remove
+from ocebuild.filesystem import copy, glob, remove
 from ocebuild.filesystem.archives import extract_archive
 from ocebuild.filesystem.cache import UNPACK_DIR
 from ocebuild.parsers.dict import merge_dict, nested_del, nested_get, nested_set
 from ocebuild.parsers.yaml import parse_yaml
-from ocebuild.pipeline import kexts
+from ocebuild.pipeline import kexts, ssdts
+from ocebuild.pipeline.lock import _category_extension
 from ocebuild.sources.resolver import PathResolver
 
 
@@ -140,39 +141,46 @@ def extract_build_packages(build_vars: dict,
   iterator = _iterate_extract_packages(unpacked_entries)
   if __wrapper is not None: iterator = __wrapper(iterator, *args, **kwargs)
 
-  oc_dir = build_dir.joinpath('EFI', 'OC')
-
   extracted = {}
   for (category, name, tmpdir) in iterator:
+    ext, _ = _category_extension(category)
     # Extract SSDTs from the archive
     if   category == 'ACPI':
-      pass
+      extract = ssdts.extract_ssdts(tmpdir)
     # Extract kexts from the archive
     elif category == 'Kexts':
       build = nested_get(lockfile, ['dependencies', name, 'build'],
                           default=build_vars['variables']['build'])
       extract = kexts.extract_kexts(tmpdir, build=build)
       # Filter out plugins that are not bundled
-      extracted_kexts = []
-      for k_name, kext in extract.items():
+      for k_name, kext in extract.copy().items():
+        # Exclude plugins that are already bundled
         is_plugin = '.kext/' in kext['__path']
-        # Add kexts to the extracted entries
-        if not is_plugin:
-          extracted_kexts.append((k_name, kext))
+        if is_plugin:
+          nested_del(extract, [k_name])
+        else: continue
         # Prune implicitly excluded plugins
-        elif (bundled := kext.get('bundled')):
-          if k_name not in bundled: remove(kext['__extracted'])
-      # Add the extracted kexts to the build
-      for k,e in extracted_kexts:
-        k_name = name if len(extracted_kexts) == 1 else k
-        e['__dest'] = oc_dir.joinpath(category, f'{k_name}.kext')
-        nested_set(extracted, [category, k_name], e)
+        if (bundled := kext.get('bundled')):
+          if k_name not in bundled:
+            remove(kext['__extracted'])
     # Extract drivers or tools from the archive
     elif category in ('Drivers', 'Tools'):
-      pass
+      extract = {}
+      for binary_path in glob(tmpdir, f'**/*{ext}'):
+        extracted_path = f'.{binary_path.as_posix().split(tmpdir.as_posix())[1]}'
+        extract[binary_path.name] = {
+          '__path': binary_path,
+          '__extracted': extracted_path
+        }
     # Extract resources from the archive
     elif category == 'Resources':
       pass
+
+    # Update extracted paths
+    for k,e in extract.items():
+      e_name = name if len(extract) == 1 else k
+      e['__dest'] = build_dir.joinpath('EFI', 'OC', category, f'{e_name}{ext}')
+      nested_set(extracted, [category, e_name], e)
 
   return extracted
 

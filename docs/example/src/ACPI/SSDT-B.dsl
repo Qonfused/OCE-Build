@@ -6,13 +6,13 @@ DefinitionBlock ("", "SSDT", 2, "SSDTB", "TEST", 0x00000000)
 	External (_SB_, DeviceObj)                      // SB
   External (__SB.PCI0._FIZ, DeviceObj)            // SB.PCI0.FIZ
   External (SB.BAZ, DeviceObj)                    // SB.BAZ
-  
+
 
 	If (_OSI ("Darwin"))
 	{
     Scope(\)
     {
-      Scope (SB.PCI0.FIZ)
+      Scope (__SB.PCI0._FIZ)
       {
         Device (^^BAR) {                          // SB.BAR
           // ...

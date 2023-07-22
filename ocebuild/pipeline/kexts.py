@@ -37,20 +37,20 @@ def parse_kext_plist(filepath: Union[str, PathResolver]) -> dict:
 
 def extract_kexts(directory: Union[str, PathResolver],
                   build: Literal['RELEASE', 'DEBUG']='RELEASE',
-                  ) -> list:
+                  ) -> dict:
   """Extracts the metadata of all Kexts in a directory."""
   kexts = {}
   for plist_path in directory.glob('**/*.kext/**/Info.plist'):
-    kext_path = PathResolver(plist_path).parents[1].as_posix()
-    extract_path = f'.{str(kext_path).split(directory.as_posix())[1]}'
-    plist_props = parse_kext_plist(plist_path)
+    parent = str(plist_path).rsplit('.kext', maxsplit=1)[0]
+    kext_path = PathResolver(f'{parent}.kext')
+    extract_path = f'.{kext_path.as_posix().split(directory.as_posix())[1]}'
     # Update kext dictionary
-    kexts[plist_props['name']] = {
+    kexts[kext_path.stem] = {
       "__path": extract_path,
       "__extracted": kext_path,
       "plist": plist_path,
-      **plist_props
     }
+
   # Filter build targets if provided in extract path
   if any(build.lower() in e['__path'].lower() for e in kexts.values()):
     kexts = { k:v for k,v in kexts.items()

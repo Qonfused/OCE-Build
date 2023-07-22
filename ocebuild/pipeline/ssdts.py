@@ -14,6 +14,7 @@ from tempfile import mkdtemp, NamedTemporaryFile
 
 from typing import Callable, Generator, List, Optional, Union
 
+from ocebuild.filesystem import glob
 from ocebuild.filesystem.cache import UNPACK_DIR
 from ocebuild.parsers.asl import parse_ssdt_namespace
 from ocebuild.sources import request
@@ -85,11 +86,12 @@ def iasl_wrapper(cache: bool=True
     # @see https://github.com/acpica/acpica/issues/414#issuecomment-432378819
     yield iasl
   finally:
-    if tmp_wrapper:
+    if tmp_wrapper:# and not cache:
       PathResolver(iasl.keywords['binary_path']).unlink()
 
 @contextmanager
 def translate_ssdts(filepaths: List[Union[str, PathResolver]],
+                    directory: Optional[Union[str, PathResolver]]=None,
                     persist: bool=False
                     ) -> Generator[List[PathResolver], any, None]:
   """Decompiles or compiles SSDT tables using iasl.
@@ -101,7 +103,7 @@ def translate_ssdts(filepaths: List[Union[str, PathResolver]],
   Yields:
     A list of filepaths to the compiled + decompiled SSDT files.
   """
-  tmp_dir = PathResolver(mkdtemp())
+  tmp_dir = PathResolver(mkdtemp(dir=directory))
   try:
     with iasl_wrapper() as iasl:
       for filepath in map(PathResolver, filepaths):
@@ -160,11 +162,28 @@ def sort_ssdt_symbols(filepaths: List[Union[str, PathResolver]]) -> OrderedDict:
 
   return sorted_dependencies
 
+def extract_ssdts(directory: Union[str, PathResolver]) -> dict:
+  """Extracts the metadata of all SSDTs in a directory."""
+  ssdts = {}
+  ssdt_paths = glob(directory, '**/*.aml', include='**/*.dsl')
+  with translate_ssdts(ssdt_paths, directory, persist=True) as translated_ssdts:
+    for ssdt_path in filter(lambda p: p.suffix == '.aml', translated_ssdts):
+      extract_path = f'.{ssdt_path.as_posix().split(directory.as_posix())[1]}'
+      source_path = PathResolver(str(ssdt_path).replace('.aml', '.dsl'))
+      # Update ssdt dictionary
+      ssdts[ssdt_path.stem] = {
+        "__path": ssdt_path,
+        "__extracted": extract_path,
+        "source": source_path
+      }
+
+  return ssdts
 
 __all__ = [
-  # Functions (4)
+  # Functions (5)
   "extract_iasl_binary",
   "iasl_wrapper",
   "translate_ssdts",
-  "sort_ssdt_symbols"
+  "sort_ssdt_symbols",
+  "extract_ssdts"
 ]

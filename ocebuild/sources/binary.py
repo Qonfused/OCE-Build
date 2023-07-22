@@ -109,7 +109,7 @@ def wrap_binary(args: List[str],
   if not isinstance(args, list): args = [args]
   chmod(binary_path := binary_path, 0o755)
   process = subprocess.run([binary_path, *args],
-                            check=True,
+                            check=False,
                             stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE,
                             encoding='UTF-8')

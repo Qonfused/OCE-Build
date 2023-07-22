@@ -12,9 +12,9 @@ from typing import List, Tuple, Union
 
 import click
 
-from ocebuild.filesystem import copy, glob, remove
+from ocebuild.filesystem import glob, remove
 from ocebuild.filesystem.cache import UNPACK_DIR
-from ocebuild.parsers.dict import nested_get
+from ocebuild.parsers.dict import nested_get, nested_del
 from ocebuild.pipeline import config, kexts, opencore, ssdts
 from ocebuild.pipeline.build import *
 from ocebuild.pipeline.lock import prune_resolver_entry
@@ -66,6 +66,9 @@ def unpack_packages(build_config: dict,
                     ) -> dict:
   """Unpacks and extracts packages to a temporary directory."""
 
+  # Track total number of extracted build entries
+  total_extracted = 0
+
   # Handle unpacking build packages from the resolvers
   debug(f"Unpacking packages to {UNPACK_DIR}")
   with Progress() as progress:
@@ -74,8 +77,8 @@ def unpack_packages(build_config: dict,
                                             project_dir=project_dir,
                                             # Interactive arguments
                                             __wrapper=bar)
-  num_packages = len([e['name'] for e in resolvers if '__extracted' in e])
-  info(f'Unpacked {num_packages} packages.')
+  num_unpacked = len([k for e in unpacked_entries.values() for k in e.keys()])
+  info(f'Unpacked {num_unpacked} packages from lockfile.')
 
   # Extract the OpenCore package to the output directory
   if opencore_pkg := nested_get(unpacked_entries, ['OpenCorePkg', 'OpenCore']):
@@ -87,21 +90,28 @@ def unpack_packages(build_config: dict,
       # Extract additional OpenCore binaries not shipped in the main package
       if binary_pkg := nested_get(unpacked_entries, ['OpenCorePkg', 'OcBinaryData']):
         opencore.extract_ocbinary_archive(pkg=binary_pkg, oc_pkg=opencore_pkg)
-      # Cleanup resolver entries
-      prune_resolver_entry(resolvers, key='__category', value='OpenCorePkg')
       # Prune remaining files from the OpenCore package
+      prev_len = len(resolvers)
       opencore.prune_opencore_archive(opencore_pkg, resolvers,
                                       # Interactive arguments
                                       __wrapper=bar1)
-      #TODO Copy the extracted package to the build directory
-    num_oc_packages = len(unpacked_entries['OpenCorePkg'])
-    info(f"Extracted {num_oc_packages} OpenCore packages.")
+    # Show the extracted OpenCore package version
+    entry = nested_get(lockfile, ['dependencies', 'OpenCorePkg', 'OpenCore'])
+    success(f"Extracted OpenCore package [cyan]v{entry['version']}[/cyan].",
+            highlight=False)
+    # Report the number of entries pruned from the OpenCore package
+    if diff := prev_len - len(resolvers):
+      total_extracted += diff
+      info(f"Extracted {diff} build entries from OpenCore package.")
+    # Cleanup resolver entries
+    prune_resolver_entry(resolvers, key='__category', value='OpenCorePkg')
+    nested_del(unpacked_entries, ['OpenCorePkg'])
 
   # Extract remaining packages to the output directory
   if unpacked_entries:
     with Progress() as progress:
       # Extract and parse metadata from each unpacked package
-      bar1 = progress_bar('Extracting packages', wrap=progress)
+      bar1 = progress_bar('Extracting build packages', wrap=progress)
       extracted = extract_build_packages(build_vars, lockfile, unpacked_entries,
                                          build_dir=build_dir,
                                          # Interactive arguments
@@ -110,14 +120,12 @@ def unpack_packages(build_config: dict,
       prune_build_packages(build_config, extracted,
                            # Interactive arguments
                            __wrapper=bar1)
-    num_extracted = len([k for e in extracted.values() for k in e.keys()])
-    info(f"Extracted {num_extracted} build packages.")
+    if extracted:
+      num_extracted = len([k for e in extracted.values() for k in e.keys()])
+      total_extracted += num_extracted
+      info(f"Extracted {num_extracted} build entries from lockfile.")
 
-  # Check if any packages failed to extract
-  if missing_packages := num_packages - (num_oc_packages + num_extracted):
-    abort(f"Failed to extract {missing_packages} packages.",
-          hint="Check the build configuration for errors.",
-          traceback=False)
+  success(f"Extracted {total_extracted} total build entries.")
 
   return extracted
 
@@ -175,7 +183,7 @@ def cli(env, cwd, out, clean, update, force):
   # Prepend build directory to resolver paths
   for e in resolvers:
     e['__filepath'] = BUILD_DIR.joinpath(e['__filepath']).resolve()
-  #TODO: Handle skipping builds if the lockfile and build dir is up to date
+  # Handle skipping builds if the lockfile and build dir is up to date
   has_pending_build = any(e['specifier'] != '*' and not e['__filepath'].exists()
                           for e in resolvers)
   if not (has_pending_build or BUILD_DIR.exists()):
