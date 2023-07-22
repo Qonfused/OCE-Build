@@ -7,7 +7,6 @@
 """CLI entrypoint for the patch command."""
 
 import click
-from rich.progress import Progress
 
 from ._lib import *
 

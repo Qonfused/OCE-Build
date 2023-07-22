@@ -11,7 +11,6 @@ from os import getcwd
 from typing import List, Tuple, Union
 
 import click
-from rich.progress import Progress
 
 from ._lib import *
 
@@ -19,7 +18,7 @@ from ocebuild.filesystem import glob, remove
 from ocebuild.filesystem.cache import UNPACK_DIR
 from ocebuild.parsers.dict import nested_get
 from ocebuild.pipeline import config, kexts, opencore, ssdts
-from ocebuild.pipeline.build import read_build_file, unpack_build_entries
+from ocebuild.pipeline.build import *
 from ocebuild.pipeline.lock import prune_resolver_entry
 from ocebuild.sources.resolver import PathResolver
 

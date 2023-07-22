@@ -12,8 +12,8 @@ from typing import Callable, Generator, Iterator, List, Optional
 
 import click
 from rich.console import Console
-from rich.logging import RichHandler
-from rich.progress import Progress, track
+from rich.progress import Progress as rich_progress, track
+from rich.table import Table
 from rich.text import Text
 from rich.theme import Theme
 
@@ -255,6 +255,22 @@ def abort(msg: str,
 #                           CLI Interactive Utilities                          #
 ################################################################################
 
+class log_progress(rich_progress):
+  """An extended rich.progress.Progress class for the CLI."""
+  def get_renderables(self):
+    """Renders the progress bar into a `console.log` aligned table"""
+    time = render_time(datetime.now())
+    renderable = self.make_tasks_table(self.tasks)
+    # Construct grid
+    grid = Table.grid(expand=False)
+    grid.add_column(no_wrap=True, min_width=len(time) + 1)
+    grid.add_column(no_wrap=True)
+    grid.add_row(f"[cyan]{time}[/cyan]", renderable)
+    yield grid
+
+Progress = partial(log_progress, console=console)
+"""A customized `log_progress` class wrapper."""
+
 def progress_bar(description: str,
                  *args,
                  wrap: Callable=track,
@@ -272,7 +288,7 @@ def progress_bar(description: str,
   Returns:
     A partial for a generator that yields an iterator for the progress bar.
   """
-  if isinstance(wrap, Progress):
+  if isinstance(wrap, rich_progress):
     ctx = wrap
     task_id = ctx.add_task(description, total=None)
     ctx.start_task(task_id)
@@ -286,8 +302,9 @@ __all__ = [
   "START_TIME",
   "CONTEXT_SETTINGS",
   "LOGGING_THEME",
-  # Variables (1)
+  # Variables (2)
   "console",
+  "Progress",
   # Functions (9)
   "cli_command",
   "echo",
@@ -298,6 +315,7 @@ __all__ = [
   "error",
   "abort",
   "progress_bar",
-  # Classes (1)
-  "CLIEnv"
+  # Classes (2)
+  "CLIEnv",
+  "log_progress"
 ]

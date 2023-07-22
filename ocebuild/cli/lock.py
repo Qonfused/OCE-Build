@@ -12,8 +12,6 @@ from typing import List, Optional, Tuple, Union
 
 import click
 from rich import box
-from rich.console import Console
-from rich.progress import Progress
 from rich.table import Table
 
 from ._lib import *
