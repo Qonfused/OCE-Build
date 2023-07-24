@@ -18,12 +18,12 @@ Drivers:
 Kexts:
   WhateverGreen: latest
   AirportItlwmVentura:
-    specifier: OpenIntelWireless/itlwm=^2.2.0
+    specifier: OpenIntelWireless/itlwm=2.2.0
     properties:
       MaxKernel: "22.99.99"
       MinKernel: "22.0.0"
   AirportItlwm-BigSur:
-    specifier: OpenIntelWireless/itlwm=^2.1.0
+    specifier: OpenIntelWireless/itlwm=2.1.0
     properties:
       MaxKernel: "20.99.99"
       MinKernel: "20.0.0"
@@ -34,7 +34,7 @@ Kexts:
   #   properties:
   #     Comment: "Workaround for macOS Sonoma OTA updates on unsupported SMBIOSes"
   VoodooI2C:
-    specifier: VoodooI2C/VoodooI2C=2.8
+    specifier: VoodooI2C/VoodooI2C=^2.8
     bundled:
       - VoodooI2CServices
       - VoodooGPIO

@@ -228,7 +228,7 @@ def resolve_lockfile(cwd: Union[str, PathResolver],
       msg = f'Removed {len(removed)} entries'
       echo(f"{msg}.")
     # Write lockfile to disk
-    write_lockfile(LOCKFILE, lockfile, resolved, metadata)
+    lockfile = write_lockfile(LOCKFILE, lockfile, resolved, metadata)
     success(f"Lockfile written to '{LOCKFILE.relative(cwd)}'.")
   # No new resolvers
   elif lockfile and (update or force):

@@ -64,7 +64,7 @@ def cli_command(name: Optional[str]=None):
   def cli_wrapper(func):
     """Decorator for passing the CLI environment to commands."""
     nonlocal name
-    @click.command(name=name if name else func.__name__)
+    @click.command(name=name or func.__name__)
     @click.option('-v', '--verbose',
                   is_flag=True,
                   help='Enable verbose output.')
@@ -73,14 +73,15 @@ def cli_command(name: Optional[str]=None):
                   help='Enable debug output.')
     @click.make_pass_decorator(CLIEnv)
     @functools_wraps(func)
-    def _command_wrapper(env:CLIEnv,
+    def _command_wrapper(env: CLIEnv,
                          *args,
-                         verbose: bool, #pylint: disable=redefined-outer-name
-                         debug: bool,   #pylint: disable=redefined-outer-name
+                         verbose: bool,
+                         debug: bool,
                          **kwargs):
       """Simple environment wrapper for CLI commands."""
       env.verbose = verbose
       env.debug = debug
+      _rich_traceback_omit = True #pylint: disable=invalid-name,unused-variable
       return func(env, *args, **kwargs)
     return _command_wrapper
   return cli_wrapper

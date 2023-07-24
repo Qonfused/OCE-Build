@@ -239,7 +239,7 @@ def write_lockfile(lockfile_path: str,
                    lockfile: dict,
                    resolvers: dict,
                    metadata: Optional[dict]=None,
-                   ) -> None:
+                   ) -> dict:
   """Writes a lockfile to the specified path.
 
   Args:
@@ -269,6 +269,8 @@ def write_lockfile(lockfile_path: str,
 
   with open(lockfile_path, 'w', encoding='UTF-8') as f:
     f.write("\n".join(lockfile_entry))
+
+  return lockfile
 
 def prune_lockfile(build_config: dict, lockfile: dict) -> List[dict]:
   """Prunes the lockfile of entries that are not in the build configuration.
