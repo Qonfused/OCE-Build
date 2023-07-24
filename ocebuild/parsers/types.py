@@ -62,7 +62,7 @@ def decode_data(value: bytes, enc: str='base64') -> str:
   if enc == 'base64':
     return _encode_base64(value).decode('UTF-8').strip()
   elif enc == 'hex':
-    return hexlify(value).decode('UTF-8').strip()
+    return hexlify(value).decode('UTF-8').strip().upper()
   else:
     raise ValueError(f'Unrecognized data format: {enc}')
 

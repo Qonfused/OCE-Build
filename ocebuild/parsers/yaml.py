@@ -37,34 +37,27 @@ def parse_yaml_types(stype: str,
   if schema == 'annotated':
     # Parse annotated types
     if   stype == 'Date':
-      stype = 'date'
       svalue = datetime.fromisoformat(value.replace("Z", "+00:00"))
     elif stype == 'Boolean':
-      stype = 'bool'
-      svalue = value.lower() == 'true'
+      svalue = bool(value.lower() == 'true')
     elif stype == 'Data':
       stype = 'data'
       svalue = encode_data(value)
     elif stype == 'Dict':
-      stype = 'dict'
       svalue = {}
     elif stype == 'Number':
       if '.' in value:
-        stype = 'float'
         svalue = float(value)
       else:
-        stype = 'int'
         svalue = int(value)
     elif stype == 'Array':
-      stype = 'list'
       svalue = []
     elif stype == 'String':
-      stype = 'string'
       svalue = value
     # Handle generic or string types
     if isinstance(svalue, str) and svalue[0] in ('"', "'"):
       svalue = svalue[1:-1]
-    return stype, svalue
+    return svalue
   elif schema == 'yaml':
     raise NotImplementedError() #TODO
 
@@ -89,19 +82,19 @@ def write_yaml_types(value: Union[Tuple[str, any], any],
     # Parse native types
     if   stype == 'date':
       stype = 'Date   '; svalue = str(svalue).replace(' ', 'T').replace('+00:00', 'Z')
-    elif stype == 'bool':
+    elif stype in ('bool', 'boolean'):
       stype = 'Boolean'; svalue = str(svalue).lower()
-    elif stype == 'data':
+    elif stype in ('bytes', 'data'):
       stype = 'Data   '; svalue = f"<{decode_data(svalue, enc='hex')}>"
-    elif stype == 'dict':
+    elif stype in ('dict', 'dictionary'):
       stype = 'Dict   '; svalue = '(empty)'
     elif stype == 'float':
       stype = 'Number '; svalue = str(float(svalue))
-    elif stype == 'int':
+    elif stype in ('int', 'integer'):
       stype = 'Number '; svalue = str(int(svalue))
-    elif stype == 'list':
+    elif stype in ('list', 'array'):
       stype = 'Array  '; svalue = '(empty)'
-    elif stype == 'string':
+    elif stype in ('str', 'string'):
       stype = 'String '; svalue = f'"{svalue}"'
     else:
       max_size = len('Boolean')
@@ -109,13 +102,13 @@ def write_yaml_types(value: Union[Tuple[str, any], any],
       svalue = str(value if not isinstance(value, tuple) else value[1])
   elif schema == 'yaml':
     # Parse native types
-    if   stype == 'bool':
+    if   stype in ('bool', 'boolean'):
       svalue = str(svalue).lower()
-    elif stype == 'dict':
+    elif stype in ('dict', 'object'):
       svalue = ''
-    elif stype == 'list':
+    elif stype in ('list', 'array'):
       svalue = ''
-    elif stype == 'string':
+    elif stype in ('str', 'string'):
       svalue = f'"{svalue}"'
     else:
       svalue = str(svalue)

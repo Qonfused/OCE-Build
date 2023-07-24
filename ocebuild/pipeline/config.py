@@ -4,13 +4,40 @@
 ##
 """Methods for retrieving and handling config.plist files and patches."""
 
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 from ocebuild.parsers.dict import merge_dict, nested_del, nested_get, nested_set
 from ocebuild.parsers.plist import parse_plist
 from ocebuild.parsers.yaml import parse_yaml
 from ocebuild.sources.resolver import PathResolver
 
+
+def read_config(filepath: str,
+                flags: Optional[List[str]]=None
+                ) -> Tuple[Dict, Union[Dict, None]]:
+  """Reads a configuration file.
+
+  Args:
+    filepath: The path to the configuration file.
+    flags: The flags to apply to the configuration file.
+
+  Raises:
+    ValueError: If the file extension is not supported.
+
+  Returns:
+    A tuple containing:
+      - The configuration file.
+      - The frontmatter of the configuration file.
+  """
+  with open(filepath, 'r', encoding='UTF-8') as f:
+    file_ext = PathResolver(filepath).suffix
+    if   file_ext in ('.plist'):
+      file, frontmatter = parse_plist(f), None
+    elif file_ext in ('.yml', '.yaml'):
+      file, frontmatter = parse_yaml(f, flags=flags or [], frontmatter=True)
+    else:
+      raise ValueError(f"Unsupported file extension: {file_ext}")
+  return file, frontmatter
 
 def apply_preprocessor_tags(a: dict,
                             b: dict,
@@ -85,13 +112,15 @@ def apply_preprocessor_tags(a: dict,
     except KeyError: pass
 
 def merge_configs(base: Union[str, PathResolver],
-                  *patches: Union[str, PathResolver]
+                  *patches: Union[str, PathResolver],
+                  flags: Optional[List[str]]=None
                   ) -> Dict:
   """Merges a set of plist or yaml config files into a single config.
 
   Args:
     base: The base config file.
     *patches: The patch config files.
+    flags: The flags to apply to the configuration file.
 
   Returns:
     The merged config.
@@ -104,44 +133,23 @@ def merge_configs(base: Union[str, PathResolver],
     {...}
   """
   base_config, _ = read_config(base)
+  if not flags: flags = []
 
   # Parse config patches
   for filepath in patches:
-    patch, frontmatter = read_config(filepath)
-    if isinstance(frontmatter, dict) and 'tags' in frontmatter:
-      apply_preprocessor_tags(base_config, patch, frontmatter['tags'])
-    base_config = merge_dict(base_config, patch)
+    patch, frontmatter = read_config(filepath, flags=flags)
+    if isinstance(frontmatter, dict):
+      flags += nested_get(frontmatter, ['flags'], default=[])
+      if tags := nested_get(frontmatter, ['tags']):
+        apply_preprocessor_tags(base_config, patch, tags)
+      base_config = merge_dict(base_config, patch)
 
   return base_config
-
-def read_config(filepath: str) -> Tuple[Dict, Union[Dict, None]]:
-  """Reads a configuration file.
-
-  Args:
-    filepath: The path to the configuration file.
-
-  Raises:
-    ValueError: If the file extension is not supported.
-
-  Returns:
-    A tuple containing:
-      - The configuration file.
-      - The frontmatter of the configuration file.
-  """
-  with open(filepath, 'r', encoding='UTF-8') as f:
-    file_ext = PathResolver(filepath).suffix
-    if   file_ext in ('.plist'):
-      file, frontmatter = parse_plist(f), None
-    elif file_ext in ('.yml', '.yaml'):
-      file, frontmatter = parse_yaml(f, frontmatter=True)
-    else:
-      raise ValueError(f"Unsupported file extension: {file_ext}")
-  return file, frontmatter
 
 
 __all__ = [
   # Functions (3)
+  "read_config",
   "apply_preprocessor_tags",
-  "merge_configs",
-  "read_config"
+  "merge_configs"
 ]
