@@ -8,7 +8,7 @@ from hashlib import sha256
 from shutil import copyfile, copytree
 from tempfile import mkdtemp, NamedTemporaryFile
 
-from typing import Generator, Iterator, List, Literal, Optional, Union
+from typing import Generator, Iterator, List, Literal, Optional, Tuple, Union
 
 from mmap import mmap, PROT_READ
 
@@ -16,12 +16,13 @@ from .lock import prune_resolver_entry
 
 from ocebuild.filesystem.cache import UNPACK_DIR
 from ocebuild.filesystem.posix import glob, move, remove
+from ocebuild.parsers.dict import nested_get, nested_set
 from ocebuild.sources.binary import get_stream_digest
 from ocebuild.sources.resolver import PathResolver
 
 
 def extract_opencore_archive(pkg: PathResolver,
-                             target: Literal['IA32', 'X64']='X64'):
+                             target: Literal['IA32', 'X64']='X64') -> None:
   """Extracts the contents of an OpenCore archive to a temporary directory."""
   tmp_dir = mkdtemp(dir=UNPACK_DIR)
 
@@ -53,8 +54,8 @@ def extract_opencore_archive(pkg: PathResolver,
 
   # Overwrite package directory with changes
   remove(pkg)
-
-  return PathResolver(EFI_DIR.parent)
+  for dir_ in PathResolver(tmp_dir).iterdir():
+    move(dir_, pkg)
 
 def extract_ocbinary_archive(pkg: PathResolver, oc_pkg: PathResolver) -> None:
   """Extracts OcBinaryData resources to an existing OpenCore archive."""
@@ -67,26 +68,25 @@ def extract_ocbinary_archive(pkg: PathResolver, oc_pkg: PathResolver) -> None:
 
 def _iterate_entries(opencore_pkg: PathResolver,
                      opencore_dir: PathResolver
-                     ) -> Generator[PathResolver, any, None]:
+                     ) -> Generator[Tuple[str, str], any, None]:
   """Iterate over the entries in the build configuration."""
   for category in map(lambda p: p.name, opencore_dir.iterdir()):
     if category not in ('ACPI', 'Drivers', 'Kexts', 'Tools'): continue
     for path in map(lambda p: p.relative_to(opencore_pkg).as_posix(),
                     opencore_dir.joinpath(category).iterdir()):
-      yield path
+      yield category, path
 
-def prune_opencore_archive(opencore_pkg: PathResolver,
-                           resolvers: List[dict],
-                           *args,
-                           __wrapper: Optional[Iterator]=None,
-                           **kwargs
-                           ) -> None:
-  """Extracts the OpenCore pacakge from the build OpenCore configuration.
+def extract_build_entries(opencore_pkg: PathResolver,
+                          resolvers: List[dict],
+                          *args,
+                          __wrapper: Optional[Iterator]=None,
+                          **kwargs
+                          ) -> None:
+  """Prunes and extracts build entries from an OpenCore package.
 
   Args:
+    opencore_pkg: The path to the OpenCore package.
     resolvers: The build configuration resolvers.
-    lockfile: The build configuration lockfile.
-    target: The target EFI architecture to extract.
     *args: Additional arguments to pass to the optional iterator wrapper.
     __wrapper: A wrapper function to apply to the iterator. (Optional)
     **kwargs: Additional keyword arguments to pass to the optional iterator wrapper.
@@ -101,15 +101,26 @@ def prune_opencore_archive(opencore_pkg: PathResolver,
   if __wrapper is not None: iterator = __wrapper(iterator, *args, **kwargs)
 
   # Iterate over the entries in the extracted OpenCore package
-  bundled = set(v['__filepath'] for v in resolvers if v['specifier'] == '*')
-  for path in iterator:
+  extract_entries = {}
+  bundled = list(filter(lambda e: e['specifier'] == '*', resolvers))
+  for category, path in iterator:
     # Include only binaries that are specified as bundled in the build config
-    if any(str(p).find(path) != -1 for p in bundled):
-      #TODO: Add entry under OpenCore's `bundled` property
-      bundled.discard(path)
-      prune_resolver_entry(resolvers, key='name', value=PathResolver(path).stem)
+    matches = filter(lambda e: str(e['__filepath']).find(path) > 0, bundled)
+    if entry := next(matches, None):
+      filepath = PathResolver(entry['__filepath']).as_posix()
+      prune_resolver_entry(resolvers, key='__filepath', value=filepath)
+      # Add the entry to the extracted entries
+      relative = f'.{path.rsplit(category, maxsplit=1)[1]}'
+      name = nested_get(entry, ['name'], default=PathResolver(path).stem)
+      nested_set(extract_entries, [entry['__category'], name], {
+        '__dest': PathResolver(filepath),
+        '__extracted': PathResolver(opencore_pkg.joinpath(path)),
+        '__path': relative
+      })
     else:
       remove(opencore_pkg.joinpath(path))
+
+  return extract_entries
 
 def get_opencore_checksum(file_path: Union[str, PathResolver],
                           algorithm=sha256
@@ -174,6 +185,6 @@ __all__ = [
   # Functions (4)
   "extract_opencore_archive",
   "extract_ocbinary_archive",
-  "prune_opencore_archive",
+  "extract_build_entries",
   "get_opencore_checksum"
 ]

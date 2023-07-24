@@ -4,20 +4,16 @@
 ##
 """Methods for handling and manipulating the build configuration."""
 
-from functools import reduce
-from itertools import chain
 from shutil import unpack_archive
 from tempfile import mkdtemp
 
 from typing import Iterator, List, Optional, Tuple
 
-from ocebuild.filesystem import copy, glob, remove
+from ocebuild.filesystem import copy
 from ocebuild.filesystem.archives import extract_archive
 from ocebuild.filesystem.cache import UNPACK_DIR
-from ocebuild.parsers.dict import merge_dict, nested_del, nested_get, nested_set
+from ocebuild.parsers.dict import nested_get, nested_set
 from ocebuild.parsers.yaml import parse_yaml
-from ocebuild.pipeline import kexts, ssdts
-from ocebuild.pipeline.lock import _category_extension
 from ocebuild.sources.resolver import PathResolver
 
 
@@ -121,105 +117,9 @@ def unpack_build_entries(resolvers: List[dict],
 
   return extracted
 
-def _iterate_extract_packages(unpacked_entries: dict):
-  """Iterate over the entries in the build configuration."""
-  def group_entries(category: str, entries: dict):
-    return [(category, name, tmpdir) for name, tmpdir in entries.items()]
-  return list(chain(*[group_entries(c,e) for c,e in unpacked_entries.items()]))
-
-def extract_build_packages(build_vars: dict,
-                           lockfile: dict,
-                           unpacked_entries: dict,
-                           build_dir: PathResolver,
-                           *args,
-                           __wrapper: Optional[Iterator]=None,
-                           **kwargs
-                           ) -> dict:
-  """Extracts packages from unpacked package entries."""
-
-  # Handle interactive mode for iterator
-  iterator = _iterate_extract_packages(unpacked_entries)
-  if __wrapper is not None: iterator = __wrapper(iterator, *args, **kwargs)
-
-  extracted = {}
-  for (category, name, tmpdir) in iterator:
-    ext, _ = _category_extension(category)
-    # Extract SSDTs from the archive
-    if   category == 'ACPI':
-      extract = ssdts.extract_ssdts(tmpdir)
-    # Extract kexts from the archive
-    elif category == 'Kexts':
-      build = nested_get(lockfile, ['dependencies', name, 'build'],
-                          default=build_vars['variables']['build'])
-      extract = kexts.extract_kexts(tmpdir, build=build)
-      # Filter out plugins that are not bundled
-      for k_name, kext in extract.copy().items():
-        # Exclude plugins that are already bundled
-        is_plugin = '.kext/' in kext['__path']
-        if is_plugin:
-          nested_del(extract, [k_name])
-        else: continue
-        # Prune implicitly excluded plugins
-        if (bundled := kext.get('bundled')):
-          if k_name not in bundled:
-            remove(kext['__extracted'])
-    # Extract drivers or tools from the archive
-    elif category in ('Drivers', 'Tools'):
-      extract = {}
-      for binary_path in glob(tmpdir, f'**/*{ext}'):
-        extracted_path = f'.{binary_path.as_posix().split(tmpdir.as_posix())[1]}'
-        extract[binary_path.name] = {
-          '__path': binary_path,
-          '__extracted': extracted_path
-        }
-    # Extract resources from the archive
-    elif category == 'Resources':
-      pass
-
-    # Update extracted paths
-    for k,e in extract.items():
-      e_name = name if len(extract) == 1 else k
-      e['__dest'] = build_dir.joinpath('EFI', 'OC', category, f'{e_name}{ext}')
-      nested_set(extracted, [category, e_name], e)
-
-  return extracted
-
-def _iterate_prune_packages(extracted_entries: dict):
-  """Iterate over the entries in the build configuration."""
-  def group_entries(category: str, entries: dict):
-    return [(category, name, entry) for name, entry in entries.items()]
-  return list(chain(*[group_entries(c,e) for c,e in extracted_entries.items()]))
-
-def prune_build_packages(build_config: dict,
-                         extracted_entries: dict,
-                         *args,
-                         __wrapper: Optional[Iterator]=None,
-                         **kwargs
-                         ) -> dict:
-  """Prunes the build configuration of entries that were not extracted."""
-
-  # Create list of entry names and their bundled package names
-  entries = reduce(merge_dict, [
-    { c: (k, *nested_get(e, ['bundled'], default=[])) }
-      for c,d in build_config.items()
-        for k,e in d.items()
-  ], {})
-
-  # Handle interactive mode for iterator
-  iterator = _iterate_prune_packages(extracted_entries)
-  if __wrapper is not None: iterator = __wrapper(iterator, *args, **kwargs)
-
-  for category, name, entry in iterator:
-    # Prune extracted entries that are not in the build configuration
-    if not name in nested_get(entries, [category], default=()):
-      nested_del(extracted_entries, [category, name])
-      remove(entry['__extracted'])
-
 
 __all__ = [
-  # Functions (4)
+  # Functions (2)
   "read_build_file",
-  "unpack_build_entries",
-  "extract_build_packages",
-  "prune_build_packages"
+  "unpack_build_entries"
 ]

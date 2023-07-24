@@ -48,7 +48,6 @@ def extract_kexts(directory: Union[str, PathResolver],
     kexts[kext_path.stem] = {
       "__path": extract_path,
       "__extracted": kext_path,
-      "plist": plist_path,
     }
 
   # Filter build targets if provided in extract path

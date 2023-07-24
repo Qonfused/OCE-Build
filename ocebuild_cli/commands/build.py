@@ -6,18 +6,18 @@
 ##
 """CLI entrypoint for the build command."""
 
-from os import getcwd
+from os import getcwd, makedirs
 
 from typing import List, Tuple, Union
 
 import click
 
-from ocebuild.filesystem import glob, remove
-from ocebuild.filesystem.cache import UNPACK_DIR
-from ocebuild.parsers.dict import nested_get, nested_del
-from ocebuild.pipeline import config, kexts, opencore, ssdts
+from ocebuild.filesystem import copy, glob, remove
+from ocebuild.filesystem.cache import clear_cache, UNPACK_DIR
+from ocebuild.parsers.dict import merge_dict, nested_del, nested_get
 from ocebuild.pipeline.build import *
-from ocebuild.pipeline.lock import prune_resolver_entry
+from ocebuild.pipeline.packages import *
+from ocebuild.pipeline.packages import _iterate_extract_packages
 from ocebuild.sources.resolver import PathResolver
 
 from ocebuild_cli._lib import cli_command
@@ -57,19 +57,8 @@ def get_build_file(cwd: Union[str, PathResolver]
 
   return build_config, build_vars, flags, BUILD_FILE, PROJECT_DIR
 
-def unpack_packages(build_config: dict,
-                    build_vars: dict,
-                    lockfile: dict,
-                    resolvers: List[dict],
-                    project_dir: PathResolver,
-                    build_dir: PathResolver
-                    ) -> dict:
-  """Unpacks and extracts packages to a temporary directory."""
-
-  # Track total number of extracted build entries
-  total_extracted = 0
-
-  # Handle unpacking build packages from the resolvers
+def unpack_packages(resolvers: List[dict], project_dir: PathResolver) -> dict:
+  """Unpacks packages to a temporary directory."""
   debug(f"Unpacking packages to {UNPACK_DIR}")
   with Progress() as progress:
     bar = progress_bar('Unpacking packages', wrap=progress)
@@ -78,56 +67,89 @@ def unpack_packages(build_config: dict,
                                             # Interactive arguments
                                             __wrapper=bar)
   num_unpacked = len([k for e in unpacked_entries.values() for k in e.keys()])
-  info(f'Unpacked {num_unpacked} packages from lockfile.')
+  if num_unpacked:
+    success(f'Unpacked {num_unpacked} packages from lockfile.')
 
-  # Extract the OpenCore package to the output directory
-  if opencore_pkg := nested_get(unpacked_entries, ['OpenCorePkg', 'OpenCore']):
+  return unpacked_entries
+
+def extract_packages(build_vars: dict,
+                     lockfile: dict,
+                     resolvers: List[dict],
+                     packages: dict,
+                     build_dir: PathResolver,
+                     ) -> Tuple[Union[PathResolver, None], dict]:
+  """Extracts packages for build entries satisfying the build configuration."""
+  extracted_entries = {}
+  def count(d: dict): return len([k for e in d.values() for k in e.keys()])
+
+  # Include build entries from the OpenCore package as (vendored) packages
+  if opencore_pkg := nested_get(packages, ['OpenCorePkg', 'OpenCore']):
     with Progress() as progress:
-      bar1 = progress_bar('Extracting OpenCore package', wrap=progress)
-      target = build_vars['variables']['target']
-      opencore_pkg = opencore.extract_opencore_archive(pkg=opencore_pkg,
-                                                       target=target)
-      # Extract additional OpenCore binaries not shipped in the main package
-      if binary_pkg := nested_get(unpacked_entries, ['OpenCorePkg', 'OcBinaryData']):
-        opencore.extract_ocbinary_archive(pkg=binary_pkg, oc_pkg=opencore_pkg)
-      # Prune remaining files from the OpenCore package
-      prev_len = len(resolvers)
-      opencore.prune_opencore_archive(opencore_pkg, resolvers,
-                                      # Interactive arguments
-                                      __wrapper=bar1)
+      bar = progress_bar('Extracting OpenCore package', wrap=progress)
+      extracted = extract_opencore_packages(opencore_pkg,
+                                            target=build_vars['variables']['target'],
+                                            resolvers=resolvers,
+                                            packages=packages)
+      extracted_entries = merge_dict(extracted_entries, extracted)
     # Show the extracted OpenCore package version
     entry = nested_get(lockfile, ['dependencies', 'OpenCorePkg', 'OpenCore'])
     success(f"Extracted OpenCore package [cyan]v{entry['version']}[/cyan].",
             highlight=False)
-    # Report the number of entries pruned from the OpenCore package
-    if diff := prev_len - len(resolvers):
-      total_extracted += diff
-      info(f"Extracted {diff} build entries from OpenCore package.")
-    # Cleanup resolver entries
-    prune_resolver_entry(resolvers, key='__category', value='OpenCorePkg')
-    nested_del(unpacked_entries, ['OpenCorePkg'])
+    # Report the number of entries bundled with the OpenCore package
+    info(f"Extracted {count(extracted)} build entries from OpenCore package.")
 
-  # Extract remaining packages to the output directory
-  if unpacked_entries:
+  # Extract remaining packages
+  if packages:
     with Progress() as progress:
-      # Extract and parse metadata from each unpacked package
-      bar1 = progress_bar('Extracting build packages', wrap=progress)
-      extracted = extract_build_packages(build_vars, lockfile, unpacked_entries,
+      bar = progress_bar('Extracting packages', wrap=progress)
+      extracted = extract_build_packages(build_vars, resolvers, packages,
                                          build_dir=build_dir,
                                          # Interactive arguments
-                                         __wrapper=bar1)
-      # Prune extracted entries based on the build configuration
-      prune_build_packages(build_config, extracted,
-                           # Interactive arguments
-                           __wrapper=bar1)
-    if extracted:
-      num_extracted = len([k for e in extracted.values() for k in e.keys()])
-      total_extracted += num_extracted
-      info(f"Extracted {num_extracted} build entries from lockfile.")
+                                         __wrapper=bar)
+      extracted_entries = merge_dict(extracted_entries, extracted)
+    info(f"Extracted {count(extracted)} build entries from lockfile.")
 
-  success(f"Extracted {total_extracted} total build entries.")
+  return opencore_pkg, extracted_entries
 
-  return extracted
+def extract_build_directory(opencore_pkg: Union[str, PathResolver],
+                            extracted_entries: dict,
+                            build_dir: PathResolver
+                            ) -> None:
+  """Extracts all package-extracted build entries to the build directory."""
+
+  with Progress() as progress:
+    # Extract OpenCore package to build directory (without vendored packages)
+    if opencore_pkg:
+      remaining_categories = set(extracted_entries.keys())
+      bar1 = progress.add_task("Moving OpenCore package",
+                               total=len(remaining_categories))
+      def ignore_extracted(path, _):
+        exclusions = set()
+        if (category := PathResolver(path).name) in remaining_categories:
+          entry = nested_get(extracted_entries, [category])
+          exclusions |= set(e['__extracted'].name for e in entry.values())
+          remaining_categories.remove(category)
+          progress.update(bar1, advance=1)
+        return exclusions
+      copy(opencore_pkg, build_dir, ignore=ignore_extracted, dirs_exist_ok=True)
+
+    # Move build entries to the build directory
+    bar2 = progress_bar('Moving build entries', wrap=progress)
+    iterator = bar2(_iterate_extract_packages(extracted_entries))
+    for category, name, entry in iterator:
+      dest = entry['__dest']
+      src = entry['__extracted']
+      # Move and overrite existing files
+      if dest.exists(): remove(dest)
+      copy(src, dest)
+      # Remove the entry if it failed to copy
+      if not dest.exists():
+        nested_del(extracted_entries, [category, name])
+
+  # Clean up the temporary directory
+  clear_cache(cache_dirs=[UNPACK_DIR])
+
+  return extracted_entries
 
 
 @cli_command(name='build')
@@ -169,6 +191,10 @@ def cli(env, cwd, out, clean, update, force):
     except Exception: #pylint: disable=broad-exception-caught
       abort(f"Failed to clean the output directory ('{BUILD_DIR}')",
             'Check the output directory permissions.')
+    else:
+      makedirs(BUILD_DIR, exist_ok=True)
+      if not any(BUILD_DIR.iterdir()):
+        success(f"Cleaned the output directory at '{BUILD_DIR}'.")
 
   # Read the build configuration
   build_config, build_vars, flags, *_, PROJECT_DIR = get_build_file(cwd)
@@ -187,20 +213,30 @@ def cli(env, cwd, out, clean, update, force):
   has_pending_build = any(e['specifier'] != '*' and not e['__filepath'].exists()
                           for e in resolvers)
   if not (has_pending_build or BUILD_DIR.exists()):
-    echo("\n".join(('\n[white]Nothing to build.[/white]',
-                  'Try running with --update or --force to regenerate a build.')),
-         log=True)
+    echo('\n[white]Nothing to build.[/white]',
+         '\nTry running with --update or --force to regenerate a build.',
+         log=False)
     exit(0)
 
-  # Unpack all build entries to a temporary directory
-  extracted = unpack_packages(build_config, build_vars, lockfile, resolvers,
-                              project_dir=PROJECT_DIR,
-                              build_dir=BUILD_DIR)
+  # Extract all build entries to a temporary directory
+  packages = unpack_packages(resolvers, project_dir=PROJECT_DIR)
+  opencore_pkg, extracted = extract_packages(build_vars, lockfile, resolvers,
+                                             packages=packages,
+                                             build_dir=BUILD_DIR)
+  # Move build entries to the build directory
+  extract_build_directory(opencore_pkg, extracted, build_dir=BUILD_DIR)
+  if extracted:
+    num_extracted = len([k for e in extracted.values() for k in e.keys()])
+    success(f"Extracted {num_extracted} build entries to '{BUILD_DIR}'.")
+
+  #TODO: Call the patch command to apply config.plist patches
 
 
 __all__ = [
-  # Functions (3)
+  # Functions (5)
   "get_build_file",
   "unpack_packages",
+  "extract_packages",
+  "extract_build_directory",
   "cli"
 ]

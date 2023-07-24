@@ -14,7 +14,7 @@ from tempfile import mkdtemp, NamedTemporaryFile
 
 from typing import Callable, Generator, List, Optional, Union
 
-from ocebuild.filesystem import glob
+from ocebuild.filesystem import glob, remove
 from ocebuild.filesystem.cache import CACHE_DIR, UNPACK_DIR
 from ocebuild.parsers.asl import parse_ssdt_namespace
 from ocebuild.sources import request
@@ -65,7 +65,7 @@ def extract_iasl_binary(url: Optional[str]=None,
     yield partial(wrap_binary, binary_path=file.name)
   finally:
     # Cleanup after context exits
-    if not persist: unlink(extract_dir)
+    if not persist: remove(extract_dir)
 
 @contextmanager
 def iasl_wrapper(cache: bool=True
@@ -97,7 +97,7 @@ def iasl_wrapper(cache: bool=True
     yield iasl
   finally:
     if tmp_wrapper and not cache:
-      PathResolver(iasl.keywords['binary_path']).unlink()
+      remove(iasl.keywords['binary_path'])
 
 @contextmanager
 def translate_ssdts(filepaths: List[Union[str, PathResolver]],
@@ -176,16 +176,19 @@ def extract_ssdts(directory: Union[str, PathResolver]) -> dict:
   """Extracts the metadata of all SSDTs in a directory."""
   ssdts = {}
   ssdt_paths = glob(directory, '**/*.aml', include='**/*.dsl')
-  with translate_ssdts(ssdt_paths, directory, persist=True) as translated_ssdts:
+  with translate_ssdts(ssdt_paths, UNPACK_DIR, persist=True) as translated_ssdts:
     for ssdt_path in filter(lambda p: p.suffix == '.aml', translated_ssdts):
-      extract_path = f'.{ssdt_path.as_posix().split(directory.as_posix())[1]}'
-      source_path = PathResolver(str(ssdt_path).replace('.aml', '.dsl'))
+      name = ssdt_path.stem
+      source_path = next(filter(lambda p: p.stem == name, ssdt_paths))
+      relative = f'.{source_path.as_posix().split(directory.as_posix())[1]}'
       # Update ssdt dictionary
-      ssdts[ssdt_path.stem] = {
-        "__path": ssdt_path,
-        "__extracted": extract_path,
-        "source": source_path
+      ssdts[name] = {
+        "__extracted": ssdt_path,
+        "__path": relative
       }
+      # Cleanup
+      source_path = PathResolver(str(ssdt_path).replace('.aml', '.dsl'))
+      remove(source_path)
 
   return ssdts
 
