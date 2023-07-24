@@ -8,14 +8,14 @@ from collections import OrderedDict
 from contextlib import contextmanager
 from functools import partial
 from graphlib import TopologicalSorter
-from os import unlink
+from os import makedirs, unlink, SEEK_END
 from shutil import copyfile, rmtree, which
 from tempfile import mkdtemp, NamedTemporaryFile
 
 from typing import Callable, Generator, List, Optional, Union
 
 from ocebuild.filesystem import glob
-from ocebuild.filesystem.cache import UNPACK_DIR
+from ocebuild.filesystem.cache import CACHE_DIR, UNPACK_DIR
 from ocebuild.parsers.asl import parse_ssdt_namespace
 from ocebuild.sources import request
 from ocebuild.sources.binary import get_binary_ext, wrap_binary
@@ -31,31 +31,41 @@ def extract_iasl_binary(url: Optional[str]=None,
   """Extracts an iasl binary and yields a subprocess wrapper.
 
   Args:
-    url: The URL to the iasl binary.
-    cache: Whether to cache the extracted iasl binary.
-    persist: Whether to persist the extracted binary.
+    url: The URL to the iasl binary. If not provided, the URL will be
+        automatically retrieved based on the current platform.
+    cache: Whether to cache the extracted iasl binary for subsequent calls.
+    persist: Whether to persist the binary wrapper outside the current context.
 
   Yields:
     A subprocess wrapper for the extracted iasl binary.
   """
   binary = f'iasl{get_binary_ext()}'
-  tmp_file = NamedTemporaryFile(suffix=f'-{binary}',
-                                delete=not cache,
-                                dir=UNPACK_DIR)
+  extract_dir = CACHE_DIR.joinpath('iasl')
   try:
-    # Fetch the iasl binary appropriate for the current platform
-    if not url:
-      url = github_file_url('Qonfused/iASL', path=binary, raw=True)
-    # Fetch and extract the iasl binary to a temporary file
-    with request(url) as response:
-      tmp_file.seek(0)
-      tmp_file.write(response.read())
-      tmp_file.close()
+    # Create a temporary file to store the iasl binary
+    makedirs(extract_dir, exist_ok=True)
+    if cache:
+      filepath = extract_dir.joinpath(binary)
+      mode = 'w+b' if not filepath.exists() else 'r+b'
+      file = open(extract_dir.joinpath(binary), mode)
+    else:
+      file = NamedTemporaryFile(suffix=f'-{binary}', dir=extract_dir)
+    file.seek(0, SEEK_END)
+    # Download the iasl binary if the file is empty
+    if not file.tell():
+      # Fetch the iasl binary appropriate for the current platform
+      if not url:
+        url = github_file_url('Qonfused/iASL', path=binary, raw=True)
+      # Fetch and extract the iasl binary to a temporary file
+      with request(url) as response:
+        file.seek(0)
+        file.write(response.read())
+        file.close()
     # Yield a wrapper over the iasl binary
-    yield partial(wrap_binary, binary_path=tmp_file.name)
+    yield partial(wrap_binary, binary_path=file.name)
   finally:
     # Cleanup after context exits
-    if not persist: unlink(tmp_file.name)
+    if not persist: unlink(extract_dir)
 
 @contextmanager
 def iasl_wrapper(cache: bool=True
@@ -79,14 +89,14 @@ def iasl_wrapper(cache: bool=True
       iasl = partial(wrap_binary, binary_path=path)
     # Otherwise, extract a temporary iasl binary
     elif not tmp_wrapper:
-      with extract_iasl_binary(cache=True, persist=True) as tmp_wrapper:
+      with extract_iasl_binary(cache=cache, persist=True) as tmp_wrapper:
         iasl = tmp_wrapper
     #TODO: Add option to provide -da or -e flag w/ user-provided DSDT/SSDTs
     # @see https://www.tonymacx86.com/threads/guide-patching-laptop-dsdt-ssdts.152573/
     # @see https://github.com/acpica/acpica/issues/414#issuecomment-432378819
     yield iasl
   finally:
-    if tmp_wrapper:# and not cache:
+    if tmp_wrapper and not cache:
       PathResolver(iasl.keywords['binary_path']).unlink()
 
 @contextmanager
