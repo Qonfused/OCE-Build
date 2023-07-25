@@ -13,31 +13,43 @@ from ocebuild.sources.resolver import PathResolver
 
 
 def read_config(filepath: str,
+                frontmatter: bool=False,
                 flags: Optional[List[str]]=None
-                ) -> Tuple[Dict, Union[Dict, None]]:
+                ) -> Tuple[dict, Union[dict, None]]:
   """Reads a configuration file.
 
   Args:
     filepath: The path to the configuration file.
+    frontmatter: Whether to include the file's frontmatter.
     flags: The flags to apply to the configuration file.
 
   Raises:
     ValueError: If the file extension is not supported.
 
   Returns:
-    A tuple containing:
+    The configuration file.
+
+    If `frontmatter` is `True`, a tuple containing:
       - The configuration file.
       - The frontmatter of the configuration file.
   """
+  if not flags: flags = []
   with open(filepath, 'r', encoding='UTF-8') as f:
     file_ext = PathResolver(filepath).suffix
     if   file_ext in ('.plist'):
-      file, frontmatter = parse_plist(f), None
+      file = parse_plist(f)
+      if frontmatter:
+        return file, None
     elif file_ext in ('.yml', '.yaml'):
-      file, frontmatter = parse_yaml(f, flags=flags or [], frontmatter=True)
+      if frontmatter:
+        file, frontmatter = parse_yaml(f, flags=flags, frontmatter=True)
+        return file, frontmatter
+      else:
+        file = parse_yaml(f, flags=flags)
     else:
       raise ValueError(f"Unsupported file extension: {file_ext}")
-  return file, frontmatter
+
+  return file
 
 def apply_preprocessor_tags(a: dict,
                             b: dict,
@@ -137,7 +149,7 @@ def merge_configs(base: Union[str, PathResolver],
 
   # Parse config patches
   for filepath in patches:
-    patch, frontmatter = read_config(filepath, flags=flags)
+    patch, frontmatter = read_config(filepath, flags=flags, frontmatter=True)
     if isinstance(frontmatter, dict):
       flags += nested_get(frontmatter, ['flags'], default=[])
       if tags := nested_get(frontmatter, ['tags']):

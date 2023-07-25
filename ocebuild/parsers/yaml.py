@@ -78,6 +78,12 @@ def write_yaml_types(value: Union[Tuple[str, any], any],
   stype, svalue = type(value).__name__, value
   if isinstance(value, tuple): stype, svalue = value
 
+  def _format_data(data, pad=8):
+    """Formats data into hex strings"""
+    string = decode_data(data, enc='hex')
+    hex_fmt = ' '.join(string[i:i+pad] for i in range(0,len(string), pad))
+    return f"<{ hex_fmt }>"
+
   if schema == 'annotated':
     # Parse native types
     if   stype == 'date':
@@ -85,7 +91,7 @@ def write_yaml_types(value: Union[Tuple[str, any], any],
     elif stype in ('bool', 'boolean'):
       stype = 'Boolean'; svalue = str(svalue).lower()
     elif stype in ('bytes', 'data'):
-      stype = 'Data   '; svalue = f"<{decode_data(svalue, enc='hex')}>"
+      stype = 'Data   '; svalue = _format_data(svalue)
     elif stype in ('dict', 'dictionary'):
       stype = 'Dict   '; svalue = '(empty)'
     elif stype == 'float':
@@ -346,8 +352,20 @@ def write_yaml(config: dict,
         # Append value to entry
         stype, svalue = write_yaml_types(value, schema)
         if schema == 'annotated':
+          as_literal = False
           indent = max_tree_len - (cursor['indent']*j + len(f"{key}:"))
-          entry = f'{padding}{key}:{" ".rjust(indent + 1)}{stype} | {svalue}'
+          # Add indentation for comments
+          if key.startswith('#'):
+            comment_key = key[1:].split()[0].lower()
+            if comment_key in ('warning', 'comment'):
+              as_literal = True
+            else:
+              indent += 2 if key[:2] == '# ' else 1
+          # Format indentation-aligned entries
+          if as_literal:
+            entry = f'{padding}{key}: {value}'
+          else:
+            entry = f'{padding}{key}:{" ".rjust(indent + 1)}{stype} | {svalue}'
         elif schema == 'yaml':
           entry = f'{padding}{key}: {svalue}'.rstrip()
       # Add new dict

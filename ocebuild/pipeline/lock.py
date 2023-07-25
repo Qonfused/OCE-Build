@@ -227,13 +227,19 @@ def parse_specifier(name: str,
   # No resolver matched
   return None
 
-def read_lockfile(lockfile_path: str) -> Tuple[dict, dict]:
+def read_lockfile(lockfile_path: str,
+                  metadata: bool=False
+                  ) -> Union[dict, Tuple[dict, dict]]:
   """Reads a lockfile from the specified path."""
   with open(lockfile_path, 'r', encoding='UTF-8') as f:
     lockfile, frontmatter = parse_yaml(f, frontmatter=True)
-  metadata = nested_get(frontmatter, ['metadata'], default={})
 
-  return lockfile, metadata
+  # Include lockfile metadata if specified
+  if metadata:
+    metadata = nested_get(frontmatter, ['metadata'], default={})
+    return lockfile, metadata
+
+  return lockfile
 
 def write_lockfile(lockfile_path: str,
                    lockfile: dict,

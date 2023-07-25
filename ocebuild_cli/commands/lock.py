@@ -138,7 +138,7 @@ def get_lockfile(cwd: Union[str, PathResolver],
   if LOCK_FILE.exists():
     info(msg=f"Found lockfile at '{LOCK_FILE.relative(cwd)}'.")
     try:
-      lockfile, metadata = read_lockfile(lockfile_path=LOCK_FILE)
+      lockfile, metadata = read_lockfile(lockfile_path=LOCK_FILE, metadata=True)
     except Exception as e: #pylint: disable=broad-exception-caught
       error(msg=f"Encountered an error while reading '{LOCK_FILE.name}': {e}",
             hint="Try running `ocebuild lock` first.")
