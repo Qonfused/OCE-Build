@@ -21,14 +21,14 @@ def _extract_key(command: str, string: str, sol='^') -> Union[str, None]:
   return re_search(f'{sol}\{command}\{{(.*?)\}}', string, group=1)
 
 def _extract_value(command: str,
-                  string: str,
-                  key: str,
-                  eol='\\\\\\\\'
-                  ) -> Union[str, None]:
+                   string: str,
+                   key: str,
+                   eol='\\\\\\\\'
+                   ) -> Union[str, None]:
   """Extracts a key value from a line."""
   ln = re_search(f'\{command}\{{{key}\}}:\s?(.*){eol}$', string, group=1)
-  if not eol: return ln
-  return _extract_key(command='\.*?', string=ln, sol='') or ln if ln else None
+  if not ln or not eol: return ln
+  return _extract_key(command='\.*?', string=ln.strip(), sol='^') or ln
 
 def _parse_failsafe(stype: str,
                     svalue: str
