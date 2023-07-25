@@ -84,7 +84,7 @@ help    = "Runs the lint command only on changed files."
 
 [tool.pytest.ini_options]
 addopts           = "-rfEX --strict-markers"
-# filterwarnings = [ "ignore::DeprecationWarning" ]
+filterwarnings = [ "ignore:invalid escape sequence:DeprecationWarning" ]
 norecursedirs     = [ "ci", "dist", "docs", "scripts" ]
 python_files      = [ "*_test.py" ]
 python_functions  = [ "test_*" ]

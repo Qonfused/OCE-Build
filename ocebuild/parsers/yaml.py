@@ -6,9 +6,6 @@
 
 #pylint: disable=cell-var-from-loop
 
-#TODO: Refactor to use regex parsers
-
-import re
 from datetime import datetime
 from shlex import split
 
@@ -16,6 +13,7 @@ from typing import List, Literal, Optional, Tuple, Union
 
 from ._lib import _append_tags, _apply_macro, update_cursor
 from .dict import flatten_dict, nested_get, nested_set
+from .regex import re_search
 from .types import decode_data, encode_data
 
 
@@ -55,7 +53,7 @@ def parse_yaml_types(stype: str,
     elif stype == 'String':
       svalue = value
     # Handle generic or string types
-    if isinstance(svalue, str) and svalue[0] in ('"', "'"):
+    if isinstance(svalue, str) and svalue[:1] in ('"', "'"):
       svalue = svalue[1:-1]
     return svalue
   elif schema == 'yaml':
@@ -315,7 +313,7 @@ def write_yaml(config: dict,
       # Avoid parsing literal array indices
       if isinstance(tree[j], int): continue
       # Insert array indices as additional keys
-      elif (re_match := re.search(r'(.*)\[([0-9]+)\]', key)):
+      elif (re_match := re_search(r'(.*)\[([0-9]+)\]', key, group=None)):
         key, idx = re_match.groups()
         tree[j] = key
         tree[j+1:j+1] = [int(idx)]
