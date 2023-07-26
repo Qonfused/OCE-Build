@@ -6,7 +6,7 @@
 
 from functools import partial
 
-from typing import Union
+from typing import Set, Tuple, Union
 
 from ocebuild.parsers.dict import nested_get, nested_set
 from ocebuild.parsers.plist import parse_plist
@@ -16,19 +16,13 @@ from ocebuild.sources import request
 from ocebuild.sources.github import github_file_url
 
 
-def _extract_key(command: str, string: str, sol='^') -> Union[str, None]:
-  """Extracts a key value from a line."""
-  return re_search(f'{sol}\{command}\{{(.*?)\}}', string, group=1)
+def _normalize_entry(entry: str) -> str:
+  """Normalizes indentation errors."""
+  lines = []
+  for i, e in enumerate(entry.split('\n\n\n\n')):
+    lines.append(e.replace('\n\n  ', ' ' if i else '\n').strip())
 
-def _extract_value(command: str,
-                   string: str,
-                   key: str,
-                   eol='\\\\\\\\'
-                   ) -> Union[str, None]:
-  """Extracts a key value from a line."""
-  ln = re_search(f'\{command}\{{{key}\}}:\s?(.*){eol}$', string, group=1)
-  if not ln or not eol: return ln
-  return _extract_key(command='\.*?', string=ln.strip(), sol='^') or ln
+  return "\n\n".join(lines)
 
 def _parse_failsafe(stype: str,
                     svalue: str
@@ -67,77 +61,118 @@ def _parse_failsafe(stype: str,
 
   return value
 
-def _parse_key_entry(cursor: dict, schema: dict, sample: dict):
-  """Add value to the schema if all required attributes are present"""
-  if (key := cursor['key']) and (stype := cursor['type']):
+################################################################################
+#                               LaTeX Parsing Macros                           #
+################################################################################
 
-    # Set default allowlist based on parent key
-    valid = set(cursor['tree'][-1:])
-    invalid = set()
+def _extract_command(line: str) -> Union[str, None]:
+  """Extracts a LaTeX command from a line."""
+  if line[:1] == '\\' and (command_match := line.split('{', 1)[0])[1:]:
+    # Handle match on labels, etc
+    if command_match.count('\\') > 1:
+      return command_match.split(maxsplit=1)[0]
+    # Default to prefix match
+    return command_match
+  else:
+    # No match
+    return None
 
-    # Parse description for any inconsistencies
-    if desc := cursor['description']:
-      desc = desc \
-        .replace('\n\n', '<\\n\\n>') \
-        .replace('\n', ' ') \
-        .replace('<\\n\\n>', '\n\n')
-      cursor['description'] = desc
+def _extract_key(command: str, string: str, sol='^') -> Union[str, None]:
+  """Extracts a key value from a line."""
+  return re_search(f'{sol}\{command}\{{(.*?)\}}', string, group=1)
 
-      # Parse description for exclusion/inclusion rules
-      valid_pattern = r'\\emph\{Note\}: This option is only valid for \\texttt\{(.*?)\}'
-      if valid_match := re_search(valid_pattern, desc, group=1):
-        valid = set((valid_match,))
-      invalid_pattern = valid_pattern + r' and cannot be specified for \\texttt\{(.*?)\}'
-      if invalid_match := re_search(invalid_pattern, desc, group=2):
-        invalid = set((invalid_match,))
+def _extract_value(command: str,
+                   string: str,
+                   key: str,
+                   eol='\\\\\\\\'
+                   ) -> Union[str, None]:
+  """Extracts a key value from a line."""
+  ln = re_search(f'\{command}\{{{key}\}}:\s?(.*){eol}$', string, group=1)
+  if not ln or not eol: return ln
+  return _extract_key(command='\.*?', string=ln.strip(), sol='^') or ln
 
-    def add_entry(tree: list):
-      """Parse and add failsafe values"""
+def _parse_attributes(line: str, key: str) -> str:
+  skey = key.replace('\\', '\\\\')
+  if attr := re_search(f'\{{{skey}\}},?\s?(.*?)\\\\\\\\$', line, group=1):
+    key += f", {attr}"
+  return key
 
-      # Ensure that the parent entry is a valid target
-      nonlocal valid, invalid; pkey = tree[-1]
-      if pkey not in valid and pkey in invalid: return
+################################################################################
+#                              Schema Parsing Macros                           #
+################################################################################
 
-      # Parse failsafe value
-      nonlocal key, stype; svalue = cursor['value'] or 'Empty'
-      entry = _parse_failsafe(stype, svalue)
-
-      # Ensure that the parent entry exists in the schema
-      parent_entry = nested_get(schema, tree, default={})
-      if not parent_entry: nested_set(schema, tree, {})
-
-      if   isinstance(parent_entry, dict):
-        nested_set(schema, (*tree, key), entry)
-      elif isinstance(parent_entry, list):
-        # Only one dict entry is allowed per array
-        if not parent_entry: parent_entry = [{}]
-        parent_entry[0][key] = entry
-        nested_set(schema, tree, parent_entry)
-
-    # Attempt to fix values inconsistent with the sample plist
-    tree = cursor['tree'].copy()
-    try:
-      if not nested_get(sample, tree):
-        # 'Entry Properties' has an inconsistent name
-        if tree == ['Misc', 'Entry']:
-          tree[-1] = 'Entries'
-          # These properties are also applicable to `Misc.Tools`
-          add_entry(('Misc', 'Tools'))
-        # 'Memory Device Properties' has an inconsistent name
-        if tree == ['PlatformInfo', 'Memory', 'Device']:
-          tree[-1] = 'Devices'
-        else:
-          raise KeyError(tree[-1])
-    except: pass
-
-    # Add entry to the schema
-    add_entry(tree)
-
-  # Reset values
+def _reset_key_entry(cursor: dict):
+  """Resets the cursor's key attributes."""
   cursor['key'] = None
   cursor['type'] = None
   cursor['value'] = None
-  cursor['description'] = None
+  cursor['entry'] = None
+
+def _parse_key_entry(cursor: dict, schema: dict, sample: dict):
+  """Add value to the schema if all required attributes are present"""
+
+  tree = cursor['tree'].copy()
+  queue = [tree]
+
+  # Attempt to fix values inconsistent with the sample plist
+  if not nested_get(sample, tree):
+    # 'Entry Properties' has an inconsistent name
+    if tree == ['Misc', 'Entry']:
+      tree[-1] = 'Entries'
+      # These properties are also applicable to `Misc.Tools`
+      queue += [('Misc', 'Tools')]
+    # 'Memory Device Properties' has an inconsistent name
+    if tree == ['PlatformInfo', 'Memory', 'Device']:
+      tree[-1] = 'Devices'
+
+  # Add entries to the schema
+  for tree_ in queue: _add_schema_entry(tree_, cursor, schema)
+
+def _parse_exclusion_rules(cursor: dict) -> Tuple[Set[str], Set[str]]:
+  """Parses exclusion rules from an entry description."""
+
+  # Set default allowlist based on parent key
+  valid = set(cursor['tree'][-1:])
+  invalid = set()
+
+  if entry := cursor['entry']:
+    # Parse description for exclusion/inclusion rules
+    valid_pattern = r'\\emph\{Note\}: This option is only valid for \\texttt\{(.*?)\}'
+    if valid_match := re_search(valid_pattern, entry, group=1):
+      valid = set((valid_match,))
+    invalid_pattern = valid_pattern + r' and cannot be specified for \\texttt\{(.*?)\}'
+    if invalid_match := re_search(invalid_pattern, entry, group=2):
+      invalid = set((invalid_match,))
+
+  return valid, invalid
+
+def _add_schema_entry(tree: list, cursor: dict, schema: dict):
+  """Parse and add failsafe values"""
+
+  # Ensure that the parent entry is a valid target
+  valid, invalid = _parse_exclusion_rules(cursor)
+  pkey = tree[-1]
+  if pkey not in valid and pkey in invalid: return
+
+  # Parse failsafe value
+  key = cursor['key']
+  stype = cursor['type']
+  svalue = cursor['value'] or 'Empty'
+  entry = _parse_failsafe(stype, svalue)
+
+  # Ensure that the parent entry exists in the schema
+  parent_entry = nested_get(schema, tree, default={})
+  if not parent_entry: nested_set(schema, tree, {})
+
+  if   isinstance(parent_entry, dict):
+    nested_set(schema, (*tree, key), entry)
+  elif isinstance(parent_entry, list):
+    # Only one dict entry is allowed per array
+    if not parent_entry: parent_entry = [{}]
+    parent_entry[0][key] = entry
+    nested_set(schema, tree, parent_entry)
+
+################################################################################
 
 def get_configuration_schema(repository: str='acidanthera/OpenCorePkg',
                              branch: str = 'master',
@@ -159,81 +194,63 @@ def get_configuration_schema(repository: str='acidanthera/OpenCorePkg',
   sample_plist_url = file_url(path='Docs/Sample.plist')
 
   # Parse the configuration schema against the sample plist
+  cursor = { 'tree': [], 'key': None, 'type': None, 'value': None, 'entry': '' }
   schema = {}
   sample_plist = parse_plist(request(url=sample_plist_url).text())
-  parse_key_entry = partial(_parse_key_entry,
-                            schema=schema,
-                            sample=sample_plist)
-
   with request(url=configuration_url).text() as file:
-    cursor = {
-      'tree': [],
-      'key': None,
-      'type': None,
-      'value': None,
-      'description': None
-    }
     for line in file:
+      # Normalize line
+      lnorm = str(line.lstrip()).strip()
+      # Skip comments
+      if lnorm[:1] == '%': continue
+
+      # Use root-level commands as boundaries for key entries
+      if (line[:1] == '\\' or lnorm.startswith('\item')) and cursor['key']:
+        if (entry := cursor['entry']) and cursor['type']:
+          # Normalize entry to fix formatting inconsistencies
+          cursor['entry'] = _normalize_entry(entry)
+          # Add key entry to schema
+          _parse_key_entry(cursor, schema, sample_plist)
+        # Reset all attributes
+        _reset_key_entry(cursor)
+      # If set, continue storing the current LaTeX entry
+      elif cursor['entry']:
+        cursor['entry'] += f"\n{line}"
+
       # Parse LaTeX commands
-      lnorm = str(line).strip()
-      if lnorm[:1] == '\\' and (command := lnorm.split('{', 1)[0])[1:]:
-        # Handle match on labels, etc
-        if command.count('\\') > 1:
-          command = command.split(maxsplit=1)[0]
+      if command := _extract_command(lnorm):
         # Parse section/subsection commands
         if command in ('\section', '\subsection', '\subsubsection'):
           name: str = re_search(f'\\{command}\{{(.*?)\}}', lnorm, group=1)
-          if cursor['key']: parse_key_entry(cursor)
           # Is a section
           if command == '\section':
-            if name in sample_plist.keys():
-              cursor['tree'] = [name]
-            else:
-              cursor['tree'] = []
-              continue
+            entry = [name] if name in sample_plist.keys() else []
+            cursor['tree'] = entry
           # Is a subsection
-          elif command == '\subsection':
-            if key := re_search(r'([a-zA-Z0-9]+)\s?Properties', name, group=1):
-              cursor['tree'][1:] = [key]
-            else:
-              cursor['tree'][1:] = []
-              continue
-          elif command == '\subsubsection':
-            if key := re_search(r'([a-zA-Z0-9]+)\s?Properties', name, group=1):
-              key = key.split(maxsplit=1)[0]
-              cursor['tree'][2:] = [key]
-            else:
-              cursor['tree'][2:] = []
-              continue
-        elif not cursor['tree']: continue
+          else:
+            key = re_search(r'([a-zA-Z0-9]+)\s?Properties', name, group=1)
+            if command == '\subsection':
+              entry = [key] if key else []
+              cursor['tree'][1:] = entry
+            elif command == '\subsubsection':
+              entry = key.split(maxsplit=1)[:1] if key else []
+              cursor['tree'][2:] = entry
         # Parse property fields for keys
-        elif not cursor['description'] and command in ('\\texttt', '\\textbf'):
-          if   command == '\\texttt':
+        elif cursor['tree'] and command in ('\\texttt', '\\textbf'):
+          if command == '\\texttt':
             # Is a key name
             if key := _extract_key(command, lnorm, sol=''):
-              if not cursor['key']: cursor['key'] = key
+              if not cursor['key']:
+                cursor['key'] = key
+                cursor['entry'] = line
           elif command == '\\textbf':
             # Is a key type
-            if   stype := _extract_value(command, lnorm, key='Type'):
-              cursor['type'] = stype
-              # Append any additional attributes
-              stype = stype.replace('\\', '\\\\')
-              attr_pattern = f'\{{{stype}\}},?\s?(.*?)\\\\\\\\$'
-              if attr := re_search(attr_pattern, lnorm, group=1):
-                cursor['type'] += f", {attr}"
+            if stype := _extract_value(command, lnorm, key='Type'):
+              # Append additional attributes outside of the encapsulated value
+              cursor['type'] = _parse_attributes(lnorm, stype)
             # Is a key value
             elif svalue := _extract_value(command, lnorm, key='Failsafe'):
               cursor['value'] = svalue
-            # Is a key description
-            elif desc := _extract_value(command, lnorm, key='Description', eol=''):
-              cursor['description'] = desc
-              continue
-        # Reset cursor on item boundaries
-        elif command == '\item':
-          parse_key_entry(cursor)
-      # Continue parsing descriptions
-      if cursor['description']:
-        cursor['description'] += f"\n{lnorm}"
 
   return schema
 
