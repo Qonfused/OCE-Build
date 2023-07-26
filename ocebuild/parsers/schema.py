@@ -13,51 +13,6 @@ from .regex import re_search
 from .yaml import parse_yaml_types
 
 
-def _normalize_entry(entry: str) -> str:
-  """Normalizes indentation errors."""
-  lines = []
-  for i, e in enumerate(entry.split('\n\n\n\n')):
-    lines.append(e.replace('\n\n  ', ' ' if i else '\n').strip())
-
-  return "\n\n".join(lines)
-
-def _parse_failsafe(stype: str,
-                    svalue: str
-                    ) -> Union[str, int, float, dict, list]:
-  """Parses a failsafe value."""
-
-  # Remove leading and trailing whitespace
-  atype = stype\
-    .strip() \
-    .replace('plist\\ ', '') \
-    .split(',')[0] \
-    .capitalize()
-
-  if atype in ('Integer', 'Real'):
-    atype = 'Number'
-    # Handle typecasting for hexadecimal values
-    if svalue[:2] == '0x':
-      svalue = str(int(svalue, 16))
-  elif atype in ('Data', 'Multidata'):
-    atype = 'Data'
-    if svalue[:2] == '0x':
-      svalue = svalue[2:]
-    # Handle filling size-specified data values
-    if   size := re_search(', (\d+) bits?', stype, group=1):
-      svalue = '0' * 1 * int(size)
-    elif size := re_search(', (\d+) bytes?', stype, group=1):
-      svalue = '0' * 2 * int(size)
-  elif atype in ('Dictionary'):
-    atype = 'Dict'
-
-  if svalue.lower().split(maxsplit=1)[0] in ('empty',):
-    svalue = ''
-
-  # Ensure value is serializable as an annotated YAML type
-  value = parse_yaml_types(atype, svalue, schema='annotated')
-
-  return value
-
 ################################################################################
 #                               LaTeX Parsing Macros                           #
 ################################################################################
@@ -95,8 +50,16 @@ def _parse_attributes(line: str, key: str) -> str:
     key += f", {attr}"
   return key
 
+def _normalize_lines(entry: str) -> str:
+  """Normalizes indentation errors."""
+  lines = []
+  for i, e in enumerate(entry.split('\n\n\n\n')):
+    lines.append(e.replace('\n\n  ', ' ' if i else '\n').strip())
+
+  return "\n\n".join(lines)
+
 ################################################################################
-#                              Schema Parsing Macros                           #
+#                              Entry Parsing Macros                            #
 ################################################################################
 
 def _reset_key_entry(cursor: dict):
@@ -144,6 +107,47 @@ def _parse_exclusion_rules(cursor: dict) -> Tuple[Set[str], Set[str]]:
 
   return valid, invalid
 
+def _parse_failsafe(stype: str,
+                    svalue: str
+                    ) -> Union[str, int, float, dict, list]:
+  """Parses a failsafe value."""
+
+  # Remove leading and trailing whitespace
+  atype = stype\
+    .strip() \
+    .replace('plist\\ ', '') \
+    .split(',')[0] \
+    .capitalize()
+
+  if atype in ('Integer', 'Real'):
+    atype = 'Number'
+    # Handle typecasting for hexadecimal values
+    if svalue[:2] == '0x':
+      svalue = str(int(svalue, 16))
+  elif atype in ('Data', 'Multidata'):
+    atype = 'Data'
+    if svalue[:2] == '0x':
+      svalue = svalue[2:]
+    # Handle filling size-specified data values
+    if   size := re_search(', (\d+) bits?', stype, group=1):
+      svalue = '0' * 1 * int(size)
+    elif size := re_search(', (\d+) bytes?', stype, group=1):
+      svalue = '0' * 2 * int(size)
+  elif atype in ('Dictionary'):
+    atype = 'Dict'
+
+  if svalue.lower().split(maxsplit=1)[0] in ('empty',):
+    svalue = ''
+
+  # Ensure value is serializable as an annotated YAML type
+  value = parse_yaml_types(atype, svalue, schema='annotated')
+
+  return value
+
+################################################################################
+#                              Schema Parsing Methods                          #
+################################################################################
+
 def _add_schema_entry(tree: list, cursor: dict, schema: dict):
   """Parse and add failsafe values"""
 
@@ -169,10 +173,6 @@ def _add_schema_entry(tree: list, cursor: dict, schema: dict):
     if not parent_entry: parent_entry = [{}]
     parent_entry[0][key] = entry
     nested_set(schema, tree, parent_entry)
-
-################################################################################
-#                              Schema Parsing Methods                          #
-################################################################################
 
 def parse_schema(file: Union[List[str], TextIOWrapper],
                  sample_plist: dict
@@ -206,7 +206,7 @@ def parse_schema(file: Union[List[str], TextIOWrapper],
     if (line[:1] == '\\' or lnorm.startswith('\item')) and cursor['key']:
       if (entry := cursor['entry']) and cursor['type']:
         # Normalize entry to fix formatting inconsistencies
-        cursor['entry'] = _normalize_entry(entry)
+        cursor['entry'] = _normalize_lines(entry)
         # Add key entry to schema
         _parse_key_entry(cursor, schema, sample_plist)
       # Reset all attributes
