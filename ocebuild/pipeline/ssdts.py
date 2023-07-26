@@ -8,7 +8,7 @@ from collections import OrderedDict
 from contextlib import contextmanager
 from functools import partial
 from graphlib import TopologicalSorter
-from os import makedirs, unlink, SEEK_END
+from os import makedirs, SEEK_END
 from shutil import copyfile, rmtree, which
 from tempfile import mkdtemp, NamedTemporaryFile
 
@@ -129,7 +129,9 @@ def sort_ssdt_symbols(filepaths: List[Union[str, PathResolver]]) -> OrderedDict:
   """Sorts the injection order of SSDT tables by resolving symbolic references.
 
   This is a naive implementation that does not prune conditional branches or
-  build flags outside of standard ACPI spec.
+  build flags outside of standard ACPI spec. It is intended to be used as a
+  baseline reference for the injection order of SSDT tables in the absence of
+  information about the system's DSDT.
 
   Args:
     filepaths: A list of filepaths to SSDT *.dsl files.

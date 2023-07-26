@@ -4,7 +4,7 @@
 # Copyright (c) 2023, Cory Bennett. All rights reserved.
 # SPDX-License-Identifier: BSD-3-Clause
 ##
-""""""
+"""Methods for retrieving and handling packages."""
 
 from functools import reduce
 from itertools import chain
@@ -23,7 +23,17 @@ def extract_opencore_packages(opencore_pkg: Union[str, PathResolver],
                               resolvers: List[dict],
                               packages: dict,
                               ) -> dict:
-  """Extracts build entries as vendored packages from an OpenCore package."""
+  """Extracts build entries as vendored packages from an OpenCore package.
+
+  Args:
+    opencore_pkg: Path to an existing OpenCore package.
+    target: The desired target architecture of the OpenCore EFI.
+    resolvers: The list of resolver entries to update.
+    packages: The list of packages to update.
+
+  Returns:
+    A dictionary of extracted build entries.
+  """
 
   # Replace archive temporary directory with extracted contents
   opencore.extract_opencore_archive(opencore_pkg, target)
@@ -54,7 +64,20 @@ def extract_build_packages(build_vars: dict,
                            __wrapper: Optional[Iterator]=None,
                            **kwargs
                            ) -> dict:
-  """Extracts build entries from unpacked packages."""
+  """Extracts build entries from unpacked packages.
+
+  Args:
+    build_vars: The configured build variables.
+    resolvers: The list of resolver entries to update.
+    packages: The list of packages to extract.
+    build_dir: The path to the build directory.
+    *args: Additional arguments to pass to the iterator.
+    __wrapper: A wrapper function to apply to the iterator. (Optional)
+    **kwargs: Additional keyword arguments to pass to the iterator.
+
+  Returns:
+    A dictionary of extracted build entries.
+  """
 
   def _get_resolver_entry(category: str, name: str) -> Union[dict, None]:
     return next(filter(lambda e: e['__category'] == category and
@@ -126,7 +149,18 @@ def prune_build_packages(build_config: dict,
                          __wrapper: Optional[Iterator]=None,
                          **kwargs
                          ) -> dict:
-  """Prunes the build configuration of entries that were not extracted."""
+  """Prunes the build configuration of entries that were not extracted.
+
+  Args:
+    build_config: The build configuration.
+    extracted_entries: The extracted build entries.
+    *args: Additional arguments to pass to the iterator.
+    __wrapper: A wrapper function to apply to the iterator. (Optional)
+    **kwargs: Additional keyword arguments to pass to the iterator.
+
+  Returns:
+    A dictionary of pruned build entries.
+  """
 
   # Create list of entry names and their bundled package names
   entries = reduce(merge_dict, [

@@ -18,7 +18,16 @@ from .yaml import parse_yaml_types
 ################################################################################
 
 def _extract_command(line: str) -> Union[str, None]:
-  """Extracts a LaTeX command from a line."""
+  """Extracts a LaTeX command from a line.
+
+  Examples:
+    >>> _extract_command('\\section{foo}')
+    '\\\\section'
+    >>> _extract_command('\\\\texttt{foo} \\label{bar}')
+    '\\\\texttt'
+    >>> _extract_command('% \\\\foo')
+    None
+  """
 
   if line[:1] == '\\' and (command_match := line.split('{', 1)[0])[1:]:
     # Handle match on labels, etc
@@ -31,7 +40,26 @@ def _extract_command(line: str) -> Union[str, None]:
     return None
 
 def _extract_key(command: str, string: str, sol='^') -> Union[str, None]:
-  """Extracts a key value from a line."""
+  """Extracts a key name from a line.
+
+  Args:
+    command: The LaTeX command to match.
+    string: The intput string to match against.
+    sol: The start of line character to match against. Defaults to '^'.
+
+  Returns:
+    The matched key name or None if no match was found.
+
+  Examples:
+    >>> _extract_key('\\\\texttt', '\\\\texttt{foo}')
+    'foo'
+    >>> _extract_key('\\\\texttt', '\\\\texttt{foo} \\label{bar}')
+    'foo'
+    >>> _extract_key('\\\\texttt', '\\\\texttt{foo} \\texttt{bar}', sol='')
+    'bar'
+    >>> _extract_key('\\\\label', '\\\\texttt{foo}')
+    None
+  """
   return re_search(f'{sol}\{command}\{{(.*?)\}}', string, group=1)
 
 def _extract_value(command: str,
@@ -39,12 +67,41 @@ def _extract_value(command: str,
                    key: str,
                    eol='\\\\\\\\'
                    ) -> Union[str, None]:
-  """Extracts a key value from a line."""
+  """Extracts a key value from a line.
+
+  Args:
+    command: The LaTeX command to match.
+    string: The intput string to match against.
+    key: The key name to match against.
+    eol: The end of line character to match against. Defaults to '\\\\\\\\'.
+
+  Returns:
+    The matched key value or None if no match was found.
+
+  Examples:
+    >>> _extract_value('\\\\textbf', '\\\\textbf{Type}: foo\\\\\\\\', 'Type')
+    'foo'
+    >>> _extract_value('\\\\textbf', '\\\\textbf{Type}: foo \\\\texttt{bar}\\\\\\\\', 'Type')
+    'foo \\\\texttt{bar}'
+  """
   ln = re_search(f'\{command}\{{{key}\}}:\s?(.*){eol}$', string, group=1)
   if not ln or not eol: return ln
   return _extract_key(command='\.*?', string=ln.strip(), sol='^') or ln
 
 def _parse_attributes(line: str, key: str) -> str:
+  """Parses additional attributes from a line.
+
+  Args:
+    line: The line to parse.
+    key: The key to append attributes to.
+
+  Returns:
+    The key with appended attributes.
+
+  Example:
+    >>> _parse_attributes('\\\\textbf{Type}: \\\\texttt{foo}, bar\\\\\\\\', 'Type')
+    'foo, bar'
+  """
   skey = key.replace('\\', '\\\\')
   if attr := re_search(f'\{{{skey}\}},?\s?(.*?)\\\\\\\\$', line, group=1):
     key += f", {attr}"
