@@ -169,21 +169,15 @@ def _parse_key_entry(cursor: dict,
     if tree == ['PlatformInfo', 'Memory', 'Device']:
       tree[-1] = 'Devices'
 
-  # Add value to the schema if all required attributes are present
-  if (entry := cursor['entry']) and cursor['type']:
-    # Normalize entry to fix formatting inconsistencies
-    entry = _normalize_lines(entry)
-    cursor['entry'] = entry
+  # Add entries to the schema
+  entry_tree = _add_schema_entry(tree, cursor, schema)
 
-    # Add entries to the schema
-    entry_tree = _add_schema_entry(tree, cursor, schema)
-
-    # If specified, add the raw LaTeX entry to the raw schema
-    if entry_tree and raw_schema is not None:
-      # Maps the entry tree to a <key>.<key>[idx].<key>... string
-      tree = "".join(f'[{k}]' if isinstance(k, int) else f'.{k}'
-                     for k in entry_tree)[1:]
-      nested_set(raw_schema, (tree,), entry)
+  # If specified, add the raw LaTeX entry to the raw schema
+  if entry_tree and raw_schema is not None:
+    # Maps the entry tree to a <key>.<key>[idx].<key>... string
+    tree = "".join(f'[{k}]' if isinstance(k, int) else f'.{k}'
+                    for k in entry_tree)[1:]
+    nested_set(raw_schema, (tree,), cursor['entry'])
 
 def _parse_exclusion_rules(cursor: dict) -> Tuple[Set[str], Set[str]]:
   """Parses exclusion rules from an entry description."""
@@ -298,6 +292,8 @@ def parse_schema(file: Union[List[str], TextIOWrapper],
     A dictionary representing failsafe values for the Sample.plist schema.
   """
 
+  #TODO: Fix item boundary/validation for # Misc -> Entries[]/Tools[] -> Flavour
+
   # Parse the configuration schema against the sample plist
   cursor = { 'tree': [], 'key': None, 'type': None, 'value': None, 'entry': '' }
   schema = {}
@@ -308,12 +304,17 @@ def parse_schema(file: Union[List[str], TextIOWrapper],
     if lnorm[:1] == '%': continue
 
     # Use root-level commands as boundaries for key entries
-    if (line[:1] == '\\' or line.startswith('\item')) and cursor['key']:
-      _parse_key_entry(cursor, schema, sample_plist, raw_schema=raw_schema)
+    if (line[:1] == '\\' or lnorm[:5] == '\item') and cursor['key']:
+      # Add value to the schema if all required attributes are present
+      if (entry := cursor['entry']) and cursor['type']:
+        # Normalize entry to fix formatting inconsistencies
+        cursor['entry'] = _normalize_lines(entry)
+        # Add entry to the schema
+        _parse_key_entry(cursor, schema, sample_plist, raw_schema=raw_schema)
       # Reset all attributes
       _reset_key_entry(cursor)
     # If set, continue storing the current LaTeX entry
-    elif cursor['entry']:
+    if cursor['entry']:
       cursor['entry'] += f"\n{line}"
 
     # Parse LaTeX commands
@@ -366,6 +367,8 @@ def format_markdown_entry(key: str, entry: Optional[str]=None) -> str:
     .replace('[0]', '[]')
   header = '#' * (1 + key.count('.') + key.count('[]'))
 
+  #TODO: Parse markdown tables, see Kernel -> Scheme -> KernelArch
+
   entry_keys = "|".join(['Type', 'Failsafe', 'Requirement', 'Description'])
   for pattern, repl in [
     # Properly space out entry keys
@@ -400,6 +403,7 @@ def format_markdown_entry(key: str, entry: Optional[str]=None) -> str:
     (r'\\\s?\n',              r'\n'),
     (r'\\textbackslash',      r'\\'),
     (r'\\\\',                 r'\\'),
+    (r'\\ ',                  r'\\'),
   ]: entry = re_sub(pattern, repl, entry)
 
   start = entry.index('**Type**:')
