@@ -167,6 +167,7 @@ def get_configuration_schema(repository: str='acidanthera/OpenCorePkg',
                              branch: str = 'master',
                              tag: Union[str, None] = None,
                              commit: Union[str, None] = None,
+                             **kwargs
                              ) -> dict:
   """Reads the Sample.plist schema from a OpenCorePkg version."""
 
@@ -184,7 +185,7 @@ def get_configuration_schema(repository: str='acidanthera/OpenCorePkg',
 
   sample_plist = parse_plist(request(url=sample_plist_url).text())
   with request(url=configuration_url).text() as file:
-    schema = parse_schema(file, sample_plist)
+    schema = parse_schema(file, sample_plist, **kwargs)
 
   return schema
 

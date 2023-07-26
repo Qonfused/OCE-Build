@@ -6,7 +6,7 @@
 
 from io import TextIOWrapper
 
-from typing import List, Set, Tuple, Union
+from typing import List, Optional, Set, Tuple, Union
 
 from .dict import nested_get, nested_set
 from .regex import re_search
@@ -111,9 +111,26 @@ def _normalize_lines(entry: str) -> str:
   """Normalizes indentation errors."""
   lines = []
   for i, e in enumerate(entry.split('\n\n\n\n')):
-    lines.append(e.replace('\n\n  ', ' ' if i else '\n').strip())
+    line_fmt = e \
+      .replace('\n\n  ', ' ' if i else '\n') \
+      .replace('\\newline ', '\n') \
+      .strip()
+    # Handle inconsistent indentation in the primary entry
+    line_fmt = "".join(f"\n{l}" if l[:1] == '\\' and (not i or '}:' in l) \
+                            else f" {l}" \
+                        for i, l in enumerate(line_fmt.split('\n')))
 
-  return "\n\n".join(lines)
+    lines.append(line_fmt.strip())
+
+  # Handle exceptions for specific commands
+  line_fmt = "\n\n".join(lines).replace('  ', '') \
+    .replace(cmd := '\\begin{itemize}', f'\n{cmd}') \
+    .replace(f'\n\n{cmd}', f'\n{cmd}') \
+    .replace(cmd := '\\tightlist',      f'\n  {cmd}') \
+    .replace(cmd := '\\item',           f'\n  {cmd}') \
+    .replace(cmd := '\\end{itemize}',   f'\n{cmd}')
+
+  return line_fmt
 
 ################################################################################
 #                              Entry Parsing Macros                            #
@@ -126,11 +143,17 @@ def _reset_key_entry(cursor: dict):
   cursor['value'] = None
   cursor['entry'] = None
 
-def _parse_key_entry(cursor: dict, schema: dict, sample: dict):
-  """Add value to the schema if all required attributes are present"""
+def _parse_key_entry(cursor: dict,
+                     schema: dict,
+                     sample: dict,
+                     /,
+                     tree: Optional[list] = None,
+                     raw_schema: Optional[dict] = None
+                     ):
+  """Parses the cursor's key attributes and adds them to the schema."""
 
-  tree = cursor['tree'].copy()
-  queue = [tree]
+  # Allow for overriding the tree when recursing
+  if not tree: tree = cursor['tree'].copy()
 
   # Attempt to fix values inconsistent with the sample plist
   if not nested_get(sample, tree):
@@ -138,13 +161,28 @@ def _parse_key_entry(cursor: dict, schema: dict, sample: dict):
     if tree == ['Misc', 'Entry']:
       tree[-1] = 'Entries'
       # These properties are also applicable to `Misc.Tools`
-      queue += [('Misc', 'Tools')]
+      _parse_key_entry(cursor, schema, sample,
+                       tree=('Misc', 'Tools'),
+                       raw_schema=raw_schema)
     # 'Memory Device Properties' has an inconsistent name
     if tree == ['PlatformInfo', 'Memory', 'Device']:
       tree[-1] = 'Devices'
 
-  # Add entries to the schema
-  for tree_ in queue: _add_schema_entry(tree_, cursor, schema)
+  # Add value to the schema if all required attributes are present
+  if (entry := cursor['entry']) and cursor['type']:
+    # Normalize entry to fix formatting inconsistencies
+    entry = _normalize_lines(entry)
+    cursor['entry'] = entry
+
+    # Add entries to the schema
+    entry_tree = _add_schema_entry(tree, cursor, schema)
+
+    # If specified, add the raw LaTeX entry to the raw schema
+    if entry_tree and raw_schema is not None:
+      # Maps the entry tree to a <key>.<key>[idx].<key>... string
+      tree = "".join(f'[{k}]' if isinstance(k, int) else f'.{k}'
+                     for k in entry_tree)[1:]
+      nested_set(raw_schema, (tree,), entry)
 
 def _parse_exclusion_rules(cursor: dict) -> Tuple[Set[str], Set[str]]:
   """Parses exclusion rules from an entry description."""
@@ -205,7 +243,7 @@ def _parse_failsafe(stype: str,
 #                              Schema Parsing Methods                          #
 ################################################################################
 
-def _add_schema_entry(tree: list, cursor: dict, schema: dict):
+def _add_schema_entry(tree: list, cursor: dict, schema: dict) -> List[str]:
   """Parse and add failsafe values"""
 
   # Ensure that the parent entry is a valid target
@@ -223,16 +261,24 @@ def _add_schema_entry(tree: list, cursor: dict, schema: dict):
   parent_entry = nested_get(schema, tree, default={})
   if not parent_entry: nested_set(schema, tree, {})
 
+  # Add entry to the schema
   if   isinstance(parent_entry, dict):
-    nested_set(schema, (*tree, key), entry)
+    entry_tree = (*tree, key)
+    nested_set(schema, entry_tree, entry)
   elif isinstance(parent_entry, list):
-    # Only one dict entry is allowed per array
     if not parent_entry: parent_entry = [{}]
+    # Only one dict entry is allowed per array
+    entry_tree = (*tree, 0, key)
     parent_entry[0][key] = entry
     nested_set(schema, tree, parent_entry)
 
+  # Return the entry tree for validation
+  return entry_tree
+
 def parse_schema(file: Union[List[str], TextIOWrapper],
-                 sample_plist: dict
+                 sample_plist: dict,
+                 /,
+                 raw_schema: Optional[dict] = None
                  ) -> dict:
   """Gets the Sample.plist schema from a Configuration.tex file.
 
@@ -245,6 +291,7 @@ def parse_schema(file: Union[List[str], TextIOWrapper],
   Args:
     file: The Configuration.tex file to parse.
     sample_plist: The sample plist to use for comparison.
+    raw_schema: If specified, the raw schema will be stored in this dictionary.
 
   Returns:
     A dictionary representing failsafe values for the Sample.plist schema.
@@ -260,12 +307,8 @@ def parse_schema(file: Union[List[str], TextIOWrapper],
     if lnorm[:1] == '%': continue
 
     # Use root-level commands as boundaries for key entries
-    if (line[:1] == '\\' or lnorm.startswith('\item')) and cursor['key']:
-      if (entry := cursor['entry']) and cursor['type']:
-        # Normalize entry to fix formatting inconsistencies
-        cursor['entry'] = _normalize_lines(entry)
-        # Add key entry to schema
-        _parse_key_entry(cursor, schema, sample_plist)
+    if (line[:1] == '\\' or line.startswith('\item')) and cursor['key']:
+      _parse_key_entry(cursor, schema, sample_plist, raw_schema=raw_schema)
       # Reset all attributes
       _reset_key_entry(cursor)
     # If set, continue storing the current LaTeX entry
