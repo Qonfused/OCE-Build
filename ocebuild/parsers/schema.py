@@ -4,16 +4,13 @@
 ##
 """Methods for retrieving and handling Sample.plist schemas."""
 
-from functools import partial
+from io import TextIOWrapper
 
-from typing import Set, Tuple, Union
+from typing import List, Set, Tuple, Union
 
-from ocebuild.parsers.dict import nested_get, nested_set
-from ocebuild.parsers.plist import parse_plist
-from ocebuild.parsers.regex import re_search
-from ocebuild.parsers.yaml import parse_yaml_types
-from ocebuild.sources import request
-from ocebuild.sources.github import github_file_url
+from .dict import nested_get, nested_set
+from .regex import re_search
+from .yaml import parse_yaml_types
 
 
 def _normalize_entry(entry: str) -> str:
@@ -67,6 +64,7 @@ def _parse_failsafe(stype: str,
 
 def _extract_command(line: str) -> Union[str, None]:
   """Extracts a LaTeX command from a line."""
+
   if line[:1] == '\\' and (command_match := line.split('{', 1)[0])[1:]:
     # Handle match on labels, etc
     if command_match.count('\\') > 1:
@@ -173,89 +171,89 @@ def _add_schema_entry(tree: list, cursor: dict, schema: dict):
     nested_set(schema, tree, parent_entry)
 
 ################################################################################
+#                              Schema Parsing Methods                          #
+################################################################################
 
-def get_configuration_schema(repository: str='acidanthera/OpenCorePkg',
-                             branch: str = 'master',
-                             tag: Union[str, None] = None,
-                             commit: Union[str, None] = None,
-                             ) -> dict:
-  """Gets the configuration schema from a Configuration.tex file."""
+def parse_schema(file: Union[List[str], TextIOWrapper],
+                 sample_plist: dict
+                 ) -> dict:
+  """Gets the Sample.plist schema from a Configuration.tex file.
 
-  # Resolve file urls for the given repository parameters.
-  file_url = partial(github_file_url,
-                     repository=repository,
-                     branch=branch,
-                     tag=tag,
-                     commit=commit,
-                     raw=True)
+  The Sample.plist schema is parsed from the Configuration.tex file, which is
+  the source LaTeX file for the OpenCore documentation. These schema values
+  match the declared failsafe values used as fallbacks in the OpenCore config
+  file. Extracted schema values are then converted to a plist-compatible format
+  and then coerced into native Python types.
 
-  # Get the reference configuration and sample plist urls
-  configuration_url = file_url(path='Docs/Configuration.tex')
-  sample_plist_url = file_url(path='Docs/Sample.plist')
+  Args:
+    file: The Configuration.tex file to parse.
+    sample_plist: The sample plist to use for comparison.
+
+  Returns:
+    A dictionary representing failsafe values for the Sample.plist schema.
+  """
 
   # Parse the configuration schema against the sample plist
   cursor = { 'tree': [], 'key': None, 'type': None, 'value': None, 'entry': '' }
   schema = {}
-  sample_plist = parse_plist(request(url=sample_plist_url).text())
-  with request(url=configuration_url).text() as file:
-    for line in file:
-      # Normalize line
-      lnorm = str(line.lstrip()).strip()
-      # Skip comments
-      if lnorm[:1] == '%': continue
+  for line in file:
+    # Normalize line
+    lnorm = str(line.lstrip()).strip()
+    # Skip comments
+    if lnorm[:1] == '%': continue
 
-      # Use root-level commands as boundaries for key entries
-      if (line[:1] == '\\' or lnorm.startswith('\item')) and cursor['key']:
-        if (entry := cursor['entry']) and cursor['type']:
-          # Normalize entry to fix formatting inconsistencies
-          cursor['entry'] = _normalize_entry(entry)
-          # Add key entry to schema
-          _parse_key_entry(cursor, schema, sample_plist)
-        # Reset all attributes
-        _reset_key_entry(cursor)
-      # If set, continue storing the current LaTeX entry
-      elif cursor['entry']:
-        cursor['entry'] += f"\n{line}"
+    # Use root-level commands as boundaries for key entries
+    if (line[:1] == '\\' or lnorm.startswith('\item')) and cursor['key']:
+      if (entry := cursor['entry']) and cursor['type']:
+        # Normalize entry to fix formatting inconsistencies
+        cursor['entry'] = _normalize_entry(entry)
+        # Add key entry to schema
+        _parse_key_entry(cursor, schema, sample_plist)
+      # Reset all attributes
+      _reset_key_entry(cursor)
+    # If set, continue storing the current LaTeX entry
+    elif cursor['entry']:
+      cursor['entry'] += f"\n{line}"
 
-      # Parse LaTeX commands
-      if command := _extract_command(lnorm):
-        # Parse section/subsection commands
-        if command in ('\section', '\subsection', '\subsubsection'):
-          name: str = re_search(f'\\{command}\{{(.*?)\}}', lnorm, group=1)
-          # Is a section
-          if command == '\section':
-            entry = [name] if name in sample_plist.keys() else []
-            cursor['tree'] = entry
-          # Is a subsection
-          else:
-            key = re_search(r'([a-zA-Z0-9]+)\s?Properties', name, group=1)
-            if command == '\subsection':
-              entry = [key] if key else []
-              cursor['tree'][1:] = entry
-            elif command == '\subsubsection':
-              entry = key.split(maxsplit=1)[:1] if key else []
-              cursor['tree'][2:] = entry
-        # Parse property fields for keys
-        elif cursor['tree'] and command in ('\\texttt', '\\textbf'):
-          if command == '\\texttt':
-            # Is a key name
-            if key := _extract_key(command, lnorm, sol=''):
-              if not cursor['key']:
-                cursor['key'] = key
-                cursor['entry'] = line
-          elif command == '\\textbf':
-            # Is a key type
-            if stype := _extract_value(command, lnorm, key='Type'):
-              # Append additional attributes outside of the encapsulated value
-              cursor['type'] = _parse_attributes(lnorm, stype)
-            # Is a key value
-            elif svalue := _extract_value(command, lnorm, key='Failsafe'):
-              cursor['value'] = svalue
+    # Parse LaTeX commands
+    if command := _extract_command(lnorm):
+      # Parse section/subsection commands
+      if command in ('\section', '\subsection', '\subsubsection'):
+        name: str = re_search(f'\\{command}\{{(.*?)\}}', lnorm, group=1)
+        # Is a section
+        if command == '\section':
+          entry = [name] if name in sample_plist.keys() else []
+          cursor['tree'] = entry
+        # Is a subsection
+        else:
+          key = re_search(r'([a-zA-Z0-9]+)\s?Properties', name, group=1)
+          if command == '\subsection':
+            entry = [key] if key else []
+            cursor['tree'][1:] = entry
+          elif command == '\subsubsection':
+            entry = key.split(maxsplit=1)[:1] if key else []
+            cursor['tree'][2:] = entry
+      # Parse property fields for keys
+      elif cursor['tree'] and command in ('\\texttt', '\\textbf'):
+        if command == '\\texttt':
+          # Is a key name
+          if key := _extract_key(command, lnorm, sol=''):
+            if not cursor['key']:
+              cursor['key'] = key
+              cursor['entry'] = line
+        elif command == '\\textbf':
+          # Is a key type
+          if stype := _extract_value(command, lnorm, key='Type'):
+            # Append additional attributes outside of the encapsulated value
+            cursor['type'] = _parse_attributes(lnorm, stype)
+          # Is a key value
+          elif svalue := _extract_value(command, lnorm, key='Failsafe'):
+            cursor['value'] = svalue
 
   return schema
 
 
 __all__ = [
   # Functions (1)
-  "get_configuration_schema"
+  "parse_schema"
 ]

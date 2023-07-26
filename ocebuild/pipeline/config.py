@@ -4,11 +4,16 @@
 ##
 """Methods for retrieving and handling config.plist files and patches."""
 
+from functools import partial
+
 from typing import Dict, List, Optional, Tuple, Union
 
 from ocebuild.parsers.dict import merge_dict, nested_del, nested_get, nested_set
 from ocebuild.parsers.plist import parse_plist
+from ocebuild.parsers.schema import parse_schema
 from ocebuild.parsers.yaml import parse_yaml
+from ocebuild.sources import request
+from ocebuild.sources.github import github_file_url
 from ocebuild.sources.resolver import PathResolver
 
 
@@ -158,10 +163,36 @@ def merge_configs(base: Union[str, PathResolver],
 
   return base_config
 
+def get_configuration_schema(repository: str='acidanthera/OpenCorePkg',
+                             branch: str = 'master',
+                             tag: Union[str, None] = None,
+                             commit: Union[str, None] = None,
+                             ) -> dict:
+  """Reads the Sample.plist schema from a OpenCorePkg version."""
+
+  # Resolve file urls for the given repository parameters.
+  file_url = partial(github_file_url,
+                     repository=repository,
+                     branch=branch,
+                     tag=tag,
+                     commit=commit,
+                     raw=True)
+
+  # Get the reference configuration and sample plist urls
+  configuration_url = file_url(path='Docs/Configuration.tex')
+  sample_plist_url = file_url(path='Docs/Sample.plist')
+
+  sample_plist = parse_plist(request(url=sample_plist_url).text())
+  with request(url=configuration_url).text() as file:
+    schema = parse_schema(file, sample_plist)
+
+  return schema
+
 
 __all__ = [
-  # Functions (3)
+  # Functions (4)
   "read_config",
   "apply_preprocessor_tags",
-  "merge_configs"
+  "merge_configs",
+  "get_configuration_schema"
 ]
