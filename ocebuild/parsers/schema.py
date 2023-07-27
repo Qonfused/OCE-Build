@@ -270,6 +270,36 @@ def _add_schema_entry(tree: list, cursor: dict, schema: dict) -> List[str]:
 #                              Schema Parsing Methods                          #
 ################################################################################
 
+def _is_boundary(lnorm: str, indent: str, entry: str) -> bool:
+  """Checks if the line is a valid boundary command."""
+
+  # Check if the line is a valid root command
+  if lnorm[:1] == '\\' and indent <= 1:
+    return True
+  if not any(lnorm.startswith(c) for c in ('\item', '\end{enumerate}')):
+    return False
+  # Handle false positives for \item commands
+  list_count = entry.count('\\begin{itemize}')
+  is_building_list = list_count == 1 + entry.count('\\end{itemize}') > 0
+  if lnorm != '\item' or is_building_list:
+    return False
+
+  return True
+
+def _is_nested_boundary(cursor: dict, indent: str, entry: str) -> bool:
+  """Checks if the line is a valid nested boundary command."""
+
+  # Handle false positives for nested \item commands
+  if cursor['type'] and indent >= 2:
+    trailing_command = entry.rstrip().rsplit(maxsplit=1)[-1]
+    is_nested_list = trailing_command in ('\\begin{itemize}', '\\tightlist')
+    has_finished_list = trailing_command == '\\end{itemize}'
+    # Is still a nested key entry
+    if not is_nested_list and has_finished_list:
+      return False
+
+  return True
+
 def parse_schema(file: Union[List[str], TextIOWrapper],
                  sample_plist: dict,
                  /,
@@ -292,36 +322,30 @@ def parse_schema(file: Union[List[str], TextIOWrapper],
     A dictionary representing failsafe values for the Sample.plist schema.
   """
 
-  #TODO: Fix item boundary/validation for # Misc -> Entries[]/Tools[] -> Flavour
-
   # Parse the configuration schema against the sample plist
   cursor = { 'tree': [], 'key': None, 'type': None, 'value': None, 'entry': '' }
   schema = {}
   for line in file:
     # Normalize line
     lnorm = str(lstrip := line.lstrip()).strip()
-    indent = len(line) - len(lstrip)
     # Skip comments
     if lnorm[:1] == '%': continue
 
     # Use root-level commands as boundaries for key entries
-    is_root_command = lnorm[:1] == '\\' and indent <= 1
-    is_boundary = any(lnorm.startswith(c) for c in ('\item', '\end{enumerate}'))
-    if cursor['key'] and (is_root_command or is_boundary):
-      # Handle false positives for nested \item commands
-      if not is_root_command and lnorm != '\item':
-        cursor['entry'] += f"\n{line}"
-        continue
+    indent = len(line) - len(lstrip)
+    if (entry := cursor['entry'] or '') and _is_boundary(lnorm, indent, entry):
       # Add value to the schema if all required attributes are present
-      if (entry := cursor['entry']) and cursor['type']:
+      if cursor['key'] and cursor['type']:
         # Normalize entry to fix formatting inconsistencies
+        if not _is_nested_boundary(cursor, indent, entry):
+          cursor['entry'] += f"\n{line}"
         cursor['entry'] = _normalize_lines(entry)
         # Add entry to the schema
         _parse_key_entry(cursor, schema, sample_plist, raw_schema=raw_schema)
       # Reset all attributes
       _reset_key_entry(cursor)
     # If set, continue storing the current LaTeX entry
-    elif cursor['entry']:
+    elif entry:
       cursor['entry'] += f"\n{line}"
 
     # Parse LaTeX commands

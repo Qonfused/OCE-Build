@@ -1,6 +1,6 @@
 <h1 id=schema>OpenCore Config.plist Schema - v0.9.3</h1>
 
-#### Last Updated: `2023-07-27 15:29:07.304820+00:00`
+#### Last Updated: `2023-07-27 18:41:04.900010+00:00`
 
 #### Revision: `{ SHA1: d52fc46ba650ce1afe00c354331a0657a533ef18 }`
 
@@ -3615,6 +3615,20 @@ Sets CPU FSB frequency. This value equals to CPU nominal frequency divided by CP
 
 **Description**: Sets `StartupPowerEvents` in `gEfiMiscSubClassGuid`. The value found on Macs is power management state bitmask, normally 0. Known bits read by
 `X86PlatformPlugin.kext`:
+* `0x00000001` --- Shutdown cause was a `PWROK` event (Same as `GEN_PMCON_2` bit 0)
+* `0x00000002` --- Shutdown cause was a `SYS_PWROK` event (Same as `GEN_PMCON_2` bit 1)
+* `0x00000004` --- Shutdown cause was a `THRMTRIP#` event (Same as `GEN_PMCON_2` bit 3)
+* `0x00000008` --- Rebooted due to a SYS_RESET# event (Same as `GEN_PMCON_2` bit 4)
+* `0x00000010` --- Power Failure (Same as `GEN_PMCON_3` bit 1 `PWR_FLR`)
+* `0x00000020` --- Loss of RTC Well Power (Same as `GEN_PMCON_3` bit 2 `RTC_PWR_STS`)
+* `0x00000040` --- General Reset Status (Same as `GEN_PMCON_3` bit 9 `GEN_RST_STS`)
+* `0xffffff80` --- SUS Well Power Loss (Same as `GEN_PMCON_3` bit 14)
+* `0x00010000` --- Wake cause was a ME Wake event (Same as PRSTS bit 0, `ME_WAKE_STS`)
+* `0x00020000` --- Cold Reboot was ME Induced event (Same as `PRSTS` bit 1 `ME_HRST_COLD_STS`)
+* `0x00040000` --- Warm Reboot was ME Induced event (Same as `PRSTS` bit 2 `ME_HRST_WARM_STS`)
+* `0x00080000` --- Shutdown was ME Induced event (Same as `PRSTS` bit 3 `ME_HOST_PWRDN`)
+* `0x00100000` --- Global reset ME Watchdog Timer event (Same as `PRSTS` bit 6)
+* `0x00200000` --- Global reset PowerManagement Watchdog Timer event (Same as `PRSTS` bit 15)
 
 <h3 id=platforminfo-datahub-systemproductname>PlatformInfo -> DataHub -> SystemProductName</h3>
 
@@ -3875,6 +3889,13 @@ For empty slot this must be set to `NO DIMM` for macOS System Profiler to correc
 **Failsafe**: `0x03`\**SMBIOS**: Physical Memory Array (Type 16) --- Memory Error Correction
 
 **Description**: Specifies the primary hardware error correction or detection method supported by the memory.
+* `0x01` --- Other
+* `0x02` --- Unknown
+* `0x03` --- None
+* `0x04` --- Parity
+* `0x05` --- Single-bit ECC
+* `0x06` --- Multi-bit ECC
+* `0x07` --- CRC
 
 <h3 id=platforminfo-memory-formfactor>PlatformInfo -> Memory -> FormFactor</h3>
 
@@ -3887,6 +3908,11 @@ For empty slot this must be set to `NO DIMM` for macOS System Profiler to correc
 When `CustomMemory` is `false`, this value is automatically set based on Mac product name.
 
 When `Automatic` is `true`, the original value from the the corresponding Mac model will be set if available. Otherwise, the value from `OcMacInfoLib` will be set. When `Automatic` is `false`, a user-specified value will be set if available. Otherwise, the original value from the firmware will be set. If no value is provided, the failsafe value will be set.
+* `0x01` --- Other
+* `0x02` --- Unknown
+* `0x09` --- DIMM
+* `0x0D` --- SODIMM
+* `0x0F` --- FB-DIMM
 
 <h3 id=platforminfo-memory-maxcapacity>PlatformInfo -> Memory -> MaxCapacity</h3>
 
@@ -3911,6 +3937,18 @@ When `Automatic` is `true`, the original value from the the corresponding Mac mo
 **Failsafe**: `0x02`\**SMBIOS**: Memory Device (Type 17) --- Memory Type
 
 **Description**: Specifies the memory type. Commonly used types are listed below.
+* `0x01` --- Other
+* `0x02` --- Unknown
+* `0x0F` --- SDRAM
+* `0x12` --- DDR
+* `0x13` --- DDR2
+* `0x14` --- DDR2 FB-DIMM
+* `0x18` --- DDR3
+* `0x1A` --- DDR4
+* `0x1B` --- LPDDR
+* `0x1C` --- LPDDR2
+* `0x1D` --- LPDDR3
+* `0x1E` --- LPDDR4
 
 <h3 id=platforminfo-memory-typedetail>PlatformInfo -> Memory -> TypeDetail</h3>
 
@@ -3919,6 +3957,12 @@ When `Automatic` is `true`, the original value from the the corresponding Mac mo
 **Failsafe**: `0x4`\**SMBIOS**: Memory Device (Type 17) --- Type Detail
 
 **Description**: Specifies additional memory type information.
+* `Bit 0` --- Reserved, set to 0
+* `Bit 1` --- Other
+* `Bit 2` --- Unknown
+* `Bit 7` --- Synchronous
+* `Bit 13` --- Registered (buffered)
+* `Bit 14` --- Unbuffered (unregistered)
 
 <h2 id=platforminfo-platformnvram>PlatformInfo -> PlatformNVRAM</h2>
 
@@ -4261,6 +4305,12 @@ If `UpdateNVRAM` is set to `false`, the aforementioned variables can be updated 
 **Failsafe**: `Create`
 
 **Description**: Update SMBIOS fields approach:
+* `TryOverwrite` --- `Overwrite` if new size is \textless{}= than the page-aligned original and there are no issues with legacy region unlock. `Create` otherwise. Has issues on some types of firmware.
+* `Create` --- Replace the tables with newly allocated EfiReservedMemoryType at AllocateMaxAddress without any fallbacks.
+* `Overwrite` --- Overwrite existing gEfiSmbiosTableGuid and gEfiSmbiosTable3Guid data if it fits new size. Abort with unspecified state otherwise.
+* `Custom` --- Write SMBIOS tables (`gEfiSmbios(3)TableGuid`) to `gOcCustomSmbios(3)TableGuid` to workaround firmware overwriting SMBIOS contents at ExitBootServices. Otherwise equivalent to `Create`. Requires patching AppleSmbios.kext and AppleACPIPlatform.kext to read from another GUID: `"EB9D2D31"` - `"EB9D2D35"` (in ASCII), done automatically by `CustomSMBIOSGuid` quirk. 
+
+*Note*: A side effect of using the `Custom` approach that it makes SMBIOS updates exclusive to macOS, avoiding a collision with existing Windows activation and custom OEM software but potentially obstructing the operation of Apple-specific tools.
 
 <h2 id=platforminfo-userawuuidencoding>PlatformInfo -> UseRawUuidEncoding</h2>
 
