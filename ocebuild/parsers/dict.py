@@ -23,14 +23,14 @@ def flatten_dict(dic: dict,
   def recurse_flatten(v: any, prefix: str='') -> None:
     if isinstance(v, dict):
       if not (entries := v.items()):
-        flat_dict[prefix[1:]] = ('dict', v)
+        flat_dict[prefix[1:]] = v
       else:
         for k, v2 in entries:
           p2 = f"{prefix}{delimiter}{k}"
           recurse_flatten(v2, p2)
     elif isinstance(v, list):
       if not v:
-        flat_dict[prefix[1:]] = ('list', v)
+        flat_dict[prefix[1:]] = v
       else:
         for i, v2 in enumerate(v):
           p2 = f"{prefix}[{i}]"

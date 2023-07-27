@@ -364,10 +364,6 @@ def parse_schema(file: Union[List[str], TextIOWrapper],
 def format_markdown_entry(key: str, entry: Optional[str]=None) -> str:
   """Formats a Sample.plist schema entry as markdown."""
 
-  # Handle incorrect spread of `map()`` arguments
-  if isinstance(key, tuple) and not entry:
-    key, entry = key
-
   # Converts the key to a markdown header
   key_fmt = key \
     .replace('.', ' -> ') \
@@ -423,18 +419,9 @@ def format_markdown_entry(key: str, entry: Optional[str]=None) -> str:
 
   return f"{header} {key_fmt}\n\n{entry[start:end].strip()}"
 
-def parse_markdown_schema(raw_schema: dict) -> str:
-  """Parses the raw schema into a markdown formatted document."""
-  document = "\n\n".join(map(format_markdown_entry, sorted(raw_schema.items())))
-
-  #TODO: Resolve header references with new header format
-
-  return document
-
 
 __all__ = [
-  # Functions (3)
+  # Functions (2)
   "parse_schema",
-  "format_markdown_entry",
-  "parse_markdown_schema"
+  "format_markdown_entry"
 ]
