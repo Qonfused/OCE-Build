@@ -299,12 +299,19 @@ def parse_schema(file: Union[List[str], TextIOWrapper],
   schema = {}
   for line in file:
     # Normalize line
-    lnorm = str(line.lstrip()).strip()
+    lnorm = str(lstrip := line.lstrip()).strip()
+    indent = len(line) - len(lstrip)
     # Skip comments
     if lnorm[:1] == '%': continue
 
     # Use root-level commands as boundaries for key entries
-    if (line[:1] == '\\' or lnorm[:5] == '\item') and cursor['key']:
+    is_root_command = lnorm[:1] == '\\' and indent <= 1
+    is_boundary = any(lnorm.startswith(c) for c in ('\item', '\end{enumerate}'))
+    if cursor['key'] and (is_root_command or is_boundary):
+      # Handle false positives for nested \item commands
+      if not is_root_command and lnorm != '\item':
+        cursor['entry'] += f"\n{line}"
+        continue
       # Add value to the schema if all required attributes are present
       if (entry := cursor['entry']) and cursor['type']:
         # Normalize entry to fix formatting inconsistencies
@@ -314,7 +321,7 @@ def parse_schema(file: Union[List[str], TextIOWrapper],
       # Reset all attributes
       _reset_key_entry(cursor)
     # If set, continue storing the current LaTeX entry
-    if cursor['entry']:
+    elif cursor['entry']:
       cursor['entry'] += f"\n{line}"
 
     # Parse LaTeX commands
