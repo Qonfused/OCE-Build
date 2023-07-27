@@ -1,6 +1,6 @@
 <h1 id=schema>OpenCore Config.plist Schema - v0.9.3</h1>
 
-#### Last Updated: `2023-07-27 18:41:04.900010+00:00`
+#### Last Updated: `2023-07-27 20:16:06.518836+00:00`
 
 #### Revision: `{ SHA1: d52fc46ba650ce1afe00c354331a0657a533ef18 }`
 
@@ -1177,7 +1177,7 @@ This option performs memory map analysis of the firmware and checks whether all 
 
 This option overrides the maximum slide of 255 by a user specified value between 1 and 254 (inclusive) when `ProvideCustomSlide` is enabled. It is assumed that modern firmware allocates pool memory from top to bottom, effectively resulting in free memory when slide scanning is used later as temporary memory during kernel loading. When such memory is not available, this option stops the evaluation of higher slides.
 
-*Note*: The need for this quirk is determined by random boot failures when `ProvideCustomSlide` is enabled and the randomized slide falls into the unavailable range. When `AppleDebug` is enabled, the debug log typically contains messages such as `AAPL: [EB|`LD:LKC] \` Err(0x9)}. To find the optimal value, append `slide=X`, where `X` is the slide value, to the `boot-args` and select the largest one that does not result in boot failures.
+*Note*: The need for this quirk is determined by random boot failures when `ProvideCustomSlide` is enabled and the randomized slide falls into the unavailable range. When `AppleDebug` is enabled, the debug log typically contains messages such as `AAPL: [EB|`LD:LKC]\` Err(0x9)}. To find the optimal value, append `slide=X`, where `X` is the slide value, to the `boot-args` and select the largest one that does not result in boot failures.
 
 <h3 id=booter-quirks-rebuildapplememorymap>Booter -> Quirks -> RebuildAppleMemoryMap</h3>
 
@@ -1215,7 +1215,9 @@ For development purposes one may take risks and try other values. Consider a GPU
 * `BAR0` supports sizes from 256 MB to 8 GB. Its value is 4 GB.
 * `BAR1` supports sizes from 2 MB to 256 MB. Its value is 256 MB. 
 
-*Example 1*: Setting `ResizeAppleGpuBars` to 1 GB will change `BAR0` to 1 GB and leave `BAR1` unchanged. \*Example 2*: Setting `ResizeAppleGpuBars` to 1 MB will change `BAR0` to 256 MB and `BAR0` to 2 MB. \*Example 3*: Setting `ResizeAppleGpuBars` to 16 GB will make no changes.
+*Example 1*: Setting `ResizeAppleGpuBars` to 1 GB will change `BAR0` to 1 GB and leave `BAR1` unchanged.
+*Example 2*: Setting `ResizeAppleGpuBars` to 1 MB will change `BAR0` to 256 MB and `BAR0` to 2 MB.
+*Example 3*: Setting `ResizeAppleGpuBars` to 16 GB will make no changes.
 
 *Note*: See `ResizeGpuBars` quirk for general GPU PCI BAR size configuration and more details about the technology.
 
@@ -1609,7 +1611,7 @@ To be filled with `plist dict` values, describing each kext. Refer to the **Forc
 
 **Failsafe**: Empty
 
-**Description**: Kext bundle path (e.g. `System\Library \Extensions \IONetworkingFamily.kext`).
+**Description**: Kext bundle path (e.g. `System\Library\Extensions\IONetworkingFamily.kext`).
 
 <h3 id=kernel-force-comment>Kernel -> Force[] -> Comment</h3>
 
@@ -1862,16 +1864,13 @@ To be filled with `plist dictionary` values, describing each patch. Refer to the
 Some types of firmware lock the `PKG_CST_CONFIG_CONTROL` MSR register and the bundled `ControlMsrE2` tool can be used to check its state. Note that some types of firmware only have this register locked on some cores. As modern firmware provide a `CFG Lock` setting that allows configuring the `PKG_CST_CONFIG_CONTROL` MSR register lock, this option should be avoided whenever possible.
 
 On APTIO firmware that do not provide a `CFG Lock` setting in the GUI, it is possible to access the option directly:
-
-\begin{enumerate}
 * Download [UEFITool](https://github.com/LongSoft/UEFITool/releases) and [IFR-Extractor](https://github.com/LongSoft/Universal-IFR-Extractor/releases).
 * Open the firmware image in UEFITool and find `CFG Lock` unicode string. If it is not present, the firmware may not have this option and the process should therefore be discontinued.
 * Extract the `Setup.bin` PE32 Image Section (the UEFITool found) through the `Extract Body` menu option.
 * Run IFR-Extractor on the extracted file (e.g. `./ifrextract Setup.bin Setup.txt`).
 * Find `CFG Lock, VarStoreInfo (VarOffset/VarName):` in `Setup.txt` and remember the offset right after it (e.g. `0x123`).
 * Download and run [Modified GRUB Shell](http://brains.by/posts/bootx64.7z) compiled by [brainsucker](https://habr.com/geektimes/post/258090) or use [a newer version](https://github.com/datasone/grub-mod-setup_var) by [datasone](https://github.com/datasone).
-* Enter `setup_var 0x123 0x00` command, where `0x123` should be replaced by the actual offset, and reboot. \end{enumerate}
-
+* Enter `setup_var 0x123 0x00` command, where `0x123` should be replaced by the actual offset, and reboot. 
 **Warning**: Variable offsets are unique not only to each motherboard but even to its firmware version. Never ever try to use an offset without checking.
 
 On selected platforms, the `ControlMsrE2` tool can also change such hidden options. Pass desired argument: `lock`, `unlock` for `CFG Lock`. Or pass `interactive` to find and modify other hidden options.
@@ -2273,8 +2272,6 @@ On macOS 10.7 and earlier, the XNU kernel can boot with architectures different 
 * `x86_64` --- Use `x86_64` (64-bit) kernel when available. 
 
 The algorithm used to determine the preferred kernel architecture is set out below.
-
-\begin{enumerate}
 * `arch` argument in image arguments (e.g. when launched via UEFI Shell) or in `boot-args` variable overrides any compatibility checks and forces the specified architecture, completing this algorithm.
 * OpenCore build architecture restricts capabilities to `i386` and `i386-user32` mode for the 32-bit firmware variant.
 * Determined EfiBoot version restricts architecture choice:
@@ -2285,14 +2282,14 @@ The algorithm used to determine the preferred kernel architecture is set out bel
 * If `KernelArch` is set to `Auto` and `SSSE3` is not supported by the CPU, capabilities are restricted to `i386-user32` if supported by EfiBoot.
 * Board identifier (from SMBIOS) based on EfiBoot version disables `x86_64` support on an unsupported model if any `i386` variant is supported. `Auto` is not consulted here as the list is not overridable in EfiBoot.
 * `KernelArch` restricts the support to the explicitly specified architecture (when not set to `Auto`) if the architecture remains present in the capabilities.
-* The best supported architecture is chosen in this order: `x86_64`, `i386`, `i386-user32`. \end{enumerate}
-
+* The best supported architecture is chosen in this order: `x86_64`, `i386`, `i386-user32`. 
 Unlike macOS~10.7 (where certain board identifiers are treated as the `i386` only machines), and macOS~10.5 or earlier (where `x86_64` is not supported by the macOS kernel), macOS~10.6 is very special. The architecture choice on macOS~10.6 depends on many factors including not only the board identifier, but also the macOS product type (client vs server), macOS point release, and amount of RAM. The detection of all these is complicated and impractical, as several point releases had implementation flaws resulting in a failure to properly execute the server detection in the first place. For this reason, OpenCore on macOS~10.6 falls back on the `x86_64` architecture whenever it is supported by the board, as it is on macOS~10.7.
 
 A 64-bit Mac model compatibility matrix corresponding to actual EfiBoot behaviour on macOS 10.6.8 and 10.7.5 is outlined below.
 
-\begin{center} \begin{tabular}{|p{0.9in}|c|c|c|c|} \hline **Model** & **10.6 (minimal)** & **10.6 (client)** & **10.6 (server)** & **10.7 (any)** \\hline Macmini & 4,x (Mid 2010) & 5,x (Mid 2011) & 4,x (Mid 2010) & 3,x (Early 2009) \\hline MacBook & Unsupported & Unsupported & Unsupported & 5,x (2009/09) \\hline MacBookAir & Unsupported & Unsupported & Unsupported & 2,x (Late 2008) \\hline MacBookPro & 4,x (Early 2008) & 8,x (Early 2011) & 8,x (Early 2011) & 3,x (Mid 2007) \\hline iMac & 8,x (Early 2008) & 12,x (Mid 2011) & 12,x (Mid 2011) & 7,x (Mid 2007) \\hline MacPro & 3,x (Early 2008) & 5,x (Mid 2010) & 3,x (Early 2008) & 3,x (Early 2008) \\hline Xserve & 2,x (Early 2008) & 2,x (Early 2008) & 2,x (Early 2008) & 2,x (Early 2008) \\hline \end{tabular} \end{center}
 
+ 
+{|p{0.9in}|c|c|c|c|}\hline **Model** & **10.6 (minimal)** & **10.6 (client)** & **10.6 (server)** & **10.7 (any)**\\hline Macmini & 4,x (Mid 2010) & 5,x (Mid 2011) & 4,x (Mid 2010) & 3,x (Early 2009)\\hline MacBook & Unsupported & Unsupported & Unsupported & 5,x (2009/09)\\hline MacBookAir & Unsupported & Unsupported & Unsupported & 2,x (Late 2008)\\hline MacBookPro & 4,x (Early 2008) & 8,x (Early 2011) & 8,x (Early 2011) & 3,x (Mid 2007)\\hline iMac & 8,x (Early 2008) & 12,x (Mid 2011) & 12,x (Mid 2011) & 7,x (Mid 2007)\\hline MacPro & 3,x (Early 2008) & 5,x (Mid 2010) & 3,x (Early 2008) & 3,x (Early 2008)\\hline Xserve & 2,x (Early 2008) & 2,x (Early 2008) & 2,x (Early 2008) & 2,x (Early 2008)\\hline\end{tabular} 
 *Note*: `3+2` and `6+4` hotkeys to choose the preferred architecture are unsupported as they are handled by EfiBoot and hence, difficult to detect.
 
 <h3 id=kernel-scheme-kernelcache>Kernel -> Scheme -> KernelCache</h3>
@@ -2309,8 +2306,9 @@ Different variants of macOS support different kernel caching variants designed t
 
 The list of available kernel caching types and its current support in OpenCore is listed below.
 
-\begin{center} \begin{tabular}{|p{0.67in}|c|c|c|c|c|c|c|} \hline **macOS** & **i386 NC** & **i386 MK** & **i386 PK** & **x86_64 NC** & **x86_64 MK** & **x86_64 PK** & **x86_64 KC** \\hline 10.4 & YES & YES (V1) & NO (V1) & --- & --- & --- & --- \\hline 10.5 & YES & YES (V1) & NO (V1) & --- & --- & --- & --- \\hline 10.6 & YES & YES (V2) & YES (V2) & YES & YES (V2) & YES (V2) & --- \\hline 10.7 & YES & --- & YES (V3) & YES & --- & YES (V3) & --- \\hline 10.8-10.9 & --- & --- & --- & YES & --- & YES (V3) & --- \\hline 10.10-10.15 & --- & --- & --- & --- & --- & YES (V3) & --- \\hline 11+ & --- & --- & --- & --- & --- & YES (V3) & YES \\hline \end{tabular} \end{center}
 
+ 
+{|p{0.67in}|c|c|c|c|c|c|c|}\hline **macOS** & **i386 NC** & **i386 MK** & **i386 PK** & **x86_64 NC** & **x86_64 MK** & **x86_64 PK** & **x86_64 KC**\\hline 10.4 & YES & YES (V1) & NO (V1) & --- & --- & --- & ---\\hline 10.5 & YES & YES (V1) & NO (V1) & --- & --- & --- & ---\\hline 10.6 & YES & YES (V2) & YES (V2) & YES & YES (V2) & YES (V2) & ---\\hline 10.7 & YES & --- & YES (V3) & YES & --- & YES (V3) & ---\\hline 10.8-10.9 & --- & --- & --- & YES & --- & YES (V3) & ---\\hline 10.10-10.15 & --- & --- & --- & --- & --- & YES (V3) & ---\\hline 11+ & --- & --- & --- & --- & --- & YES (V3) & YES\\hline\end{tabular} 
 *Note*: The first version (V1) of the 32-bit `prelinkedkernel` is unsupported due to the corruption of kext symbol tables by the tools. On this version, the `Auto` setting will block `prelinkedkernel` booting. This also results in the `keepsyms=1` boot argument being non-functional for kext frames on these systems.
 
 <h2 id=misc-blessoverride>Misc -> BlessOverride</h2>
@@ -2438,7 +2436,7 @@ Valid values:
 * `Short` --- create a short boot option instead of a complete one.
 * This variant is useful for some older types of firmware, typically from Insyde, that are unable to manage full device paths. 
 * `System` --- create no boot option but assume specified custom option is blessed.
-* This variant is useful when relying on `ForceBooterSignature` quirk and OpenCore launcher path management happens through `bless` utilities without involving OpenCore.  \medskip 
+* This variant is useful when relying on `ForceBooterSignature` quirk and OpenCore launcher path management happens through `bless` utilities without involving OpenCore.   
 
 This option allows integration with third-party operating system installation and upgrades (which may overwrite the `\EFI\BOOT\BOOTx64.efi` file). The BOOTx64.efi file is no longer used for bootstrapping OpenCore if a custom option is created. The custom path used for bootstrapping can be specified by using the `LauncherPath` option.
 
@@ -2475,7 +2473,7 @@ This option allows integration with third-party operating system installation an
 
 **Description**: Sets specific attributes for the OpenCore picker.
 
-Different OpenCore pickers may be configured through the attribute mask containing OpenCore-reserved (`BIT0`\textasciitilde`BIT15`) and OEM-specific (`BIT16`\textasciitilde`BIT31`) values.
+Different OpenCore pickers may be configured through the attribute mask containing OpenCore-reserved (`BIT0`~`BIT15`) and OEM-specific (`BIT16`~`BIT31`) values.
 
 Current OpenCore values include:
 * `0x0001` --- `OC_ATTR_USE_VOLUME_ICON`, provides custom icons for boot entries:
@@ -2483,34 +2481,34 @@ Current OpenCore values include:
 OpenCore will attempt loading a volume icon by searching as follows, and will fallback to the default icon on failure:
 * `.VolumeIcon.icns` file at `Preboot` volume in per-volume directory(`/System/Volumes/Preboot/{GUID\`/} when mounted at the default location withinmacOS) for APFS (if present).
 * `.VolumeIcon.icns` file at the `Preboot` volume root (`/System/Volumes/Preboot/`, when mounted at the default location within macOS) for APFS (otherwise).
-* `.VolumeIcon.icns` file at the volume root for other filesystems.  \medskip
+* `.VolumeIcon.icns` file at the volume root for other filesystems.  
 
-*Note 1*: The Apple picker partially supports placing a volume icon file at the operating system's `Data` volume root, `/System/Volumes/Data/`, when mounted at the default location within macOS. This approach is flawed: the file is neither accessible to OpenCanopy nor to the Apple picker when FileVault 2, which is meant to be the default choice, is enabled. Therefore, OpenCanopy does not attempt supporting Apple's approach. A volume icon file may be placed at the root of the `Preboot` volume for compatibility with both OpenCanopy and the Apple picker, or use the `Preboot` per-volume location as above with OpenCanopy as a preferred alternative to Apple's approach. \medskip
+*Note 1*: The Apple picker partially supports placing a volume icon file at the operating system's `Data` volume root, `/System/Volumes/Data/`, when mounted at the default location within macOS. This approach is flawed: the file is neither accessible to OpenCanopy nor to the Apple picker when FileVault 2, which is meant to be the default choice, is enabled. Therefore, OpenCanopy does not attempt supporting Apple's approach. A volume icon file may be placed at the root of the `Preboot` volume for compatibility with both OpenCanopy and the Apple picker, or use the `Preboot` per-volume location as above with OpenCanopy as a preferred alternative to Apple's approach. 
 
-*Note 2*: Be aware that using a volume icon on any drive overrides the normal OpenCore picker behaviour for that drive of selecting the appropriate icon depending on whether the drive is internal or external. \medskip
+*Note 2*: Be aware that using a volume icon on any drive overrides the normal OpenCore picker behaviour for that drive of selecting the appropriate icon depending on whether the drive is internal or external.
 * `0x0002` --- `OC_ATTR_USE_DISK_LABEL_FILE`, use custom prerendered titles for boot entries from `.disk_label` (`.disk_label_2x`) file next to the bootloader for all filesystems. These labels can be generated via the `disklabel` utility or the `bless -{`-folder {FOLDER_PATH} -{}-label {LABEL_TEXT}} command. When prerendered labels are disabled or missing, use label text in `.contentDetails` (or `.disk_label.contentDetails`) file next to bootloader if present instead, otherwise the entry name itself will be rendered.
 * `0x0004` --- `OC_ATTR_USE_GENERIC_LABEL_IMAGE`, provides predefined label images for boot entries without custom entries. This may however give less detail for the actual boot entry.
 * `0x0008` --- `OC_ATTR_HIDE_THEMED_ICONS`, prefers builtin icons for certain icon categories to match the theme style. For example, this could force displaying the builtin Time Machine icon. Requires `OC_ATTR_USE_VOLUME_ICON`.
 * `0x0010` --- `OC_ATTR_USE_POINTER_CONTROL`, enables pointer control in the OpenCore picker when available. For example, this could make use of mouse or trackpad to control UI elements.
 * `0x0020` --- `OC_ATTR_SHOW_DEBUG_DISPLAY`, enable display of additional timing and debug information, in Builtin picker in `DEBUG` and `NOOPT` builds only.
 * `0x0040` --- `OC_ATTR_USE_MINIMAL_UI`, use minimal UI display, no Shutdown or Restart buttons, affects OpenCanopy and builtin picker.
-* `0x0080` --- `OC_ATTR_USE_FLAVOUR_ICON`\label{oc-attr-use-flavour-icon}, provides flexible boot entry content description, suitable for picking the best media across different content sets:
+* `0x0080` --- `OC_ATTR_USE_FLAVOUR_ICON`, provides flexible boot entry content description, suitable for picking the best media across different content sets:
 
 When enabled, the entry icon in OpenCanopy and the audio assist entry sound in OpenCanopy and builtin boot picker are chosen by something called content flavour. To determine content flavour the following algorithm is used:
 * For a Tool the value is read from `Flavour` field.
 * For an automatically discovered entry, including for boot entry protocol entries such as those generated by the OpenLinuxBoot driver, it is read from the `.contentFlavour` file next to the bootloader, if present.
 * For a custom entry specified in the `Entries` section it is read from the `.contentFlavour` file next to the bootloader if `Flavour` is `Auto`, otherwise it is specified via the `Flavour` value itself.
-* If read flavour is `Auto` or there is no `.contentFlavour`, entry flavour is chosen based on the entry type (e.g. Windows automatically gets Windows flavour).  \medskip
+* If read flavour is `Auto` or there is no `.contentFlavour`, entry flavour is chosen based on the entry type (e.g. Windows automatically gets Windows flavour).  
 
-The Flavour value is a sequence of `:` separated names limited to 64 characters of printable 7-bit ASCII. This is designed to support up to approximately five names. Each name refers to a flavour, with the first name having the highest priority and the last name having the lowest priority. Such a structure allows describing an entry in a more specific way, with icons selected flexibly depending on support by the audio-visual pack. A missing audio or icon file means the next flavour should be tried, and if all are missing the choice happens based on the type of the entry. Example flavour values: `BigSur:Apple`, `Windows10:Windows`. `OpenShell:UEFIShell:Shell`. \medskip
+The Flavour value is a sequence of `:` separated names limited to 64 characters of printable 7-bit ASCII. This is designed to support up to approximately five names. Each name refers to a flavour, with the first name having the highest priority and the last name having the lowest priority. Such a structure allows describing an entry in a more specific way, with icons selected flexibly depending on support by the audio-visual pack. A missing audio or icon file means the next flavour should be tried, and if all are missing the choice happens based on the type of the entry. Example flavour values: `BigSur:Apple`, `Windows10:Windows`. `OpenShell:UEFIShell:Shell`. 
 
-Using flavours means that you can switch between icon sets easily, with the flavour selecting the best available icons from each set. E.g. specifying icon flavour `Debian:Linux` will use the icon `Debian.icns` if provided, then will try `Linux.icns`, then will fall back to the default for an OS, which is `HardDrive.icns`. \medskip
+Using flavours means that you can switch between icon sets easily, with the flavour selecting the best available icons from each set. E.g. specifying icon flavour `Debian:Linux` will use the icon `Debian.icns` if provided, then will try `Linux.icns`, then will fall back to the default for an OS, which is `HardDrive.icns`. 
 
 Things to keep in mind:
 * For security reasons `Ext<Flavour>.icns` and `<Flavour>.icns` are both supported, and only `Ext<Flavour>.icns` will be used if the entry is on an external drive (followed by default fallback `ExtHardDrive.icns`).
 * Where both apply `.VolumeIcon.icns` takes precence over `.contentFlavour`.
 * In order to allow icons and audio assist to work correctly for tools (e.g. for UEFI Shell), system default boot entry icons (see `Docs/Flavours.md`) specified in the `Flavour` setting for `Tools` or `Entries` will continue to apply even when flavour is disabled. Non-system icons will be ignored in thiscase. In addition, the flavours `UEFIShell` and `NVRAMReset` are given special processing, identifying their respective tools to apply correct audio-assist, default builtin labels, etc.
-* A list of recommended flavours is provided in `Docs/Flavours.md`.  \medskip
+* A list of recommended flavours is provided in `Docs/Flavours.md`.
 
 <h3 id=misc-boot-pickeraudioassist>Misc -> Boot -> PickerAudioAssist</h3>
 
@@ -3091,8 +3089,6 @@ Setting `SecureBootModel` to any valid value but `Disabled` is equivalent to [`M
 Note that enabling Apple Secure Boot is demanding on invalid configurations, faulty macOS installations, and on unsupported setups.
 
 Things to consider:
-
-\begin{enumerate}
 * As with T2 Macs, all unsigned kernel extensions as well as several signed kernel extensions, including NVIDIA Web Drivers, cannot be installed.
 * The list of cached kernel extensions may be different, resulting in a need to change the list of `Added` or `Forced` kernel extensions. For example, `IO80211Family` cannot be injected in this case.
 * System volume alterations on operating systems with sealing, such as macOS~11, may result in the operating system being unbootable. Do not try to disable system volume encryption unless Apple Secure Boot is disabled.
@@ -3100,8 +3096,7 @@ Things to consider:
 * Operating systems released before Apple Secure Boot was released (e.g. macOS~10.12 or earlier), will still boot until UEFI Secure Boot is enabled. This is so because Apple Secure Boot treats these as incompatible and they are then handled by the firmware (as Microsoft Windows is).
 * On older CPUs (e.g. before Sandy Bridge), enabling Apple Secure Boot might cause slightly slower loading (by up to 1 second).
 * As the `Default` value will increase with time to support the latest major released operating system, it is not recommended to use the `ApECID` and the `Default` settings together.
-* Installing macOS with Apple Secure Boot enabled is not possible while using HFS+ target volumes. This may include HFS+ formatted drives when no spare APFS drive is available. \end{enumerate}
-
+* Installing macOS with Apple Secure Boot enabled is not possible while using HFS+ target volumes. This may include HFS+ formatted drives when no spare APFS drive is available. 
 The installed operating system may have sometimes outdated Apple Secure Boot manifests on the `Preboot` partition, resulting in boot failures. This is likely to be the case when an `'OCB: Apple Secure Boot prohibits this boot entry, enforcing!'' message is logged.
 
 When this happens, either reinstall the operating system or copy the manifests (files with `.im4m` extension, such as `boot.efi.j137.im4m`) from `/usr/standalone/i386` to `/Volumes/Preboot/<UUID>/System/Library/CoreServices`. Here, `<UUID>` is the system volume identifier. On HFS+ installations, the manifests should be copied to `/System/Library/CoreServices` on the system volume.
@@ -3799,7 +3794,7 @@ Specify special string value `OEM` to extract current value from NVRAM (`system-
 
 **Type**: `plist integer`, 16-bit
 
-**Failsafe**: `0xFFFF` (unknown)\**SMBIOS**: Memory Device (Type 17) --- Data Width
+**Failsafe**: `0xFFFF` (unknown) **SMBIOS**: Memory Device (Type 17) --- Data Width
 
 **Description**: Specifies the data width, in bits, of the memory. A `DataWidth` of `0` and a `TotalWidth` of `8` indicates that the device is being used solely to provide 8 error-correction bits.
 
@@ -3817,7 +3812,7 @@ To be filled with `plist dictionary` values, describing each memory device. Refe
 
 **Type**: `plist string`
 
-**Failsafe**: `Unknown`\**SMBIOS**: Memory Device (Type 17) --- Asset Tag
+**Failsafe**: `Unknown` **SMBIOS**: Memory Device (Type 17) --- Asset Tag
 
 **Description**: Specifies the asset tag of this memory device.
 
@@ -3825,7 +3820,7 @@ To be filled with `plist dictionary` values, describing each memory device. Refe
 
 **Type**: `plist string`
 
-**Failsafe**: `Unknown`\**SMBIOS**: Memory Device (Type 17) --- Bank Locator
+**Failsafe**: `Unknown` **SMBIOS**: Memory Device (Type 17) --- Bank Locator
 
 **Description**: Specifies the physically labeled bank where the memory device is located.
 
@@ -3833,7 +3828,7 @@ To be filled with `plist dictionary` values, describing each memory device. Refe
 
 **Type**: `plist string`
 
-**Failsafe**: `Unknown`\**SMBIOS**: Memory Device (Type 17) --- Device Locator
+**Failsafe**: `Unknown` **SMBIOS**: Memory Device (Type 17) --- Device Locator
 
 **Description**: Specifies the physically-labeled socket or board position where the memory device is located.
 
@@ -3841,7 +3836,7 @@ To be filled with `plist dictionary` values, describing each memory device. Refe
 
 **Type**: `plist string`
 
-**Failsafe**: `Unknown`\**SMBIOS**: Memory Device (Type 17) --- Manufacturer
+**Failsafe**: `Unknown` **SMBIOS**: Memory Device (Type 17) --- Manufacturer
 
 **Description**: Specifies the manufacturer of this memory device.
 
@@ -3854,7 +3849,7 @@ For empty slot this must be set to `NO DIMM` for macOS System Profiler to correc
 
 **Type**: `plist string`
 
-**Failsafe**: `Unknown`\**SMBIOS**: Memory Device (Type 17) --- Part Number
+**Failsafe**: `Unknown` **SMBIOS**: Memory Device (Type 17) --- Part Number
 
 **Description**: Specifies the part number of this memory device.
 
@@ -3862,7 +3857,7 @@ For empty slot this must be set to `NO DIMM` for macOS System Profiler to correc
 
 **Type**: `plist string`
 
-**Failsafe**: `Unknown`\**SMBIOS**: Memory Device (Type 17) --- Serial Number
+**Failsafe**: `Unknown` **SMBIOS**: Memory Device (Type 17) --- Serial Number
 
 **Description**: Specifies the serial number of this memory device.
 
@@ -3870,7 +3865,7 @@ For empty slot this must be set to `NO DIMM` for macOS System Profiler to correc
 
 **Type**: `plist integer`, 32-bit
 
-**Failsafe**: `0`\**SMBIOS**: Memory Device (Type 17) --- Size
+**Failsafe**: `0` **SMBIOS**: Memory Device (Type 17) --- Size
 
 **Description**: Specifies the size of the memory device, in megabytes. `0` indicates this slot is not populated.
 
@@ -3878,7 +3873,7 @@ For empty slot this must be set to `NO DIMM` for macOS System Profiler to correc
 
 **Type**: `plist integer`, 16-bit
 
-**Failsafe**: `0`\**SMBIOS**: Memory Device (Type 17) --- Speed
+**Failsafe**: `0` **SMBIOS**: Memory Device (Type 17) --- Speed
 
 **Description**: Specifies the maximum capable speed of the device, in megatransfers per second (MT/s). `0` indicates an unknown speed.
 
@@ -3886,7 +3881,7 @@ For empty slot this must be set to `NO DIMM` for macOS System Profiler to correc
 
 **Type**: `plist integer`, 8-bit
 
-**Failsafe**: `0x03`\**SMBIOS**: Physical Memory Array (Type 16) --- Memory Error Correction
+**Failsafe**: `0x03` **SMBIOS**: Physical Memory Array (Type 16) --- Memory Error Correction
 
 **Description**: Specifies the primary hardware error correction or detection method supported by the memory.
 * `0x01` --- Other
@@ -3901,7 +3896,7 @@ For empty slot this must be set to `NO DIMM` for macOS System Profiler to correc
 
 **Type**: `plist integer`, 8-bit
 
-**Failsafe**: `0x02`\**SMBIOS**: Memory Device (Type 17) --- Form Factor
+**Failsafe**: `0x02` **SMBIOS**: Memory Device (Type 17) --- Form Factor
 
 **Description**: Specifies the form factor of the memory. On Macs, this should typically be DIMM or SODIMM. Commonly used form factors are listed below.
 
@@ -3918,7 +3913,7 @@ When `Automatic` is `true`, the original value from the the corresponding Mac mo
 
 **Type**: `plist integer`, 64-bit
 
-**Failsafe**: `0`\**SMBIOS**: Physical Memory Array (Type 16) --- Maximum Capacity
+**Failsafe**: `0` **SMBIOS**: Physical Memory Array (Type 16) --- Maximum Capacity
 
 **Description**: Specifies the maximum amount of memory, in bytes, supported by the system.
 
@@ -3926,7 +3921,7 @@ When `Automatic` is `true`, the original value from the the corresponding Mac mo
 
 **Type**: `plist integer`, 16-bit
 
-**Failsafe**: `0xFFFF` (unknown)\**SMBIOS**: Memory Device (Type 17) --- Total Width
+**Failsafe**: `0xFFFF` (unknown) **SMBIOS**: Memory Device (Type 17) --- Total Width
 
 **Description**: Specifies the total width, in bits, of the memory, including any check or error-correction bits. If there are no error-correction bits, this value should be equal to `DataWidth`.
 
@@ -3934,7 +3929,7 @@ When `Automatic` is `true`, the original value from the the corresponding Mac mo
 
 **Type**: `plist integer`, 8-bit
 
-**Failsafe**: `0x02`\**SMBIOS**: Memory Device (Type 17) --- Memory Type
+**Failsafe**: `0x02` **SMBIOS**: Memory Device (Type 17) --- Memory Type
 
 **Description**: Specifies the memory type. Commonly used types are listed below.
 * `0x01` --- Other
@@ -3954,7 +3949,7 @@ When `Automatic` is `true`, the original value from the the corresponding Mac mo
 
 **Type**: `plist integer`, 16-bit
 
-**Failsafe**: `0x4`\**SMBIOS**: Memory Device (Type 17) --- Type Detail
+**Failsafe**: `0x4` **SMBIOS**: Memory Device (Type 17) --- Type Detail
 
 **Description**: Specifies additional memory type information.
 * `Bit 0` --- Reserved, set to 0
@@ -4044,7 +4039,7 @@ When `Automatic` is `true`, the original value from the the corresponding Mac mo
 
 **Type**: `plist string`
 
-**Failsafe**: Empty (OEM specified)\**SMBIOS**: BIOS Information (Type 0) --- BIOS Release Date
+**Failsafe**: Empty (OEM specified) **SMBIOS**: BIOS Information (Type 0) --- BIOS Release Date
 
 **Description**: Firmware release date. Similar to `BIOSVersion`. May look like `12/08/2017`.
 
@@ -4052,7 +4047,7 @@ When `Automatic` is `true`, the original value from the the corresponding Mac mo
 
 **Type**: `plist string`
 
-**Failsafe**: Empty (OEM specified)\**SMBIOS**: BIOS Information (Type 0) --- Vendor
+**Failsafe**: Empty (OEM specified) **SMBIOS**: BIOS Information (Type 0) --- Vendor
 
 **Description**: BIOS Vendor. All rules of `SystemManufacturer` do apply.
 
@@ -4060,7 +4055,7 @@ When `Automatic` is `true`, the original value from the the corresponding Mac mo
 
 **Type**: `plist string`
 
-**Failsafe**: Empty (OEM specified)\**SMBIOS**: BIOS Information (Type 0) --- BIOS Version
+**Failsafe**: Empty (OEM specified) **SMBIOS**: BIOS Information (Type 0) --- BIOS Version
 
 **Description**: Firmware version. This value gets updated and takes part in update delivery configuration and macOS version compatibility. This value could look like `MM71.88Z.0234.B00.1809171422` in older firmware and is described in [BiosId.h](https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Apple/Guid/BiosId.h). In newer firmware, it should look like `236.0.0.0.0` or `220.230.16.0.0 (iBridge: 16.16.2542.0.0,0)`. iBridge version is read from `BridgeOSVersion` variable, and is only present on macs with T2.
 
@@ -4068,7 +4063,7 @@ When `Automatic` is `true`, the original value from the the corresponding Mac mo
 
 **Type**: `plist string`
 
-**Failsafe**: Empty (OEM specified)\**SMBIOS**: Baseboard (or Module) Information (Type 2) --- Asset Tag
+**Failsafe**: Empty (OEM specified) **SMBIOS**: Baseboard (or Module) Information (Type 2) --- Asset Tag
 
 **Description**: Asset tag number. Varies, may be empty or `Type2 - Board Asset Tag`.
 
@@ -4076,7 +4071,7 @@ When `Automatic` is `true`, the original value from the the corresponding Mac mo
 
 **Type**: `plist string`
 
-**Failsafe**: Empty (OEM specified)\**SMBIOS**: Baseboard (or Module) Information (Type 2) --- Location in Chassis
+**Failsafe**: Empty (OEM specified) **SMBIOS**: Baseboard (or Module) Information (Type 2) --- Location in Chassis
 
 **Description**: Varies, may be empty or `Part Component`.
 
@@ -4084,7 +4079,7 @@ When `Automatic` is `true`, the original value from the the corresponding Mac mo
 
 **Type**: `plist string`
 
-**Failsafe**: Empty (OEM specified)\**SMBIOS**: Baseboard (or Module) Information (Type 2) - Manufacturer
+**Failsafe**: Empty (OEM specified) **SMBIOS**: Baseboard (or Module) Information (Type 2) - Manufacturer
 
 **Description**: Board manufacturer. All rules of `SystemManufacturer` do apply.
 
@@ -4092,7 +4087,7 @@ When `Automatic` is `true`, the original value from the the corresponding Mac mo
 
 **Type**: `plist string`
 
-**Failsafe**: Empty (OEM specified)\**SMBIOS**: Baseboard (or Module) Information (Type 2) - Product
+**Failsafe**: Empty (OEM specified) **SMBIOS**: Baseboard (or Module) Information (Type 2) - Product
 
 **Description**: Mac Board ID (`board-id`). May look like `Mac-7BA5B2D9E42DDD94` or `Mac-F221BEC8` in older models.
 
@@ -4100,7 +4095,7 @@ When `Automatic` is `true`, the original value from the the corresponding Mac mo
 
 **Type**: `plist string`
 
-**Failsafe**: Empty (OEM specified)\**SMBIOS**: Baseboard (or Module) Information (Type 2) --- Serial Number
+**Failsafe**: Empty (OEM specified) **SMBIOS**: Baseboard (or Module) Information (Type 2) --- Serial Number
 
 **Description**: Board serial number in defined format. Known formats are described in [macserial](https://github.com/acidanthera/macserial/blob/master/FORMAT.md).
 
@@ -4108,7 +4103,7 @@ When `Automatic` is `true`, the original value from the the corresponding Mac mo
 
 **Type**: `plist integer`
 
-**Failsafe**: `0` (OEM specified)\**SMBIOS**: Baseboard (or Module) Information (Type 2) --- Board Type
+**Failsafe**: `0` (OEM specified) **SMBIOS**: Baseboard (or Module) Information (Type 2) --- Board Type
 
 **Description**: Either `0xA` (Motherboard (includes processor, memory, and I/O) or `0xB` (Processor/Memory Module). Refer to Table 15 -- Baseboard: Board Type for details.
 
@@ -4116,7 +4111,7 @@ When `Automatic` is `true`, the original value from the the corresponding Mac mo
 
 **Type**: `plist string`
 
-**Failsafe**: Empty (OEM specified)\**SMBIOS**: Baseboard (or Module) Information (Type 2) - Version
+**Failsafe**: Empty (OEM specified) **SMBIOS**: Baseboard (or Module) Information (Type 2) - Version
 
 **Description**: Board version number. Varies, may match `SystemProductName` or `SystemProductVersion`.
 
@@ -4124,7 +4119,7 @@ When `Automatic` is `true`, the original value from the the corresponding Mac mo
 
 **Type**: `plist string`
 
-**Failsafe**: Empty (OEM specified)\**SMBIOS**: System Enclosure or Chassis (Type 3) --- Asset Tag Number
+**Failsafe**: Empty (OEM specified) **SMBIOS**: System Enclosure or Chassis (Type 3) --- Asset Tag Number
 
 **Description**: Chassis type name. Varies, could be empty or `MacBook-Aluminum`.
 
@@ -4132,7 +4127,7 @@ When `Automatic` is `true`, the original value from the the corresponding Mac mo
 
 **Type**: `plist string`
 
-**Failsafe**: Empty (OEM specified)\**SMBIOS**: System Enclosure or Chassis (Type 3) --- Manufacturer
+**Failsafe**: Empty (OEM specified) **SMBIOS**: System Enclosure or Chassis (Type 3) --- Manufacturer
 
 **Description**: Board manufacturer. All rules of `SystemManufacturer` do apply.
 
@@ -4140,7 +4135,7 @@ When `Automatic` is `true`, the original value from the the corresponding Mac mo
 
 **Type**: `plist string`
 
-**Failsafe**: Empty (OEM specified)\**SMBIOS**: System Enclosure or Chassis (Type 3) --- Version
+**Failsafe**: Empty (OEM specified) **SMBIOS**: System Enclosure or Chassis (Type 3) --- Version
 
 **Description**: Should match `SystemSerialNumber`.
 
@@ -4148,7 +4143,7 @@ When `Automatic` is `true`, the original value from the the corresponding Mac mo
 
 **Type**: `plist integer`
 
-**Failsafe**: `0` (OEM specified)\**SMBIOS**: System Enclosure or Chassis (Type 3) --- Type
+**Failsafe**: `0` (OEM specified) **SMBIOS**: System Enclosure or Chassis (Type 3) --- Type
 
 **Description**: Chassis type. Refer to Table 17 --- System Enclosure or Chassis Types for details.
 
@@ -4156,7 +4151,7 @@ When `Automatic` is `true`, the original value from the the corresponding Mac mo
 
 **Type**: `plist string`
 
-**Failsafe**: Empty (OEM specified)\**SMBIOS**: System Enclosure or Chassis (Type 3) --- Version
+**Failsafe**: Empty (OEM specified) **SMBIOS**: System Enclosure or Chassis (Type 3) --- Version
 
 **Description**: Should match `BoardProduct`.
 
@@ -4164,7 +4159,7 @@ When `Automatic` is `true`, the original value from the the corresponding Mac mo
 
 **Type**: `plist data`, 8 bytes
 
-**Failsafe**: `0` (OEM specified on Apple hardware, 0 otherwise)\**SMBIOS**: `APPLE_SMBIOS_TABLE_TYPE128` - `FirmwareFeatures` and `ExtendedFirmwareFeatures`
+**Failsafe**: `0` (OEM specified on Apple hardware, 0 otherwise) **SMBIOS**: `APPLE_SMBIOS_TABLE_TYPE128` - `FirmwareFeatures` and `ExtendedFirmwareFeatures`
 
 **Description**: 64-bit firmware features bitmask. Refer to [AppleFeatures.h](https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Apple/IndustryStandard/AppleFeatures.h) for details. Lower 32 bits match `FirmwareFeatures`. Upper 64 bits match `ExtendedFirmwareFeatures`.
 
@@ -4172,7 +4167,7 @@ When `Automatic` is `true`, the original value from the the corresponding Mac mo
 
 **Type**: `plist data`, 8 bytes
 
-**Failsafe**: `0` (OEM specified on Apple hardware, 0 otherwise)\**SMBIOS**: `APPLE_SMBIOS_TABLE_TYPE128` - `FirmwareFeaturesMask` and `ExtendedFirmwareFeaturesMask`
+**Failsafe**: `0` (OEM specified on Apple hardware, 0 otherwise) **SMBIOS**: `APPLE_SMBIOS_TABLE_TYPE128` - `FirmwareFeaturesMask` and `ExtendedFirmwareFeaturesMask`
 
 **Description**: Supported bits of extended firmware features bitmask. Refer to [AppleFeatures.h](https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Apple/IndustryStandard/AppleFeatures.h) for details. Lower 32 bits match `FirmwareFeaturesMask`. Upper 64 bits match `ExtendedFirmwareFeaturesMask`.
 
@@ -4180,7 +4175,7 @@ When `Automatic` is `true`, the original value from the the corresponding Mac mo
 
 **Type**: `plist integer`, 32-bit
 
-**Failsafe**: `0xFFFFFFFF` (OEM specified on Apple hardware, do not provide the table otherwise)\**SMBIOS**: `APPLE_SMBIOS_TABLE_TYPE133` - `PlatformFeature`
+**Failsafe**: `0xFFFFFFFF` (OEM specified on Apple hardware, do not provide the table otherwise) **SMBIOS**: `APPLE_SMBIOS_TABLE_TYPE133` - `PlatformFeature`
 
 **Description**: Platform features bitmask (Missing on older Macs). Refer to [AppleFeatures.h](https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Apple/IndustryStandard/AppleFeatures.h) for details.
 
@@ -4188,7 +4183,7 @@ When `Automatic` is `true`, the original value from the the corresponding Mac mo
 
 **Type**: `plist integer`, 16-bit
 
-**Failsafe**: `0` (Automatic)\**SMBIOS**: `APPLE_SMBIOS_TABLE_TYPE131` - `ProcessorType`
+**Failsafe**: `0` (Automatic) **SMBIOS**: `APPLE_SMBIOS_TABLE_TYPE131` - `ProcessorType`
 
 **Description**: Combined of Processor Major and Minor types.
 
@@ -4198,7 +4193,7 @@ Automatic value generation attempts to provide the most accurate value for the c
 
 **Type**: `plist data`, 16 bytes
 
-**Failsafe**: All zero (OEM specified on Apple hardware, do not provide the table otherwise)\**SMBIOS**: `APPLE_SMBIOS_TABLE_TYPE134` - `Version`
+**Failsafe**: All zero (OEM specified on Apple hardware, do not provide the table otherwise) **SMBIOS**: `APPLE_SMBIOS_TABLE_TYPE134` - `Version`
 
 **Description**: ASCII string containing SMC version in upper case. Missing on T2 based Macs.
 
@@ -4206,7 +4201,7 @@ Automatic value generation attempts to provide the most accurate value for the c
 
 **Type**: `plist string`
 
-**Failsafe**: Empty (OEM specified)\**SMBIOS**: System Information (Type 1) --- Family
+**Failsafe**: Empty (OEM specified) **SMBIOS**: System Information (Type 1) --- Family
 
 **Description**: Family name. May look like `iMac Pro`.
 
@@ -4214,7 +4209,7 @@ Automatic value generation attempts to provide the most accurate value for the c
 
 **Type**: `plist string`
 
-**Failsafe**: Empty (OEM specified)\**SMBIOS**: System Information (Type 1) --- Manufacturer
+**Failsafe**: Empty (OEM specified) **SMBIOS**: System Information (Type 1) --- Manufacturer
 
 **Description**: OEM manufacturer of the particular board. Use failsafe unless strictly required. Do not override to contain `Apple Inc.` on non-Apple hardware, as this confuses numerous services present in the operating system, such as firmware updates, eficheck, as well as kernel extensions developed in Acidanthera, such as Lilu and its plugins. In addition it will also make some operating systems such as Linux unbootable.
 
@@ -4222,7 +4217,7 @@ Automatic value generation attempts to provide the most accurate value for the c
 
 **Type**: `plist string`
 
-**Failsafe**: Empty (OEM specified)\**SMBIOS**: System Information (Type 1), Product Name
+**Failsafe**: Empty (OEM specified) **SMBIOS**: System Information (Type 1), Product Name
 
 **Description**: Preferred Mac model used to mark the device as supported by the operating system. This value must be specified by any configuration for later automatic generation of the related values in this and other SMBIOS tables and related configuration parameters. If `SystemProductName` is not compatible with the target operating system, `-no_compat_check` boot argument may be used as an override.
 
@@ -4232,7 +4227,7 @@ Automatic value generation attempts to provide the most accurate value for the c
 
 **Type**: `plist string`
 
-**Failsafe**: Empty (OEM specified)\**SMBIOS**: System Information (Type 1) --- SKU Number
+**Failsafe**: Empty (OEM specified) **SMBIOS**: System Information (Type 1) --- SKU Number
 
 **Description**: Mac Board ID (`board-id`). May look like `Mac-7BA5B2D9E42DDD94` or `Mac-F221BEC8` in older models. Sometimes it can be just empty.
 
@@ -4240,7 +4235,7 @@ Automatic value generation attempts to provide the most accurate value for the c
 
 **Type**: `plist string`
 
-**Failsafe**: Empty (OEM specified)\**SMBIOS**: System Information (Type 1) --- Serial Number
+**Failsafe**: Empty (OEM specified) **SMBIOS**: System Information (Type 1) --- Serial Number
 
 **Description**: Product serial number in defined format. Known formats are described in [macserial](https://github.com/acidanthera/OpenCorePkg/blob/master/Utilities/macserial/FORMAT.md).
 
@@ -4248,7 +4243,7 @@ Automatic value generation attempts to provide the most accurate value for the c
 
 **Type**: `plist string`, GUID
 
-**Failsafe**: Empty (OEM specified)\**SMBIOS**: System Information (Type 1) --- UUID
+**Failsafe**: Empty (OEM specified) **SMBIOS**: System Information (Type 1) --- UUID
 
 **Description**: A UUID is an identifier that is designed to be unique across both time and space. It requires no central registration process.
 
@@ -4256,7 +4251,7 @@ Automatic value generation attempts to provide the most accurate value for the c
 
 **Type**: `plist string`
 
-**Failsafe**: Empty (OEM specified)\**SMBIOS**: System Information (Type 1) --- Version
+**Failsafe**: Empty (OEM specified) **SMBIOS**: System Information (Type 1) --- Version
 
 **Description**: Product iteration version number. May look like `1.1`.
 
@@ -4305,7 +4300,7 @@ If `UpdateNVRAM` is set to `false`, the aforementioned variables can be updated 
 **Failsafe**: `Create`
 
 **Description**: Update SMBIOS fields approach:
-* `TryOverwrite` --- `Overwrite` if new size is \textless{}= than the page-aligned original and there are no issues with legacy region unlock. `Create` otherwise. Has issues on some types of firmware.
+* `TryOverwrite` --- `Overwrite` if new size is <= than the page-aligned original and there are no issues with legacy region unlock. `Create` otherwise. Has issues on some types of firmware.
 * `Create` --- Replace the tables with newly allocated EfiReservedMemoryType at AllocateMaxAddress without any fallbacks.
 * `Overwrite` --- Overwrite existing gEfiSmbiosTableGuid and gEfiSmbiosTable3Guid data if it fits new size. Abort with unspecified state otherwise.
 * `Custom` --- Write SMBIOS tables (`gEfiSmbios(3)TableGuid`) to `gOcCustomSmbios(3)TableGuid` to workaround firmware overwriting SMBIOS contents at ExitBootServices. Otherwise equivalent to `Create`. Requires patching AppleSmbios.kext and AppleACPIPlatform.kext to read from another GUID: `"EB9D2D31"` - `"EB9D2D35"` (in ASCII), done automatically by `CustomSMBIOSGuid` quirk. 
@@ -4323,8 +4318,8 @@ If `UpdateNVRAM` is set to `false`, the aforementioned variables can be updated 
 **Description**: Use raw encoding for SMBIOS UUIDs.
 
 Each UUID `AABBCCDD-EEFF-GGHH-IIJJ-KKLLMMNNOOPP` is essentially a hexadecimal 16-byte number. It can be encoded in two ways:
-* `Big Endian` --- by writing all the bytes as they are without making any order changes (`{AA BB CC DD EE FF GG HH II JJ KK LL MM NN OO PP\`}). This method is also known as [RFC 4122](https://tools.ietf.org/html/rfc4122) encoding or `Raw` encoding.
-* `Little Endian` --- by interpreting the bytes as numbers and using Little Endian byte representation (`{DD CC BB AA FF EE HH GG II JJ KK LL MM NN OO PP\`}). 
+* `Big Endian` --- by writing all the bytes as they are without making any order changes (`{AA BB CC DD EE FF GG HH II JJ KK LL MM NN OO PP}`). This method is also known as [RFC 4122](https://tools.ietf.org/html/rfc4122) encoding or `Raw` encoding.
+* `Little Endian` --- by interpreting the bytes as numbers and using Little Endian byte representation (`{DD CC BB AA FF EE HH GG II JJ KK LL MM NN OO PP}`). 
 
 The SMBIOS specification did not explicitly specify the encoding format for the UUID up to SMBIOS 2.6, where it stated that `Little Endian` encoding shall be used. This led to the confusion in both firmware implementations and system software as different vendors used different encodings prior to that.
 * Apple uses the `Big Endian` format everywhere but it ignores SMBIOS UUID within macOS.
@@ -5695,7 +5690,9 @@ Consider a GPU with 2 BARs:
 * `BAR0` supports sizes from 256 MB to 8 GB. Its value is 4 GB.
 * `BAR1` supports sizes from 2 MB to 256 MB. Its value is 256 MB. 
 
-*Example 1*: Setting `ResizeGpuBars` to 1 GB will change `BAR0` to 1 GB and leave `BAR1` unchanged. \*Example 2*: Setting `ResizeGpuBars` to 1 MB will change `BAR0` to 256 MB and `BAR0` to 2 MB. \*Example 3*: Setting `ResizeGpuBars` to 16 GB will change `BAR0` to 8 GB and leave `BAR1` unchanged.
+*Example 1*: Setting `ResizeGpuBars` to 1 GB will change `BAR0` to 1 GB and leave `BAR1` unchanged.
+*Example 2*: Setting `ResizeGpuBars` to 1 MB will change `BAR0` to 256 MB and `BAR0` to 2 MB.
+*Example 3*: Setting `ResizeGpuBars` to 16 GB will change `BAR0` to 8 GB and leave `BAR1` unchanged.
 
 *Note 1*: This quirk shall not be used to workaround macOS limitation to address BARs over 1 GB. `ResizeAppleGpuBars` should be used instead.
 

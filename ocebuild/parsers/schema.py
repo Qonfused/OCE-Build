@@ -411,6 +411,15 @@ def format_markdown_entry(key: str, entry: Optional[str]=None) -> str:
     (r'\\sout\{([^}]+)\}',    r'~~\1~~'),
     # Add monospace formatting to all teletype text
     (r'\\texttt\{([^}]+)\}',  r'`\1`'),
+    # Handle anchor and alignment commands
+    (r'\\medskip',            r''), #r'\n\n'),
+    (r'\\label\{([^}]+)\}',   r''),
+    (r'\\begin\{([^}]+)\}',   r'\n'),
+    (r'\\end\{([^}]+)\}\n',   r''),
+    # Handle named commands for special characters
+    (r'\\textless\{?\}?',         r'\<'),
+    (r'\\textgreater\{?\}?',      r'\>'),
+    (r'\\textasciitilde\{?\}?',   r'~'),
     # Handle url links and header refs
     (r'\\href\{([^}]+)\}\{([^}]+)\}',       r'[\2](\1)'),
     (r'\\hyperref\[([^}]+)\]\{([^}]+)\}',   r'**\2**'), # r'[\2](#\1)'),
@@ -426,11 +435,14 @@ def format_markdown_entry(key: str, entry: Optional[str]=None) -> str:
     (r'\*\\ `',                       r'\n`'),
     (r'(:|`)\\ `',                    r'\1\n  * `'), # Kernel -> Emulate -> Cpuid1Data
     (r'\n\s*?\*?\s*?\`(OCAU|HDA)\:',  r'\n* `\1:'),  # UEFI -> Audio -> AudioCodec/AudioOutMask
+    (r'\\\*\*',                       r' **'),
+    (r' \\ \*',                       r'\n*'),
+    (r'\\\`}\).',                     r'}`).'),      # PlatformInfo -> UseRawUuidEncoding
     # Handle escaped backslashes
     (r'\\\s?\n',              r'\n'),
     (r'\\textbackslash',      r'\\'),
     (r'\\\\',                 r'\\'),
-    (r'\\ ',                  r'\\'),
+    (r'\s?\\\s?',                  r'\\'),
   ]: entry = re_sub(pattern, repl, entry)
 
   start = entry.index('**Type**:')
