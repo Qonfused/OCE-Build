@@ -25,11 +25,14 @@ PROJECT_ENTRYPOINT = PathResolver(__file__).parent
 PROJECT_ROOT = PathResolver(__file__).parents[1]
 """The project's root directory."""
 
+PROJECT_DOCS = PROJECT_ROOT.joinpath('docs')
+"""The project's documentation directory."""
+
+PROJECT_EXAMPLES = PROJECT_ROOT.joinpath('examples')
+"""The project's examples directory."""
+
 PROJECT_NAMESPACES = _enumerate_modules(PROJECT_ROOT)
 """The project's root namespaces."""
-
-EXAMPLE_PATH = PROJECT_ROOT.joinpath('docs', 'example', 'src')
-"""The project's example project directory."""
 
 ################################################################################
 #                          Python Installation Schemes                         #
@@ -62,11 +65,12 @@ EXTERNAL_MODULES = PLATLIB_MODULES | PURELIB_MODULES
 
 
 __all__ = [
-  # Constants (11)
+  # Constants (12)
   "PROJECT_ENTRYPOINT",
   "PROJECT_ROOT",
+  "PROJECT_DOCS",
+  "PROJECT_EXAMPLES",
   "PROJECT_NAMESPACES",
-  "EXAMPLE_PATH",
   "STDLIB_MODULES",
   "PLATSTDLIB_MODULES",
   "PLATLIB_MODULES",

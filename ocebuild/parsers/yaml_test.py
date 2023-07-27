@@ -10,6 +10,10 @@ import pytest
 from .dict import nested_get
 from .yaml import *
 
+from ci import PROJECT_DOCS, PROJECT_EXAMPLES
+
+
+SIMPLE_DEMO = PROJECT_EXAMPLES.joinpath('simple-demo-project', 'src')
 
 def test_parse_yaml_types(): pass # Not implemented
 
@@ -52,27 +56,27 @@ def test_parse_yaml():
   assert not parse_yaml(lines=[], config={}, flags=[])
 
   # Validate parsing TextIOWrapper input
-  file = open('docs/example/src/build.yml', 'r', encoding='UTF-8')
+  file = open(SIMPLE_DEMO.joinpath('build.yml'), 'r', encoding='UTF-8')
   assert parse_yaml(file)
   file.seek(0)
   assert parse_yaml(file)
 
   # Validate parsing List[str] input
-  file = open('docs/example/src/build.yml', 'r', encoding='UTF-8')
+  file = open(SIMPLE_DEMO.joinpath('build.yml'), 'r', encoding='UTF-8')
   assert parse_yaml(lines=[l.rstrip() for l in file])
   file.seek(0)
   lockfile = parse_yaml(lines=[l.rstrip() for l in file])
   assert lockfile
 
   # Validate parsing frontmatter
-  file = open('docs/example/src/build.yml', 'r', encoding='UTF-8')
+  file = open(SIMPLE_DEMO.joinpath('build.yml'), 'r', encoding='UTF-8')
   output, frontmatter = parse_yaml(lines=[l.rstrip() for l in file],
                                    frontmatter=True)
   assert output
   assert frontmatter
 
   # Validate parsing plist schema
-  file = open('docs/base-config.yml', 'r', encoding='UTF-8')
+  file = open(PROJECT_DOCS.joinpath('base-config.yml'), 'r', encoding='UTF-8')
   assert parse_yaml(file, frontmatter=True)
 
   # Validate handling preprocessor flags

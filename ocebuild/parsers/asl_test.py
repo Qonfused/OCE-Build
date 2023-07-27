@@ -11,8 +11,10 @@ import pytest
 from .asl import *
 from .regex import re_search
 
-from ci import EXAMPLE_PATH
+from ci import PROJECT_EXAMPLES
 
+
+SIMPLE_DEMO = PROJECT_EXAMPLES.joinpath('simple-demo-project', 'src')
 
 ################################################################################
 #                              Regular Expressions                             #
@@ -99,7 +101,7 @@ def test_parse_definition_block():
 
 def test_parse_ssdt_namespace():
   # Test against SSDT-A
-  with open(f'{EXAMPLE_PATH}/ACPI/SSDT-A.dsl', encoding='UTF-8') as ssdt_file:
+  with open(f'{SIMPLE_DEMO}/ACPI/SSDT-A.dsl', encoding='UTF-8') as ssdt_file:
     assert parse_ssdt_namespace(ssdt_file) == \
       {'definition_block': OrderedDict([('AMLFileName', ''),
                                         ('TableSignature', 'SSDT'),
@@ -115,7 +117,7 @@ def test_parse_ssdt_namespace():
                                  ('SB.PCI0.QUUX', 'Name')])}
 
   # Test against SSDT-B
-  with open(f'{EXAMPLE_PATH}/ACPI/SSDT-B.dsl', encoding='UTF-8') as ssdt_file:
+  with open(f'{SIMPLE_DEMO}/ACPI/SSDT-B.dsl', encoding='UTF-8') as ssdt_file:
     assert parse_ssdt_namespace(ssdt_file) == \
       {'definition_block': OrderedDict([('AMLFileName', ''),
                                         ('TableSignature', 'SSDT'),
