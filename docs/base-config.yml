@@ -44,14 +44,25 @@ NVRAM:
 # Prevents SMBIOS injection into non-Apple operating systems.
 #
 # This approach with UpdateSMBIOSMode relegates SMBIOS updates to macOS to avoid
-# colliding with Windows license activation and other custom OEM software.
+# colliding with OEM Windows license activation and other custom OEM software.
 #
-# - Note: This has a side-effect of breaking Bootcamp compatibility on Windows.
-#         You can restore this functionality (at the cost of breaking OEM
-#         software on hackintoshes) by using the below OpenCore defaults:
-#             
-#             Kernel.Quirks.CustomSMBIOSGuid: Boolean | false
-#             PlatformInfo.UpdateSMBIOSMode:  String  | "Create"
+# This works by writing SMBIOS information to another area of the SMBIOS table
+# not read by Windows and instead patching macOS's AppleSmbios.kext to read from
+# the new location. The original SMBIOS information area is left untouched.
+#
+# - Note1: All ACPI injections, patches, deletions are still applied by OpenCore
+#          when using this method. To prevent any ACPI manipulation from being
+#          applied, it is better to boot into the Windows Boot Manager instead.
+#
+# - Note2: OEM Windows license activation is only problematic with SMBIOS
+#          injection for licenses with no Windows accounts tied to them.
+#
+# - Note3: This has a side-effect of breaking Bootcamp compatibility on Windows.
+#          You can restore this functionality (at the cost of breaking OEM
+#          software on hackintoshes) by using the below OpenCore defaults:
+#
+#              Kernel.Quirks.CustomSMBIOSGuid: Boolean | false
+#              PlatformInfo.UpdateSMBIOSMode:  String  | "Create"
 Kernel:
   Quirks:
     CustomSMBIOSGuid:         Boolean | true
