@@ -9,7 +9,7 @@ from itertools import chain
 
 from typing import List, Literal, Union
 
-from ocebuild.parsers.dict import nested_del, nested_get, nested_set
+from ocebuild.parsers.dict import nested_get
 from ocebuild.parsers.plist import parse_plist
 from ocebuild.sources.resolver import PathResolver
 from ocebuild.versioning.semver import get_version, sort_dependencies
@@ -20,17 +20,14 @@ def parse_kext_plist(filepath: Union[str, PathResolver]) -> dict:
   with open(filepath, 'r', encoding='UTF-8') as file:
     # Build plist dictionary from filestream
     plist = parse_plist(file)
+
   # Extract Kext bundle properties
   name = nested_get(plist, ['CFBundleName'])
   identifier = nested_get(plist, ['CFBundleIdentifier'])
   version = nested_get(plist, ['CFBundleVersion'])
   executable = nested_get(plist, ['CFBundleExecutable'])
-  libraries = nested_get(plist, ['OSBundleLibraries'], default={})
-  dependencies = { k:v for k,v in libraries.items()
-                       # Ignore self-dependencies
-                   if (not k == identifier and
-                       # Ignore Apple-provided libraries
-                       not k.startswith('com.apple.')) }
+  dependencies = nested_get(plist, ['OSBundleLibraries'], default={})
+
   return {
     "name": name,
     "identifier": identifier,
@@ -94,13 +91,17 @@ def sort_kext_cfbundle(filepaths: List[Union[str, PathResolver]]) -> OrderedDict
     else:
       identifier_map[key].append(identifier_entry)
 
+  # Set allow list for unresolved dependencies
+  allow_list = { 'com.apple.' }
+
   # Resolve Kext dependency versions to determine load order
   sorted_dependencies = []
   sorting_scheme = lambda e: get_version(nested_get(e, ['props', 'version'],
                                                     default='latest'))
   for identifier, version in sort_dependencies(dependency_tree):
+    # Handle unresolved dependencies
     entries = identifier_map.get(identifier, [])
-    if not entries:
+    if not (entries or any(identifier.startswith(p) for p in allow_list)):
       raise ValueError(f'Unresolved Kext identifier: {identifier}')
 
     # Handle duplicate identifiers and sort by version
@@ -121,9 +122,35 @@ def sort_kext_cfbundle(filepaths: List[Union[str, PathResolver]]) -> OrderedDict
 
       # Group bundled plugins with their parent Kext
       if bundled_entries:
-        insertion_index = 1 + sorted_dependencies.index(bundled_entries[-1])
-        sorted_dependencies.insert(insertion_index, entry)
-      # Otherwise add entry to sorted dependencies
+        insertion_index = sorted_dependencies.index(bundled_entries[-1])
+        sorted_dependencies.insert(1 + insertion_index, entry)
+      # Handle standalone Kexts
+      elif not version and (dependencies := entry['dependencies']):
+        insertion_index = 0
+        for identifier in (dependency_keys := set(dependencies.keys())):
+          # Grab the last entry with the same identifier
+          matches = list(filter(lambda x: x['identifier'] == identifier,
+                                sorted_dependencies))
+          if matches:
+            dependency_idx = sorted_dependencies.index(matches[-1])
+            insertion_index = max(insertion_index, dependency_idx)
+          # Grab the last entry with the same mutual dependencies
+          try:
+            while True:
+              next_entry = sorted_dependencies[insertion_index + 1]
+              if set(next_entry['dependencies'].keys()) == dependency_keys:
+                insertion_index += 1
+              else:
+                break
+          except IndexError:
+            pass #de-op
+        # Upsert standalone dependents with dependencies/mutual dependents
+        if insertion_index:
+          sorted_dependencies.insert(1 + insertion_index, entry)
+        # Otherwise add entry to sorted dependencies
+        else:
+          sorted_dependencies.append(entry)
+      # Handle dependencies
       else:
         sorted_dependencies.append(entry)
 
