@@ -196,7 +196,7 @@ When contributing code to this project, you must agree to license your contribut
 
 When adding a new file to the project, you must include the license header at the top of the file. This can be done by copying the license header from an existing file in the project and updating the year and author information. Below are some examples of license headers for different programming languages:
 
-* [Python license example](https://github.com/Qonfused/OCE-Build/blob/python-rewrite/ocebuild/__init__.py#L1-L4)
+* [Python license example](https://github.com/Qonfused/OCE-Build/blob/main/ocebuild/__init__.py#L1-L4)
 
 ## Pull Request Process
 
