@@ -1,0 +1,66 @@
+## @file
+# Example config.plist configuration file adapted from the UX481FA/UX481FL
+#
+# Copyright (c) 2023, Cory Bennett. All rights reserved.
+# SPDX-License-Identifier: BSD-3-Clause
+##
+
+# This file builds on the existing defaults from OCE-Build.
+# @see https://github.com/Qonfused/OCE-Build/blob/main/base-config.yml
+
+# Test adding nested entry
+NVRAM:
+  Add:
+    E09B9297-7928-4440-9AAB-D1F8536FBF0A:
+      hbfx-ahbm:                      Number  | 13
+
+# Test overrides without additional options
+ACPI:
+  @override
+  Delete:                             Array   | []
+  @override
+  Patch:
+    # Companion to src/ACPI/SSDT-ATKD.dsl -> EFI/OC/ACPI/SSDT-ATKD.aml
+    - Comment:                        String  | "[ATKD] FN Lock - Rename _QD5 to XQD5"
+      Find:                           Data    | <5F514435>
+      Replace:                        Data    | <58514435>
+    # Companion to src/ACPI/SSDT-GPIO.dsl -> EFI/OC/ACPI/SSDT-GPIO.aml
+    - Base:                           String  | "_SB.PCI0.I2C1.ETPD"
+      Comment:                        String  | "[GPI0] Trackpad - Rename _CRS to XCRS"
+      Count:                          Number  | 1
+      Find:                           Data    | <5F435253>
+      Replace:                        Data    | <58435253>
+    - Base:                           String  | "_SB.PCI0.I2C0.TPL1"
+      Comment:                        String  | "[GPI0] Primary Display - Rename _CRS to XCRS"
+      Count:                          Number  | 1
+      Find:                           Data    | <5F435253>
+      Replace:                        Data    | <58435253>
+    - Base:                           String  | "_SB.PCI0.I2C3.TPL0"
+      Comment:                        String  | "[GPI0] Screenpad Plus - Rename _CRS to XCRS"
+      Count:                          Number  | 1
+      Find:                           Data    | <5F435253>
+      Replace:                        Data    | <58435253>
+
+# Test override on dict entry
+DeviceProperties:
+  @override
+  Add:
+    PciRoot(0x0)/Pci(0x2,0x0):
+      model:                          String  | "Intel iGPU device path"
+
+# Test override on object array
+ACPI:
+  Add:
+    @override(Path)
+    - Comment:                        String  | "This comment has been replaced"
+      Path:                           String  | "DSDT.aml"
+
+# Test append on new and existing values
+NVRAM:
+  Add:
+    4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:
+      @append(",")
+      revpatch:                       String  | "sbvmm"
+    7C436110-AB2A-4BBB-A880-FE41995C9F82:
+      @append(" ")
+      boot-args:                      String  | "foo"

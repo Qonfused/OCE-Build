@@ -1,0 +1,126 @@
+[tool.poetry]
+name          = "ocebuild"
+version       = "0.0.0-dev"
+description   = "Portable OpenCore EFI dependency & build manager."
+authors       = [ "Cory Bennett <csquaredbennett@gmail.com>" ]
+readme        = "README.md"
+license       = "BSD-3-Clause"
+homepage      = "https://github.com/Qonfused/OCE-Build"
+repository    = "https://github.com/Qonfused/OCE-Build"
+documentation = "https://ocebuild.readthedocs.io/"
+keywords      = [ "cli", "tui", "packaging", "dependency", "opencore" ]
+classifiers   = [
+  "Development Status :: 1 - Planning",
+  'Environment :: Console',
+  "Intended Audience :: Developers",
+  'License :: OSI Approved :: BSD License',
+  "Topic :: Software Development :: Build Tools",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+  "Operating System :: OS Independent",
+  # Python and supported versions
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: Implementation :: CPython",
+  # Supporting languages
+  "Programming Language :: C++"
+]
+
+################################################################################
+#                              Project Dependencies                            #
+################################################################################
+
+[tool.poetry.dependencies]
+python            = ">=3.8"
+packaging         = "^23.0"
+graphlib_backport = { version = "^1.0.0", python = "<3.9" }
+typing_extensions = { version = "^4.2.0", python = "<3.10" }
+
+[tool.poetry.group.cli.dependencies]
+click = "^8.0.1"
+rich = "^13.4.2"
+
+[tool.poetry.group.dev.dependencies]
+python-dotenv = "^1.0.0"
+pre-commit = "^3.3.3"
+pylint = "^2.17.4"
+
+# [tool.poetry.group.docs.dependencies]
+# # TODO
+
+[tool.poetry.group.test.dependencies]
+pytest      = "^7.0.1"
+pytest-cov  = ">=3,<5"
+
+################################################################################
+#                                Project Scripts                               #
+################################################################################
+
+[tool.poetry.scripts]
+ocebuild = "ocebuild_cli.__main__:_main"
+
+[tool.poe]
+include = [ "ci/scripts/tasks.toml" ]
+poetry_command = "" # Run tasks via `poetry <task>` with the poethepoet plugin.
+
+[tool.poe.tasks.test]
+cmd     = "pytest --cov=ocebuild"
+help    = "Runs project tests with a short coverage report."
+
+[tool.poe.tasks.lint]
+cmd     = "pylint --rcfile ci/tools/pylint/.pylintrc ocebuild"
+help    = "Runs project linter with a short report."
+
+[tool.poe.tasks.lint-diff]
+shell   = "git diff --name-only | sed '/.*\\.py/!d' | xargs poetry lint"
+interpreter = ["posix", "bash"]
+help    = "Runs the lint command only on changed files."
+
+################################################################################
+#                               Test Configuration                             #
+################################################################################
+
+[tool.pytest.ini_options]
+addopts           = "-rfEX --strict-markers"
+# addopts           = "-rfEX --strict-markers --doctest-modules"
+# doctest_optionflags = "NORMALIZE_WHITESPACE IGNORE_EXCEPTION_DETAIL"
+filterwarnings = [ "ignore:invalid escape sequence:DeprecationWarning" ]
+norecursedirs     = [ "ci", "dist", "docs", "scripts" ]
+python_files      = [ "*_test.py" ]
+python_functions  = [ "test_*" ]
+
+[tool.coverage.run]
+relative_files  = true
+source          = [ "ocebuild/*" ]
+omit            = [ "__*.py", "*_test.py", "**/errors/*" ]
+
+[tool.coverage.report]
+exclude_also  = [
+  # Don't complain about missing debug-only code:
+  "def __repr__",
+  "if self\\.debug",
+  # Don't complain if tests don't hit defensive assertion code:
+  "raise AssertionError",
+  "raise NotImplementedError",
+  "raise ValidatonError",
+  "raise PathValidationError",
+  # Don't complain if non-runnable code isn't run:
+  "if 0:",
+  "if __name__ == .__main__.:",
+  # Don't complain about abstract methods, they aren't run:
+  "@(abc\\.)?abstractmethod"
+]
+show_missing  = true
+skip_covered  = true
+skip_empty    = true
+sort          = "-Miss"
+
+################################################################################
+#                              Build Configuration                             #
+################################################################################
+
+[build-system]
+requires      = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

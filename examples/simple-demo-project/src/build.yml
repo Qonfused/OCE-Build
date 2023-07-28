@@ -1,0 +1,47 @@
+---
+build: DEBUG
+version: latest
+---
+ACPI:
+  SSDT-A: "file:ACPI/SSDT-A.dsl"
+  SSDT-B: "file:../../example/src/ACPI/SSDT-B.dsl"
+  SSDT-PNLF: "*"
+Drivers:
+  - AudioDxe
+  - HfsPlus
+@ifdef(RELEASE)
+  - OpenCanopy
+@endif
+  - OpenRuntime
+  - ResetNvramEntry
+  - Rts5227S
+Kexts:
+  WhateverGreen: latest
+  AirportItlwmVentura:
+    specifier: OpenIntelWireless/itlwm=2.2.0
+    properties:
+      MaxKernel: "22.99.99"
+      MinKernel: "22.0.0"
+  AirportItlwm-BigSur:
+    specifier: OpenIntelWireless/itlwm=2.1.0
+    properties:
+      MaxKernel: "20.99.99"
+      MinKernel: "20.0.0"
+  # RestrictEvents-1: "acidanthera/RestrictEvents#e5c52564f5bca1aebbd916f2753f5a58809703a8"
+  # RestrictEvents:
+  #   specifier: acidanthera/RestrictEvents#foo
+  #   branch: force-vmm-install
+  #   properties:
+  #     Comment: "Workaround for macOS Sonoma OTA updates on unsupported SMBIOSes"
+  VoodooI2C:
+    specifier: VoodooI2C/VoodooI2C=^2.8
+    bundled:
+      - VoodooI2CServices
+      - VoodooGPIO
+      - VoodooInput
+  VoodooI2CHID:
+    specifier: "*"
+  Foo: "file:./Kexts/UTBMap.kext"
+Tools:
+  - ControlMsrE2
+  - OpenShell

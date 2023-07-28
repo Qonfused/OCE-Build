@@ -1,0 +1,19 @@
+{
+  "recommendations": [
+      "mikestead.dotenv",
+      "editorconfig.editorconfig",
+      // Markdown extensions
+      "bierner.github-markdown-preview",
+      "bierner.markdown-preview-github-styles",
+      "bierner.markdown-checkbox",
+      "bierner.markdown-footnotes",
+      // PDF preview extension
+      "tomoki1207.pdf",
+      // AML and DSL syntax highlighting
+      "Thog.vscode-asl",
+      // C++ extensions
+      "ms-vscode.cpptools",
+      "ms-vscode.cmake-tools",
+      "josetr.cmake-language-support-vscode"
+  ]
+}

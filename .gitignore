@@ -1,16 +1,27 @@
 .*
+.env
 !/.github
-!/.vscode
+!/.vscode*
+!/.clang-format
+!/.editorconfig
+!/.env-example
 !/.gitattributes
 !/.gitignore
+!/.pre-commit-config.yaml
+!/**/.pylintrc
 
 # Build artifacts
-/dist
+dist/
 
-# macOS specific caches
-/.fseventsd
-/.Spotlight-V100
-/.Trashes
+# Debug files
+*.dSYM/
+*.su
+*.idb
+*.pdb
 
-# Windows specific caches
-/$RECYCLE.BIN
+# Python artifacts
+__pycache__/
+*.pyc
+
+# Sphinx documentation
+docs/_build/
