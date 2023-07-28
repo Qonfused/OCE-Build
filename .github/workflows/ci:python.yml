@@ -2,15 +2,9 @@ name: Python CI
 on:
   # Enables trigger for commits or PRs when making changes to python namespaces.
   push:
-    paths:
-      # Python namespaces
-      - 'ci/**/*.py'
-      - 'ocebuild/**/*.py'
-      # Python configuration
-      - 'poetry.lock'
-      - 'pyproject.toml'
+    branches: [main]
   pull_request:
-    types: [ opened, synchronize, closed ]
+    types: [ opened, synchronize, closed, reopened ]
     paths:
       # Python namespaces
       - 'ci/**/*.py'
