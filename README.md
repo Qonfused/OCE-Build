@@ -35,6 +35,19 @@ While this project is primarily intended to be used for PC Hackintosh projects u
     - [ ] Compiler options with external refs and patchfiles
   - [ ] CI support for managing and building Kexts with XCode
 
+## Installation
+
+See the [install](/docs/install.md) documentation for more information on how to
+install OCE Build as an executable or as a Python library.
+
+## Getting Started
+
+>TODO
+
+## Contributing
+
+See the [contributing](/docs/contributing.md) documentation for more information on how to contribute to this project.
+
 ## Development
 
 Development of this project is done using [Poetry](https://python-poetry.org/). Poetry is a Python package manager that provides a virtual environment for managing dependencies and project configuration. Poetry is required to be installed on your system to develop and build this project.

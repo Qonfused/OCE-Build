@@ -12,7 +12,6 @@ from typing import Optional
 
 from ocebuild.filesystem import glob
 from ocebuild.parsers.dict import nested_get
-from ocebuild.parsers.plist import write_plist
 from ocebuild.parsers.regex import re_search
 from ocebuild.pipeline.config import *
 from ocebuild.pipeline.lock import read_lockfile
@@ -63,13 +62,8 @@ def cli(env, cwd, out):
   LOCKFILE = glob(cwd, '**/build.lock', first=True)
   lockfile = read_lockfile(LOCKFILE) if LOCKFILE.exists() else None
 
-  # Extract the Sample.plist schema
-  schema = read_schema(lockfile)
-
-  # # Uncomment to dump the schema output to a file
-  # from pprint import pprint; pprint(schema, stream=open('Schema.txt', 'w'))
-  # with open('Schema.plist', 'w') as file:
-  #   file.write(write_plist(schema))
+  # # Extract the Sample.plist schema
+  # schema = read_schema(lockfile, raw_schema=(raw_schema := {}))
 
 
 __all__ = [

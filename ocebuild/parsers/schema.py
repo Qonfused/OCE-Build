@@ -385,7 +385,7 @@ def parse_schema(file: Union[List[str], TextIOWrapper],
 
   return schema
 
-def format_markdown_entry(key: str, entry: Optional[str]=None) -> str:
+def format_markdown_entry(key: str, entry: str) -> str:
   """Formats a Sample.plist schema entry as markdown."""
 
   # Converts the key to a markdown header
@@ -436,7 +436,7 @@ def format_markdown_entry(key: str, entry: Optional[str]=None) -> str:
     (r'(:|`)\\ `',                    r'\1\n  * `'), # Kernel -> Emulate -> Cpuid1Data
     (r'\n\s*?\*?\s*?\`(OCAU|HDA)\:',  r'\n* `\1:'),  # UEFI -> Audio -> AudioCodec/AudioOutMask
     (r'\\\*\*',                       r' **'),
-    (r' \\ \*',                       r'\n*'),
+    (r' \\ \*',                       r'\n\n*'),
     (r'\\\`}\).',                     r'}`).'),      # PlatformInfo -> UseRawUuidEncoding
     # Handle escaped backslashes
     (r'\\\s?\n',              r'\n'),

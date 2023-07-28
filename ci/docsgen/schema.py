@@ -6,13 +6,14 @@
 ##
 """Documentation writers and parsers for OpenCore configuration file schemas."""
 
+from collections import OrderedDict
 from datetime import datetime, timezone
 
 from typing import Optional
 
 from ci import PROJECT_DOCS
 
-from ocebuild.parsers.dict import flatten_dict, nested_get
+from ocebuild.parsers.dict import flatten_dict, nested_get, merge_dict
 from ocebuild.parsers.plist import write_plist
 from ocebuild.parsers.regex import re_search
 from ocebuild.parsers.schema import format_markdown_entry
@@ -126,12 +127,16 @@ if __name__ == '__main__':
   schema, sample = get_configuration_schema(commit=commit_sha,
                                             raw_schema=(raw_schema := {}),
                                             get_sample=True)
+  schema_meta = OrderedDict(**{
+    '#Revision': {
+      'OpenCore-Version': entry.get('version', 'Unknown'),
+    }
+  })
 
-  schema_dir = PROJECT_DOCS.joinpath('schema')
-  with open(schema_dir.joinpath('Schema.plist'), 'w') as file:
-    schema_plist = write_plist(schema)
+  with open(PROJECT_DOCS.joinpath('Resources', 'Schema.plist'), 'w') as file:
+    schema_plist = write_plist(merge_dict(schema_meta, schema))
     file.write(schema_plist)
-  with open(schema_dir.joinpath('Schema.md'), 'w') as file:
+  with open(PROJECT_DOCS.joinpath('schema.md'), 'w') as file:
     schema_doc = parse_fmarkdown_schema(raw_schema, schema, sample,
                                         title="OpenCore Config.plist Schema",
                                         metadata=entry)

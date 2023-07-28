@@ -76,7 +76,8 @@ def test_parse_yaml():
   assert frontmatter
 
   # Validate parsing plist schema
-  file = open(PROJECT_DOCS.joinpath('base-config.yml'), 'r', encoding='UTF-8')
+  file = open(PROJECT_DOCS.joinpath('resources', 'base-config.yml'), 'r',
+              encoding='UTF-8')
   assert parse_yaml(file, frontmatter=True)
 
   # Validate handling preprocessor flags

@@ -1,6 +1,6 @@
 <h1 id=schema>OpenCore Config.plist Schema - v0.9.3</h1>
 
-#### Last Updated: `2023-07-27 20:16:06.518836+00:00`
+#### Last Updated: `2023-07-28 06:50:54.566136+00:00`
 
 #### Revision: `{ SHA1: d52fc46ba650ce1afe00c354331a0657a533ef18 }`
 
@@ -1216,7 +1216,9 @@ For development purposes one may take risks and try other values. Consider a GPU
 * `BAR1` supports sizes from 2 MB to 256 MB. Its value is 256 MB. 
 
 *Example 1*: Setting `ResizeAppleGpuBars` to 1 GB will change `BAR0` to 1 GB and leave `BAR1` unchanged.
+
 *Example 2*: Setting `ResizeAppleGpuBars` to 1 MB will change `BAR0` to 256 MB and `BAR0` to 2 MB.
+
 *Example 3*: Setting `ResizeAppleGpuBars` to 16 GB will make no changes.
 
 *Note*: See `ResizeGpuBars` quirk for general GPU PCI BAR size configuration and more details about the technology.
@@ -5691,7 +5693,9 @@ Consider a GPU with 2 BARs:
 * `BAR1` supports sizes from 2 MB to 256 MB. Its value is 256 MB. 
 
 *Example 1*: Setting `ResizeGpuBars` to 1 GB will change `BAR0` to 1 GB and leave `BAR1` unchanged.
+
 *Example 2*: Setting `ResizeGpuBars` to 1 MB will change `BAR0` to 256 MB and `BAR0` to 2 MB.
+
 *Example 3*: Setting `ResizeGpuBars` to 16 GB will change `BAR0` to 8 GB and leave `BAR1` unchanged.
 
 *Note 1*: This quirk shall not be used to workaround macOS limitation to address BARs over 1 GB. `ResizeAppleGpuBars` should be used instead.
