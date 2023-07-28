@@ -136,7 +136,8 @@ def _format_dependency_entry(entry: Dict[str, any]) -> dict:
 
 def parse_semver_params(entry: Union[str, dict],
                         specifier: str,
-                        parameters: Optional[dict]) -> Dict[str, str]:
+                        parameters: Optional[dict]=None
+                        ) -> Dict[str, str]:
   """Parses a semver version entry or specifier for parameters.
 
   Args:
