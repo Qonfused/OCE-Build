@@ -192,6 +192,12 @@ def get_configuration_schema(repository: str='acidanthera/OpenCorePkg',
 
   return schema
 
+#TODO: Sort kexts by dependency order, including support for:
+# - Including existing entry properties (pointing to an existing `BundlePath`)
+# - Disable entries on:
+#   - Duplicate CFBundleIdentifiers with overlapping Max/MinKernel ranges
+#   - Missing CFBundleIdentifiers (i.e. unresolved dependencies)
+#   - Missing CFBundleIdentifiers/CFBundleExecutable fields in Info.plist
 
 __all__ = [
   # Functions (4)

@@ -194,6 +194,7 @@ def extract_ssdts(directory: Union[str, PathResolver]) -> dict:
 
   return ssdts
 
+
 __all__ = [
   # Functions (5)
   "extract_iasl_binary",
