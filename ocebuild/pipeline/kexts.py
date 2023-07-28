@@ -127,9 +127,9 @@ def sort_kext_cfbundle(filepaths: List[Union[str, PathResolver]]) -> OrderedDict
       # Handle standalone Kexts
       elif not version and (dependencies := entry['dependencies']):
         insertion_index = 0
-        for identifier in (dependency_keys := set(dependencies.keys())):
+        for dependency in (dependency_keys := set(dependencies.keys())):
           # Grab the last entry with the same identifier
-          matches = list(filter(lambda x: x['identifier'] == identifier,
+          matches = list(filter(lambda x: x['identifier'] == dependency,
                                 sorted_dependencies))
           if matches:
             dependency_idx = sorted_dependencies.index(matches[-1])
@@ -138,7 +138,13 @@ def sort_kext_cfbundle(filepaths: List[Union[str, PathResolver]]) -> OrderedDict
           try:
             while True:
               next_entry = sorted_dependencies[insertion_index + 1]
-              if set(next_entry['dependencies'].keys()) == dependency_keys:
+              # Next entry has the same dependencies
+              has_mutual_keys = dependency_keys == \
+                set(next_entry['dependencies'].keys())
+              # Next entry shares the current matched dependency
+              has_mutual_dependency = matches and \
+                dependency in next_entry['dependencies']
+              if has_mutual_keys or has_mutual_dependency:
                 insertion_index += 1
               else:
                 break
