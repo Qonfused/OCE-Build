@@ -13,7 +13,15 @@ from ocebuild.sources.resolver import PathResolver
 
 def _enumerate_modules(path: str) -> set:
   """Returns a set of all modules in a directory."""
-  return set(p.stem for p in sorted(PathResolver(path).iterdir()))
+  files = set()
+  for f in sorted(PathResolver(path).iterdir()):
+    name = f.stem
+    if f.is_dir() and f.joinpath('__init__.py').exists():
+      files.add(name)
+    elif f.is_file() and f.suffix == '.py':
+      files.add(name)
+
+  return files
 
 ################################################################################
 #                              Project Constants                               #

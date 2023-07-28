@@ -16,7 +16,7 @@ from inspect import getdoc
 
 from typing import Dict, List, Optional, Tuple, Union
 
-from ci import PROJECT_ENTRYPOINT, PROJECT_ROOT
+from ci import PROJECT_NAMESPACES, PROJECT_ROOT
 
 from ocebuild.filesystem.posix import glob
 from ocebuild.parsers.regex import re_search
@@ -270,8 +270,12 @@ def generate_api_exports(filepath: Union[str, PathResolver],
 
 def _main(entrypoint: Optional[str]=None) -> None:
   # Extract project entrypoint or default to project entrypoint
-  if entrypoint: entrypoint = PROJECT_ROOT.joinpath(entrypoint)
-  if not entrypoint: entrypoint = PROJECT_ENTRYPOINT
+  if entrypoint:
+    entrypoint = PROJECT_ROOT.joinpath(entrypoint)
+  if not entrypoint:
+    for namespace in PROJECT_NAMESPACES:
+      _main(namespace)
+    return None
 
   # Enumerate each package
   for package in recurse_packages(entrypoint):

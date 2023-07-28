@@ -13,7 +13,7 @@ from typing import Optional
 
 from ci import PROJECT_DOCS
 
-from ocebuild.parsers.dict import flatten_dict, nested_get, merge_dict
+from ocebuild.parsers.dict import flatten_dict, merge_dict, nested_get
 from ocebuild.parsers.plist import write_plist
 from ocebuild.parsers.regex import re_search
 from ocebuild.parsers.schema import format_markdown_entry

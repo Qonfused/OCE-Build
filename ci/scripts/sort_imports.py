@@ -13,7 +13,7 @@ from re import sub as re_sub
 
 from typing import List, Optional, Union
 
-from ci import PROJECT_ENTRYPOINT, PROJECT_ROOT, PYTHON_MODULES
+from ci import PROJECT_NAMESPACES, PROJECT_ROOT, PYTHON_MODULES
 
 from ocebuild.filesystem import glob
 from ocebuild.parsers.regex import re_search
@@ -147,8 +147,12 @@ def recurse_modules(entrypoint: Union[str, PathResolver]) -> List[str]:
 
 def _main(entrypoint: Optional[str]=None) -> None:
   # Extract project entrypoint or default to project entrypoint
-  if entrypoint: entrypoint = PROJECT_ROOT.joinpath(entrypoint)
-  if not entrypoint: entrypoint = PROJECT_ENTRYPOINT
+  if entrypoint:
+    entrypoint = PROJECT_ROOT.joinpath(entrypoint)
+  if not entrypoint:
+    for namespace in PROJECT_NAMESPACES:
+      _main(namespace)
+    return None
 
   # Enumerate each package
   for package in recurse_modules(entrypoint):

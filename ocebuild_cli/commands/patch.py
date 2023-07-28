@@ -6,9 +6,9 @@
 ##
 """CLI entrypoint for the patch command."""
 
-import click
-
 from typing import Optional
+
+import click
 
 from ocebuild.filesystem import glob
 from ocebuild.parsers.dict import nested_get
@@ -67,6 +67,7 @@ def cli(env, cwd, out):
 
 
 __all__ = [
-  # Functions (1)
+  # Functions (2)
+  "read_schema",
   "cli"
 ]
