@@ -142,9 +142,8 @@ def sort_kext_cfbundle(filepaths: List[Union[str, PathResolver]]) -> OrderedDict
               has_mutual_keys = dependency_keys == \
                 set(next_entry['dependencies'].keys())
               # Next entry shares the current matched dependency
-              has_mutual_dependency = matches and \
-                dependency in next_entry['dependencies']
-              if has_mutual_keys or has_mutual_dependency:
+              has_mutual_dependency = dependency in next_entry['dependencies']
+              if matches and (has_mutual_keys or has_mutual_dependency):
                 insertion_index += 1
               else:
                 break
