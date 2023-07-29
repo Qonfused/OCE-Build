@@ -8,6 +8,7 @@
 
 from inspect import signature
 from pathlib import Path as _Path, PurePath as _PurePath
+from pathlib import PosixPath, PurePosixPath, PureWindowsPath, WindowsPath
 
 from typing import Any, List, Optional, TypeVar
 
@@ -110,7 +111,7 @@ class Path(BasePath, Path_flavour := type(_Path())):
   """
 
   cls_flavour = Path_flavour
-  subclasses: List[TPath] = []
+  subclasses: List[TPath] = [PosixPath, WindowsPath]
 
 class PurePath(BasePath, PurePath_flavour := type(_PurePath())):
   """Provides a `pathlib.PurePath` class that can be subclassed idiomatically."""
@@ -121,7 +122,7 @@ class PurePath(BasePath, PurePath_flavour := type(_PurePath())):
   """
 
   cls_flavour = PurePath_flavour
-  subclasses: List[TPurePath] = []
+  subclasses: List[TPurePath] = [PurePosixPath, PureWindowsPath]
 
 
 __all__ = [
