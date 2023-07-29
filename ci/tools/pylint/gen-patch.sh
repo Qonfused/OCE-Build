@@ -4,7 +4,7 @@
 ## @file
 # Generates a patch file for pylintrc from the Google pylint config.
 #
-# Copyright (c) 2023, Cory Bennett. All rights reserved.
+# Copyright (c) 2023, The OCE Build Authors. All rights reserved.
 # SPDX-License-Identifier: BSD-3-Clause
 ##
 
