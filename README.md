@@ -11,6 +11,7 @@
 
 <div align="center">
 
+  <!-- TODO: Add PyPI badges for supported Python versions, etc -->
   <a href="/LICENSE">![License](https://img.shields.io/badge/⚖_License-BSD_3_Clause-lightblue?labelColor=3f4551)</a>
   <a href="/CHANGELOG.md">![SemVer](https://img.shields.io/badge/dynamic/yaml?label=SemVer&logo=SemVer&labelColor=3f4551&color=f48042&prefix=v&query=$.version&url=https://raw.githubusercontent.com/Qonfused/OCE-Build/main/ci/registry/project.json)</a>
   <a href="https://github.com/acidanthera/OpenCorePkg/releases">![OpenCore](https://img.shields.io/badge/dynamic/yaml?label=OpenCore&logo=Osano&logoColor=0298e1&labelColor=3f4451&prefix=v&query=$.version&url=https://raw.githubusercontent.com/Qonfused/OCE-Build/main/ci/registry/schema.json)</a>
