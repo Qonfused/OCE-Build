@@ -137,7 +137,7 @@ def get_variable_docstring(statement: str,
 
 def get_public_exports(filepath: Union[str, PathResolver],
                        module_path: str
-                       ) -> dict[str, list[str]]:
+                       ) -> Dict[str, List[str]]:
   """Returns a list of public API exports from a module.
 
   Args:
