@@ -8,10 +8,11 @@
 
 from collections import OrderedDict
 from datetime import datetime, timezone
+from json import dumps as json_dumps
 
 from typing import Optional
 
-from ci import PROJECT_DOCS
+from ci import PROJECT_DOCS, PROJECT_ROOT
 
 from ocebuild.parsers.dict import flatten_dict, merge_dict, nested_get
 from ocebuild.parsers.plist import write_plist
@@ -20,6 +21,7 @@ from ocebuild.parsers.schema import format_markdown_entry
 from ocebuild.parsers.types import decode_data
 from ocebuild.pipeline.config import get_configuration_schema
 from ocebuild.pipeline.lock import resolve_specifiers
+from ocebuild.sources.resolver import PathResolver
 
 
 def parse_fmarkdown_schema(raw_schema: dict,
@@ -133,7 +135,7 @@ if __name__ == '__main__':
     }
   })
 
-  with open(PROJECT_DOCS.joinpath('Resources', 'Schema.plist'), 'w') as file:
+  with open(PROJECT_DOCS.joinpath('resources', 'Schema.plist'), 'w') as file:
     schema_plist = write_plist(merge_dict(schema_meta, schema))
     file.write(schema_plist)
   with open(PROJECT_DOCS.joinpath('schema.md'), 'w') as file:
@@ -142,6 +144,9 @@ if __name__ == '__main__':
                                         metadata=entry)
     file.write(schema_doc)
 
+  # Update registry version for schema
+  registry_vers = PathResolver(PROJECT_ROOT, 'ci', 'registry', 'schema.json')
+  registry_vers.write_text(json_dumps({ 'version': entry.get('version') }))
 
 __all__ = [
   # Functions (1)

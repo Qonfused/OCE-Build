@@ -7,6 +7,7 @@
 """Bumps the project version using the given semver string."""
 
 from argparse import ArgumentParser
+from json import dumps as json_dumps
 
 from types import SimpleNamespace
 from typing import Optional
@@ -105,6 +106,10 @@ def _main(**kwargs) -> None:
                f'{prefix}"{version_str}"')
     # Write to file
     PathResolver(project_cfg).write_text(file_text, encoding='UTF-8')
+
+  # Update registry version for project
+  registry_vers = PathResolver(PROJECT_ROOT, 'ci', 'registry', 'project.json')
+  registry_vers.write_text(json_dumps({ 'version': version_str }))
 
   print(f"Bumped version from '{__version__}' to '{version_str}'")
 
