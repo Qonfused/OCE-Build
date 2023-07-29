@@ -4,7 +4,7 @@
 ##
 """Overrides the `pathlib` module to support backports and custom subclasses."""
 
-#pylint: disable=C0103,E0602,R1725
+#pylint: disable=C0103,E0602,E1003,R1725,W0611,W0718
 
 from inspect import signature
 from pathlib import Path as _Path, PurePath as _PurePath
@@ -14,7 +14,7 @@ from typing import Any, List, Optional, TypeVar
 
 
 class BasePath():
-  """Provides a `pathlib.Path` class that can be subclassed idiomatically."""
+  """Provides a `pathlib` wrapper class that can be subclassed idiomatically."""
 
   TBasePath = TypeVar("TBasePath", bound="BasePath")
   """BasePath class type alias for overriding built-in method signatures.
@@ -34,7 +34,7 @@ class BasePath():
       super(self.cls_flavour, self).__init__(*args)
     # Instantiates a new Path subclass using the `__new__` method.
     # This uses a __cls__ hook as a fallback for the `__getattribute__` method.
-    except: #pylint: disable=bare-except
+    except Exception: #pragma: no cover
       self.__cls__ = super().__new__(self.cls_flavour, *args, **kwargs)
 
   @classmethod
@@ -111,7 +111,7 @@ class Path(BasePath, Path_flavour := type(_Path())):
   """
 
   cls_flavour = Path_flavour
-  subclasses: List[TPath] = [PosixPath, WindowsPath]
+  subclasses: List[TPath] = []
 
 class PurePath(BasePath, PurePath_flavour := type(_PurePath())):
   """Provides a `pathlib.PurePath` class that can be subclassed idiomatically."""
@@ -122,7 +122,7 @@ class PurePath(BasePath, PurePath_flavour := type(_PurePath())):
   """
 
   cls_flavour = PurePath_flavour
-  subclasses: List[TPurePath] = [PurePosixPath, PureWindowsPath]
+  subclasses: List[TPurePath] = []
 
 
 __all__ = [
