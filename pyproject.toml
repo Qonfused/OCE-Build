@@ -32,6 +32,7 @@ include       = [
   "CHANGELOG.md",
   # Vendored third_party dependencies
   "third_party/__init__.py",
+  "third_party/cpython",
 ]
 exclude       = [
   # Exclude tests from distribution

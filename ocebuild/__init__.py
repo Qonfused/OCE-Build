@@ -11,3 +11,4 @@ from ocebuild.version import *
 
 # Override the Python module search path to include third-party dependencies.
 from third_party import inject_module
+inject_module('pathlib', 'third_party.cpython.pathlib')
