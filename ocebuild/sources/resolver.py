@@ -9,7 +9,6 @@
 import re
 from difflib import get_close_matches
 from hashlib import sha256
-from pathlib import Path
 from re import split
 
 from typing import Generator, List, Literal, Optional, Tuple, TypeVar, Union
@@ -18,6 +17,8 @@ from .dortania import *
 from .github import *
 
 from ocebuild.versioning.semver import get_version, resolve_version_specifier
+
+from third_party.cpython.pathlib import Path
 
 
 TBaseResolver = TypeVar("TBaseResolver", bound="BaseResolver")
