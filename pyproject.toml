@@ -46,10 +46,10 @@ exclude       = [
 [tool.poetry.dependencies]
 python            = ">=3.8"
 packaging         = "^23.0"
-graphlib_backport = { version = "^1.0.0", python = "<3.9" }
 typing_extensions = { version = "^4.2.0", python = "<3.10" }
-
-[tool.poetry.group.cli.dependencies]
+# Library dependencies
+graphlib_backport = { version = "^1.0.0", python = "<3.9" }
+# CLI dependencies
 click = "^8.0.1"
 rich = "^13.4.2"
 
