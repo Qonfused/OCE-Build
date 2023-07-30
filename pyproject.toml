@@ -30,7 +30,9 @@ classifiers   = [
 ]
 include       = [
   "CHANGELOG.md",
-  # Vendored third_party dependencies
+  # Include the cli module in source distribution
+  "ocebuild_cli",
+  # Include vendored third_party dependencies
   "third_party/__init__.py",
 ]
 exclude       = [
