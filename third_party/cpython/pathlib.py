@@ -1,13 +1,16 @@
+#pragma preserve-exports
+
 ## @file
 # Copyright (c) 2023, Cory Bennett. All rights reserved.
 # SPDX-License-Identifier: BSD-3-Clause
 ##
 """Overrides the `pathlib` module to support backports and custom subclasses."""
 
-#pylint: disable=C0103,E0602,E1003,R1725,W0611,W0718
+#pylint: disable=C0103,E0602,E1003,R1725,W0718
 
 import pathlib
 from inspect import signature
+from pathlib import PosixPath, PurePosixPath, PureWindowsPath, WindowsPath
 
 from typing import Any, List, Optional, TypeVar
 
@@ -125,13 +128,15 @@ class PurePath(BasePath, PurePath_flavour := type(pathlib.PurePath())):
   cls_flavour = PurePath_flavour
   subclasses: List[TPurePath] = []
 
+
 # Inject the `pathlib` namespace into the current module
 inject_module_namespace(pathlib, namespace=globals())
 
-
 __all__ = [
-  # Classes (3)
-  "BasePath",
   "Path",
-  "PurePath"
+  "PurePath",
+  "PosixPath",
+  "PurePosixPath",
+  "WindowsPath",
+  "PureWindowsPath"
 ]
