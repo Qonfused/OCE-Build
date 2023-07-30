@@ -6,11 +6,12 @@
 
 #pylint: disable=C0103,E0602,E1003,R1725,W0611,W0718
 
+import pathlib
 from inspect import signature
-from pathlib import Path as _Path, PurePath as _PurePath
-from pathlib import PosixPath, PurePosixPath, PureWindowsPath, WindowsPath
 
 from typing import Any, List, Optional, TypeVar
+
+from .. import inject_module_namespace
 
 
 class BasePath():
@@ -102,7 +103,7 @@ class BasePath():
 
     return cls_instance
 
-class Path(BasePath, Path_flavour := type(_Path())):
+class Path(BasePath, Path_flavour := type(pathlib.Path())):
   """Provides a `pathlib.Path` class that can be subclassed idiomatically."""
 
   TPath = TypeVar("TPath", bound="Path")
@@ -113,7 +114,7 @@ class Path(BasePath, Path_flavour := type(_Path())):
   cls_flavour = Path_flavour
   subclasses: List[TPath] = []
 
-class PurePath(BasePath, PurePath_flavour := type(_PurePath())):
+class PurePath(BasePath, PurePath_flavour := type(pathlib.PurePath())):
   """Provides a `pathlib.PurePath` class that can be subclassed idiomatically."""
 
   TPurePath = TypeVar("TPurePath", bound="PurePath")
@@ -123,6 +124,9 @@ class PurePath(BasePath, PurePath_flavour := type(_PurePath())):
 
   cls_flavour = PurePath_flavour
   subclasses: List[TPurePath] = []
+
+# Inject the `pathlib` namespace into the current module
+inject_module_namespace(pathlib, namespace=globals())
 
 
 __all__ = [
