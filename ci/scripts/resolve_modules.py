@@ -20,7 +20,8 @@ from ci import PROJECT_NAMESPACES, PROJECT_ROOT
 
 from ocebuild.filesystem.posix import glob
 from ocebuild.parsers.regex import re_search
-from ocebuild.sources.resolver import PathResolver
+
+from third_party.cpython.pathlib import Path
 
 
 PRAGMA_FLAGS = [
@@ -45,24 +46,24 @@ AST_TYPES_STMTS = [
 ]
 """Types of AST nodes that represent statements."""
 
-def _get_parent_tree(package: Union[str, PathResolver]) -> str:
+def _get_parent_tree(package: Union[str, Path]) -> str:
   """Returns the parent tree of a package."""
-  ptree = str(PathResolver(package).relative_to(PROJECT_ROOT).parents[1])
+  ptree = str(Path(package).relative_to(PROJECT_ROOT).parents[1])
   if ptree == '.': ptree = ''
   else: ptree += '.'
   return ptree
 
-def recurse_packages(entrypoint: Union[str, PathResolver]) -> List[str]:
+def recurse_packages(entrypoint: Union[str, Path]) -> List[str]:
   """Returns a list of all project packages recursively."""
-  patterns = map(lambda f: PathResolver(f).resolve(),
+  patterns = map(lambda f: Path(f).resolve(),
                  glob(entrypoint, pattern='**/__init__.py'))
 
   packages = sorted(patterns)
   return packages
 
-def recurse_modules(entrypoint: Union[str, PathResolver]) -> List[str]:
+def recurse_modules(entrypoint: Union[str, Path]) -> List[str]:
   """Returns a list of all project modules recursively."""
-  patterns = map(lambda f: PathResolver(f).relative(entrypoint,
+  patterns = map(lambda f: Path(f).relative(entrypoint,
                                                     from_parent=True),
                  glob(entrypoint,
                       pattern='[!_]*.py',
@@ -72,7 +73,7 @@ def recurse_modules(entrypoint: Union[str, PathResolver]) -> List[str]:
   modules = sorted(map(lambda m: m[:-len('.py')], patterns))
   return modules
 
-def get_local_statements(filepath: Union[str, PathResolver]
+def get_local_statements(filepath: Union[str, Path]
                          ) -> Tuple[List[str], Dict[str, List[str]]]:
   """Returns a list of local statements from a file.
 
@@ -117,7 +118,7 @@ def get_local_statements(filepath: Union[str, PathResolver]
   return names, types
 
 def get_variable_docstring(statement: str,
-                           filepath: Union[str, PathResolver]
+                           filepath: Union[str, Path]
                            ) -> Union[str, None]:
   """Returns the docstring for a variable.
 
@@ -135,7 +136,7 @@ def get_variable_docstring(statement: str,
                           multiline=True)
     return docstring
 
-def get_public_exports(filepath: Union[str, PathResolver],
+def get_public_exports(filepath: Union[str, Path],
                        module_path: str
                        ) -> Dict[str, List[str]]:
   """Returns a list of public API exports from a module.
@@ -183,7 +184,7 @@ def get_public_exports(filepath: Union[str, PathResolver],
 
   return export_types
 
-def get_file_header(filepath: Union[str, PathResolver]):
+def get_file_header(filepath: Union[str, Path]):
   """Retrieves the file header and module docstring from a file."""
   lines: List[str] = []
   with open(filepath, 'r', encoding='UTF-8') as init_file:
@@ -219,7 +220,7 @@ def get_file_header(filepath: Union[str, PathResolver]):
       lines.append(line)
   return lines
 
-def generate_api_exports(filepath: Union[str, PathResolver],
+def generate_api_exports(filepath: Union[str, Path],
                          module_path: str
                          ) -> None:
   """Generates a module's API exports.
@@ -265,7 +266,7 @@ def generate_api_exports(filepath: Union[str, PathResolver],
       file_text += f'\n\n{replacement_text}\n'
 
     # Write to file
-    PathResolver(filepath).write_text(file_text, encoding='UTF-8')
+    Path(filepath).write_text(file_text, encoding='UTF-8')
 
 
 def _main(entrypoint: Optional[str]=None) -> None:
@@ -304,7 +305,7 @@ def _main(entrypoint: Optional[str]=None) -> None:
     # Update package file
     if not 'no-implicit' in pragma_line:
       package_text = '\n'.join(package_lines) + '\n'
-      PathResolver(package).write_text(package_text, encoding='UTF-8')
+      Path(package).write_text(package_text, encoding='UTF-8')
 
 if __name__ == '__main__':
   parser = ArgumentParser()

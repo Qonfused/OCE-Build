@@ -9,7 +9,7 @@ from .ssdts import *
 
 from ci import PROJECT_EXAMPLES
 
-from ocebuild.sources.resolver import PathResolver
+from third_party.cpython.pathlib import Path
 
 
 SIMPLE_DEMO = PROJECT_EXAMPLES.joinpath('simple-demo-project', 'src')
@@ -27,6 +27,6 @@ def test_sort_ssdt_symbols():
 def test_extract_iasl_binary():
   with extract_iasl_binary() as iasl_wrapper:
     iasl_wrapper(f'{SIMPLE_DEMO}/ACPI/SSDT-A.dsl')
-    output_path = PathResolver(f'{SIMPLE_DEMO}/ACPI/SSDT-A.aml')
+    output_path = Path(f'{SIMPLE_DEMO}/ACPI/SSDT-A.aml')
     assert output_path.exists()
   output_path.unlink()

@@ -9,16 +9,16 @@
 import re
 from difflib import get_close_matches
 from hashlib import sha256
-from inspect import signature
-from pathlib import Path
 from re import split
 
-from typing import Any, Generator, List, Literal, Optional, Tuple, TypeVar, Union
+from typing import Generator, List, Literal, Optional, Tuple, TypeVar, Union
 
 from .dortania import *
 from .github import *
 
 from ocebuild.versioning.semver import get_version, resolve_version_specifier
+
+from third_party.cpython.pathlib import Path
 
 
 TBaseResolver = TypeVar("TBaseResolver", bound="BaseResolver")
@@ -280,7 +280,7 @@ class DortaniaResolver(BaseResolver):
 
     return release_url
 
-class PathResolver(BaseResolver, cls := type(Path())):
+class PathResolver(BaseResolver, Path):
   """Resolves a filepath based on the class parameters."""
 
   def __init__(self: TPathResolver,
@@ -295,55 +295,21 @@ class PathResolver(BaseResolver, cls := type(Path())):
     # Public properties
     self.path = path
 
-    # Attempt to subclass pathlib.Path directly - Python 3.12+
-    # @see https://github.com/Qonfused/OCE-Build/pull/4#issuecomment-1611019621
-    try:
-      super(cls, self).__init__(path, *args)
-    # Instantiates a new Path subclass using the `__new__` method.
-    except: #pylint: disable=bare-except
-      self.__cls__ = super().__new__(cls, path, *args, **kwargs)
-
-  def __getattribute__(self: TPathResolver, name: str) -> Any:
-    """Retrieves from the instantiated class or subclass."""
-    self_attr = super().__getattribute__(name)
-    try:
-      # Get the uninstantiated class representation
-      class_repr = super().__getattribute__('__class__')
-      # Get the instantiated subclass attribute (if either exists)
-      cls_ref = super().__getattribute__('__cls__')
-      cls_attr = cls_ref.__getattribute__(name)
-      # Only return attribute if not overridden
-      assert not class_repr.__getattribute__(name)
-      assert signature(self_attr) == signature(cls_attr)
-      # Return class attribute
-      return cls_attr
-    # Return the class attribute (if it exists)
-    except: #pylint: disable=bare-except
-      return self_attr
-
   def glob(self: TPathResolver,
            pattern: str
            ) -> Generator[TPathResolver, any, None]:
     """Iterates from a directory or from a file's parent directory."""
+    cls = self.resolve().__getinstance__()
+
     glob_iter = None
-    if self.resolve().is_file():
-      glob_iter = self.resolve().parent.glob(pattern)
+    if cls.is_file():
+      glob_iter = cls.parent.glob(pattern)
     else:
-      glob_iter = self.resolve().glob(pattern)
+      glob_iter = cls.glob(pattern)
     # Re-initialize PathResolver instances
     return (PathResolver(p) for p in glob_iter)
 
-  def relative(self: TPathResolver,
-               path: Union[str, TPathResolver]='.',
-               from_parent: bool=False
-               ) -> str:
-    """Resolves a relative representation from a path."""
-    parent_dir = cls(path).resolve()
-    if from_parent and self.resolve().is_file():
-      parent_dir = parent_dir.parent
-    return self.relative_to(parent_dir).as_posix()
-
-  def resolve(self: TPathResolver, strict: bool = False) -> cls:
+  def resolve(self: TPathResolver, strict: bool = False) -> Path:
     """Resolves a filepath based on the class parameters.
 
     If the path exists, the checksum is calculated and stored.
@@ -354,20 +320,7 @@ class PathResolver(BaseResolver, cls := type(Path())):
     Returns:
       The resolved filepath wrapped in a PathResolver instance.
     """
-    resolved_path: cls
-    try:
-      # Check if path has called the `__init__` method - Python 3.12+
-      if '_raw_paths' in dir(self):
-        resolved_path = super(cls, self).resolve(strict)
-      # Fall back to calling initialized `__cls__` subclass
-      elif '__cls__' in dir(self):
-        resolved_path = self.__cls__.resolve(strict)
-      # Fall back to initializing and calling a new cls subclass
-      else:
-        resolved_path = cls(self.path).resolve(strict)
-    except AttributeError:
-      # Create a new PathResolver instance
-      resolved_path = PathResolver(self).resolve(strict)
+    resolved_path = PathResolver(self.__getinstance__().resolve(strict=strict))
 
     if strict or resolved_path.exists():
       # Get checksum of the resolved filepath

@@ -14,7 +14,8 @@ from ocebuild.filesystem.archives import extract_archive
 from ocebuild.filesystem.cache import UNPACK_DIR
 from ocebuild.parsers.dict import nested_get, nested_set
 from ocebuild.parsers.yaml import parse_yaml
-from ocebuild.sources.resolver import PathResolver
+
+from third_party.cpython.pathlib import Path
 
 
 def _set_var_default(build_vars: dict, name: str, default: str):
@@ -86,7 +87,7 @@ def read_build_file(filepath: str,
   return build_config, build_vars, flags
 
 def unpack_build_entries(resolvers: List[dict],
-                         project_dir: PathResolver,
+                         project_dir: Path,
                          *args,
                          __wrapper: Optional[Iterator]=None,
                          **kwargs) -> dict:
@@ -98,7 +99,7 @@ def unpack_build_entries(resolvers: List[dict],
 
   extracted = {}
   for entry in iterator:
-    tmpdir: PathResolver
+    tmpdir: Path
     # Handle extracting remote entries
     if (url := entry.get('url')):
       with extract_archive(url, persist=True) as tmpdir:
@@ -106,7 +107,7 @@ def unpack_build_entries(resolvers: List[dict],
           unpack_archive(archive, tmpdir.joinpath(archive.name))
     # Handle extracting local entries
     elif (path := entry.get('path')):
-      tmpdir = PathResolver(mkdtemp(dir=UNPACK_DIR))
+      tmpdir = Path(mkdtemp(dir=UNPACK_DIR))
       src = project_dir.joinpath(path)
       copy(src, tmpdir.joinpath(tmpdir, src.name))
     # Skip wildcard specifiers

@@ -11,11 +11,12 @@ from typing import List, Literal, Union
 
 from ocebuild.parsers.dict import nested_get
 from ocebuild.parsers.plist import parse_plist
-from ocebuild.sources.resolver import PathResolver
 from ocebuild.versioning.semver import get_version, sort_dependencies
 
+from third_party.cpython.pathlib import Path
 
-def parse_kext_plist(filepath: Union[str, PathResolver]) -> dict:
+
+def parse_kext_plist(filepath: Union[str, Path]) -> dict:
   """Parses the Info.plist of a Kext."""
   with open(filepath, 'r', encoding='UTF-8') as file:
     # Build plist dictionary from filestream
@@ -36,7 +37,7 @@ def parse_kext_plist(filepath: Union[str, PathResolver]) -> dict:
     "dependencies": dependencies
   }
 
-def sort_kext_cfbundle(filepaths: List[Union[str, PathResolver]]) -> OrderedDict:
+def sort_kext_cfbundle(filepaths: List[Union[str, Path]]) -> OrderedDict:
   """Sorts the injection order of Kexts based on their CFBundleidentifier.
 
   This implementation uses a topological sort to order Kexts based on their
@@ -58,9 +59,9 @@ def sort_kext_cfbundle(filepaths: List[Union[str, PathResolver]]) -> OrderedDict
   Returns:
     An sorted dictionary array of Kexts sorted by their CFBundleIdentifier.
   """
-  plist_paths = list(chain(*(PathResolver(f).glob('**/Info.plist')
+  plist_paths = list(chain(*(Path(f).glob('**/Info.plist')
                              for f in filepaths)))
-  kext_names = list(PathResolver(str(f).rsplit('.kext')[-2]).stem
+  kext_names = list(Path(str(f).rsplit('.kext')[-2]).stem
                     for f in plist_paths)
 
   # Extract flat tree of Kext dependencies
@@ -83,7 +84,7 @@ def sort_kext_cfbundle(filepaths: List[Union[str, PathResolver]]) -> OrderedDict
 
     # Add Kext to identifier map
     kext_path = filepath.parents[1].as_posix()
-    relative_path = ".kext".join(p if i else PathResolver(p).stem for
+    relative_path = ".kext".join(p if i else Path(p).stem for
                                  i,p in enumerate(kext_path.split('.kext')))
     identifier_entry = dict(__path=relative_path, name=name, props=plist_props)
     if not key in identifier_map:
@@ -161,14 +162,14 @@ def sort_kext_cfbundle(filepaths: List[Union[str, PathResolver]]) -> OrderedDict
 
   return sorted_dependencies
 
-def extract_kexts(directory: Union[str, PathResolver],
+def extract_kexts(directory: Union[str, Path],
                   build: Literal['RELEASE', 'DEBUG']='RELEASE',
                   ) -> dict:
   """Extracts the metadata of all Kexts in a directory."""
   kexts = {}
   for plist_path in directory.glob('**/*.kext/**/Info.plist'):
     parent = str(plist_path).rsplit('.kext', maxsplit=1)[0]
-    kext_path = PathResolver(f'{parent}.kext')
+    kext_path = Path(f'{parent}.kext')
     extract_path = f'.{kext_path.as_posix().split(directory.as_posix())[1]}'
     # Update kext dictionary
     kexts[kext_path.stem] = {

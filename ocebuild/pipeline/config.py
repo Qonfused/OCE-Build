@@ -14,7 +14,8 @@ from ocebuild.parsers.schema import parse_schema
 from ocebuild.parsers.yaml import parse_yaml
 from ocebuild.sources import request
 from ocebuild.sources.github import github_file_url
-from ocebuild.sources.resolver import PathResolver
+
+from third_party.cpython.pathlib import Path
 
 
 def read_config(filepath: str,
@@ -40,7 +41,7 @@ def read_config(filepath: str,
   """
   if not flags: flags = []
   with open(filepath, 'r', encoding='UTF-8') as f:
-    file_ext = PathResolver(filepath).suffix
+    file_ext = Path(filepath).suffix
     if   file_ext in ('.plist'):
       file = parse_plist(f)
       if frontmatter:
@@ -128,8 +129,8 @@ def apply_preprocessor_tags(a: dict,
     try: nested_del(b, tree)
     except KeyError: pass
 
-def merge_configs(base: Union[str, PathResolver],
-                  *patches: Union[str, PathResolver],
+def merge_configs(base: Union[str, Path],
+                  *patches: Union[str, Path],
                   flags: Optional[List[str]]=None
                   ) -> Dict:
   """Merges a set of plist or yaml config files into a single config.

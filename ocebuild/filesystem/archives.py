@@ -15,13 +15,14 @@ from .cache import UNPACK_DIR
 
 from ocebuild.parsers.regex import re_match
 from ocebuild.sources import request
-from ocebuild.sources.resolver import PathResolver
+
+from third_party.cpython.pathlib import Path
 
 
 @contextmanager
 def extract_archive(url: Union[str, Request],
                     persist: bool=False
-                    ) -> Generator[PathResolver, str, None]:
+                    ) -> Generator[Path, str, None]:
   """Extracts a file from a URL and yields a temporary extraction directory.
 
   Args:
@@ -46,7 +47,7 @@ def extract_archive(url: Union[str, Request],
                           string=response.headers.get('Content-Disposition'),
                           group=1)
       if filename:
-        extension = "".join(PathResolver(filename).suffixes)
+        extension = "".join(Path(filename).suffixes)
       elif '.' in url:
         extension = f'.{url.split(".")[-1]}'
       else:
@@ -59,7 +60,7 @@ def extract_archive(url: Union[str, Request],
         # Extract the zip file to the temporary directory.
         unpack_archive(tmp_file.name, tmp_dir)
     # Yield the temporary directory.
-    yield PathResolver(tmp_dir)
+    yield Path(tmp_dir)
   finally:
     # Cleanup after context exits
     if not persist: rmtree(tmp_dir)

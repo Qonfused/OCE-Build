@@ -20,7 +20,8 @@ from ocebuild.parsers.asl import parse_ssdt_namespace
 from ocebuild.sources import request
 from ocebuild.sources.binary import get_binary_ext, wrap_binary
 from ocebuild.sources.github import github_file_url
-from ocebuild.sources.resolver import PathResolver
+
+from third_party.cpython.pathlib import Path
 
 
 @contextmanager
@@ -100,10 +101,10 @@ def iasl_wrapper(cache: bool=True
       remove(iasl.keywords['binary_path'])
 
 @contextmanager
-def translate_ssdts(filepaths: List[Union[str, PathResolver]],
-                    directory: Optional[Union[str, PathResolver]]=None,
+def translate_ssdts(filepaths: List[Union[str, Path]],
+                    directory: Optional[Union[str, Path]]=None,
                     persist: bool=False
-                    ) -> Generator[List[PathResolver], any, None]:
+                    ) -> Generator[List[Path], any, None]:
   """Decompiles or compiles SSDT tables using iasl.
 
   Args:
@@ -113,19 +114,19 @@ def translate_ssdts(filepaths: List[Union[str, PathResolver]],
   Yields:
     A list of filepaths to the compiled + decompiled SSDT files.
   """
-  tmp_dir = PathResolver(mkdtemp(dir=directory))
+  tmp_dir = Path(mkdtemp(dir=directory))
   try:
     with iasl_wrapper() as iasl:
-      for filepath in map(PathResolver, filepaths):
+      for filepath in map(Path, filepaths):
         tmp_copy = tmp_dir.joinpath(filepath.name)
         copyfile(filepath, tmp_copy)
         iasl(['-ve', tmp_copy])
-    yield list(map(PathResolver, tmp_dir.iterdir()))
+    yield list(map(Path, tmp_dir.iterdir()))
   finally:
     # Cleanup after context exits
     if not persist: rmtree(tmp_dir)
 
-def sort_ssdt_symbols(filepaths: List[Union[str, PathResolver]]) -> OrderedDict:
+def sort_ssdt_symbols(filepaths: List[Union[str, Path]]) -> OrderedDict:
   """Sorts the injection order of SSDT tables by resolving symbolic references.
 
   This is a naive implementation that does not prune conditional branches or
@@ -139,7 +140,7 @@ def sort_ssdt_symbols(filepaths: List[Union[str, PathResolver]]) -> OrderedDict:
   Returns:
     An ordered dictionary of SSDT table names with their exported symbols.
   """
-  ssdt_names = list(PathResolver(f).stem for f in filepaths)
+  ssdt_names = list(Path(f).stem for f in filepaths)
 
   # Extract flat tree of SSDT symbols and tables
   dependency_tree = OrderedDict()
@@ -174,7 +175,7 @@ def sort_ssdt_symbols(filepaths: List[Union[str, PathResolver]]) -> OrderedDict:
 
   return sorted_dependencies
 
-def extract_ssdts(directory: Union[str, PathResolver]) -> dict:
+def extract_ssdts(directory: Union[str, Path]) -> dict:
   """Extracts the metadata of all SSDTs in a directory."""
   ssdts = {}
   ssdt_paths = glob(directory, '**/*.aml', include='**/*.dsl')
@@ -189,7 +190,7 @@ def extract_ssdts(directory: Union[str, PathResolver]) -> dict:
         "__path": relative
       }
       # Cleanup
-      source_path = PathResolver(str(ssdt_path).replace('.aml', '.dsl'))
+      source_path = Path(str(ssdt_path).replace('.aml', '.dsl'))
       remove(source_path)
 
   return ssdts

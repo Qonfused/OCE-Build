@@ -18,15 +18,16 @@ from ocebuild.parsers.dict import merge_dict, nested_del, nested_get
 from ocebuild.pipeline.build import *
 from ocebuild.pipeline.packages import *
 from ocebuild.pipeline.packages import _iterate_extract_packages
-from ocebuild.sources.resolver import PathResolver
 
 from ocebuild_cli._lib import cli_command
 from ocebuild_cli.interactive import Progress, progress_bar
 from ocebuild_cli.logging import *
 
+from third_party.cpython.pathlib import Path
 
-def get_build_file(cwd: Union[str, PathResolver]
-                   ) -> Tuple[dict, dict, List[str], PathResolver, PathResolver]:
+
+def get_build_file(cwd: Union[str, Path]
+                   ) -> Tuple[dict, dict, List[str], Path, Path]:
   """Reads the build file configuration.
 
   Args:
@@ -52,12 +53,12 @@ def get_build_file(cwd: Union[str, PathResolver]
     abort(f"Encountered an error while reading '{BUILD_FILE.name}': {e}",
           'Check the build configuration for errors.')
   else:
-    PROJECT_DIR = PathResolver(BUILD_FILE.parent)
+    PROJECT_DIR = Path(BUILD_FILE.parent)
     debug(f"Using '{PROJECT_DIR.relative('.')}' as the project root.")
 
   return build_config, build_vars, flags, BUILD_FILE, PROJECT_DIR
 
-def unpack_packages(resolvers: List[dict], project_dir: PathResolver) -> dict:
+def unpack_packages(resolvers: List[dict], project_dir: Path) -> dict:
   """Unpacks packages to a temporary directory."""
   debug(f"Unpacking packages to {UNPACK_DIR}")
   with Progress() as progress:
@@ -76,8 +77,8 @@ def extract_packages(build_vars: dict,
                      lockfile: dict,
                      resolvers: List[dict],
                      packages: dict,
-                     build_dir: PathResolver,
-                     ) -> Tuple[Union[PathResolver, None], dict]:
+                     build_dir: Path,
+                     ) -> Tuple[Union[Path, None], dict]:
   """Extracts packages for build entries satisfying the build configuration."""
   extracted_entries = {}
   def count(d: dict): return len([k for e in d.values() for k in e.keys()])
@@ -111,9 +112,9 @@ def extract_packages(build_vars: dict,
 
   return opencore_pkg, extracted_entries
 
-def extract_build_directory(opencore_pkg: Union[str, PathResolver],
+def extract_build_directory(opencore_pkg: Union[str, Path],
                             extracted_entries: dict,
-                            build_dir: PathResolver
+                            build_dir: Path
                             ) -> None:
   """Extracts all package-extracted build entries to the build directory."""
 
@@ -125,7 +126,7 @@ def extract_build_directory(opencore_pkg: Union[str, PathResolver],
                                total=len(remaining_categories))
       def ignore_extracted(path, _):
         exclusions = set()
-        if (category := PathResolver(path).name) in remaining_categories:
+        if (category := Path(path).name) in remaining_categories:
           entry = nested_get(extracted_entries, [category])
           exclusions |= set(e['__extracted'].name for e in entry.values())
           remaining_categories.remove(category)
@@ -158,10 +159,10 @@ def extract_build_directory(opencore_pkg: Union[str, PathResolver],
                               file_okay=False,
                               readable=True,
                               writable=True,
-                              path_type=PathResolver),
+                              path_type=Path),
               help="Use the specified directory as the working directory.")
 @click.option("-o", "--out",
-              type=click.Path(path_type=PathResolver),
+              type=click.Path(path_type=Path),
               help="Use the specified directory as the output directory.")
 @click.option("--clean",
               is_flag=True,
@@ -182,7 +183,7 @@ def cli(env, cwd, out, clean, update, force):
   else: debug(f"(--out) Using '{out}' as the build directory.")
 
   # Prepare the build directory
-  BUILD_DIR = PathResolver(cwd, out)
+  BUILD_DIR = Path(cwd, out)
   debug(f"Using '{BUILD_DIR}' as the build directory.")
   if clean:
     debug('(--clean) Cleaning the output directory...')

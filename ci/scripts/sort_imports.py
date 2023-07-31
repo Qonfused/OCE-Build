@@ -17,7 +17,8 @@ from ci import PROJECT_NAMESPACES, PROJECT_ROOT, PYTHON_MODULES
 
 from ocebuild.filesystem import glob
 from ocebuild.parsers.regex import re_search
-from ocebuild.sources.resolver import PathResolver
+
+from third_party.cpython.pathlib import Path
 
 
 RE_IMPORT_BLOCK = r'(?s)(\n*^(?:from|import).*^(?:from|import).*?\n*$)'
@@ -134,9 +135,9 @@ def sort_file_imports(file: str) -> str:
 
   return file
 
-def recurse_modules(entrypoint: Union[str, PathResolver]) -> List[str]:
+def recurse_modules(entrypoint: Union[str, Path]) -> List[str]:
   """Returns a list of all project packages recursively."""
-  patterns = map(lambda f: PathResolver(f).resolve(),
+  patterns = map(lambda f: Path(f).resolve(),
                  glob(entrypoint,
                       pattern='**/*.py',
                       exclude='**/__init__.py'))
@@ -161,7 +162,7 @@ def _main(entrypoint: Optional[str]=None) -> None:
       # Sort imports by type
       file_text = sort_file_imports(file_text)
       # Write to file
-    PathResolver(package).write_text(file_text, encoding='UTF-8')
+    Path(package).write_text(file_text, encoding='UTF-8')
 
 
 __all__ = [

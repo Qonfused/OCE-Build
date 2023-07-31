@@ -8,13 +8,14 @@ from sys import builtin_module_names
 from sysconfig import get_paths
 
 from ocebuild import __file__
-from ocebuild.sources.resolver import PathResolver
+
+from third_party.cpython.pathlib import Path
 
 
 def _enumerate_modules(path: str) -> set:
   """Returns a set of all modules in a directory."""
   files = set()
-  for f in sorted(PathResolver(path).iterdir()):
+  for f in sorted(Path(path).iterdir()):
     name = f.stem
     if f.is_dir() and f.joinpath('__init__.py').exists():
       files.add(name)
@@ -27,10 +28,10 @@ def _enumerate_modules(path: str) -> set:
 #                              Project Constants                               #
 ################################################################################
 
-PROJECT_ENTRYPOINT = PathResolver(__file__).parent
+PROJECT_ENTRYPOINT = Path(__file__).parent
 """The main project's import entrypoint."""
 
-PROJECT_ROOT = PathResolver(__file__).parents[1]
+PROJECT_ROOT = Path(__file__).parents[1]
 """The project's root directory."""
 
 PROJECT_DOCS = PROJECT_ROOT.joinpath('docs')

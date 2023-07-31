@@ -5,20 +5,20 @@
 """Parser for converting property list to a Python dictionary."""
 
 from io import BufferedReader, TextIOWrapper
-from plistlib import dumps, InvalidFileException, loads, PlistFormat
-from xml.parsers.expat import ExpatError
 
 from typing import Union
 
+from third_party.cpython.plistlib import dumps, loads, FMT_BINARY, FMT_XML
+from third_party.cpython.plistlib import PlistFormat
 
-PLIST_FORMATS = { 'xml': PlistFormat.FMT_XML,
-                  'binary': PlistFormat.FMT_BINARY }
+
+PLIST_FORMATS = { 'xml': FMT_XML, 'binary': FMT_BINARY }
 """Mapping of format names to plistlib `PlistFormat` enum values."""
 
 def parse_plist(lines: Union[str, bytes, BufferedReader, TextIOWrapper],
                 fmt: Union[None, PlistFormat] = None,
                 dict_type=dict
-               ) -> dict:
+                ) -> dict:
   """Parses a native dictionary from a plist.
 
   Args:
@@ -29,19 +29,14 @@ def parse_plist(lines: Union[str, bytes, BufferedReader, TextIOWrapper],
   Returns:
     A dictionary containing the parsed plist.
   """
-  try:
-    if isinstance(lines, (BufferedReader, TextIOWrapper)):
-      lines = lines.read()
-    if isinstance(lines, str):
-      lines = str.encode(lines)
-    return loads(lines, fmt=fmt, dict_type=dict_type)
-  except InvalidFileException as e:
-    raise ValueError('Invalid plist header.') from e
-  except ExpatError as e:
-    raise ValueError(f'Invalid plist: {e}') from e
+  if isinstance(lines, (BufferedReader, TextIOWrapper)):
+    lines = lines.read()
+  if isinstance(lines, str):
+    lines = str.encode(lines)
+  return loads(lines, fmt=fmt, dict_type=dict_type)
 
 def write_plist(config: dict,
-                fmt: PlistFormat = PLIST_FORMATS['xml'],
+                fmt: PlistFormat = FMT_XML,
                 sort_keys: bool=False
                 ) -> str:
   """Writes a native dictionary to a plist.
