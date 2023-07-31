@@ -12,7 +12,7 @@ import pathlib
 from inspect import signature
 from pathlib import PosixPath, PurePosixPath, PureWindowsPath, WindowsPath
 
-from typing import Any, List, Optional, TypeVar
+from typing import Any, List, Optional, TypeVar, Union
 
 from .. import inject_module_namespace
 
@@ -116,6 +116,16 @@ class Path(BasePath, Path_flavour := type(pathlib.Path())):
 
   cls_flavour = Path_flavour
   subclasses: List[TPath] = []
+
+  def relative(self: TPath,
+               path: Union[str, TPath]='.',
+               from_parent: bool=False
+               ) -> str:
+    """Resolves a relative representation from a file or directory path."""
+    parent_dir = Path(path).resolve()
+    if from_parent and self.resolve().is_file():
+      parent_dir = parent_dir.parent
+    return self.resolve().relative_to(parent_dir).as_posix()
 
 class PurePath(BasePath, PurePath_flavour := type(pathlib.PurePath())):
   """Provides a `pathlib.PurePath` class that can be subclassed idiomatically."""
