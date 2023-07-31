@@ -28,16 +28,17 @@ classifiers   = [
   "Topic :: Software Development :: Build Tools",
   "Operating System :: OS Independent",
 ]
-include       = [
-  "CHANGELOG.md",
-  # Include the cli module in source distribution
-  "ocebuild_cli",
-  # Include vendored third_party dependencies
-  "third_party/__init__.py",
+packages      = [
+  # Include required modules for the source distribution:
+  { include = "ocebuild",         from = ".",   format = "sdist" },
+  { include = "ocebuild_cli",     from = ".",   format = "sdist" },
+  { include = "third_party",      from = ".",   format = "sdist" },
+  # Redirect poetry to staging area for wheel distribution:
+  { include = "ocebuild",  from = "ci/tools/poetry/staging",  format = "wheel" }
 ]
-exclude       = [
-  # Exclude tests from distribution
-  "**/*_test.py",
+include       = [
+  # Include required CI paths for PEP-517 builds:
+  { path = "ci/tools/poetry",   format = "sdist" }
 ]
 
 ################################################################################
@@ -49,6 +50,9 @@ python            = ">=3.8"
 packaging         = "^23.0"
 typing_extensions = { version = "^4.2.0", python = "<3.10" }
 graphlib_backport = { version = "^1.0.0", python = "<3.9" }
+
+[tool.poetry.group.cli]
+optional = false
 
 [tool.poetry.group.cli.dependencies]
 click = "^8.0.1"
@@ -71,7 +75,7 @@ pytest-cov  = ">=3,<5"
 ################################################################################
 
 [tool.poetry.scripts]
-ocebuild = "ocebuild_cli.__main__:_main"
+ocebuild = "ocebuild.cli.__main__:_main"
 
 [tool.poe]
 include = [ "ci/scripts/tasks.toml" ]
@@ -133,6 +137,22 @@ sort          = "-Miss"
 #                              Build Configuration                             #
 ################################################################################
 
+# Poetry hooks are only used when building using the full project locally.
+[tool.poe.poetry_hooks]
+pre_build     = "pre-build"
+post_build    = "post-build"
+
+[tool.poe.tasks.pre-build]
+script        = "ci.tools.poetry.hooks.build:pre_build"
+
+[tool.poe.tasks.post-build]
+script        = "ci.tools.poetry.hooks.build:post_build"
+
+# Below are used when building the project using any PEP-517 build backend.
+[tool.poetry.build]
+generate-setup-file = false
+script        = "ci/tools/poetry/hooks/build.py"
+
 [build-system]
-requires      = ["poetry-core"]
+requires      = ["poetry-core>=1.2.0b1"]
 build-backend = "poetry.core.masonry.api"
