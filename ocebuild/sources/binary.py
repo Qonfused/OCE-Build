@@ -15,9 +15,9 @@ from platform import system
 
 from typing import List, Literal
 
-from .resolver import PathResolver
-
 from ocebuild.errors._lib import disable_exception_traceback
+
+from third_party.cpython.pathlib import Path
 
 
 def get_binary_ext(platform: Literal['Windows', 'Darwin', 'Linux']=system()
@@ -46,7 +46,7 @@ def _get_file_digest(filename, hash) -> str:
 
 def _get_dir_digest(directory, hash):
   """Recursively gets a digest for all files in a directory."""
-  for path in sorted(PathResolver(directory).iterdir()):
+  for path in sorted(Path(directory).iterdir()):
     # Ensure subdirectories are sorted for consistent hashes
     hash.update(path.name.encode())
     if path.is_file():
@@ -66,7 +66,7 @@ def get_digest(filepath, algorithm=sha256) -> str:
     A hex digest of the file or directory.
   """
   hash = algorithm()
-  if not (path := PathResolver(filepath)).exists():
+  if not (path := Path(filepath)).exists():
     raise FileNotFoundError(f'No such file or directory: {filepath}')
   elif path.is_file():
     _get_file_digest(filepath, hash)
@@ -114,11 +114,11 @@ def wrap_binary(args: List[str],
                             stderr=subprocess.PIPE,
                             encoding='UTF-8')
   # Remove binary from disk
-  if not persist: PathResolver(binary_path).unlink()
+  if not persist: Path(binary_path).unlink()
   # Raise error without stacktrace
   if process.returncode: #pragma: no cover
     with disable_exception_traceback():
-      stderr_name = PathResolver(binary_path).name
+      stderr_name = Path(binary_path).name
       raise RuntimeError(f'({stderr_name}) {process.stderr.strip()}')
   return process.stdout
 

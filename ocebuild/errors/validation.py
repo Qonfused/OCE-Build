@@ -18,7 +18,8 @@ from ._lib import disable_exception_traceback
 from .types import PathValidationError
 
 from ocebuild.parsers.dict import flatten_dict
-from ocebuild.sources.resolver import PathResolver
+
+from third_party.cpython.pathlib import Path
 
 
 def validate(call: Callable[[], bool],
@@ -51,7 +52,7 @@ def validate_path_tree(path: Union[str, "PathLike[str]"],
     True if the path matches the tree schema.
   """
   # Verify path exists
-  root_dir = PathResolver(path)
+  root_dir = Path(path)
   for ftree, flag in flatten_dict(tree, delimiter).items():
     # Create error partial for re-use
     absolute_path = root_dir.joinpath(*ftree.split('/'))

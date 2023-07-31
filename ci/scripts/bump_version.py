@@ -15,9 +15,10 @@ from typing import Optional
 from ci import PROJECT_ROOT
 
 from ocebuild.parsers.regex import re_search
-from ocebuild.sources.resolver import PathResolver
 from ocebuild.version import __file__ as __version_file__, __version__
 from ocebuild.version import _BUILD, _MAJOR_VERSION, _MINOR_VERSION, _PATCH_VERSION, _PRE_RELEASE
+
+from third_party.cpython.pathlib import Path
 
 
 version = SimpleNamespace(major=int(_MAJOR_VERSION),
@@ -72,7 +73,7 @@ def _main(**kwargs) -> None:
   version_str = bump_version(**kwargs)
 
   # Update version file
-  version_file = PathResolver(__version_file__)
+  version_file = Path(__version_file__)
   with open(version_file, 'r', encoding='UTF-8') as file:
     file_text = file.read()
     # Replace semver components
@@ -92,10 +93,10 @@ def _main(**kwargs) -> None:
       .replace(f"__version__    = '{__version__}'",
                f"__version__    = '{version_str}'")
     # Write to file
-    PathResolver(version_file).write_text(file_text, encoding='UTF-8')
+    Path(version_file).write_text(file_text, encoding='UTF-8')
 
   # Update project config file
-  project_cfg = PathResolver(PROJECT_ROOT, 'pyproject.toml')
+  project_cfg = Path(PROJECT_ROOT, 'pyproject.toml')
   with open(project_cfg, 'r', encoding='UTF-8') as file:
     file_text = file.read()
     # Get version string pattern
@@ -105,10 +106,10 @@ def _main(**kwargs) -> None:
       .replace(f'{prefix}"{__version__}"',
                f'{prefix}"{version_str}"')
     # Write to file
-    PathResolver(project_cfg).write_text(file_text, encoding='UTF-8')
+    Path(project_cfg).write_text(file_text, encoding='UTF-8')
 
   # Update registry version for project
-  registry_vers = PathResolver(PROJECT_ROOT, 'ci', 'registry', 'project.json')
+  registry_vers = Path(PROJECT_ROOT, 'ci', 'registry', 'project.json')
   registry_vers.write_text(json_dumps({ 'version': version_str }))
 
   print(f"Bumped version from '{__version__}' to '{version_str}'")

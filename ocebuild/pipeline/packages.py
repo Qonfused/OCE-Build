@@ -15,10 +15,11 @@ from ocebuild.filesystem import glob, remove
 from ocebuild.parsers.dict import merge_dict, nested_del, nested_get, nested_set
 from ocebuild.pipeline import config, kexts, opencore, ssdts
 from ocebuild.pipeline.lock import _category_extension, prune_resolver_entry
-from ocebuild.sources.resolver import PathResolver
+
+from third_party.cpython.pathlib import Path
 
 
-def extract_opencore_packages(opencore_pkg: Union[str, PathResolver],
+def extract_opencore_packages(opencore_pkg: Union[str, Path],
                               target: str,
                               resolvers: List[dict],
                               packages: dict,
@@ -59,7 +60,7 @@ def _iterate_extract_packages(unpacked_entries: dict):
 def extract_build_packages(build_vars: dict,
                            resolvers: List[dict],
                            packages: dict,
-                           build_dir: PathResolver,
+                           build_dir: Path,
                            *args,
                            __wrapper: Optional[Iterator]=None,
                            **kwargs

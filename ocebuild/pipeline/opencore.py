@@ -18,10 +18,11 @@ from ocebuild.filesystem.cache import UNPACK_DIR
 from ocebuild.filesystem.posix import glob, move, remove
 from ocebuild.parsers.dict import nested_get, nested_set
 from ocebuild.sources.binary import get_stream_digest
-from ocebuild.sources.resolver import PathResolver
+
+from third_party.cpython.pathlib import Path
 
 
-def extract_opencore_archive(pkg: PathResolver,
+def extract_opencore_archive(pkg: Path,
                              target: Literal['IA32', 'X64']='X64') -> None:
   """Extracts the contents of an OpenCore archive to a temporary directory.
 
@@ -59,10 +60,10 @@ def extract_opencore_archive(pkg: PathResolver,
 
   # Overwrite package directory with changes
   remove(pkg)
-  for dir_ in PathResolver(tmp_dir).iterdir():
+  for dir_ in Path(tmp_dir).iterdir():
     move(dir_, pkg)
 
-def extract_ocbinary_archive(pkg: PathResolver, oc_pkg: PathResolver) -> None:
+def extract_ocbinary_archive(pkg: Path, oc_pkg: Path) -> None:
   """Extracts OcBinaryData resources to an existing OpenCore archive.
 
   Args:
@@ -76,8 +77,8 @@ def extract_ocbinary_archive(pkg: PathResolver, oc_pkg: PathResolver) -> None:
   # Cleanup
   remove(pkg)
 
-def _iterate_entries(opencore_pkg: PathResolver,
-                     opencore_dir: PathResolver
+def _iterate_entries(opencore_pkg: Path,
+                     opencore_dir: Path
                      ) -> Generator[Tuple[str, str], any, None]:
   """Iterate over the entries in the build configuration."""
   for category in map(lambda p: p.name, opencore_dir.iterdir()):
@@ -86,7 +87,7 @@ def _iterate_entries(opencore_pkg: PathResolver,
                     opencore_dir.joinpath(category).iterdir()):
       yield category, path
 
-def extract_build_entries(opencore_pkg: PathResolver,
+def extract_build_entries(opencore_pkg: Path,
                           resolvers: List[dict],
                           *args,
                           __wrapper: Optional[Iterator]=None,
@@ -102,7 +103,7 @@ def extract_build_entries(opencore_pkg: PathResolver,
     **kwargs: Additional keyword arguments to pass to the optional iterator wrapper.
 
   Returns:
-    A PathResolver to the extracted OpenCore directory.
+    A Path to the extracted OpenCore directory.
   """
 
   oc_dir = opencore_pkg.joinpath('EFI', 'OC')
@@ -117,14 +118,14 @@ def extract_build_entries(opencore_pkg: PathResolver,
     # Include only binaries that are specified as bundled in the build config
     matches = filter(lambda e: str(e['__filepath']).find(path) > 0, bundled)
     if entry := next(matches, None):
-      filepath = PathResolver(entry['__filepath']).as_posix()
+      filepath = Path(entry['__filepath']).as_posix()
       prune_resolver_entry(resolvers, key='__filepath', value=filepath)
       # Add the entry to the extracted entries
       relative = f'.{path.rsplit(category, maxsplit=1)[1]}'
-      name = nested_get(entry, ['name'], default=PathResolver(path).stem)
+      name = nested_get(entry, ['name'], default=Path(path).stem)
       nested_set(extract_entries, [entry['__category'], name], {
-        '__dest': PathResolver(filepath),
-        '__extracted': PathResolver(opencore_pkg.joinpath(path)),
+        '__dest': Path(filepath),
+        '__extracted': Path(opencore_pkg.joinpath(path)),
         '__path': relative
       })
     else:
@@ -132,7 +133,7 @@ def extract_build_entries(opencore_pkg: PathResolver,
 
   return extract_entries
 
-def get_opencore_checksum(file_path: Union[str, PathResolver],
+def get_opencore_checksum(file_path: Union[str, Path],
                           algorithm=sha256
                           ) -> str:
   """Computes the SHA256 checksum of the OpenCore binary.
@@ -155,7 +156,7 @@ def get_opencore_checksum(file_path: Union[str, PathResolver],
   """
 
   # Copy the file contents to the temporary file
-  file_path = PathResolver(file_path)
+  file_path = Path(file_path)
   with NamedTemporaryFile(mode="r+b",
                           suffix='-OpenCore.efi',
                           dir=UNPACK_DIR) as f:

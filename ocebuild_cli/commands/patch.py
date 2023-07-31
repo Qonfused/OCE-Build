@@ -15,11 +15,12 @@ from ocebuild.parsers.dict import nested_get
 from ocebuild.parsers.regex import re_search
 from ocebuild.pipeline.config import *
 from ocebuild.pipeline.lock import read_lockfile
-from ocebuild.sources.resolver import PathResolver
 
 from ocebuild_cli._lib import cli_command
 from ocebuild_cli.interactive import Progress, progress_bar
 from ocebuild_cli.logging import *
+
+from third_party.cpython.pathlib import Path
 
 
 def read_schema(lockfile: Optional[dict]=None, **kwargs) -> dict:
@@ -50,10 +51,10 @@ def read_schema(lockfile: Optional[dict]=None, **kwargs) -> dict:
                               file_okay=False,
                               readable=True,
                               writable=True,
-                              path_type=PathResolver),
+                              path_type=Path),
               help="Use the specified directory as the working directory.")
 @click.option("-o", "--out",
-              type=click.Path(path_type=PathResolver),
+              type=click.Path(path_type=Path),
               help="Use the specified directory as the output directory.")
 def cli(env, cwd, out):
   """Patches an existing OpenCore configuration."""

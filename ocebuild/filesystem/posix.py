@@ -9,7 +9,7 @@ from shutil import copy as _copy, copytree, move as shutil_move, rmtree
 
 from typing import Generator, List, Optional, Union
 
-from ocebuild.sources.resolver import PathResolver
+from third_party.cpython.pathlib import Path
 
 
 def copy(src: Union[str, "PathLike[str]"],
@@ -24,7 +24,7 @@ def copy(src: Union[str, "PathLike[str]"],
   Raises:
     ValueError: If the path is not a file or directory.
   """
-  src = PathResolver(src)
+  src = Path(src)
   if src.is_file(): _copy(src, dest, **kwargs)
   elif src.is_dir(): copytree(src, dest, **kwargs)
   else:
@@ -40,7 +40,7 @@ def remove(path: Union[str, "PathLike[str]"]) -> None:
   Raises:
     ValueError: If the path is not a file or directory.
   """
-  path = PathResolver(path)
+  path = Path(path)
   if not path.exists(): return
   elif path.is_file(): path.unlink()
   elif path.is_dir(): rmtree(path)
@@ -49,7 +49,7 @@ def remove(path: Union[str, "PathLike[str]"]) -> None:
 
 def rename(path: Union[str, "PathLike[str]"],
            name: str
-           ) -> PathResolver:
+           ) -> Path:
   """Renames a file or directory.
 
   Args:
@@ -63,8 +63,8 @@ def rename(path: Union[str, "PathLike[str]"],
     FileNotFoundError: If the file or directory does not exist.
     OSError: If the file or directory cannot be renamed.
   """
-  parent_dir = PathResolver(path).parent
-  output_dir = PathResolver(parent_dir, name)
+  parent_dir = Path(path).parent
+  output_dir = Path(parent_dir, name)
   os_rename(path, output_dir)
   return output_dir
 
@@ -72,7 +72,7 @@ def move(src: Union[str, "PathLike[str]"],
          target: Union[str, "PathLike[str]"],
          name: Optional[str]=None,
          **kwargs
-         ) -> PathResolver:
+         ) -> Path:
   """Moves a file or directory to a new location.
 
   This is a simple wrapper over shutil's `move` method that
@@ -86,7 +86,7 @@ def move(src: Union[str, "PathLike[str]"],
   Returns:
     The destination path.
   """
-  dest = PathResolver(target, name if name else PathResolver(src).name)
+  dest = Path(target, name if name else Path(src).name)
   if not (parent_dir := dest.parent).is_dir() and str(parent_dir) != '.':
     parent_dir.mkdir(parents=True, exist_ok=True)
   shutil_move(str(src), parent_dir if not name else dest, kwargs)
@@ -97,7 +97,7 @@ def glob(directory: Union[str, "PathLike[str]"],
          include: Optional[Union[str, List[str]]]=None,
          exclude: Optional[Union[str, List[str]]]=None,
          first: Optional[bool] = False
-         ) -> Union[Generator[PathResolver, None, None], PathResolver, None]:
+         ) -> Union[Generator[Path, None, None], Path, None]:
   """Returns a list of paths matching the given pattern.
 
   Args:
@@ -111,18 +111,18 @@ def glob(directory: Union[str, "PathLike[str]"],
     A list of matching paths.
     Instead returns the first matching path if `first` is `True`.
   """
-  matches = list(PathResolver(directory).glob(pattern))
+  matches = list(Path(directory).glob(pattern))
   if include is not None:
     if isinstance(include, str): include = [include]
     include_matches = set()
     for s in include:
-      include_matches |= set(PathResolver(directory).glob(s))
+      include_matches |= set(Path(directory).glob(s))
     matches = list((*set(matches), *include_matches))
   if exclude is not None:
     if isinstance(exclude, str): exclude = [exclude]
     exclude_matches = set()
     for s in exclude:
-      exclude_matches |= set(PathResolver(directory).glob(s))
+      exclude_matches |= set(Path(directory).glob(s))
     matches = list(set(matches) - exclude_matches)
   if first:
     return matches[0] if matches else None

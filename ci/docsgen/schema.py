@@ -21,7 +21,8 @@ from ocebuild.parsers.schema import format_markdown_entry
 from ocebuild.parsers.types import decode_data
 from ocebuild.pipeline.config import get_configuration_schema
 from ocebuild.pipeline.lock import resolve_specifiers
-from ocebuild.sources.resolver import PathResolver
+
+from third_party.cpython.pathlib import Path
 
 
 def parse_fmarkdown_schema(raw_schema: dict,
@@ -145,8 +146,9 @@ if __name__ == '__main__':
     file.write(schema_doc)
 
   # Update registry version for schema
-  registry_vers = PathResolver(PROJECT_ROOT, 'ci', 'registry', 'schema.json')
+  registry_vers = Path(PROJECT_ROOT, 'ci', 'registry', 'schema.json')
   registry_vers.write_text(json_dumps({ 'version': entry.get('version') }))
+
 
 __all__ = [
   # Functions (1)

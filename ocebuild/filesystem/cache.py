@@ -11,18 +11,19 @@ from typing import Generator, List, Union
 from .posix import remove
 
 from ocebuild.parsers.regex import re_search
-from ocebuild.sources.resolver import PathResolver
+
+from third_party.cpython.pathlib import Path
 
 
 def _iter_temp_dir(prefix: str,
-                   dir_: Union[str, PathResolver]
-                   ) -> Generator[PathResolver, any, None]:
+                   dir_: Union[str, Path]
+                   ) -> Generator[Path, any, None]:
   """Iterate over all temporary directories."""
-  for d in PathResolver(dir_).iterdir():
+  for d in Path(dir_).iterdir():
     if d.is_dir() and d.name.startswith(prefix):
       yield d
 
-def _get_temp_dir(prefix: str="ocebuild-", clear: bool=False) -> PathResolver:
+def _get_temp_dir(prefix: str="ocebuild-", clear: bool=False) -> Path:
   """Return the path to a directory that can be used for ephemeral caching.
 
   Args:
@@ -41,12 +42,12 @@ def _get_temp_dir(prefix: str="ocebuild-", clear: bool=False) -> PathResolver:
     # Return the most recent cache directory
     tmpdir = next(iter(cache_dirs))
     if not clear:
-      return PathResolver(tmpdir)
+      return Path(tmpdir)
     else:
       remove(tmpdir)
   # Create a new cache directory
   tmpdir = mkdtemp(prefix=prefix)
-  return PathResolver(tmpdir)
+  return Path(tmpdir)
 
 CACHE_DIR = _get_temp_dir(prefix="ocebuild-cache-")
 """Global cache directory for storing and re-using files between builds."""
@@ -54,7 +55,7 @@ CACHE_DIR = _get_temp_dir(prefix="ocebuild-cache-")
 UNPACK_DIR = _get_temp_dir(prefix="ocebuild-unpack-", clear=True)
 """Directory for unpacking and handling remote or cached archives."""
 
-def clear_cache(cache_dirs: List[PathResolver]):
+def clear_cache(cache_dirs: List[Path]):
   """Clears all cache directories"""
   if not cache_dirs:
     cache_dirs = (CACHE_DIR, UNPACK_DIR,)

@@ -16,12 +16,14 @@ from rich.table import Table
 
 from ocebuild.parsers.yaml import parse_yaml
 from ocebuild.pipeline.lock import *
-from ocebuild.sources.resolver import PathResolver, ResolverType
+from ocebuild.sources.resolver import ResolverType
 
 import ocebuild_cli._lib as lib
 from ocebuild_cli._lib import cli_command
 from ocebuild_cli.interactive import Progress, progress_bar
 from ocebuild_cli.logging import *
+
+from third_party.cpython.pathlib import Path
 
 
 def rich_resolver(resolver: ResolverType,
@@ -41,7 +43,7 @@ def rich_resolver(resolver: ResolverType,
 
   if resolver is None: return None
   elif 'path' in resolver_props:
-    path_ = PathResolver(resolver.path)
+    path_ = Path(resolver.path)
     # _checksum = resolver_props['__resolver'].checksum
     name, resolution_str = resolution.split('@file:')
     resolution_str = f'file:{resolution_str}' \
@@ -118,9 +120,9 @@ def format_resolvers(resolvers: List[dict]) -> Table:
 
   return table
 
-def get_lockfile(cwd: Union[str, PathResolver],
-                 project_dir: Union[str, PathResolver]
-                 ) -> Tuple[dict, PathResolver]:
+def get_lockfile(cwd: Union[str, Path],
+                 project_dir: Union[str, Path]
+                 ) -> Tuple[dict, Path]:
   """Reads the project's lockfile.
 
   Args:
@@ -134,7 +136,7 @@ def get_lockfile(cwd: Union[str, PathResolver],
       - The lockfile path.
   """
 
-  LOCK_FILE = PathResolver(project_dir, 'build.lock')
+  LOCK_FILE = Path(project_dir, 'build.lock')
   if LOCK_FILE.exists():
     info(msg=f"Found lockfile at '{LOCK_FILE.relative(cwd)}'.")
     try:
@@ -148,13 +150,13 @@ def get_lockfile(cwd: Union[str, PathResolver],
 
   return lockfile, metadata, LOCK_FILE
 
-def resolve_lockfile(cwd: Union[str, PathResolver],
+def resolve_lockfile(cwd: Union[str, Path],
                      check: bool=False,
                      update: bool=False,
                      force: bool=False,
                      build_config: Optional[dict]=None,
-                     project_dir: Optional[PathResolver]=None
-                     ) -> Tuple[dict, List[dict], PathResolver]:
+                     project_dir: Optional[Path]=None
+                     ) -> Tuple[dict, List[dict], Path]:
   """Resolves the project's lockfile.
 
   Args:
@@ -245,7 +247,7 @@ def resolve_lockfile(cwd: Union[str, PathResolver],
                               file_okay=False,
                               readable=True,
                               writable=True,
-                              path_type=PathResolver),
+                              path_type=Path),
               help="Use the specified directory as the working directory.")
 @click.option("--check",
               is_flag=True,

@@ -14,6 +14,8 @@ from typing import List, Optional
 
 from ocebuild import __file__ as module_path
 
+from third_party.cpython.pathlib import Path
+
 
 @contextmanager
 def disable_exception_traceback(tracebacklimit: int=0):
@@ -63,11 +65,9 @@ def wrap_exception(suppress: Optional[List[str]]=None,
   if not hide_modules: hide_modules = []
   e_type, e, tb = exc_info()
 
-  # Delayed import to avoid circular dependency
-  from ocebuild.sources.resolver import PathResolver #pylint: disable=import-outside-toplevel
-  module = str(PathResolver(module_path).parent)
+  module = str(Path(module_path).parent)
   hidden_module_paths = \
-    set(str(PathResolver(m.__file__).parent) for m in hide_modules)
+    set(str(Path(m.__file__).parent) for m in hide_modules)
 
   tb_frame = tb
   tb_prev = None
