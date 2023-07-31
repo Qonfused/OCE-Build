@@ -65,7 +65,7 @@ install OCE Build as an executable or as a Python library.
 
 ## Contributing
 
-See the [contributing](/docs/contributing.md) documentation for more information on how to contribute to this project.
+See the [contributing](/CONTRIBUTING.md) documentation for more information on how to contribute to this project.
 
 ## Issues
 
@@ -73,4 +73,4 @@ See the [contributing](/docs/contributing.md) documentation for more information
 
 ## License
 
-[BSD 3-Clause License](https://github.com/Qonfused/OCE-Build/blob/main/LICENSE).
+[BSD 3-Clause License](/LICENSE).
