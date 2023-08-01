@@ -1,0 +1,435 @@
+'#Revision':
+  OpenCore-Version:                 String  | "0.9.3"
+ACPI:
+  Add:
+    - Comment:                      String  | ""
+      Enabled:                      Boolean | false
+      Path:                         String  | ""
+  Delete:
+    - All:                          Boolean | false
+      Comment:                      String  | ""
+      Enabled:                      Boolean | false
+      OemTableId:                   Data    | <00000000 00000000>
+      TableLength:                  Number  | 0
+      TableSignature:               Data    | <00000000>
+  Patch:
+    - Base:                         String  | ""
+      BaseSkip:                     Number  | 0
+      Comment:                      String  | ""
+      Count:                        Number  | 0
+      Enabled:                      Boolean | false
+      Find:                         Data    | <>
+      Limit:                        Number  | 0
+      Mask:                         Data    | <>
+      OemTableId:                   Data    | <00000000 00000000>
+      Replace:                      Data    | <>
+      ReplaceMask:                  Data    | <>
+      Skip:                         Number  | 0
+      TableLength:                  Number  | 0
+      TableSignature:               Data    | <00000000>
+  Quirks:
+    FadtEnableReset:                Boolean | false
+    NormalizeHeaders:               Boolean | false
+    RebaseRegions:                  Boolean | false
+    ResetHwSig:                     Boolean | false
+    ResetLogoStatus:                Boolean | false
+    SyncTableIds:                   Boolean | false
+Booter:
+  MmioWhitelist:
+    - Address:                      Number  | 0
+      Comment:                      String  | ""
+      Enabled:                      Boolean | false
+  Patch:
+    - Arch:                         String  | "Any"
+      Comment:                      String  | ""
+      Count:                        Number  | 0
+      Enabled:                      Boolean | false
+      Find:                         Data    | <>
+      Identifier:                   String  | "Any"
+      Limit:                        Number  | 0
+      Mask:                         Data    | <>
+      Replace:                      Data    | <>
+      ReplaceMask:                  Data    | <>
+      Skip:                         Number  | 0
+  Quirks:
+    AllowRelocationBlock:           Boolean | false
+    AvoidRuntimeDefrag:             Boolean | false
+    DevirtualiseMmio:               Boolean | false
+    DisableSingleUser:              Boolean | false
+    DisableVariableWrite:           Boolean | false
+    DiscardHibernateMap:            Boolean | false
+    EnableSafeModeSlide:            Boolean | false
+    EnableWriteUnprotector:         Boolean | false
+    ForceBooterSignature:           Boolean | false
+    ForceExitBootServices:          Boolean | false
+    ProtectMemoryRegions:           Boolean | false
+    ProtectSecureBoot:              Boolean | false
+    ProtectUefiServices:            Boolean | false
+    ProvideCustomSlide:             Boolean | false
+    ProvideMaxSlide:                Number  | 0
+    RebuildAppleMemoryMap:          Boolean | false
+    ResizeAppleGpuBars:             Number  | -1
+    SetupVirtualMap:                Boolean | false
+    SignalAppleOS:                  Boolean | false
+    SyncRuntimePermissions:         Boolean | false
+DeviceProperties:
+  Add:                              Dict    | (empty)
+  Delete:                           Dict    | (empty)
+Kernel:
+  Add:
+    - Arch:                         String  | "Any"
+      BundlePath:                   String  | ""
+      Comment:                      String  | ""
+      Enabled:                      Boolean | false
+      ExecutablePath:               String  | ""
+      MaxKernel:                    String  | ""
+      MinKernel:                    String  | ""
+      PlistPath:                    String  | ""
+  Block:
+    - Arch:                         String  | "Any"
+      Comment:                      String  | ""
+      Enabled:                      Boolean | false
+      Identifier:                   String  | ""
+      MaxKernel:                    String  | ""
+      MinKernel:                    String  | ""
+      Strategy:                     String  | "Disable"
+  Emulate:
+    Cpuid1Data:                     Data    | <00000000 00000000 00000000 00000000>
+    Cpuid1Mask:                     Data    | <00000000 00000000 00000000 00000000>
+    DummyPowerManagement:           Boolean | false
+    MaxKernel:                      String  | ""
+    MinKernel:                      String  | ""
+  Force:
+    - Arch:                         String  | "Any"
+      BundlePath:                   String  | ""
+      Comment:                      String  | ""
+      Enabled:                      Boolean | false
+      ExecutablePath:               String  | ""
+      Identifier:                   String  | ""
+      MaxKernel:                    String  | ""
+      MinKernel:                    String  | ""
+      PlistPath:                    String  | ""
+  Patch:
+    - Arch:                         String  | "Any"
+      Base:                         String  | ""
+      Comment:                      String  | ""
+      Count:                        Number  | 0
+      Enabled:                      Boolean | false
+      Find:                         Data    | <>
+      Identifier:                   String  | ""
+      Limit:                        Number  | 0
+      Mask:                         Data    | <>
+      MaxKernel:                    String  | ""
+      MinKernel:                    String  | ""
+      Replace:                      Data    | <>
+      ReplaceMask:                  Data    | <>
+      Skip:                         Number  | 0
+  Quirks:
+    AppleCpuPmCfgLock:              Boolean | false
+    AppleXcpmCfgLock:               Boolean | false
+    AppleXcpmExtraMsrs:             Boolean | false
+    AppleXcpmForceBoost:            Boolean | false
+    CustomPciSerialDevice:          Boolean | false
+    CustomSMBIOSGuid:               Boolean | false
+    DisableIoMapper:                Boolean | false
+    DisableIoMapperMapping:         Boolean | false
+    DisableLinkeditJettison:        Boolean | false
+    DisableRtcChecksum:             Boolean | false
+    ExtendBTFeatureFlags:           Boolean | false
+    ExternalDiskIcons:              Boolean | false
+    ForceAquantiaEthernet:          Boolean | false
+    ForceSecureBootScheme:          Boolean | false
+    IncreasePciBarSize:             Boolean | false
+    LapicKernelPanic:               Boolean | false
+    LegacyCommpage:                 Boolean | false
+    PanicNoKextDump:                Boolean | false
+    PowerTimeoutKernelPanic:        Boolean | false
+    ProvideCurrentCpuInfo:          Boolean | false
+    SetApfsTrimTimeout:             Number  | -1
+    ThirdPartyDrives:               Boolean | false
+    XhciPortLimit:                  Boolean | false
+  Scheme:
+    CustomKernel:                   Boolean | false
+    FuzzyMatch:                     Boolean | false
+    KernelArch:                     String  | "Auto"
+    KernelCache:                    String  | "Auto"
+Misc:
+  Boot:
+    ConsoleAttributes:              Number  | 0
+    HibernateMode:                  String  | "None"
+    HibernateSkipsPicker:           Boolean | false
+    HideAuxiliary:                  Boolean | false
+    LauncherOption:                 String  | "Disabled"
+    LauncherPath:                   String  | "Default"
+    PickerAttributes:               Number  | 0
+    PickerAudioAssist:              Boolean | false
+    PollAppleHotKeys:               Boolean | false
+    ShowPicker:                     Boolean | false
+    TakeoffDelay:                   Number  | 0
+    Timeout:                        Number  | 0
+    PickerMode:                     String  | "Builtin"
+    PickerVariant:                  String  | "Auto"
+  BlessOverride:                    Array   | (empty)
+  Debug:
+    AppleDebug:                     Boolean | false
+    ApplePanic:                     Boolean | false
+    DisableWatchDog:                Boolean | false
+    DisplayDelay:                   Number  | 0
+    DisplayLevel:                   Number  | 0
+    LogModules:                     String  | "*"
+    SysReport:                      Boolean | false
+    Target:                         Number  | 0
+  Entries:
+    - Arguments:                    String  | ""
+      Auxiliary:                    Boolean | false
+      Comment:                      String  | ""
+      Enabled:                      Boolean | false
+      Flavour:                      String  | "Auto"
+      Name:                         String  | ""
+      Path:                         String  | ""
+      TextMode:                     Boolean | false
+  Security:
+    AllowSetDefault:                Boolean | false
+    ApECID:                         Number  | 0
+    AuthRestart:                    Boolean | false
+    BlacklistAppleUpdate:           Boolean | false
+    DmgLoading:                     String  | "Signed"
+    EnablePassword:                 Boolean | false
+    ExposeSensitiveData:            Number  | 6
+    HaltLevel:                      Number  | 2147483648
+    PasswordHash:                   Data    | <00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000>
+    PasswordSalt:                   Data    | <>
+    Vault:                          String  | "Secure"
+    ScanPolicy:                     Number  | 17760515
+    SecureBootModel:                String  | "Default"
+  Serial:
+    Custom:
+      BaudRate:                     Number  | 115200
+      ClockRate:                    Number  | 1843200
+      DetectCable:                  Boolean | false
+      ExtendedTxFifoSize:           Number  | 64
+      FifoControl:                  Number  | 7
+      LineControl:                  Number  | 7
+      PciDeviceInfo:                Data    | <FF>
+      RegisterAccessWidth:          Number  | 8
+      RegisterBase:                 Number  | 1016
+      RegisterStride:               Number  | 1
+      UseHardwareFlowControl:       Boolean | false
+      UseMmio:                      Boolean | false
+    Init:                           Boolean | false
+    Override:                       Boolean | false
+  Tools:
+    - Arguments:                    String  | ""
+      Auxiliary:                    Boolean | false
+      Comment:                      String  | ""
+      Enabled:                      Boolean | false
+      Flavour:                      String  | "Auto"
+      FullNvramAccess:              Boolean | false
+      Name:                         String  | ""
+      Path:                         String  | ""
+      RealPath:                     Boolean | false
+      TextMode:                     Boolean | false
+NVRAM:
+  Add:                              Dict    | (empty)
+  Delete:                           Dict    | (empty)
+  LegacyOverwrite:                  Boolean | false
+  LegacySchema:                     Dict    | (empty)
+  WriteFlash:                       Boolean | false
+PlatformInfo:
+  Automatic:                        Boolean | false
+  CustomMemory:                     Boolean | false
+  UpdateDataHub:                    Boolean | false
+  UpdateNVRAM:                      Boolean | false
+  UpdateSMBIOS:                     Boolean | false
+  UpdateSMBIOSMode:                 String  | "Create"
+  UseRawUuidEncoding:               Boolean | false
+  Generic:
+    SpoofVendor:                    Boolean | false
+    AdviseFeatures:                 Boolean | false
+    MaxBIOSVersion:                 Boolean | false
+    SystemMemoryStatus:             String  | "Auto"
+    ProcessorType:                  Number  | 0
+    SystemProductName:              String  | ""
+    SystemSerialNumber:             String  | ""
+    SystemUUID:                     String  | ""
+    MLB:                            String  | ""
+    ROM:                            Data    | <00000000 0000>
+  DataHub:
+    PlatformName:                   String  | ""
+    SystemProductName:              String  | ""
+    SystemSerialNumber:             String  | ""
+    SystemUUID:                     String  | ""
+    BoardProduct:                   String  | ""
+    BoardRevision:                  Data    | <00>
+    StartupPowerEvents:             Number  | 0
+    InitialTSC:                     Number  | 0
+    FSBFrequency:                   Number  | 0
+    ARTFrequency:                   Number  | 0
+    DevicePathsSupported:           Number  | 0
+    SmcRevision:                    Data    | <00000000 0000>
+    SmcBranch:                      Data    | <00000000 00000000>
+    SmcPlatform:                    Data    | <00000000 00000000>
+  Memory:
+    DataWidth:                      Number  | 65535
+    Devices:
+      - AssetTag:                   String  | "Unknown"
+        BankLocator:                String  | "Unknown"
+        DeviceLocator:              String  | "Unknown"
+        Manufacturer:               String  | "Unknown"
+        PartNumber:                 String  | "Unknown"
+        SerialNumber:               String  | "Unknown"
+        Size:                       Number  | 0
+        Speed:                      Number  | 0
+    ErrorCorrection:                Number  | 3
+    FormFactor:                     Number  | 2
+    MaxCapacity:                    Number  | 0
+    TotalWidth:                     Number  | 65535
+    Type:                           Number  | 2
+    TypeDetail:                     Number  | 4
+  PlatformNVRAM:
+    BID:                            String  | ""
+    ROM:                            Data    | <00000000 0000>
+    MLB:                            String  | ""
+    FirmwareFeatures:               Data    | <00000000 00000000>
+    FirmwareFeaturesMask:           Data    | <00000000 00000000>
+    SystemSerialNumber:             String  | ""
+    SystemUUID:                     String  | ""
+  SMBIOS:
+    BIOSVendor:                     String  | ""
+    BIOSVersion:                    String  | ""
+    BIOSReleaseDate:                String  | ""
+    SystemManufacturer:             String  | ""
+    SystemProductName:              String  | ""
+    SystemVersion:                  String  | ""
+    SystemSerialNumber:             String  | ""
+    SystemUUID:                     String  | ""
+    SystemSKUNumber:                String  | ""
+    SystemFamily:                   String  | ""
+    BoardManufacturer:              String  | ""
+    BoardProduct:                   String  | ""
+    BoardVersion:                   String  | ""
+    BoardSerialNumber:              String  | ""
+    BoardAssetTag:                  String  | ""
+    BoardType:                      Number  | 0
+    BoardLocationInChassis:         String  | ""
+    ChassisManufacturer:            String  | ""
+    ChassisType:                    Number  | 0
+    ChassisVersion:                 String  | ""
+    ChassisSerialNumber:            String  | ""
+    ChassisAssetTag:                String  | ""
+    PlatformFeature:                Number  | 4294967295
+    SmcVersion:                     Data    | <00000000 00000000 00000000 00000000>
+    FirmwareFeatures:               Data    | <00000000 00000000>
+    FirmwareFeaturesMask:           Data    | <00000000 00000000>
+    ProcessorType:                  Number  | 0
+UEFI:
+  APFS:
+    EnableJumpstart:                Boolean | false
+    GlobalConnect:                  Boolean | false
+    HideVerbose:                    Boolean | false
+    JumpstartHotPlug:               Boolean | false
+    MinDate:                        Number  | 0
+    MinVersion:                     Number  | 0
+  AppleInput:
+    AppleEvent:                     String  | "Auto"
+    CustomDelays:                   Boolean | false
+    KeyInitialDelay:                Number  | 50
+    KeySubsequentDelay:             Number  | 5
+    GraphicsInputMirroring:         Boolean | false
+    PointerPollMin:                 Number  | 0
+    PointerPollMax:                 Number  | 0
+    PointerPollMask:                Number  | -1
+    PointerSpeedDiv:                Number  | 1
+    PointerSpeedMul:                Number  | 1
+    PointerDwellClickTimeout:       Number  | 0
+    PointerDwellDoubleClickTimeout: Number  | 0
+    PointerDwellRadius:             Number  | 0
+  Audio:
+    AudioCodec:                     Number  | 0
+    AudioDevice:                    String  | ""
+    AudioOutMask:                   Number  | -1
+    AudioSupport:                   Boolean | false
+    DisconnectHda:                  Boolean | false
+    MaximumGain:                    Number  | -15
+    MinimumAssistGain:              Number  | -30
+    MinimumAudibleGain:             Number  | -128
+    PlayChime:                      String  | "Auto"
+    ResetTrafficClass:              Boolean | false
+    SetupDelay:                     Number  | 0
+  ConnectDrivers:                   Boolean | false
+  Drivers:
+    - Comment:                      String  | ""
+      Enabled:                      Boolean | false
+      Path:                         String  | ""
+      LoadEarly:                    Boolean | false
+      Arguments:                    String  | ""
+  Input:
+    KeyFiltering:                   Boolean | false
+    KeyForgetThreshold:             Number  | 0
+    KeySupport:                     Boolean | false
+    KeySupportMode:                 String  | "Auto"
+    KeySwap:                        Boolean | false
+    PointerSupport:                 Boolean | false
+    PointerSupportMode:             String  | ""
+    TimerResolution:                Number  | 0
+  Output:
+    InitialMode:                    String  | "Auto"
+    TextRenderer:                   String  | "BuiltinGraphics"
+    ConsoleFont:                    String  | ""
+    ConsoleMode:                    String  | ""
+    Resolution:                     String  | ""
+    ForceResolution:                Boolean | false
+    ClearScreenOnModeSwitch:        Boolean | false
+    DirectGopRendering:             Boolean | false
+    GopBurstMode:                   Boolean | false
+    GopPassThrough:                 String  | "Disabled"
+    IgnoreTextInGraphics:           Boolean | false
+    ReplaceTabWithSpace:            Boolean | false
+    ProvideConsoleGop:              Boolean | false
+    ReconnectGraphicsOnConnect:     Boolean | false
+    ReconnectOnResChange:           Boolean | false
+    SanitiseClearScreen:            Boolean | false
+    UIScale:                        Number  | -1
+    UgaPassThrough:                 Boolean | false
+  ProtocolOverrides:
+    AppleAudio:                     Boolean | false
+    AppleBootPolicy:                Boolean | false
+    AppleDebugLog:                  Boolean | false
+    AppleEg2Info:                   Boolean | false
+    AppleFramebufferInfo:           Boolean | false
+    AppleImageConversion:           Boolean | false
+    AppleImg4Verification:          Boolean | false
+    AppleKeyMap:                    Boolean | false
+    AppleRtcRam:                    Boolean | false
+    AppleSecureBoot:                Boolean | false
+    AppleSmcIo:                     Boolean | false
+    AppleUserInterfaceTheme:        Boolean | false
+    DataHub:                        Boolean | false
+    DeviceProperties:               Boolean | false
+    FirmwareVolume:                 Boolean | false
+    HashServices:                   Boolean | false
+    OSInfo:                         Boolean | false
+    PciIo:                          Boolean | false
+    UnicodeCollation:               Boolean | false
+  Quirks:
+    ActivateHpetSupport:            Boolean | false
+    EnableVectorAcceleration:       Boolean | false
+    EnableVmx:                      Boolean | false
+    DisableSecurityPolicy:          Boolean | false
+    ExitBootServicesDelay:          Number  | 0
+    ForceOcWriteFlash:              Boolean | false
+    ForgeUefiSupport:               Boolean | false
+    IgnoreInvalidFlexRatio:         Boolean | false
+    ReleaseUsbOwnership:            Boolean | false
+    ReloadOptionRoms:               Boolean | false
+    RequestBootVarRouting:          Boolean | false
+    ResizeUsePciRbIo:               Boolean | false
+    ResizeGpuBars:                  Number  | -1
+    TscSyncTimeout:                 Number  | 0
+    UnblockFsConnect:               Boolean | false
+  ReservedMemory:
+    - Address:                      Number  | 0
+      Comment:                      String  | ""
+      Size:                         Number  | 0
+      Type:                         String  | "Reserved"
+      Enabled:                      Boolean | false

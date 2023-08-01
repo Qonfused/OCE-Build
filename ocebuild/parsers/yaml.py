@@ -367,7 +367,10 @@ def write_yaml(config: dict,
         elif schema == 'yaml':
           entry = f'{padding}{key}: {svalue}'.rstrip()
       # Add new dict
-      else: entry = f'{padding}{key}:'
+      else:
+        if key.startswith('#'):
+          key = f"'{key}'"
+        entry = f'{padding}{key}:'
       lines.append(entry)
 
       # Update cursor position

@@ -1,6 +1,6 @@
 <h1 id=schema>OpenCore Config.plist Schema - v0.9.3</h1>
 
-#### Last Updated: `2023-07-28 06:50:54.566136+00:00`
+#### Last Updated: `2023-08-01 10:28:57.590845+00:00`
 
 #### Revision: `{ SHA1: d52fc46ba650ce1afe00c354331a0657a533ef18 }`
 

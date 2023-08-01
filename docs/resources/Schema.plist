@@ -30,15 +30,11 @@
 				<key>Enabled</key>
 				<false/>
 				<key>OemTableId</key>
-				<data>
-				AAAAAAAAAAA=
-				</data>
+				<data>AAAAAAAAAAA=</data>
 				<key>TableLength</key>
 				<integer>0</integer>
 				<key>TableSignature</key>
-				<data>
-				AAAAAA==
-				</data>
+				<data>AAAAAA==</data>
 			</dict>
 		</array>
 		<key>Patch</key>
@@ -55,31 +51,23 @@
 				<key>Enabled</key>
 				<false/>
 				<key>Find</key>
-				<data>
-				</data>
+				<data></data>
 				<key>Limit</key>
 				<integer>0</integer>
 				<key>Mask</key>
-				<data>
-				</data>
+				<data></data>
 				<key>OemTableId</key>
-				<data>
-				AAAAAAAAAAA=
-				</data>
+				<data>AAAAAAAAAAA=</data>
 				<key>Replace</key>
-				<data>
-				</data>
+				<data></data>
 				<key>ReplaceMask</key>
-				<data>
-				</data>
+				<data></data>
 				<key>Skip</key>
 				<integer>0</integer>
 				<key>TableLength</key>
 				<integer>0</integer>
 				<key>TableSignature</key>
-				<data>
-				AAAAAA==
-				</data>
+				<data>AAAAAA==</data>
 			</dict>
 		</array>
 		<key>Quirks</key>
@@ -123,21 +111,17 @@
 				<key>Enabled</key>
 				<false/>
 				<key>Find</key>
-				<data>
-				</data>
+				<data></data>
 				<key>Identifier</key>
 				<string>Any</string>
 				<key>Limit</key>
 				<integer>0</integer>
 				<key>Mask</key>
-				<data>
-				</data>
+				<data></data>
 				<key>Replace</key>
-				<data>
-				</data>
+				<data></data>
 				<key>ReplaceMask</key>
-				<data>
-				</data>
+				<data></data>
 				<key>Skip</key>
 				<integer>0</integer>
 			</dict>
@@ -238,13 +222,9 @@
 		<key>Emulate</key>
 		<dict>
 			<key>Cpuid1Data</key>
-			<data>
-			AAAAAAAAAAAAAAAAAAAAAA==
-			</data>
+			<data>AAAAAAAAAAAAAAAAAAAAAA==</data>
 			<key>Cpuid1Mask</key>
-			<data>
-			AAAAAAAAAAAAAAAAAAAAAA==
-			</data>
+			<data>AAAAAAAAAAAAAAAAAAAAAA==</data>
 			<key>DummyPowerManagement</key>
 			<false/>
 			<key>MaxKernel</key>
@@ -289,25 +269,21 @@
 				<key>Enabled</key>
 				<false/>
 				<key>Find</key>
-				<data>
-				</data>
+				<data></data>
 				<key>Identifier</key>
 				<string></string>
 				<key>Limit</key>
 				<integer>0</integer>
 				<key>Mask</key>
-				<data>
-				</data>
+				<data></data>
 				<key>MaxKernel</key>
 				<string></string>
 				<key>MinKernel</key>
 				<string></string>
 				<key>Replace</key>
-				<data>
-				</data>
+				<data></data>
 				<key>ReplaceMask</key>
-				<data>
-				</data>
+				<data></data>
 				<key>Skip</key>
 				<integer>0</integer>
 			</dict>
@@ -472,8 +448,7 @@
 			AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==
 			</data>
 			<key>PasswordSalt</key>
-			<data>
-			</data>
+			<data></data>
 			<key>Vault</key>
 			<string>Secure</string>
 			<key>ScanPolicy</key>
@@ -498,9 +473,7 @@
 				<key>LineControl</key>
 				<integer>7</integer>
 				<key>PciDeviceInfo</key>
-				<data>
-				/w==
-				</data>
+				<data>/w==</data>
 				<key>RegisterAccessWidth</key>
 				<integer>8</integer>
 				<key>RegisterBase</key>
@@ -593,9 +566,7 @@
 			<key>MLB</key>
 			<string></string>
 			<key>ROM</key>
-			<data>
-			AAAAAAAA
-			</data>
+			<data>AAAAAAAA</data>
 		</dict>
 		<key>DataHub</key>
 		<dict>
@@ -610,9 +581,7 @@
 			<key>BoardProduct</key>
 			<string></string>
 			<key>BoardRevision</key>
-			<data>
-			AA==
-			</data>
+			<data>AA==</data>
 			<key>StartupPowerEvents</key>
 			<integer>0</integer>
 			<key>InitialTSC</key>
@@ -624,17 +593,11 @@
 			<key>DevicePathsSupported</key>
 			<integer>0</integer>
 			<key>SmcRevision</key>
-			<data>
-			AAAAAAAA
-			</data>
+			<data>AAAAAAAA</data>
 			<key>SmcBranch</key>
-			<data>
-			AAAAAAAAAAA=
-			</data>
+			<data>AAAAAAAAAAA=</data>
 			<key>SmcPlatform</key>
-			<data>
-			AAAAAAAAAAA=
-			</data>
+			<data>AAAAAAAAAAA=</data>
 		</dict>
 		<key>Memory</key>
 		<dict>
@@ -679,19 +642,13 @@
 			<key>BID</key>
 			<string></string>
 			<key>ROM</key>
-			<data>
-			AAAAAAAA
-			</data>
+			<data>AAAAAAAA</data>
 			<key>MLB</key>
 			<string></string>
 			<key>FirmwareFeatures</key>
-			<data>
-			AAAAAAAAAAA=
-			</data>
+			<data>AAAAAAAAAAA=</data>
 			<key>FirmwareFeaturesMask</key>
-			<data>
-			AAAAAAAAAAA=
-			</data>
+			<data>AAAAAAAAAAA=</data>
 			<key>SystemSerialNumber</key>
 			<string></string>
 			<key>SystemUUID</key>
@@ -746,17 +703,11 @@
 			<key>PlatformFeature</key>
 			<integer>4294967295</integer>
 			<key>SmcVersion</key>
-			<data>
-			AAAAAAAAAAAAAAAAAAAAAA==
-			</data>
+			<data>AAAAAAAAAAAAAAAAAAAAAA==</data>
 			<key>FirmwareFeatures</key>
-			<data>
-			AAAAAAAAAAA=
-			</data>
+			<data>AAAAAAAAAAA=</data>
 			<key>FirmwareFeaturesMask</key>
-			<data>
-			AAAAAAAAAAA=
-			</data>
+			<data>AAAAAAAAAAA=</data>
 			<key>ProcessorType</key>
 			<integer>0</integer>
 		</dict>

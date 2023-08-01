@@ -19,6 +19,7 @@ from ocebuild.parsers.plist import write_plist
 from ocebuild.parsers.regex import re_search
 from ocebuild.parsers.schema import format_markdown_entry
 from ocebuild.parsers.types import decode_data
+from ocebuild.parsers.yaml import write_yaml
 from ocebuild.pipeline.config import get_configuration_schema
 from ocebuild.pipeline.lock import resolve_specifiers
 
@@ -136,9 +137,14 @@ if __name__ == '__main__':
     }
   })
 
+  schema_dict = merge_dict(schema_meta, schema)
   with open(PROJECT_DOCS.joinpath('resources', 'Schema.plist'), 'w') as file:
     schema_plist = write_plist(merge_dict(schema_meta, schema))
     file.write(schema_plist)
+  with open(PROJECT_DOCS.joinpath('resources', 'Schema.yaml'), 'w') as file:
+    schema_yaml = "\n".join(write_yaml(schema_dict, schema='annotated'))
+    file.write(schema_yaml)
+
   with open(PROJECT_DOCS.joinpath('schema.md'), 'w') as file:
     schema_doc = parse_fmarkdown_schema(raw_schema, schema, sample,
                                         title="OpenCore Config.plist Schema",
