@@ -4,6 +4,7 @@
 ##
 """PEP-517 compliant build hook for poetry-core."""
 
+import subprocess
 from functools import partial
 from os import listdir, makedirs, path
 from pathlib import Path
@@ -60,11 +61,24 @@ def pre_build():
   clean()
 
 def post_build():
-  clean()
   #TODO: Add post-build verification step
   # e.g. inspecting the contents of the sdist/wheel archives:
   # $ python3 -m tarfile -l dist/ocebuild-0.0.0.dev0.tar.gz
   # $ python3 -m zipfile -l dist/ocebuild-0.0.0.dev0-cp311-cp311-macosx_13_0_x86_64.whl
+
+  #TODO: Add pyinstaller build staging in a new virtualenv
+  subprocess.run(args=['poetry', 'run', 'pyinstaller',
+                       '--name', 'ocebuild',
+                       '--clean',
+                       '--noconfirm',
+                       '--log-level', 'ERROR',
+                       '--onefile',
+                       '--specpath', 'build',
+                       f'{TARGET}/cli/__main__.py'],
+                 check=True)
+
+  # Reset build staging to pre-build state
+  pre_build()
 
 if __name__ == '__main__':
   copytree('ocebuild',      f'{STAGING_PATH}/ocebuild')

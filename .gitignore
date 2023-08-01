@@ -11,6 +11,8 @@
 !/**/.pylintrc
 
 # Build artifacts
+ci/tools/poetry/staging/ocebuild
+build/
 dist/
 
 # Debug files
