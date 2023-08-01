@@ -7,15 +7,11 @@
 from functools import partial
 from os import listdir, makedirs, path
 from pathlib import Path
-from re import search as re_search, sub as re_sub, MULTILINE
+from re import sub as re_sub
 from shutil import copytree as _copytree, rmtree as _rmtree
 
 from typing import Tuple
 
-
-#NOTE: Keep in sync with ci/scripts/sort-imports.py
-RE_IMPORT_BLOCK = r'(?s)(\n*^(?:from|import).*^(?:from|import).*?\n*$)'
-"""Regular expression that matches import statements and adjacent newlines."""
 
 STAGING_PATH = 'ci/tools/poetry/staging'
 TARGET = f'{STAGING_PATH}/ocebuild'
@@ -34,8 +30,8 @@ def clean():
 
 def replace_module(module: str, replacement: str, string: str) -> str:
   """Replace a module import with a new module import."""
-  pattern = r'\n(import|from)\s*' + module + r'\b'
-  repl = r'\n\1 ' + replacement
+  pattern = r'\n(\s*?)(import|from)\s*' + module + r'\b'
+  repl = r'\n\1\2 ' + replacement
 
   # Add a notice if the namespace is separated for clarity
   notice = f"\n#NOTE: This import was remapped from '{module}' to '{replacement}'."
@@ -50,22 +46,14 @@ def remap_module_imports(entrypoint: str, mappings: Tuple[str, str]) -> None:
     with open(package, 'r', encoding='UTF-8') as module_file:
       file_text = module_file.read()
 
-    # Check if the file contains an imports block
-    imports_block = re_search(RE_IMPORT_BLOCK, file_text, flags=MULTILINE)
-    if imports_block:
-      imports_block = imports_block.group(0)
-    else: continue
-
+    # Replace the imports block with the remapped imports
     with open(package, 'w', encoding='UTF-8') as module_file:
-      # Replace the imports block with the remapped imports
-      remapped_imports = imports_block
+      remapped_text = file_text
       for module, replacement in mappings:
-        remapped_imports = replace_module(module, replacement, remapped_imports)
-
+        remapped_text = replace_module(module, replacement, remapped_text)
       # Write the updated file back to disk
-      file_text = file_text.replace(imports_block, remapped_imports)
       module_file.seek(0)
-      module_file.write(file_text)
+      module_file.write(remapped_text)
 
 
 def pre_build():
