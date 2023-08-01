@@ -138,14 +138,38 @@ sort          = "-Miss"
 
 # Poetry hooks are only used when building using the full project locally.
 [tool.poe.poetry_hooks]
-pre_build     = "pre-build"
-post_build    = "post-build"
+pre_build     = "_pre_build"
+post_build    = "_post_build"
 
-[tool.poe.tasks.pre-build]
-script        = "ci.tools.poetry.hooks.build:pre_build"
+[tool.poe.tasks]
+_pre_build    = [ "clean" ]
+_post_build   = [ "_pyinstaller", "clean -s post_build" ]
 
-[tool.poe.tasks.post-build]
-script        = "ci.tools.poetry.hooks.build:post_build"
+[tool.poe.tasks.clean]
+script = "ci.tools.poetry.hooks.build:clean"
+
+  [[tool.poe.tasks.clean.args]]
+  name = "stage"
+  options = ["-s", "--stage"]
+  type = "string"
+  help = "The build stage to clean."
+
+#TODO: Add post-build verification step
+# e.g. inspecting the contents of the sdist/wheel archives:
+# $ python3 -m tarfile -l dist/ocebuild-0.0.0.dev0.tar.gz
+# $ python3 -m zipfile -l dist/ocebuild-0.0.0.dev0-cp311-cp311-macosx_13_0_x86_64.whl
+
+[tool.poe.tasks._pyinstaller]
+cmd           = """
+pyinstaller ci/tools/poetry/staging/ocebuild/cli/__main__.py
+  --name ocebuild
+  --clean
+  --noconfirm
+  --log-level=ERROR
+  --onefile
+  --workpath ci/tools/pyinstaller/build
+  --specpath ci/tools/pyinstaller
+"""
 
 # Below are used when building the project using any PEP-517 build backend.
 [tool.poetry.build]

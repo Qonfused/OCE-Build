@@ -4,14 +4,13 @@
 ##
 """PEP-517 compliant build hook for poetry-core."""
 
-import subprocess
 from functools import partial
 from os import listdir, makedirs, path
 from pathlib import Path
 from re import sub as re_sub
 from shutil import copytree as _copytree, rmtree as _rmtree
 
-from typing import Tuple
+from typing import Optional, Tuple
 
 
 STAGING_PATH = 'ci/tools/poetry/staging'
@@ -20,14 +19,6 @@ TARGET = f'{STAGING_PATH}/ocebuild'
 # Ensure that filesystem operations are graceful
 rmtree = partial(_rmtree, ignore_errors=True)
 copytree = partial(_copytree, dirs_exist_ok=True)
-
-def clean():
-  """Cleanup the staging directory."""
-  for target in filter(path.isdir, listdir(STAGING_PATH)):
-    target_path = f'{STAGING_PATH}/{target}'
-    rmtree(target_path)
-    makedirs(target_path, exist_ok=True)
-    open(f'{target_path}/__init__.py', 'w').close()
 
 def replace_module(module: str, replacement: str, string: str) -> str:
   """Replace a module import with a new module import."""
@@ -57,35 +48,29 @@ def remap_module_imports(entrypoint: str, mappings: Tuple[str, str]) -> None:
       module_file.write(remapped_text)
 
 
-def pre_build():
-  clean()
-
-def post_build():
-  #TODO: Add post-build verification step
-  # e.g. inspecting the contents of the sdist/wheel archives:
-  # $ python3 -m tarfile -l dist/ocebuild-0.0.0.dev0.tar.gz
-  # $ python3 -m zipfile -l dist/ocebuild-0.0.0.dev0-cp311-cp311-macosx_13_0_x86_64.whl
-
-  #TODO: Add pyinstaller build staging in a new virtualenv
-  subprocess.run(args=['poetry', 'run', 'pyinstaller',
-                       '--name', 'ocebuild',
-                       '--clean',
-                       '--noconfirm',
-                       '--log-level', 'ERROR',
-                       '--onefile',
-                       '--specpath', 'build',
-                       f'{TARGET}/cli/__main__.py'],
-                 check=True)
-
-  # Reset build staging to pre-build state
-  pre_build()
+def clean(stage: Optional[str]=None):
+  """Cleanup the staging directory."""
+  if stage != 'post_build': rmtree('dist')
+  for target in filter(path.isdir, listdir(STAGING_PATH)):
+    target_path = f'{STAGING_PATH}/{target}'
+    rmtree(target_path)
+    makedirs(target_path, exist_ok=True)
+    open(f'{target_path}/__init__.py', 'w').close()
 
 if __name__ == '__main__':
+  # Copy the project source to the staging directory
   copytree('ocebuild',      f'{STAGING_PATH}/ocebuild')
-  copytree('ocebuild_cli',  f'{STAGING_PATH}/ocebuild/cli')
-  copytree('third_party',   f'{STAGING_PATH}/ocebuild/third_party')
 
-  # Update module imports
-  remap_module_imports(f'{STAGING_PATH}/ocebuild',
-                       mappings=(('ocebuild_cli', 'ocebuild.cli'),
-                                 ('third_party',  'ocebuild.third_party')))
+  # Copy the CLI and third-party packages if not developing the project locally
+  if Path('dist').exists() or not Path('ci/registry/project.json').exists():
+    copytree('ocebuild_cli',  f'{STAGING_PATH}/ocebuild/cli')
+    copytree('third_party',   f'{STAGING_PATH}/ocebuild/third_party')
+
+    # Update module imports
+    remap_module_imports(f'{STAGING_PATH}/ocebuild',
+                        mappings=(('ocebuild_cli', 'ocebuild.cli'),
+                                  ('third_party',  'ocebuild.third_party')))
+
+  # Cleanup the staging directory if pre/post hooks were not triggered
+  if not Path('dist').exists() or list(Path('dist').glob('*.whl')):
+    clean()

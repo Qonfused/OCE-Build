@@ -12,6 +12,7 @@
 
 # Build artifacts
 ci/tools/poetry/staging/ocebuild
+ci/tools/pyinstaller/build
 build/
 dist/
 
