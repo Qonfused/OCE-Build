@@ -88,3 +88,21 @@ help    = "[CI] Sorts package and namespace imports in all python files."
   options = ["--entrypoint", "--project"]
   type = "string"
   help = "The entrypoint to sort imports in. (Default: ocebuild entrypoint)"
+
+################################################################################
+
+[tool.poe.tasks.update-schema]
+script  = "ci.scripts.update_schema:_main"
+help    = "[CI] Updates the OpenCore schema using the given version parametrs."
+
+  [[tool.poe.tasks.update-schema.args]]
+  name = "tag"
+  options = ["--tag"]
+  type = "string"
+  help = "The OpenCore tag to use for the schema. (Default: latest tag)"
+
+  [[tool.poe.tasks.update-schema.args]]
+  name = "commit"
+  options = ["--commit"]
+  type = "string"
+  help = "The OpenCore commit to use for the schema. (Default: latest commit)"

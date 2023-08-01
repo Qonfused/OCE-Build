@@ -77,7 +77,7 @@ pytest-cov  = ">=3,<5"
 ocebuild = "ocebuild.cli.__main__:_main"
 
 [tool.poe]
-include = [ "ci/scripts/tasks.toml" ]
+include = [ "ci/tools/poetry/tasks.toml" ]
 poetry_command = "" # Run tasks via `poetry <task>` with the poethepoet plugin.
 
 [tool.poe.tasks.test]

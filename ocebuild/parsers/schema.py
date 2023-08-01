@@ -5,7 +5,6 @@
 """Methods for retrieving and handling Sample.plist schemas."""
 
 from io import TextIOWrapper
-from re import sub as re_sub
 
 from typing import List, Optional, Set, Tuple, Union
 
@@ -385,79 +384,8 @@ def parse_schema(file: Union[List[str], TextIOWrapper],
 
   return schema
 
-def format_markdown_entry(key: str, entry: str) -> str:
-  """Formats a Sample.plist schema entry as markdown."""
-
-  # Converts the key to a markdown header
-  key_fmt = key \
-    .replace('.', ' -> ') \
-    .replace('[0]', '[]')
-  header = '#' * (1 + key.count('.') + key.count('[]'))
-
-  #TODO: Parse markdown tables, see Kernel -> Scheme -> KernelArch
-
-  entry_keys = "|".join(['Type', 'Failsafe', 'Requirement', 'Description'])
-  for pattern, repl in [
-    # Properly space out entry keys
-    (r'\\textbf\{(' + entry_keys + r')\}:', r'\n\n\n**\1**:'),
-    # Add bold formatting to all bold text
-    (r'\\textbf\{([^}]+)\}',  r'**\1**'),
-    # Add italic formatting to all italic text
-    (r'\\textit\{([^}]+)\}',  r'*\1*'),
-    (r'\\emph\{([^}]+)\}',    r'*\1*'),
-    # Add quote formatting to all quoted text
-    (r'`([^`\']+)\'',         r"'\1'"),
-    # Add strikethrough formatting to all strikethrough text
-    (r'\\sout\{([^}]+)\}',    r'~~\1~~'),
-    # Add monospace formatting to all teletype text
-    (r'\\texttt\{([^}]+)\}',  r'`\1`'),
-    # Handle anchor and alignment commands
-    (r'\\medskip',            r''), #r'\n\n'),
-    (r'\\label\{([^}]+)\}',   r''),
-    (r'\\begin\{([^}]+)\}',   r'\n'),
-    (r'\\end\{([^}]+)\}\n',   r''),
-    # Handle named commands for special characters
-    (r'\\textless\{?\}?',         r'\<'),
-    (r'\\textgreater\{?\}?',      r'\>'),
-    (r'\\textasciitilde\{?\}?',   r'~'),
-    # Handle url links and header refs
-    (r'\\href\{([^}]+)\}\{([^}]+)\}',       r'[\2](\1)'),
-    (r'\\hyperref\[([^}]+)\]\{([^}]+)\}',   r'**\2**'), # r'[\2](#\1)'),
-    (r'\\hyperlink\{([^}]+)\}\{([^}]+)\}',  r'**\2**'), # r'[\2](#\1)'),
-    # Convert all lists to markdown bullets
-    (r'\\begin\{itemize\}',   r'\n'),
-    (r'\s*?\\tightlist',      r''),
-    (r'\s*?\\item',           r'\n*'),
-    (r'\n\\end\{itemize\}',   r''),
-    # Handle escaped characters
-    (r'\\([#%&_{}~^<>$ ])|\\\s',  r'\1'),
-    # Handle invalid escapes/closures
-    (r'\*\\ `',                       r'\n`'),
-    (r'(:|`)\\ `',                    r'\1\n  * `'), # Kernel -> Emulate -> Cpuid1Data
-    (r'\n\s*?\*?\s*?\`(OCAU|HDA)\:',  r'\n* `\1:'),  # UEFI -> Audio -> AudioCodec/AudioOutMask
-    (r'\\\*\*',                       r' **'),
-    (r' \\ \*',                       r'\n\n*'),
-    (r'\\\`}\).',                     r'}`).'),      # PlatformInfo -> UseRawUuidEncoding
-    # Handle escaped backslashes
-    (r'\\\s?\n',              r'\n'),
-    (r'\\textbackslash',      r'\\'),
-    (r'\\\\',                 r'\\'),
-    (r'\s?\\\s?',                  r'\\'),
-  ]: entry = re_sub(pattern, repl, entry)
-
-  start = entry.index('**Type**:')
-  end = len(entry)
-
-  #FIXME: Add a truncation point for invalid entries
-  for block in ['\\hypertarget{kernmatch}']:
-    if block in entry:
-      end = min(end, entry.index(block))
-
-  return f"{header} {key_fmt}\n\n{entry[start:end].strip()}"
-
 
 __all__ = [
-  # Functions (2)
-  "parse_schema",
-  "format_markdown_entry"
+  # Functions (1)
+  "parse_schema"
 ]

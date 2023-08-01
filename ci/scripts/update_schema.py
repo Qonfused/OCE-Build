@@ -6,9 +6,11 @@
 ##
 """Documentation writers and parsers for OpenCore configuration file schemas."""
 
+from argparse import ArgumentParser
 from collections import OrderedDict
 from datetime import datetime, timezone
 from json import dumps as json_dumps
+from re import sub as re_sub
 
 from typing import Optional
 
@@ -17,7 +19,6 @@ from ci import PROJECT_DOCS, PROJECT_ROOT
 from ocebuild.parsers.dict import flatten_dict, merge_dict, nested_get
 from ocebuild.parsers.plist import write_plist
 from ocebuild.parsers.regex import re_search
-from ocebuild.parsers.schema import format_markdown_entry
 from ocebuild.parsers.types import decode_data
 from ocebuild.parsers.yaml import write_yaml
 from ocebuild.pipeline.config import get_configuration_schema
@@ -25,6 +26,76 @@ from ocebuild.pipeline.lock import resolve_specifiers
 
 from third_party.cpython.pathlib import Path
 
+
+def format_markdown_entry(key: str, entry: str) -> str:
+  """Formats a Sample.plist schema entry as markdown."""
+
+  # Converts the key to a markdown header
+  key_fmt = key \
+    .replace('.', ' -> ') \
+    .replace('[0]', '[]')
+  header = '#' * (1 + key.count('.') + key.count('[]'))
+
+  #TODO: Parse markdown tables, see Kernel -> Scheme -> KernelArch
+
+  entry_keys = "|".join(['Type', 'Failsafe', 'Requirement', 'Description'])
+  for pattern, repl in [
+    # Properly space out entry keys
+    (r'\\textbf\{(' + entry_keys + r')\}:', r'\n\n\n**\1**:'),
+    # Add bold formatting to all bold text
+    (r'\\textbf\{([^}]+)\}',  r'**\1**'),
+    # Add italic formatting to all italic text
+    (r'\\textit\{([^}]+)\}',  r'*\1*'),
+    (r'\\emph\{([^}]+)\}',    r'*\1*'),
+    # Add quote formatting to all quoted text
+    (r'`([^`\']+)\'',         r"'\1'"),
+    # Add strikethrough formatting to all strikethrough text
+    (r'\\sout\{([^}]+)\}',    r'~~\1~~'),
+    # Add monospace formatting to all teletype text
+    (r'\\texttt\{([^}]+)\}',  r'`\1`'),
+    # Handle anchor and alignment commands
+    (r'\\medskip',            r''), #r'\n\n'),
+    (r'\\label\{([^}]+)\}',   r''),
+    (r'\\begin\{([^}]+)\}',   r'\n'),
+    (r'\\end\{([^}]+)\}\n',   r''),
+    # Handle named commands for special characters
+    (r'\\textless\{?\}?',         r'\<'),
+    (r'\\textgreater\{?\}?',      r'\>'),
+    (r'\\textasciitilde\{?\}?',   r'~'),
+    # Handle url links and header refs
+    (r'\\href\{([^}]+)\}\{([^}]+)\}',       r'[\2](\1)'),
+    (r'\\hyperref\[([^}]+)\]\{([^}]+)\}',   r'**\2**'), # r'[\2](#\1)'),
+    (r'\\hyperlink\{([^}]+)\}\{([^}]+)\}',  r'**\2**'), # r'[\2](#\1)'),
+    # Convert all lists to markdown bullets
+    (r'\\begin\{itemize\}',   r'\n'),
+    (r'\s*?\\tightlist',      r''),
+    (r'\s*?\\item',           r'\n*'),
+    (r'\n\\end\{itemize\}',   r''),
+    # Handle escaped characters
+    (r'\\([#%&_{}~^<>$ ])|\\\s',  r'\1'),
+    # Handle invalid escapes/closures
+    (r'\*\\ `',                       r'\n`'),
+    (r'(:|`)\\ `',                    r'\1\n  * `'), # Kernel -> Emulate -> Cpuid1Data
+    (r'\n\s*?\*?\s*?\`(OCAU|HDA)\:',  r'\n* `\1:'),  # UEFI -> Audio -> AudioCodec/AudioOutMask
+    (r'\\\*\*',                       r' **'),
+    (r' \\ \*',                       r'\n\n*'),
+    (r'\\\`}\).',                     r'}`).'),      # PlatformInfo -> UseRawUuidEncoding
+    # Handle escaped backslashes
+    (r'\\\s?\n',              r'\n'),
+    (r'\\textbackslash',      r'\\'),
+    (r'\\\\',                 r'\\'),
+    (r'\s?\\\s?',                  r'\\'),
+  ]: entry = re_sub(pattern, repl, entry)
+
+  start = entry.index('**Type**:')
+  end = len(entry)
+
+  #FIXME: Add a truncation point for invalid entries
+  for block in ['\\hypertarget{kernmatch}']:
+    if block in entry:
+      end = min(end, entry.index(block))
+
+  return f"{header} {key_fmt}\n\n{entry[start:end].strip()}"
 
 def parse_fmarkdown_schema(raw_schema: dict,
                            schema: dict,
@@ -116,19 +187,31 @@ def parse_fmarkdown_schema(raw_schema: dict,
   return document
 
 
-if __name__ == '__main__':
+def _main(tag: Optional[str]=None, commit: Optional[str]=None) -> None:
+  """Generates the OpenCore configuration schema documentation."""
+
+  parameters = {
+    'specifier': 'latest',
+    'repository': 'acidanthera/OpenCorePkg',
+    'build': 'RELEASE'
+  }
+  if tag:
+    parameters['tag'] = tag
+  if commit:
+    parameters['commit'] = commit
+
+  # Build a resolver entry reflecting the specified OpenCore version
   entry = next(iter(resolve_specifiers({
     'OpenCorePkg': {
-      'OpenCore': {
-        'specifier': 'latest',
-        'repository': 'acidanthera/OpenCorePkg',
-        'build': 'RELEASE'
-      },
+      'OpenCore': parameters,
     }
   }, lockfile={})), {})
+  if not (tag or commit):
+    commit = re_search('(?<=#commit=)[a-f0-9]+', entry.get('resolution'))
 
-  commit_sha = re_search('(?<=#commit=)[a-f0-9]+', entry.get('resolution'))
-  schema, sample = get_configuration_schema(commit=commit_sha,
+  # Retrieve the configuration schema and sample plist
+  schema, sample = get_configuration_schema(tag=tag,
+                                            commit=commit,
                                             raw_schema=(raw_schema := {}),
                                             get_sample=True)
   schema_meta = OrderedDict(**{
@@ -156,7 +239,21 @@ if __name__ == '__main__':
   registry_vers.write_text(json_dumps({ 'version': entry.get('version') }))
 
 
+if __name__ == '__main__':
+  parser = ArgumentParser()
+  parser.add_argument('--tag',
+                      nargs='?',
+                      help='The OpenCore tag to use.')
+  parser.add_argument('--commit',
+                      nargs='?',
+                      help='The OpenCore commit to use.')
+  args = parser.parse_args()
+
+  _main(tag=args.tag, commit=args.commit)
+
+
 __all__ = [
-  # Functions (1)
+  # Functions (2)
+  "format_markdown_entry",
   "parse_fmarkdown_schema"
 ]
