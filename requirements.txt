@@ -4,6 +4,9 @@ graphlib-backport==1.0.3 ; python_version >= "3.8" and python_version < "3.9" \
 packaging==23.1 ; python_version >= "3.8" and python_version < "3.13" \
     --hash=sha256:994793af429502c4ea2ebf6bf664629d07c1a9fe974af92966e4b8d2df7edc61 \
     --hash=sha256:a392980d2b6cffa644431898be54b0045151319d1e7ec34f0cfed48767dd334f
+python-dotenv==1.0.0 ; python_version >= "3.8" and python_version < "3.13" \
+    --hash=sha256:a8df96034aae6d2d50a4ebe8216326c61c3eb64836776504fcca410e5937a3ba \
+    --hash=sha256:f5971a9226b701070a4bf2c38c89e5a3f0d64de8debda981d1db98583009122a
 typing-extensions==4.7.1 ; python_version >= "3.8" and python_version < "3.10" \
     --hash=sha256:440d5dd3af93b060174bf433bccd69b0babc3b15b1a8dca43789fd7f61514b36 \
     --hash=sha256:b75ddc264f0ba5615db7ba217daeb99701ad295353c45f9e95963337ceeeffb2

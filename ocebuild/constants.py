@@ -8,17 +8,15 @@ from os import environ as os_environ
 
 from typing import Union
 
+from dotenv import find_dotenv, load_dotenv
+
 
 class __EnvironWrapper: #pylint: disable=invalid-name
   """Simple class to securely read environment variables."""
 
   def __init__(self):
     # Attempt to load environmental variables from a dotfile
-    try:
-      from dotenv import load_dotenv #pylint: disable=import-outside-toplevel
-      load_dotenv()
-    except ImportError: #pragma no cover
-      pass
+    load_dotenv(find_dotenv())
 
   def has(self, token: str) -> bool:
     """Checks if the given environment variable is set."""
