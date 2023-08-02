@@ -1,5 +1,6 @@
 .*
 .env
+.pypirc
 !/.github
 !/.vscode*
 !/.clang-format

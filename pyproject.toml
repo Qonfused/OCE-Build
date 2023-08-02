@@ -38,7 +38,9 @@ packages      = [
 ]
 include       = [
   # Include required CI paths for PEP-517 builds:
-  { path = "ci/tools/poetry",   format = "sdist" }
+  { path = "ci/tools/poetry",                         format = "sdist" },
+  # Ensure all top-level files are included for wheel distribution:
+  { path = "ci/tools/poetry/staging/ocebuild/*.py",   format = "wheel" }
 ]
 
 ################################################################################
@@ -46,7 +48,7 @@ include       = [
 ################################################################################
 
 [tool.poetry.dependencies]
-python            = ">=3.8,<3.13"
+python            = ">=3.8"
 packaging         = "^23.0"
 typing_extensions = { version = "^4.2.0", python = "<3.10" }
 graphlib_backport = { version = "^1.0.0", python = "<3.9" }
