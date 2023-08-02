@@ -47,9 +47,15 @@ def bump_version(major: Optional[bool]=None,
   if   pre_release:
     version.pre_release = pre_release
     if _PRE_RELEASE.split(".", maxsplit=1)[0] == pre_release:
-      version.pre_release += f'.{int(_PRE_RELEASE.rsplit(".", maxsplit=1)[-1]) + 1}'
+      if _match := re_search(r'(.*?)(?<=[^\d])(\d+)', _PRE_RELEASE, group=None):
+        pre_release_tag = _match.groups()[0]
+        pre_release_num = int(_match.groups()[1])
+      else:
+        pre_release_tag = _PRE_RELEASE
+        pre_release_num = 0
+      version.pre_release = f'{pre_release_tag}{pre_release_num + 1}'
     elif pre_release not in ('dev', 'release'):
-      version.pre_release += '.1'
+      version.pre_release += '1'
   # Handle increment and reset of build versions
   if build:
     version.build += 1
