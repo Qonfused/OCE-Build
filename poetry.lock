@@ -354,6 +354,17 @@ files = [
 ]
 
 [[package]]
+name = "pip"
+version = "23.2.1"
+description = "The PyPA recommended tool for installing Python packages."
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "pip-23.2.1-py3-none-any.whl", hash = "sha256:7ccf472345f20d35bdc9d1841ff5f313260c2c33fe417f48c30ac46cccabf5be"},
+    {file = "pip-23.2.1.tar.gz", hash = "sha256:fb0bd5435b3200c602b5bf61d2d43c2f13c02e29c1707567ae7fbc514eb9faf2"},
+]
+
+[[package]]
 name = "platformdirs"
 version = "3.10.0"
 description = "A small Python package for determining appropriate platform-specific dirs, e.g. a \"user data dir\"."
@@ -443,6 +454,24 @@ typing-extensions = {version = ">=3.10.0", markers = "python_version < \"3.10\""
 [package.extras]
 spelling = ["pyenchant (>=3.2,<4.0)"]
 testutils = ["gitpython (>3)"]
+
+[[package]]
+name = "pypiserver"
+version = "1.5.2"
+description = "A minimal PyPI server for use with pip/easy_install."
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "pypiserver-1.5.2-py2.py3-none-any.whl", hash = "sha256:09f2f797f92b30e92287821e2dc3ca72c8011aec6a2570019254adf98318ee5c"},
+    {file = "pypiserver-1.5.2.zip", hash = "sha256:70760efadc3d89b3e1b3f54f078a6520f6c6a0c3dd718b46cd0cf466c9fd01b2"},
+]
+
+[package.dependencies]
+pip = ">=7"
+
+[package.extras]
+cache = ["watchdog"]
+passlib = ["passlib (>=1.6)"]
 
 [[package]]
 name = "pytest"
@@ -722,4 +751,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8"
-content-hash = "8502d6342adc28e6271c3fc2e1f7d005285046a3d685d9f085ca4fa939564973"
+content-hash = "8faff5ddbe4324408f539b89616a26e63c3e21fd7e75cacb65564c9d79537a21"

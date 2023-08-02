@@ -1,0 +1,18 @@
+[tool.poetry]
+name          = "ocebuild-integration-suite"
+version       = "0.0.0-dev"
+description   = "OCE Build integration suite"
+authors       = [ "Cory Bennett <csquaredbennett@gmail.com>" ]
+
+[[tool.poetry.source]]
+name = "local"
+url = "http://localhost:8080"
+priority = 'explicit'
+
+[tool.poetry.dependencies]
+python            = ">=3.8"
+ocebuild = { version = "*", source = "local" }
+
+[build-system]
+requires      = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

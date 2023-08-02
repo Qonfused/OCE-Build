@@ -63,6 +63,7 @@ rich = "^13.4.2"
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^3.3.3"
 pylint = "^2.17.4"
+pypiserver = "^1.5.2"
 
 # [tool.poetry.group.docs.dependencies]
 # # TODO
@@ -70,6 +71,45 @@ pylint = "^2.17.4"
 [tool.poetry.group.test.dependencies]
 pytest      = "^7.0.1"
 pytest-cov  = ">=3,<5"
+
+################################################################################
+#                              Build Configuration                             #
+################################################################################
+
+# Poetry hooks are only used when building using the full project locally.
+[tool.poe.poetry_hooks]
+pre_build     = "_pre_build"
+post_build    = "_post_build"
+
+[tool.poe.tasks]
+_pre_build    = [ "clean" ]
+_post_build   = [ "_pyinstaller", "clean -s post_build" ]
+
+#TODO: Add post-build verification step
+# e.g. inspecting the contents of the sdist/wheel archives:
+# $ python3 -m tarfile -l dist/ocebuild-0.0.0.dev0.tar.gz
+# $ python3 -m zipfile -l dist/ocebuild-0.0.0.dev0-cp311-cp311-macosx_13_0_x86_64.whl
+
+[tool.poe.tasks._pyinstaller]
+cmd           = """
+pyinstaller ci/tools/poetry/staging/ocebuild/cli/__main__.py
+  --name ocebuild
+  --clean
+  --noconfirm
+  --log-level=ERROR
+  --onefile
+  --workpath ci/tools/pyinstaller/build
+  --specpath ci/tools/pyinstaller
+"""
+
+# Below are used when building the project using any PEP-517 build backend.
+[tool.poetry.build]
+generate-setup-file = false
+script        = "ci/tools/poetry/hooks/build.py"
+
+[build-system]
+requires      = ["poetry-core>=1.2.0b1", "pyinstaller"]
+build-backend = "poetry.core.masonry.api"
 
 ################################################################################
 #                                Project Scripts                               #
@@ -94,6 +134,34 @@ help    = "Runs project linter with a short report."
 shell   = "git diff --name-only | sed '/.*\\.py/!d' | xargs poetry lint"
 interpreter = ["posix", "bash"]
 help    = "Runs the lint command only on changed files."
+
+[tool.poe.tasks.clean]
+script = "ci.tools.poetry.hooks.build:clean"
+help   = "Cleans the build directory."
+
+  [[tool.poe.tasks.clean.args]]
+  name = "stage"
+  options = ["-s", "--stage"]
+  type = "string"
+  help = "The build stage to clean. (Optional)"
+
+################################################################################
+#                           PyPI Distribution Testing                          #
+################################################################################
+
+[[tool.poetry.source]]
+name = "local"
+url = "http://localhost:8080/"
+priority = 'explicit'
+
+[tool.poe.tasks.pypi-local]
+shell        = """
+({ lsof -t -i:8080 | xargs -r kill & } 2>/dev/null &&
+  pypi-server run -p 8080 -P. -a. --hash-algo=sha256 --overwrite) &
+poetry publish -r local && bash scripts/print.sh \
+  \"\\\\nRunning 'local' pypi server on https://localhost:8080/.\" &
+wait $(jobs -p)
+"""
 
 ################################################################################
 #                               Test Configuration                             #
@@ -133,51 +201,3 @@ show_missing  = true
 skip_covered  = true
 skip_empty    = true
 sort          = "-Miss"
-
-################################################################################
-#                              Build Configuration                             #
-################################################################################
-
-# Poetry hooks are only used when building using the full project locally.
-[tool.poe.poetry_hooks]
-pre_build     = "_pre_build"
-post_build    = "_post_build"
-
-[tool.poe.tasks]
-_pre_build    = [ "clean" ]
-_post_build   = [ "_pyinstaller", "clean -s post_build" ]
-
-[tool.poe.tasks.clean]
-script = "ci.tools.poetry.hooks.build:clean"
-
-  [[tool.poe.tasks.clean.args]]
-  name = "stage"
-  options = ["-s", "--stage"]
-  type = "string"
-  help = "The build stage to clean."
-
-#TODO: Add post-build verification step
-# e.g. inspecting the contents of the sdist/wheel archives:
-# $ python3 -m tarfile -l dist/ocebuild-0.0.0.dev0.tar.gz
-# $ python3 -m zipfile -l dist/ocebuild-0.0.0.dev0-cp311-cp311-macosx_13_0_x86_64.whl
-
-[tool.poe.tasks._pyinstaller]
-cmd           = """
-pyinstaller ci/tools/poetry/staging/ocebuild/cli/__main__.py
-  --name ocebuild
-  --clean
-  --noconfirm
-  --log-level=ERROR
-  --onefile
-  --workpath ci/tools/pyinstaller/build
-  --specpath ci/tools/pyinstaller
-"""
-
-# Below are used when building the project using any PEP-517 build backend.
-[tool.poetry.build]
-generate-setup-file = false
-script        = "ci/tools/poetry/hooks/build.py"
-
-[build-system]
-requires      = ["poetry-core>=1.2.0b1", "pyinstaller"]
-build-backend = "poetry.core.masonry.api"
