@@ -11,6 +11,9 @@ from functools import partial
 
 from rich.console import Console
 
+#pragma preserve-imports - Inject project namespaces into the module search path
+import sys, pathlib; sys.path.append(str(pathlib.Path(__file__, '../' * 4).resolve()))
+
 from ocebuild.sources.github import github_rate_limit
 
 
