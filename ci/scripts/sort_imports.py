@@ -142,9 +142,11 @@ def sort_file_imports(file: str) -> str:
 
   imports_block = re_search(RE_IMPORT_BLOCK, file, multiline=True)
   if imports_block:
-
-    sorted_block = sort_imports_block(imports_block)
-    return file.replace(imports_block, sorted_block)
+    try:
+      sorted_block = sort_imports_block(imports_block)
+      return file.replace(imports_block, sorted_block)
+    except Exception:
+      pass
 
   return file
 

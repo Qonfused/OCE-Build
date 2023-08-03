@@ -292,15 +292,18 @@ def _main(entrypoint: Optional[str]=None) -> None:
     for tree in recurse_modules(package.parent):
       filepath = f'{package.parents[1].joinpath(tree)}.py'
       module_path = f'{ptree}{".".join(tree.split("/"))}'
-      with open(filepath, 'r', encoding='UTF-8') as module_file:
-        f_pragma_line =  module_file.readline()
-        if not f_pragma_line.startswith('#pragma'): f_pragma_line = ''
-        # Add implicit package imports
-        if 'no-implicit' not in f_pragma_line:
-          package_lines.append(f'from {module_path} import *')
-        # Add explicit public API exports
-        if 'preserve-exports' not in f_pragma_line:
-          generate_api_exports(filepath, module_path)
+      try:
+        with open(filepath, 'r', encoding='UTF-8') as module_file:
+          f_pragma_line =  module_file.readline()
+          if not f_pragma_line.startswith('#pragma'): f_pragma_line = ''
+          # Add implicit package imports
+          if 'no-implicit' not in f_pragma_line:
+            package_lines.append(f'from {module_path} import *')
+          # Add explicit public API exports
+          if 'preserve-exports' not in f_pragma_line:
+            generate_api_exports(filepath, module_path)
+      except Exception:
+        pass
 
     # Update package file
     if not 'no-implicit' in pragma_line:
