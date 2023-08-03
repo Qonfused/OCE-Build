@@ -161,7 +161,7 @@ priority = 'explicit'
 shell        = """
 ({ lsof -t -i:8080 | xargs -r kill & } 2>/dev/null &&
   pypi-server run -p 8080 -P. -a. --hash-algo=sha256 --overwrite) &
-poetry publish -r local && bash scripts/print.sh \
+poetry publish -r local && bash ci/scripts/lib/print.sh \
   \"\\\\nRunning 'local' pypi server on https://localhost:8080/.\" &
 wait $(jobs -p)
 """
