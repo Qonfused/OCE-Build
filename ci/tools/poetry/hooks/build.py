@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 ## @file
 # Copyright (c) 2023, The OCE Build Authors. All rights reserved.
 # SPDX-License-Identifier: BSD-3-Clause
@@ -5,18 +7,24 @@
 """PEP-517 compliant build hook for poetry-core."""
 
 from functools import partial
-from os import listdir, makedirs, path
-from pathlib import Path
+from importlib.machinery import SourceFileLoader
+from os import makedirs as _makedirs
 from re import sub as re_sub
 from shutil import copytree as _copytree, rmtree as _rmtree
 
 from typing import Optional, Tuple
 
+#pragma preserve-imports - Inject project namespaces into the module search path
+import sys, pathlib; sys.path.append(str(pathlib.Path(__file__, '../' * 5).resolve()))
 
-STAGING_PATH = 'ci/tools/poetry/staging'
-TARGET = f'{STAGING_PATH}/ocebuild'
+from ci.constants import PROJECT_ROOT, PROJECT_BUILD_STAGING
+from ci.constants import _enumerate_modules, IS_FULL_ENV, HAS_RAN_HOOKS
+
+from third_party.cpython.pathlib import Path
+
 
 # Ensure that filesystem operations are graceful
+makedirs = partial(_makedirs, exist_ok=True)
 rmtree = partial(_rmtree, ignore_errors=True)
 copytree = partial(_copytree, dirs_exist_ok=True)
 
@@ -51,26 +59,34 @@ def remap_module_imports(entrypoint: str, mappings: Tuple[str, str]) -> None:
 def clean(stage: Optional[str]=None):
   """Cleanup the staging directory."""
   if stage != 'post_build': rmtree('dist')
-  for target in filter(path.isdir, listdir(STAGING_PATH)):
-    target_path = f'{STAGING_PATH}/{target}'
+  for target in _enumerate_modules(PROJECT_BUILD_STAGING):
+    target_path = f'{PROJECT_BUILD_STAGING}/{target}'
     rmtree(target_path)
-    makedirs(target_path, exist_ok=True)
+    makedirs(target_path)
     open(f'{target_path}/__init__.py', 'w').close()
 
-if __name__ == '__main__':
-  # Copy the project source to the staging directory
-  copytree('ocebuild',      f'{STAGING_PATH}/ocebuild')
+def _main():
+  # Always copy the project source to the staging directory
+  copytree('ocebuild',      f'{PROJECT_BUILD_STAGING}/ocebuild')
 
   # Copy the CLI and third-party packages if not developing the project locally
-  if Path('dist').exists() or not Path('ci/registry/project.json').exists():
-    copytree('ocebuild_cli',  f'{STAGING_PATH}/ocebuild/cli')
-    copytree('third_party',   f'{STAGING_PATH}/ocebuild/third_party')
+  if HAS_RAN_HOOKS or not IS_FULL_ENV:
+    copytree('ocebuild_cli',  f'{PROJECT_BUILD_STAGING}/ocebuild/cli')
+    copytree('third_party',   f'{PROJECT_BUILD_STAGING}/ocebuild/third_party')
 
     # Update module imports
-    remap_module_imports(f'{STAGING_PATH}/ocebuild',
-                        mappings=(('ocebuild_cli', 'ocebuild.cli'),
-                                  ('third_party',  'ocebuild.third_party')))
+    remap_module_imports(f'{PROJECT_BUILD_STAGING}/ocebuild',
+                         mappings=(('ocebuild_cli', 'ocebuild.cli'),
+                                   ('third_party',  'ocebuild.third_party')))
 
-  # Cleanup the staging directory if pre/post hooks were not triggered
-  if not Path('dist').exists() or list(Path('dist').glob('*.whl')):
+if __name__ == '__main__':
+  _main()
+
+  if not HAS_RAN_HOOKS:
+    # Cleanup the staging directory if pre/post hooks were not triggered
     clean()
+    # Ensure the install hook is ran if in a full environment
+    if IS_FULL_ENV:
+      install_hook = str(Path(PROJECT_ROOT, 'ci/tools/poetry/hooks/install.py'))
+      install = SourceFileLoader('install_hook', install_hook).load_module()
+      install._main()

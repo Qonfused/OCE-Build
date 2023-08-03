@@ -7,8 +7,6 @@
 from sys import builtin_module_names
 from sysconfig import get_paths
 
-from ocebuild import __file__
-
 from third_party.cpython.pathlib import Path
 
 
@@ -28,10 +26,10 @@ def _enumerate_modules(path: str) -> set:
 #                              Project Constants                               #
 ################################################################################
 
-PROJECT_ENTRYPOINT = Path(__file__).parent
+PROJECT_ENTRYPOINT = Path(__file__, '../' * 2, 'ocebuild').resolve()
 """The main project's import entrypoint."""
 
-PROJECT_ROOT = Path(__file__).parents[1]
+PROJECT_ROOT = PROJECT_ENTRYPOINT.parent
 """The project's root directory."""
 
 PROJECT_DOCS = PROJECT_ROOT.joinpath('docs')
@@ -42,6 +40,19 @@ PROJECT_EXAMPLES = PROJECT_ROOT.joinpath('examples')
 
 PROJECT_NAMESPACES = _enumerate_modules(PROJECT_ROOT)
 """The project's root namespaces."""
+
+PROJECT_BUILD_STAGING = PROJECT_ROOT.joinpath('ci/tools/poetry/staging')
+"""The project's build staging directory."""
+
+################################################################################
+#                            Python Environment Checks                         #
+################################################################################
+
+IS_FULL_ENV = Path(PROJECT_ROOT, 'ci/tools/poetry/tasks.toml').exists()
+"""Whether the current environment is a full development environment."""
+
+HAS_RAN_HOOKS = Path('dist').exists() and not any(Path('dist').glob('*.whl'))
+"""Whether the pre/post build hooks have been run."""
 
 ################################################################################
 #                          Python Installation Schemes                         #
@@ -74,12 +85,15 @@ EXTERNAL_MODULES = PLATLIB_MODULES | PURELIB_MODULES
 
 
 __all__ = [
-  # Constants (12)
+  # Constants (15)
   "PROJECT_ENTRYPOINT",
   "PROJECT_ROOT",
   "PROJECT_DOCS",
   "PROJECT_EXAMPLES",
   "PROJECT_NAMESPACES",
+  "PROJECT_BUILD_STAGING",
+  "IS_FULL_ENV",
+  "HAS_RAN_HOOKS",
   "STDLIB_MODULES",
   "PLATSTDLIB_MODULES",
   "PLATLIB_MODULES",

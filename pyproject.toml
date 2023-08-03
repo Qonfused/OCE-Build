@@ -38,6 +38,7 @@ packages      = [
 ]
 include       = [
   # Include required CI paths for PEP-517 builds:
+  { path = "ci/*.py",                                 format = "sdist" },
   { path = "ci/tools/poetry",                         format = "sdist" },
   # Ensure all top-level files are included for wheel distribution:
   { path = "ci/tools/poetry/staging/ocebuild/*.py",   format = "wheel" }
@@ -64,6 +65,7 @@ rich = "^13.4.2"
 pre-commit = "^3.3.3"
 pylint = "^2.17.4"
 pypiserver = "^1.5.2"
+toml = "^0.10.2"
 
 # [tool.poetry.group.docs.dependencies]
 # # TODO
@@ -108,7 +110,7 @@ generate-setup-file = false
 script        = "ci/tools/poetry/hooks/build.py"
 
 [build-system]
-requires      = ["poetry-core>=1.2.0b1", "pyinstaller"]
+requires      = ["poetry-core>=1.2.0b1", "toml"]
 build-backend = "poetry.core.masonry.api"
 
 ################################################################################
@@ -118,32 +120,33 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry.scripts]
 ocebuild = "ocebuild.cli.__main__:_main"
 
+# Run tasks via `poetry <task>` with the poethepoet plugin.
 [tool.poe]
 include = [ "ci/tools/poetry/tasks.toml" ]
-poetry_command = "" # Run tasks via `poetry <task>` with the poethepoet plugin.
+poetry_command = ""
 
-[tool.poe.tasks.test]
-cmd     = "pytest --cov=ocebuild"
-help    = "Runs project tests with a short coverage report."
+  [tool.poe.tasks.test]
+  cmd     = "pytest --cov=ocebuild"
+  help    = "Runs project tests with a short coverage report."
 
-[tool.poe.tasks.lint]
-cmd     = "pylint --rcfile ci/tools/pylint/.pylintrc ocebuild"
-help    = "Runs project linter with a short report."
+  [tool.poe.tasks.lint]
+  cmd     = "pylint --rcfile ci/tools/pylint/.pylintrc ocebuild"
+  help    = "Runs project linter with a short report."
 
-[tool.poe.tasks.lint-diff]
-shell   = "git diff --name-only | sed '/.*\\.py/!d' | xargs poetry lint"
-interpreter = ["posix", "bash"]
-help    = "Runs the lint command only on changed files."
+  [tool.poe.tasks.lint-diff]
+  shell   = "git diff --name-only | sed '/.*\\.py/!d' | xargs poetry lint"
+  interpreter = ["posix", "bash"]
+  help    = "Runs the lint command only on changed files."
 
-[tool.poe.tasks.clean]
-script = "ci.tools.poetry.hooks.build:clean"
-help   = "Cleans the build directory."
+  [tool.poe.tasks.clean]
+  script = "ci.tools.poetry.hooks.build:clean"
+  help   = "Cleans the build directory."
 
-  [[tool.poe.tasks.clean.args]]
-  name = "stage"
-  options = ["-s", "--stage"]
-  type = "string"
-  help = "The build stage to clean. (Optional)"
+    [[tool.poe.tasks.clean.args]]
+    name = "stage"
+    options = ["-s", "--stage"]
+    type = "string"
+    help = "The build stage to clean. (Optional)"
 
 ################################################################################
 #                           PyPI Distribution Testing                          #

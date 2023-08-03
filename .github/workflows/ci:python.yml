@@ -80,8 +80,7 @@ jobs:
         run: |
           poetry env use ${{ matrix.python-version }}
       - name: Setup Poetry plugins and project dependencies
-        run: |
-          bash scripts/setup-poetry.sh
+        run: poetry install -n
       # Run test suites
       - name: Run test suite
         id: python-pytest
