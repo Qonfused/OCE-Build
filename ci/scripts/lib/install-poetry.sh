@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 ## @file
-# Ensures that poetry is installed.
+# Ensures that the correct poetry version is installed.
 #
 # Copyright (c) 2023, The OCE Build Authors. All rights reserved.
 # SPDX-License-Identifier: BSD-3-Clause

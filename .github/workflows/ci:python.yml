@@ -57,7 +57,7 @@ jobs:
       # Setup python virtual environment
       - name: Install poetry
         run: |
-          bash scripts/install-poetry.sh
+          bash ci/scripts/lib/install-poetry.sh
           echo "PATH=${HOME}/.poetry/bin:${PATH}" >> $GITHUB_ENV
       - name: Setup Python ${{ matrix.python-version }}
         uses: actions/setup-python@v3
@@ -81,6 +81,12 @@ jobs:
           poetry env use ${{ matrix.python-version }}
       - name: Setup Poetry plugins and project dependencies
         run: poetry install -n
+      # Check the current runner environment
+      - name: Check GitHub API limit
+        if: steps.validate-experimental.outcome != 'failure'
+        run: poetry run python3 ci/scripts/lib/rate-limit.py
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       # Run test suites
       - name: Run test suite
         id: python-pytest
