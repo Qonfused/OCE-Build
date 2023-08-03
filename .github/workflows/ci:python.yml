@@ -199,8 +199,6 @@ jobs:
             Last updated: `{{ coverage.meta.timestamp }}`
 
             {{ marker }}
-          # Name of the branch in which coverage data will be stored on the repository.
-          COVERAGE_DATA_BRANCH: python-coverage
       - name: Store Pull Request comment to be posted
         uses: actions/upload-artifact@v3
         if: steps.coverage_comment.outputs.COMMENT_FILE_WRITTEN == 'true'
