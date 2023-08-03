@@ -21,6 +21,14 @@ from ocebuild.parsers.regex import re_search
 from third_party.cpython.pathlib import Path
 
 
+PRAGMA_FLAGS = [
+  # Skips sorting of import statements
+  'preserve-imports',
+]
+"""Flags to control module imports generation."""
+
+RE_PRAGMA_FLAGS = r'#\s*?pragma\s+(?:{})'.format('|'.join(PRAGMA_FLAGS))
+
 RE_IMPORT_BLOCK = r'(?s)(\n*^(?:from|import).*^(?:from|import).*?\n*$)'
 """Regular expression that matches import statements and adjacent newlines."""
 
@@ -127,9 +135,14 @@ def sort_imports_block(imports_block: str) -> str:
 
 def sort_file_imports(file: str) -> str:
   """Sorts import statements within file text."""
-  imports_block = re_search(RE_IMPORT_BLOCK, file, multiline=True)
 
+  pragma_flags = re_search(RE_PRAGMA_FLAGS, file, multiline=True)
+  if pragma_flags and 'preserve-imports' in pragma_flags:
+    return file
+
+  imports_block = re_search(RE_IMPORT_BLOCK, file, multiline=True)
   if imports_block:
+
     sorted_block = sort_imports_block(imports_block)
     return file.replace(imports_block, sorted_block)
 
@@ -166,7 +179,9 @@ def _main(entrypoint: Optional[str]=None) -> None:
 
 
 __all__ = [
-  # Constants (1)
+  # Constants (3)
+  "PRAGMA_FLAGS",
+  "RE_PRAGMA_FLAGS",
   "RE_IMPORT_BLOCK",
   # Functions (6)
   "module_name",
