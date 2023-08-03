@@ -83,11 +83,9 @@ jobs:
         run: poetry install -n
       # Check the current runner environment
       - name: Check GitHub API limit
-        if: steps.validate-experimental.outcome != 'failure'
-        continue-on-error: ${{ matrix.experimental }}
-        run: poetry run python3 ci/scripts/lib/rate-limit.py
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/rate_limit
       # Run test suites
       - name: Run test suite
         id: python-pytest
