@@ -37,7 +37,7 @@ extensions = [
   "autoapi.extension"
 ]
 
-templates_path = ['_templates']
+templates_path = ["_templates"]
 exclude_patterns = []
 
 # -- Options for extlinks ------------------------------------------------------
@@ -80,4 +80,5 @@ autoapi_dirs = [
   str(PROJECT_ROOT.joinpath('ci/tools/poetry/build/ocebuild')),
 ]
 autoapi_ignore = [ "*_test.py" ]
-autoapi_root = 'build'
+autoapi_root = "build"
+autoapi_template_dir = "_templates"
