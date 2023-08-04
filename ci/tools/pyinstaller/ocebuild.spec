@@ -5,7 +5,7 @@ block_cipher = None
 
 
 a = Analysis(
-    ['../poetry/staging/ocebuild/cli/__main__.py'],
+    ['../poetry/build/ocebuild/cli/__main__.py'],
     pathex=[],
     binaries=[],
     datas=[],

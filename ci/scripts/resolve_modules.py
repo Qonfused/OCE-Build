@@ -16,7 +16,7 @@ from inspect import getdoc
 
 from typing import Dict, List, Optional, Tuple, Union
 
-from ci import PROJECT_NAMESPACES, PROJECT_ROOT
+from ci import PROJECT_BUILD_PATHS, PROJECT_NAMESPACES, PROJECT_ROOT
 
 from ocebuild.filesystem.posix import glob
 from ocebuild.parsers.regex import re_search
@@ -280,6 +280,9 @@ def _main(entrypoint: Optional[str]=None) -> None:
 
   # Enumerate each package
   for package in recurse_packages(entrypoint):
+    if any(str(package).startswith(str(p)) for p in PROJECT_BUILD_PATHS):
+      continue
+
     # Get parent tree/namespace
     ptree = _get_parent_tree(package)
 
@@ -292,15 +295,18 @@ def _main(entrypoint: Optional[str]=None) -> None:
     for tree in recurse_modules(package.parent):
       filepath = f'{package.parents[1].joinpath(tree)}.py'
       module_path = f'{ptree}{".".join(tree.split("/"))}'
-      with open(filepath, 'r', encoding='UTF-8') as module_file:
-        f_pragma_line =  module_file.readline()
-        if not f_pragma_line.startswith('#pragma'): f_pragma_line = ''
-        # Add implicit package imports
-        if 'no-implicit' not in f_pragma_line:
-          package_lines.append(f'from {module_path} import *')
-        # Add explicit public API exports
-        if 'preserve-exports' not in f_pragma_line:
-          generate_api_exports(filepath, module_path)
+      try:
+        with open(filepath, 'r', encoding='UTF-8') as module_file:
+          f_pragma_line =  module_file.readline()
+          if not f_pragma_line.startswith('#pragma'): f_pragma_line = ''
+          # Add implicit package imports
+          if 'no-implicit' not in f_pragma_line:
+            package_lines.append(f'from {module_path} import *')
+          # Add explicit public API exports
+          if 'preserve-exports' not in f_pragma_line:
+            generate_api_exports(filepath, module_path)
+      except Exception:
+        pass
 
     # Update package file
     if not 'no-implicit' in pragma_line:

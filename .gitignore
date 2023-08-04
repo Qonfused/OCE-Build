@@ -1,4 +1,5 @@
 .*
+!*.keep
 .env
 .pypirc
 !/.github
@@ -9,6 +10,7 @@
 !/.gitattributes
 !/.gitignore
 !/.pre-commit-config.yaml
+!/.readthedocs.yaml
 !/**/.pylintrc
 
 # Build artifacts

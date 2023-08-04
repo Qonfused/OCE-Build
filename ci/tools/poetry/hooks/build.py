@@ -15,7 +15,7 @@ from shutil import copytree as _copytree, rmtree as _rmtree
 from typing import Optional, Tuple
 
 #pragma preserve-imports - Inject project namespaces into the module search path
-import sys, pathlib; sys.path.append(str(pathlib.Path(__file__, '../' * 5).resolve()))
+import sys, pathlib; sys.path.insert(1, str(pathlib.Path(__file__, '../' * 5).resolve()))
 
 from ci.constants import PROJECT_ROOT, PROJECT_BUILD_STAGING
 from ci.constants import _enumerate_modules, IS_FULL_ENV, HAS_RAN_HOOKS
@@ -66,18 +66,27 @@ def clean(stage: Optional[str]=None):
     open(f'{target_path}/__init__.py', 'w').close()
 
 def _main():
-  # Always copy the project source to the staging directory
-  copytree('ocebuild',      f'{PROJECT_BUILD_STAGING}/ocebuild')
+  PROJECT_BUILD_DIR = Path(PROJECT_ROOT, 'ci/tools/poetry/build')
+  # Cleanup the build directory
+  rmtree(PROJECT_BUILD_DIR)
+  makedirs(PROJECT_BUILD_DIR)
+
+  copytree('ocebuild',      f'{PROJECT_BUILD_DIR}/ocebuild')
+  copytree('ocebuild_cli',  f'{PROJECT_BUILD_DIR}/ocebuild/cli')
+  copytree('third_party',   f'{PROJECT_BUILD_DIR}/ocebuild/third_party')
+
+  # Update module imports
+  remap_module_imports(f'{PROJECT_BUILD_DIR}/ocebuild',
+                        mappings=(('ocebuild_cli', 'ocebuild.cli'),
+                                  ('third_party',  'ocebuild.third_party')))
 
   # Copy the CLI and third-party packages if not developing the project locally
   if HAS_RAN_HOOKS or not IS_FULL_ENV:
-    copytree('ocebuild_cli',  f'{PROJECT_BUILD_STAGING}/ocebuild/cli')
-    copytree('third_party',   f'{PROJECT_BUILD_STAGING}/ocebuild/third_party')
-
-    # Update module imports
-    remap_module_imports(f'{PROJECT_BUILD_STAGING}/ocebuild',
-                         mappings=(('ocebuild_cli', 'ocebuild.cli'),
-                                   ('third_party',  'ocebuild.third_party')))
+    target = f'{PROJECT_BUILD_DIR}/ocebuild'
+  # Otherwise, only copy the project source
+  else:
+    target = f'{PROJECT_ROOT}/ocebuild'
+  copytree(target, f'{PROJECT_BUILD_STAGING}/ocebuild')
 
 if __name__ == '__main__':
   _main()

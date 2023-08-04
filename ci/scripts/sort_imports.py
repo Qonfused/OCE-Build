@@ -13,7 +13,7 @@ from re import sub as re_sub
 
 from typing import List, Optional, Union
 
-from ci import PROJECT_NAMESPACES, PROJECT_ROOT, PYTHON_MODULES
+from ci import PROJECT_BUILD_PATHS, PROJECT_NAMESPACES, PROJECT_ROOT, PYTHON_MODULES
 
 from ocebuild.filesystem import glob
 from ocebuild.parsers.regex import re_search
@@ -142,9 +142,11 @@ def sort_file_imports(file: str) -> str:
 
   imports_block = re_search(RE_IMPORT_BLOCK, file, multiline=True)
   if imports_block:
-
-    sorted_block = sort_imports_block(imports_block)
-    return file.replace(imports_block, sorted_block)
+    try:
+      sorted_block = sort_imports_block(imports_block)
+      return file.replace(imports_block, sorted_block)
+    except Exception:
+      pass
 
   return file
 
@@ -170,6 +172,8 @@ def _main(entrypoint: Optional[str]=None) -> None:
 
   # Enumerate each package
   for package in recurse_modules(entrypoint):
+    if any(str(package).startswith(str(p)) for p in PROJECT_BUILD_PATHS):
+      continue
     with open(package, 'r', encoding='UTF-8') as module_file:
       file_text = module_file.read()
       # Sort imports by type
