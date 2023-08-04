@@ -20,10 +20,9 @@
 </div>
 
 OCE-Build is designed to help enable projects to be highly composable and easily
-maintainable, prioritizing a small git-friendly footprint. This is accomplished
-through a declarative configuration system that allows for a minimal project
-configuration, while still allowing for a high degree of customization and
-flexibility.
+maintainable, prioritizing a small git-friendly footprint. It is designed to be
+flexible and extensible for existing projects, while also providing a simple
+configuration and interface for new projects to get started quickly.
 
 ## Feature Overview
 
