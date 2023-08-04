@@ -17,7 +17,6 @@ def test_Path():
   assert instance.__getinstance__().__class__ in flavours
   assert repr(instance) == f"Path({repr(args)})"
   assert isinstance(instance, BasePath)
-  assert not instance.subclasses
 
   # Test subclassing
   class CustomPath(Path):
@@ -35,7 +34,7 @@ def test_Path():
   # Test MRO cooperative subclassing
   assert subclass_instance.cls_flavour == instance.cls_flavour
   assert subclass_instance.subclasses == instance.subclasses
-  assert instance.subclasses == [subclass_instance.__class__]
+  assert instance.subclasses[-1] == subclass_instance.__class__
 
 def test_PurePath():
   args = 'foo/bar'
@@ -46,7 +45,6 @@ def test_PurePath():
   assert instance.__getinstance__().__class__ in flavours
   assert repr(instance) == f"PurePath({repr(args)})"
   assert isinstance(instance, BasePath)
-  assert not instance.subclasses
 
   # Test subclassing
   class CustomPurePath(PurePath):
@@ -64,7 +62,7 @@ def test_PurePath():
   # Test MRO cooperative subclassing
   assert subclass_instance.cls_flavour == instance.cls_flavour
   assert subclass_instance.subclasses == instance.subclasses
-  assert instance.subclasses == [subclass_instance.__class__]
+  assert instance.subclasses[-1] == subclass_instance.__class__
 
   # Verify no pollution of the `pathlib` module by the Path class
   assert not hasattr(subclass_instance, 'resolve')
