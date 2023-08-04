@@ -15,15 +15,13 @@ This document describes this project's development process. Following these guid
 5. [Improving Documentation](#improving-documentation)
 6. [Development Process](#development-process)
 7. [Contributing Code](#contributing-code)
-    1. [General Guidelines and Philosophy](#general-guidelines-and-philosophy)
-    2. [Getting Started](#getting-started)
-    3. [Setting up your development environment](#setting-up-your-development-environment)
-    4. [Project Structure](#project-structure)
-    5. [Project Scripts](#project-scripts)
-    6. [Coding Style](#coding-style)
-    7. [Building the Project](#building-the-project)
-    8. [Testing](#testing)
-    9. [License](#license)
+    1. [Setting up your development environment](#setting-up-your-development-environment)
+    2. [Project Structure](#project-structure)
+    3. [Project Scripts](#project-scripts)
+    4. [Coding Style](#coding-style)
+    5. [Building the Project](#building-the-project)
+    6. [Testing](#testing)
+    7. [License](#license)
 8. [Pull Request Process](#pull-request-process)
     1. [Review Process](#review-process)
     2. [Addressing Feedback](#addressing-feedback)
@@ -82,23 +80,6 @@ When you have finished working on a topic branch, you can merge your changes bac
 
 ## Contributing Code
 
-### General Guidelines and Philosophy
-
-* Include unit tests when you contribute new features or fix a bug, this:
-  * proves that your code works correctly
-  * guards against breaking changes
-  * lowers the maintenance cost
-
-* Keep compatibility and cohesiveness mind when contributing a change that
-  will impact the public API.
-
-* Create issues for any major changes and enhancements that you wish to make.
-
-* Create a pull request for your changes and coordinate with the project
-  maintainers to get it merged to main.
-
-### Getting Started
-
 To begin contributing, you will need to fork the main repository to work on your changes. Simply navigate to our GitHub page and click the "Fork" button at the top. Once you've forked the repository, you can clone your new repository and start making edits.
 
 In git, it is best to isolate each topic or feature into a “topic branch”. While individual commits allow you control over how small individual changes are made to the code, branches are a great way to group a set of commits all related to one feature together, or to isolate different efforts when you might be working on multiple topics at the same time.
@@ -149,7 +130,25 @@ bash scripts/setup-poetry.sh
 
 ### Project Structure
 
-> TODO
+#### Development Tooling and Environments
+
+The project contains a top-level `ci/` directory containing the CI/CD configuration and environments used in integration, as well as additional configurations for each of the project's development tools when developing locally. Required environments are also automatically configured when using `poetry env use <python version>` and running the install command in a new virtual environment.
+
+This leverages a root-level `pyproject.toml` configuration as the source of truth for all of the project's dependencies and development tools. The `poetry.lock` file is used to lock the project's dependencies to specific versions to ensure that all developers are using the same versions of the project's dependencies. This allows for a consistent development environment across all platforms and Python versions.
+
+Some important caveats and notes about the project's development tools:
+
+* When configuring a new virtual environment, always use `poetry install` to ensure that the project's dependencies are installed and to ensure that the required development tools are installed and configured correctly. This will ensure that the development environment is correctly configured for your virtualenv's Python version.
+
+* When you install the project for the first time, additional required poetry plugins will be installed automatically. These plugins are required for the project's development tools to function correctly, and are automatically added to your poetry configuration with the project's install hook. These plugins are installed globally, and will be available in all of your poetry virtual environments.
+
+* The project is automatically built by poetry each time you install the project (you can find the built project under `ci/tools/poetry/build`). This means that build tools for the CLI or the project's documentation require no pre-requisite setup and only require a single command to build after installation.
+
+#### Project Modules
+
+The main project is split into two main modules: `ocebuild` and `ocebuild_cli`. The `ocebuild` module contains all of the core functionality of the project, while the `ocebuild_cli` module contains the CLI interface for the CLI executable.
+
+The `third_party` module contains all of the third-party code used by the project. This includes vendored code, as well as code that is not available on PyPI. This can include fixes or patches to upstream code, contributed experimental code, or code that is not available on PyPI.
 
 ### Project Scripts
 

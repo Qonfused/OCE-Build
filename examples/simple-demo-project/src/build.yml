@@ -42,6 +42,7 @@ Kexts:
   VoodooI2CHID:
     specifier: "*"
   Foo: "file:./Kexts/UTBMap.kext"
+Resources:
 Tools:
   - ControlMsrE2
   - OpenShell
