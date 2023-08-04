@@ -9,12 +9,6 @@ repos:
     args: ["-f", "requirements.txt", "-o", "requirements.txt"]
 - repo: local
   hooks:
-  - id: ci:setup
-    name: 'ci:setup'
-    entry: poetry install -n --with docs
-    language: system
-    types: [python]
-    pass_filenames: false
   - id: ci:resolve-modules
     name: 'ci:resolve-modules'
     entry: poetry run poe resolve-modules

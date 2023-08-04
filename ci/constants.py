@@ -44,6 +44,16 @@ PROJECT_NAMESPACES = _enumerate_modules(PROJECT_ROOT)
 PROJECT_BUILD_STAGING = PROJECT_ROOT.joinpath('ci/tools/poetry/staging')
 """The project's build staging directory."""
 
+PROJECT_BUILD_PATHS = (
+  PROJECT_ROOT.joinpath('ci/tools/poetry/build'),
+  PROJECT_ROOT.joinpath('ci/tools/pyinstaller/build'),
+  PROJECT_ROOT.joinpath('ci/tools/sphinx/api'),
+  PROJECT_ROOT.joinpath('dist'),
+  PROJECT_ROOT.joinpath('docs/build'),
+  *PROJECT_ROOT.joinpath('examples').glob('**/dist'),
+)
+"""The project's temporary build directories."""
+
 ################################################################################
 #                            Python Environment Checks                         #
 ################################################################################
@@ -85,13 +95,14 @@ EXTERNAL_MODULES = PLATLIB_MODULES | PURELIB_MODULES
 
 
 __all__ = [
-  # Constants (15)
+  # Constants (16)
   "PROJECT_ENTRYPOINT",
   "PROJECT_ROOT",
   "PROJECT_DOCS",
   "PROJECT_EXAMPLES",
   "PROJECT_NAMESPACES",
   "PROJECT_BUILD_STAGING",
+  "PROJECT_BUILD_PATHS",
   "IS_FULL_ENV",
   "HAS_RAN_HOOKS",
   "STDLIB_MODULES",

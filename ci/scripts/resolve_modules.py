@@ -16,7 +16,7 @@ from inspect import getdoc
 
 from typing import Dict, List, Optional, Tuple, Union
 
-from ci import PROJECT_NAMESPACES, PROJECT_ROOT
+from ci import PROJECT_BUILD_PATHS, PROJECT_NAMESPACES, PROJECT_ROOT
 
 from ocebuild.filesystem.posix import glob
 from ocebuild.parsers.regex import re_search
@@ -280,6 +280,9 @@ def _main(entrypoint: Optional[str]=None) -> None:
 
   # Enumerate each package
   for package in recurse_packages(entrypoint):
+    if any(str(package).startswith(str(p)) for p in PROJECT_BUILD_PATHS):
+      continue
+
     # Get parent tree/namespace
     ptree = _get_parent_tree(package)
 

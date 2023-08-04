@@ -61,12 +61,7 @@ post_build    = "_post_build"
 _pre_build    = [ "clean" ]
 _post_build   = [ "clean -s post_build", "pyinstaller" ]
 
-#TODO: Add post-build verification step
-# e.g. inspecting the contents of the sdist/wheel archives:
-# $ python3 -m tarfile -l dist/ocebuild-0.0.0.dev0.tar.gz
-# $ python3 -m zipfile -l dist/ocebuild-0.0.0.dev0-cp311-cp311-macosx_13_0_x86_64.whl
-
-# Below are used when building the project using any PEP-517 build backend.
+# Below are used when building the project using any PEP-517 build frontend.
 [tool.poetry.build]
 generate-setup-file = false
 script        = "ci/tools/poetry/hooks/build.py"
