@@ -1,7 +1,7 @@
 name: Docs
 on:
-  push:
-    branches: [main]
+  # push:
+  #   branches: [main]
   workflow_dispatch:
 env:
   python-version: 3.11
