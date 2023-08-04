@@ -1,6 +1,8 @@
 name: Docs
-# on: [push, pull_request, workflow_dispatch]
-on: [workflow_dispatch]
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
 env:
   python-version: 3.11
   docs-build: docs/build/
@@ -46,7 +48,6 @@ jobs:
           poetry sphinx-build
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
-        # if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ${{ env.docs-build }}
