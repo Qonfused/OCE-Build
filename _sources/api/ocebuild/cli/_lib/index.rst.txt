@@ -1,0 +1,71 @@
+:py:mod:`ocebuild.cli._lib`
+===========================
+
+.. py:module:: ocebuild.cli._lib
+
+.. autoapi-nested-parse::
+
+   Shared CLI utilities.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   ocebuild.cli._lib.CLIEnv
+
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ocebuild.cli._lib.cli_command
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   ocebuild.cli._lib.CONTEXT_SETTINGS
+
+
+.. py:data:: CONTEXT_SETTINGS
+
+   Shared context settings for the CLI.
+
+.. py:class:: CLIEnv(verbose_flag: bool = VERBOSE, debug_flag: bool = DEBUG)
+
+
+   Shared CLI environment.
+
+   .. py:method:: __setattr__(name: str, value: any) -> None
+
+      Sets an attribute on the CLI environment.
+
+
+
+.. py:function:: cli_command(name: Optional[str] = None)
+
+   Factory for creating a shared environment for CLI commands.
+
+   :param name: The name of the command. Defaults to the function name.
+
+   :returns: A decorator for passing the CLI environment to commands.
+
+   .. rubric:: Example
+
+   >>> @cli_command()
+   ... def cli(env, *args, **kwargs):
+   ...   print(env)
+   # -> <ocebuild.cli._lib.CLIEnv object at 0x108bf73d0>
+
+

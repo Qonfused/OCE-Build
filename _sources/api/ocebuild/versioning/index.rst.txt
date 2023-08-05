@@ -1,0 +1,186 @@
+:py:mod:`ocebuild.versioning`
+=============================
+
+.. py:module:: ocebuild.versioning
+
+.. autoapi-nested-parse::
+
+   Methods for sorting and handling versioning.
+
+
+
+Submodules
+----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   semver/index.rst
+
+
+Package Contents
+----------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ocebuild.versioning.get_version_str
+   ocebuild.versioning.get_version
+   ocebuild.versioning.compare_version
+   ocebuild.versioning.resolve_version_specifier
+   ocebuild.versioning.get_minimum_version
+   ocebuild.versioning.sort_dependencies
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   ocebuild.versioning.SEMVER_SYMBOLS
+   ocebuild.versioning.COMPARISON_SYMBOLS
+
+
+.. py:data:: SEMVER_SYMBOLS
+   :value: ('~', '^')
+
+   Semantic versioning range symbols.
+
+.. py:data:: COMPARISON_SYMBOLS
+   :value: ('>', '<', '>=', '<=', '==', '!=')
+
+   Version comparison symbols.
+
+.. py:function:: get_version_str(string: str) -> Union[str, None]
+
+   Gets the version string from a version specifier.
+
+   :param string: The version specifier.
+
+   :returns: The version string.
+
+   .. rubric:: Example
+
+   >>> get_version_string('^1.0.0')
+   # -> '1.0.0'
+   >>> get_version_string('1.0.0')
+   # ->'1.0.0'
+   >>> get_version_string('latest')
+   # -> None
+
+
+.. py:function:: get_version(string: str) -> Union[packaging.version.Version, None]
+
+   Gets the version class from a version specifier.
+
+   :param string: The version class.
+
+   :returns: The version string.
+
+   .. rubric:: Example
+
+   >>> get_version('^1.0.0')
+   # -> <Version('1.0.0')>
+   >>> get_version('1.0.0')
+   # -> <Version('1.0.0')>
+   >>> get_version('latest')
+   # -> None
+
+
+.. py:function:: compare_version(v1: Union[str, packaging.version.Version], v2: Union[str, packaging.version.Version], operator: str) -> bool
+
+   Compares a version to the version specifier.
+
+   :param v1: The version.
+   :param v2: The version specifier.
+   :param operator: The operator.
+
+   :returns: True if the version satisfies the specifier.
+
+
+.. py:function:: resolve_version_specifier(versions: List[str], specifier: str) -> Union[str, None]
+
+   Resolves a version specifier.
+
+   :param versions: The versions.
+   :param specifier: The version specifier.
+
+   :returns: The resolved version (if available).
+
+   .. rubric:: Examples
+
+   >>> resolve_version_specifier(['1.2.3', '1.2.4', '1.3.0'], '~1.2.3')
+   # -> '1.2.4'
+   >>> resolve_version_specifier(['1.2.3', '1.3.0', '2.0.0'], '^1.2.3')
+   # -> '1.3.0'
+   >>> resolve_version_specifier(['1.2.3', '1.2.4', '1.3.0'], '1.2.3')
+   # -> '1.2.3'
+   >>> resolve_version_specifier(['1.2.3', '1.2.4', '1.3.0'], '>1.2.3')
+   # -> '1.3.0'
+   >>> resolve_version_specifier(['1.2.2', '1.2.3', '1.3.0'], '<1.2.3')
+   # -> '1.2.2'
+   >>> resolve_version_specifier(['1.2.3', '1.2.4', '1.3.0'], '>=1.2.3')
+   # -> '1.3.0'
+   >>> resolve_version_specifier(['1.2.3', '1.2.4', '1.3.0'], '<=1.2.3')
+   # -> '1.2.3'
+   >>> resolve_version_specifier(['1.2.3', '1.2.4', '1.3.0'], '!=1.2.3')
+   # -> '1.3.0'
+   >>> resolve_version_specifier(['1.2.3', '1.2.4', '1.3.0'], '==1.2.3')
+   # -> '1.2.3'
+   >>> resolve_version_specifier(['1.2.3', '1.2.4', '1.3.0'], 'latest')
+   # -> '1.3.0'
+   >>> resolve_version_specifier(['1.2.3', '1.2.4', '1.3.0'], 'oldest')
+   # -> '1.2.3'
+   >>> resolve_version_specifier(['1.2.3', '1.2.4', '1.3.0'], '1.2.2')
+   # -> None
+
+
+.. py:function:: get_minimum_version(dependencies: Dict[str, Tuple[str, str]], library: str) -> Tuple[str, Union[str, None]]
+
+   Gets the minimum required version of a library.
+
+   :param dependencies: The dependency tree.
+   :param library: The library to get the minimum version of.
+
+   :returns: A tuple of the library name and the minimum version.
+
+   .. rubric:: Example
+
+   >>> dependencies = {
+   ...   'lib1': [('lib2', '2.0.0')],
+   ...   'lib2': [('lib3', '3.0.0')],
+   ...   'lib3': [],
+   ... }
+   >>> get_minimum_version(dependencies, 'lib1')
+   # -> ('lib1', None)
+   >>> get_minimum_version(dependencies, 'lib2')
+   # -> ('lib2', '^2.0.0')
+   >>> get_minimum_version(dependencies, 'lib3')
+   # -> ('lib3', '^3.0.0')
+
+
+.. py:function:: sort_dependencies(dependencies: Dict[str, Tuple[str, str]]) -> Generator[Tuple[str, str], any, None]
+
+   Sorts a dependency tree by topology and version.
+
+   :param dependencies: The dependency tree.
+
+   :Yields: A tuple of the library name and the minimum version.
+
+   :raises ValueError: If a cycle is detected in the dependency tree.
+
+   .. rubric:: Example
+
+   >>> dependencies = {
+   ...   'lib1': [('lib2', '2.0.0')],
+   ...   'lib2': [('lib3', '3.0.0')],
+   ...   'lib3': [],
+   ... }
+   >>> list(sort_dependencies(dependencies))
+   # -> [('lib3', '^3.0.0'), ('lib2', '^2.0.0'), ('lib1', None)]
+
+

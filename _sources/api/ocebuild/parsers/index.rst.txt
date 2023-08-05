@@ -1,0 +1,27 @@
+:py:mod:`ocebuild.parsers`
+==========================
+
+.. py:module:: ocebuild.parsers
+
+.. autoapi-nested-parse::
+
+   Parsers for various native types and file formats.
+
+
+
+Submodules
+----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   _lib/index.rst
+   asl/index.rst
+   dict/index.rst
+   plist/index.rst
+   regex/index.rst
+   schema/index.rst
+   types/index.rst
+   yaml/index.rst
+
+

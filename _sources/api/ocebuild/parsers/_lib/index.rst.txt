@@ -1,0 +1,47 @@
+:py:mod:`ocebuild.parsers._lib`
+===============================
+
+.. py:module:: ocebuild.parsers._lib
+
+.. autoapi-nested-parse::
+
+   Parser helper functions.
+
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ocebuild.parsers._lib.update_cursor
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   ocebuild.parsers._lib.TAGS
+
+
+.. py:data:: TAGS
+   :value: ('@append', '@delete', '@fallback', '@override', '@prepend')
+
+   Preprocessor tags for controlling output dict semantics.
+
+.. py:function:: update_cursor(level: int, key: str, cursor: dict, upshift: int = 0) -> None
+
+   Updates the cursor dictionary.
+
+   :param level: The level of the cursor.
+   :param key: The key of the cursor.
+   :param cursor: The cursor dictionary.
+   :param uplevel: Number of levels to ignore
+
+

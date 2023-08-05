@@ -1,0 +1,66 @@
+:py:mod:`ocebuild.pipeline.packages`
+====================================
+
+.. py:module:: ocebuild.pipeline.packages
+
+.. autoapi-nested-parse::
+
+   Methods for retrieving and handling packages.
+
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ocebuild.pipeline.packages.extract_opencore_packages
+   ocebuild.pipeline.packages.extract_build_packages
+   ocebuild.pipeline.packages.prune_build_packages
+
+
+
+.. py:function:: extract_opencore_packages(opencore_pkg: Union[str, ocebuild.third_party.cpython.pathlib.Path], target: str, resolvers: List[dict], packages: dict) -> dict
+
+   Extracts build entries as vendored packages from an OpenCore package.
+
+   :param opencore_pkg: Path to an existing OpenCore package.
+   :param target: The desired target architecture of the OpenCore EFI.
+   :param resolvers: The list of resolver entries to update.
+   :param packages: The list of packages to update.
+
+   :returns: A dictionary of extracted build entries.
+
+
+.. py:function:: extract_build_packages(build_vars: dict, resolvers: List[dict], packages: dict, build_dir: ocebuild.third_party.cpython.pathlib.Path, *args, __wrapper: Optional[Iterator] = None, **kwargs) -> dict
+
+   Extracts build entries from unpacked packages.
+
+   :param build_vars: The configured build variables.
+   :param resolvers: The list of resolver entries to update.
+   :param packages: The list of packages to extract.
+   :param build_dir: The path to the build directory.
+   :param \*args: Additional arguments to pass to the iterator.
+   :param __wrapper: A wrapper function to apply to the iterator. (Optional)
+   :param \*\*kwargs: Additional keyword arguments to pass to the iterator.
+
+   :returns: A dictionary of extracted build entries.
+
+
+.. py:function:: prune_build_packages(build_config: dict, extracted_entries: dict, *args, __wrapper: Optional[Iterator] = None, **kwargs) -> dict
+
+   Prunes the build configuration of entries that were not extracted.
+
+   :param build_config: The build configuration.
+   :param extracted_entries: The extracted build entries.
+   :param \*args: Additional arguments to pass to the iterator.
+   :param __wrapper: A wrapper function to apply to the iterator. (Optional)
+   :param \*\*kwargs: Additional keyword arguments to pass to the iterator.
+
+   :returns: A dictionary of pruned build entries.
+
+

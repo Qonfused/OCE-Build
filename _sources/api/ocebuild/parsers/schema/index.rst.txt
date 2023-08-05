@@ -1,0 +1,41 @@
+:py:mod:`ocebuild.parsers.schema`
+=================================
+
+.. py:module:: ocebuild.parsers.schema
+
+.. autoapi-nested-parse::
+
+   Methods for retrieving and handling Sample.plist schemas.
+
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ocebuild.parsers.schema.parse_schema
+
+
+
+.. py:function:: parse_schema(file: Union[List[str], io.TextIOWrapper], sample_plist: dict, /, raw_schema: Optional[dict] = None) -> dict
+
+   Gets the Sample.plist schema from a Configuration.tex file.
+
+   The Sample.plist schema is parsed from the Configuration.tex file, which is
+   the source LaTeX file for the OpenCore documentation. These schema values
+   match the declared failsafe values used as fallbacks in the OpenCore config
+   file. Extracted schema values are then converted to a plist-compatible format
+   and then coerced into native Python types.
+
+   :param file: The Configuration.tex file to parse.
+   :param sample_plist: The sample plist to use for comparison.
+   :param raw_schema: If specified, the raw schema will be stored in this dictionary.
+
+   :returns: A dictionary representing failsafe values for the Sample.plist schema.
+
+

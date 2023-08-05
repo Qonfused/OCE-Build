@@ -1,0 +1,41 @@
+:py:mod:`ocebuild.cli`
+======================
+
+.. py:module:: ocebuild.cli
+
+.. autoapi-nested-parse::
+
+   Methods and classes used for the OCE-Build CLI
+
+
+
+Subpackages
+-----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 3
+
+   commands/index.rst
+
+
+Submodules
+----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   __main__/index.rst
+   _lib/index.rst
+   console/index.rst
+   interactive/index.rst
+   logging/index.rst
+
+
+Package Contents
+----------------
+
+.. py:data:: __version__
+   :value: '0.0.0-dev'
+
+   
+

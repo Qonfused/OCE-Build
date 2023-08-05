@@ -1,0 +1,344 @@
+:py:mod:`ocebuild.sources`
+==========================
+
+.. py:module:: ocebuild.sources
+
+.. autoapi-nested-parse::
+
+   Methods and Classes for handling external sources.
+
+
+
+Submodules
+----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   _lib/index.rst
+   binary/index.rst
+   dortania/index.rst
+   github/index.rst
+   resolver/index.rst
+
+
+Package Contents
+----------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   ocebuild.sources.RequestWrapper
+   ocebuild.sources.GitHubResolver
+   ocebuild.sources.DortaniaResolver
+   ocebuild.sources.PathResolver
+
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ocebuild.sources.request
+   ocebuild.sources.is_latest_build
+   ocebuild.sources.has_build
+   ocebuild.sources.get_latest_sha
+   ocebuild.sources.dortania_file_url
+   ocebuild.sources.dortania_release_url
+   ocebuild.sources.github_api_request
+   ocebuild.sources.github_rate_limit
+   ocebuild.sources.get_latest_commit
+   ocebuild.sources.github_suite_id
+   ocebuild.sources.github_tag_names
+   ocebuild.sources.github_release_catalog
+   ocebuild.sources.github_file_url
+   ocebuild.sources.github_archive_url
+   ocebuild.sources.github_release_url
+   ocebuild.sources.github_artifacts_url
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   ocebuild.sources.ResolverType
+
+
+.. py:function:: request(url: Union[str, urllib.request.Request], *args, **kwargs) -> any
+
+   Simple wrapper over urlopen for skipping SSL verification.
+
+   :param url: The url to open.
+   :param \*args: Additional arguments to pass to urlopen.
+   :param \*\*kwargs: Additional keyword arguments to pass to urlopen.
+
+   :raises HTTPError: If the url could not be retrieved.
+
+   :returns: The response from urlopen wrapped in a RequestWrapper class.
+
+
+.. py:class:: RequestWrapper(response: any)
+
+
+   Wrapper for urllib.request.Request to provide a nicer interface.
+
+   .. py:method:: __enter__() -> RequestWrapper
+
+
+   .. py:method:: __exit__(*args: object) -> None
+
+
+   .. py:method:: __getattr__(attr)
+
+
+   .. py:method:: json(*args, **kargs) -> any
+
+      Return the response as JSON.
+
+
+   .. py:method:: text(*args, **kargs) -> io.TextIOWrapper
+
+      Return the response as text.
+
+
+
+.. py:function:: is_latest_build() -> bool
+
+   Checks if the cached build catalog is latest.
+
+
+.. py:function:: has_build(plugin: str) -> bool
+
+   Checks if a plugin has a build.
+
+
+.. py:function:: get_latest_sha(plugin: str) -> str
+
+   Gets the latest build sha for a plugin.
+
+
+.. py:function:: dortania_file_url(filepath: str) -> str
+
+   Formats a Dortania build repo file URL.
+
+   :param file: The remote filepath of the file.
+
+   :returns: The formatted Dortania build repo file URL.
+
+
+.. py:function:: dortania_release_url(plugin: str, commit: Optional[str] = None) -> str
+
+   Formats a Dortania build release URL.
+
+   :param plugin: The plugin to get the release URL for.
+   :param commit: The commit to get the release URL for. Defaults to the latest build.
+
+   :returns: The formatted Dortania build release URL.
+
+
+.. py:function:: github_api_request(endpoint: Optional[str] = None, url: Optional[str] = None) -> any
+
+   Gets a GitHub API request.
+
+   This method will automatically add the GitHub token from the environment.
+
+   :param endpoint: GitHub API endpoint.
+
+   :returns: API response.
+
+
+.. py:function:: github_rate_limit(kind: str = 'core', raise_error: float = False) -> int
+
+   Gets the GitHub API rate limit.
+
+   :param kind: The kind of GitHub API request to query.
+   :param raise_error: Raise an exception if the rate limit has been exceeded.
+
+   :returns: Remaining API calls allowed.
+
+   :raises Exception: If the rate limit has been exceeded.
+
+
+.. py:function:: get_latest_commit(repository: str, branch: str = 'main')
+
+   Get the latest commit of a branch in a GitHub repository.
+
+
+.. py:function:: github_suite_id(repository: str, commit: str, workflow_id: int, status: Optional[str] = 'completed') -> Union[int, None]
+
+   Gets the GitHub check suite ID for a given commit.
+
+   :param repository: GitHub repository name.
+   :param commit: Commit hash.
+
+   :returns: Check suite ID.
+
+
+.. py:function:: github_tag_names(repository: str, get_commits=False) -> Union[List[str], Tuple[List[str], List[str]]]
+
+   Returns a list of all repository tags.
+
+   :param repository: GitHub repository name.
+   :param get_commits: If True, additionally returns a list of commit hashes.
+
+   :returns: List of repository tags.
+
+
+.. py:function:: github_release_catalog(url: str) -> dict
+
+   Gets the catalog entry for a given release.
+
+   :param url: GitHub release catalog URL.
+
+   :returns: Release catalog.
+
+
+.. py:function:: github_file_url(repository: str, path: str, branch: str = 'main', tag: Optional[str] = None, commit: Optional[str] = None, raw: bool = False) -> str
+
+   Formats a GitHub file URL.
+
+   :param repository: GitHub repository name.
+   :param path: Relative path to file.
+   :param branch: Branch name.
+   :param tag: Tag name.
+   :param commit: Commit hash.
+   :param raw: If True, returns the raw URL.
+
+   :returns: URL of the file.
+
+   .. rubric:: Example
+
+   >>> github_file_url('foo/bar', path='file.json')
+   # -> "https://github.com/foo/bar/blob/main/file.json"
+   >>> github_file_url('foo/bar', path='file.json', branch='dev')
+   # -> "https://github.com/foo/bar/blob/dev/file.json"
+   >>> github_file_url('foo/bar', path='file.json', tag='v1.0.0')
+   # -> "https://github.com/foo/bar/blob/v1.0.0/file.json"
+   >>> github_file_url('foo/bar', path='file.json', commit='c0ffee')
+   # -> "https://github.com/foo/bar/blob/c0ffee/file.json"
+   >>> github_file_url('foo/bar', path='file.json', raw=True)
+   # -> "https://raw.githubusercontent.com/foo/bar/main/file.json"
+
+
+.. py:function:: github_archive_url(repository: str, branch: str = 'main', tag: Optional[str] = None, commit: Optional[str] = None) -> str
+
+   Formats a GitHub archive URL.
+
+   :param repository: GitHub repository name.
+   :param branch: Branch name.
+   :param tag: Tag name.
+   :param commit: Commit hash.
+
+   :returns: URL of the archive.
+
+   .. rubric:: Example
+
+   >>> github_archive_url('foo/bar')
+   # -> "https://github.com/foo/bar/archive/refs/heads/main.tar.gz"
+   >>> github_archive_url('foo/bar', branch='dev')
+   # -> "https://github.com/foo/bar/archive/refs/heads/dev.tar.gz"
+   >>> github_archive_url('foo/bar', tag='v1.0.0')
+   # -> "https://github.com/foo/bar/archive/refs/tags/v1.0.0.tar.gz"
+   >>> github_archive_url('foo/bar', commit='c0ffee')
+   # -> "https://github.com/foo/bar/archive/c0ffee.tar.gz"
+
+
+.. py:function:: github_release_url(repository: str, tag: Optional[str] = None) -> str
+
+   Formats a GitHub release URL.
+
+   :param repository: GitHub repository name.
+   :param tag: Tag name.
+
+   :returns: URL of the release.
+
+   .. rubric:: Example
+
+   >>> github_release_url('foo/bar')
+   # -> "https://github.com/foo/bar/releases/latest/v2.0.0"
+   >>> github_release_url('foo/bar', tag='v1.0.0')
+   # -> "https://github.com/foo/bar/releases/tag/v1.0.0"
+
+
+.. py:function:: github_artifacts_url(repository: str, branch: Optional[str] = None, workflow: Optional[str] = None, commit: Optional[str] = None, get_commit=False) -> Union[str, Tuple[str, str], None]
+
+   Formats a GitHub artifacts URL.
+
+   :param repository: GitHub repository name.
+   :param branch: Branch name.
+   :param tag: Tag name.
+   :param commit: Commit hash.
+   :param get_commit: If True, additionally returns the commit hash.
+
+   :returns: URL of the artifacts archive.
+
+
+.. py:data:: ResolverType
+
+   A type alias for the Resolver classes.
+
+.. py:class:: GitHubResolver(repository: str, path: ocebuild.sources.github.Optional[str] = None, branch: ocebuild.sources.github.Optional[str] = None, tag: ocebuild.sources.github.Optional[str] = None, workflow: ocebuild.sources.github.Optional[str] = None, commit: ocebuild.sources.github.Optional[str] = None, *args, tarball: ocebuild.sources.github.Optional[bool] = False, **kwargs)
+
+
+   Bases: :py:obj:`BaseResolver`
+
+   Resolves a GitHub URL based on the class parameters.
+
+   .. py:method:: extract_asset(resolver: ocebuild.sources.github.Union[TGitHubResolver, TDortaniaResolver], name: str, url: str, build: ocebuild.sources.github.Optional[Literal[RELEASE, DEBUG]] = None) -> str
+      :staticmethod:
+
+      Extracts the closest matching asset from a GitHub release url.
+
+
+   .. py:method:: resolve(build: ocebuild.sources.github.Optional[Literal[RELEASE, DEBUG]] = None) -> str
+
+      Returns a URL based on the class parameters.
+
+
+
+.. py:class:: DortaniaResolver(commit: ocebuild.sources.github.Optional[str] = None, *args, **kwargs)
+
+
+   Bases: :py:obj:`BaseResolver`
+
+   Resolves a Dortania build URL based on the class parameters.
+
+   .. py:method:: has_build(plugin: str)
+      :staticmethod:
+
+
+   .. py:method:: resolve(build: ocebuild.sources.github.Optional[Literal[RELEASE, DEBUG]] = None) -> str
+
+      Returns a URL based on the class parameters.
+
+
+
+.. py:class:: PathResolver(path: ocebuild.third_party.cpython.pathlib.Path, *args, **kwargs)
+
+
+   Bases: :py:obj:`BaseResolver`, :py:obj:`ocebuild.third_party.cpython.pathlib.Path`
+
+   Resolves a filepath based on the class parameters.
+
+   .. py:method:: glob(pattern: str) -> Generator[TPathResolver, any, None]
+
+      Iterates from a directory or from a file's parent directory.
+
+
+   .. py:method:: resolve(strict: bool = False) -> ocebuild.third_party.cpython.pathlib.Path
+
+      Resolves a filepath based on the class parameters.
+
+      If the path exists, the checksum is calculated and stored.
+
+      :param strict: If True, raises an error if the path does not exist.
+
+      :returns: The resolved filepath wrapped in a PathResolver instance.
+
+
+

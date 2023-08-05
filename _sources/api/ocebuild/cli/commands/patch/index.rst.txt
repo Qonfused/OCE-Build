@@ -1,0 +1,43 @@
+:py:mod:`ocebuild.cli.commands.patch`
+=====================================
+
+.. py:module:: ocebuild.cli.commands.patch
+
+.. autoapi-nested-parse::
+
+   CLI entrypoint for the patch command.
+
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ocebuild.cli.commands.patch.read_schema
+   ocebuild.cli.commands.patch.cli
+
+
+
+.. py:function:: read_schema(lockfile: ocebuild.cli.logging.Optional[dict] = None, **kwargs) -> dict
+
+   Reads the Sample.plist schema from the resolved OpenCorePkg version.
+
+   In case no lockfile is provided or no OpenCorePkg dependency is found, the
+   latest version of the Sample.plist schema will be used.
+
+   :param lockfile: The lockfile to read the OpenCore version from (Optional).
+   :param kwargs: Additional keyword arguments to pass to `get_configuration_schema`.
+
+   :returns: A dictionary representing failsafe values for the Sample.plist schema.
+
+
+.. py:function:: cli(env, cwd, out)
+
+   Patches an existing OpenCore configuration.
+
+

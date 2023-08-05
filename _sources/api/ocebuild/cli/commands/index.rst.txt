@@ -1,0 +1,64 @@
+:py:mod:`ocebuild.cli.commands`
+===============================
+
+.. py:module:: ocebuild.cli.commands
+
+.. autoapi-nested-parse::
+
+   Commands used for the OCE-Build CLI
+
+
+
+Submodules
+----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   build/index.rst
+   lock/index.rst
+   patch/index.rst
+
+
+Package Contents
+----------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ocebuild.cli.commands.build_command
+   ocebuild.cli.commands.lock_command
+   ocebuild.cli.commands.patch_command
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   ocebuild.cli.commands.cli_commands
+
+
+.. py:function:: build_command(env, cwd, out, clean, update, force)
+
+   Builds the project's OpenCore EFI directory.
+
+
+.. py:function:: lock_command(env, cwd, check, update, force)
+
+   Updates the project's lockfile.
+
+
+.. py:function:: patch_command(env, cwd, out)
+
+   Patches an existing OpenCore configuration.
+
+
+.. py:data:: cli_commands
+
+   The list of commands to register with the CLI.
+

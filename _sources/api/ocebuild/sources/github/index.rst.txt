@@ -1,0 +1,170 @@
+:py:mod:`ocebuild.sources.github`
+=================================
+
+.. py:module:: ocebuild.sources.github
+
+.. autoapi-nested-parse::
+
+   Methods for formatting and retrieving GitHub source URLs.
+
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ocebuild.sources.github.github_api_request
+   ocebuild.sources.github.github_rate_limit
+   ocebuild.sources.github.get_latest_commit
+   ocebuild.sources.github.github_suite_id
+   ocebuild.sources.github.github_tag_names
+   ocebuild.sources.github.github_release_catalog
+   ocebuild.sources.github.github_file_url
+   ocebuild.sources.github.github_archive_url
+   ocebuild.sources.github.github_release_url
+   ocebuild.sources.github.github_artifacts_url
+
+
+
+.. py:function:: github_api_request(endpoint: Optional[str] = None, url: Optional[str] = None) -> any
+
+   Gets a GitHub API request.
+
+   This method will automatically add the GitHub token from the environment.
+
+   :param endpoint: GitHub API endpoint.
+
+   :returns: API response.
+
+
+.. py:function:: github_rate_limit(kind: str = 'core', raise_error: float = False) -> int
+
+   Gets the GitHub API rate limit.
+
+   :param kind: The kind of GitHub API request to query.
+   :param raise_error: Raise an exception if the rate limit has been exceeded.
+
+   :returns: Remaining API calls allowed.
+
+   :raises Exception: If the rate limit has been exceeded.
+
+
+.. py:function:: get_latest_commit(repository: str, branch: str = 'main')
+
+   Get the latest commit of a branch in a GitHub repository.
+
+
+.. py:function:: github_suite_id(repository: str, commit: str, workflow_id: int, status: Optional[str] = 'completed') -> Union[int, None]
+
+   Gets the GitHub check suite ID for a given commit.
+
+   :param repository: GitHub repository name.
+   :param commit: Commit hash.
+
+   :returns: Check suite ID.
+
+
+.. py:function:: github_tag_names(repository: str, get_commits=False) -> Union[List[str], Tuple[List[str], List[str]]]
+
+   Returns a list of all repository tags.
+
+   :param repository: GitHub repository name.
+   :param get_commits: If True, additionally returns a list of commit hashes.
+
+   :returns: List of repository tags.
+
+
+.. py:function:: github_release_catalog(url: str) -> dict
+
+   Gets the catalog entry for a given release.
+
+   :param url: GitHub release catalog URL.
+
+   :returns: Release catalog.
+
+
+.. py:function:: github_file_url(repository: str, path: str, branch: str = 'main', tag: Optional[str] = None, commit: Optional[str] = None, raw: bool = False) -> str
+
+   Formats a GitHub file URL.
+
+   :param repository: GitHub repository name.
+   :param path: Relative path to file.
+   :param branch: Branch name.
+   :param tag: Tag name.
+   :param commit: Commit hash.
+   :param raw: If True, returns the raw URL.
+
+   :returns: URL of the file.
+
+   .. rubric:: Example
+
+   >>> github_file_url('foo/bar', path='file.json')
+   # -> "https://github.com/foo/bar/blob/main/file.json"
+   >>> github_file_url('foo/bar', path='file.json', branch='dev')
+   # -> "https://github.com/foo/bar/blob/dev/file.json"
+   >>> github_file_url('foo/bar', path='file.json', tag='v1.0.0')
+   # -> "https://github.com/foo/bar/blob/v1.0.0/file.json"
+   >>> github_file_url('foo/bar', path='file.json', commit='c0ffee')
+   # -> "https://github.com/foo/bar/blob/c0ffee/file.json"
+   >>> github_file_url('foo/bar', path='file.json', raw=True)
+   # -> "https://raw.githubusercontent.com/foo/bar/main/file.json"
+
+
+.. py:function:: github_archive_url(repository: str, branch: str = 'main', tag: Optional[str] = None, commit: Optional[str] = None) -> str
+
+   Formats a GitHub archive URL.
+
+   :param repository: GitHub repository name.
+   :param branch: Branch name.
+   :param tag: Tag name.
+   :param commit: Commit hash.
+
+   :returns: URL of the archive.
+
+   .. rubric:: Example
+
+   >>> github_archive_url('foo/bar')
+   # -> "https://github.com/foo/bar/archive/refs/heads/main.tar.gz"
+   >>> github_archive_url('foo/bar', branch='dev')
+   # -> "https://github.com/foo/bar/archive/refs/heads/dev.tar.gz"
+   >>> github_archive_url('foo/bar', tag='v1.0.0')
+   # -> "https://github.com/foo/bar/archive/refs/tags/v1.0.0.tar.gz"
+   >>> github_archive_url('foo/bar', commit='c0ffee')
+   # -> "https://github.com/foo/bar/archive/c0ffee.tar.gz"
+
+
+.. py:function:: github_release_url(repository: str, tag: Optional[str] = None) -> str
+
+   Formats a GitHub release URL.
+
+   :param repository: GitHub repository name.
+   :param tag: Tag name.
+
+   :returns: URL of the release.
+
+   .. rubric:: Example
+
+   >>> github_release_url('foo/bar')
+   # -> "https://github.com/foo/bar/releases/latest/v2.0.0"
+   >>> github_release_url('foo/bar', tag='v1.0.0')
+   # -> "https://github.com/foo/bar/releases/tag/v1.0.0"
+
+
+.. py:function:: github_artifacts_url(repository: str, branch: Optional[str] = None, workflow: Optional[str] = None, commit: Optional[str] = None, get_commit=False) -> Union[str, Tuple[str, str], None]
+
+   Formats a GitHub artifacts URL.
+
+   :param repository: GitHub repository name.
+   :param branch: Branch name.
+   :param tag: Tag name.
+   :param commit: Commit hash.
+   :param get_commit: If True, additionally returns the commit hash.
+
+   :returns: URL of the artifacts archive.
+
+

@@ -1,0 +1,46 @@
+:py:mod:`ocebuild.filesystem.cache`
+===================================
+
+.. py:module:: ocebuild.filesystem.cache
+
+.. autoapi-nested-parse::
+
+   Methods for handling cross-platform file caching operations.
+
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ocebuild.filesystem.cache.clear_cache
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   ocebuild.filesystem.cache.CACHE_DIR
+   ocebuild.filesystem.cache.UNPACK_DIR
+
+
+.. py:data:: CACHE_DIR
+
+   Global cache directory for storing and re-using files between builds.
+
+.. py:data:: UNPACK_DIR
+
+   Directory for unpacking and handling remote or cached archives.
+
+.. py:function:: clear_cache(cache_dirs: List[ocebuild.third_party.cpython.pathlib.Path])
+
+   Clears all cache directories
+
+

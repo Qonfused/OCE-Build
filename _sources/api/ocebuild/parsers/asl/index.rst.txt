@@ -1,0 +1,180 @@
+:py:mod:`ocebuild.parsers.asl`
+==============================
+
+.. py:module:: ocebuild.parsers.asl
+
+.. autoapi-nested-parse::
+
+   Helper functions for parsing ASL source code.
+
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ocebuild.parsers.asl.parse_definition_block
+   ocebuild.parsers.asl.parse_ssdt_namespace
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   ocebuild.parsers.asl.ASL_COMPILER_CONTROLS
+   ocebuild.parsers.asl.ASL_TYPES_SCOPES
+   ocebuild.parsers.asl.ASL_TYPES_CONDITIONALS
+   ocebuild.parsers.asl.ASL_PREFIX_MODIFIERS
+   ocebuild.parsers.asl.DEFINITION_BLOCK_ARGS
+   ocebuild.parsers.asl.RE_BLOCK_ARGS
+   ocebuild.parsers.asl.RE_IMPORT_TYPE
+   ocebuild.parsers.asl.RE_LOCAL_VAR
+   ocebuild.parsers.asl.RE_STATEMENT
+   ocebuild.parsers.asl.RE_NAME
+
+
+.. py:data:: ASL_COMPILER_CONTROLS
+   :value: ('External', 'Include')
+
+   Types of AST nodes that represent compiler controls.
+
+   For ASL Compiler Controls (19.16; Table), see:
+   https://uefi.org/htmlspecs/ACPI_Spec_6_4_html/19_ASL_Reference/ACPI_Source_Language_Reference.html#asl-compiler-controls
+
+.. py:data:: ASL_TYPES_SCOPES
+   :value: ('DefinitionBlock', 'Scope')
+
+   Types of AST nodes that represent scopes.
+
+.. py:data:: ASL_TYPES_CONDITIONALS
+   :value: ('If', 'ElseIf', 'Else')
+
+   Types of AST nodes that represent conditionals.
+
+.. py:data:: ASL_PREFIX_MODIFIERS
+   :value: ('\\', '^')
+
+   ASL name modifier prefixes.
+
+   For Definition Block Name Modifier Encodings (19.3; Table), see:
+   https://uefi.org/htmlspecs/ACPI_Spec_6_4_html/19_ASL_Reference/ACPI_Source_Language_Reference.html#definition-block-name-modifier-encodings
+
+   .. rubric:: Example
+
+   ```cpp
+   Scope (\PCI0)
+   {
+     Name (X, 3)
+     Scope (\)
+     {
+       Method (RQ) {Return (0)}
+     }
+     Name (^Y, 4)
+   }
+   ```
+   # ACPI Namespace -> PCI0.X, RQ, Y
+
+.. py:data:: DEFINITION_BLOCK_ARGS
+   :value: ('AMLFileName', 'TableSignature', 'ComplianceRevision', 'OEMID', 'TableID', 'OEMRevision')
+
+   The arguments of a definition block.
+
+   For DefinitionBlock (19.6.29), see:
+   https://uefi.org/htmlspecs/ACPI_Spec_6_4_html/19_ASL_Reference/ACPI_Source_Language_Reference.html#definitionblock-declare-definition-block
+
+.. py:data:: RE_BLOCK_ARGS
+   :value: '\\(((?:.*?),?\\s?)\\)'
+
+   Regular expression for matching block arguments.
+
+   Groups:
+     0: The matched line
+     1: The block arguments
+
+.. py:data:: RE_IMPORT_TYPE
+   :value: '\\(.*?,\\s?([a-zA-Z]+),?\\)?'
+
+   Regular expression for matching import types.
+
+   For External (Declare External Objects, 19.6.45), see:
+   https://uefi.org/htmlspecs/ACPI_Spec_6_4_html/19_ASL_Reference/ACPI_Source_Language_Reference.html#external-declare-external-objects
+
+   Groups:
+     0: The import type
+
+.. py:data:: RE_LOCAL_VAR
+   :value: '^(Arg|Local)(\\d+)$'
+
+   Regular expression for matching local-scoped object names.
+
+   For ArgX Objects (19.3.5.8.1), see:
+   https://uefi.org/htmlspecs/ACPI_Spec_6_4_html/19_ASL_Reference/ACPI_Source_Language_Reference.html#argx-objects
+
+   For LocalX Objects (19.3.5.8.2), see:
+   https://uefi.org/htmlspecs/ACPI_Spec_6_4_html/19_ASL_Reference/ACPI_Source_Language_Reference.html#localx-objects
+
+   Groups:
+     0: The object type
+     1: The variable index
+
+.. py:data:: RE_STATEMENT
+   :value: '^([a-zA-Z]+)\\s?\\((.*?)[,\\)]+?'
+
+   Regular expression for matching statements.
+
+   Groups:
+     0: The statement type.
+     1: The object name.
+
+.. py:data:: RE_NAME
+   :value: '^[A-Z\\^\\_\\\\][a-zA-Z0-9\\^\\_\\.\\\\]+$'
+
+   Regular expression for matching object names.
+
+   Groups:
+     0: The object name.
+
+.. py:function:: parse_definition_block(string: str) -> collections.OrderedDict
+
+   Parses arguments from a definition block line.
+
+   :param string: A definition block line.
+
+   :returns: A dictionary of definition block arguments.
+
+   :raises ValueError: If the line is not a valid definition block.
+
+   .. rubric:: Example
+
+   >>> parse_definition_block('DefinitionBlock ("", "DSDT", 2, "_ASUS_", ...)')
+   OrderedDict([('AMLFileName', ''),
+                ('TableSignature', 'DSDT'),
+                ('ComplianceRevision', 2),
+                ('OEMID', '_ASUS_'),
+                ('TableID', 'Notebook'),
+                ('OEMRevision', '0x01072009')])
+
+
+.. py:function:: parse_ssdt_namespace(lines: Union[List[str], io.TextIOWrapper]) -> dict
+
+   Parses an SSDT's namespace for imports and statement exports.
+
+   :param lines: A list of SSDT lines.
+
+   :returns: A dictionary of extracted SSDT information.
+
+   .. rubric:: Example
+
+   >>> parse_ssdt_namespace(open('path/to/ssdt.dsl', encoding='UTF-8'))
+   >>> with open('path/to/ssdt.dsl', encoding='UTF-8') as ssdt_file:
+   ...   ssdt_lines = [f.strip() for f in ssdt_file.readlines()]
+   ...   parse_ssdt_namespace(ssdt_lines)
+
+

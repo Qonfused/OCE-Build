@@ -1,0 +1,39 @@
+:py:mod:`ocebuild.third_party.cpython.plistlib`
+===============================================
+
+.. py:module:: ocebuild.third_party.cpython.plistlib
+
+.. autoapi-nested-parse::
+
+   Overrides the `plistlib` module to support backports and custom subclasses.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   ocebuild.third_party.cpython.plistlib.UID
+
+
+
+
+.. py:class:: UID(data)
+
+
+   Bases: :py:obj:`plistlib.UID`
+
+   A `plistlib.UID` subclass that enforces a 32-bit limit on the UID value.
+
+   Apple handles UIDs assuming 32-bit unsigned integers:
+     - [CF/CFBinaryPList.c#L138-L146](https://github.com/apple-oss-distributions/CF/blob/dc54c6bb1c1e5e0b9486c1d26dd5bef110b20bf3/CFBinaryPList.c#L138-L146)
+     - [CF/CFPropertyList.c#L1538-L1547](https://github.com/apple-oss-distributions/CF/blob/dc54c6bb1c1e5e0b9486c1d26dd5bef110b20bf3/CFPropertyList.c#L1538-L1547)
+
+   The original `plistlib.UID` class does not enforce this limit, so we must
+   override the constructor to ensure the value is within the 32-bit limit.
+
+

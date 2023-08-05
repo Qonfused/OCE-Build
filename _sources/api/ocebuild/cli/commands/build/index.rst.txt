@@ -1,0 +1,62 @@
+:py:mod:`ocebuild.cli.commands.build`
+=====================================
+
+.. py:module:: ocebuild.cli.commands.build
+
+.. autoapi-nested-parse::
+
+   CLI entrypoint for the build command.
+
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ocebuild.cli.commands.build.get_build_file
+   ocebuild.cli.commands.build.unpack_packages
+   ocebuild.cli.commands.build.extract_packages
+   ocebuild.cli.commands.build.extract_build_directory
+   ocebuild.cli.commands.build.cli
+
+
+
+.. py:function:: get_build_file(cwd: ocebuild.pipeline.packages.Union[str, ocebuild.third_party.cpython.pathlib.Path]) -> ocebuild.pipeline.build.Tuple[dict, dict, ocebuild.cli.logging.List[str], ocebuild.third_party.cpython.pathlib.Path, ocebuild.third_party.cpython.pathlib.Path]
+
+   Reads the build file configuration.
+
+   :param cwd: The current working directory.
+
+   :returns:   - The build configuration.
+               - The build variables.
+               - The build flags.
+               - The build file path.
+               - The project directory.
+   :rtype: A tuple containing
+
+
+.. py:function:: unpack_packages(resolvers: ocebuild.cli.logging.List[dict], project_dir: ocebuild.third_party.cpython.pathlib.Path) -> dict
+
+   Unpacks packages to a temporary directory.
+
+
+.. py:function:: extract_packages(build_vars: dict, lockfile: dict, resolvers: ocebuild.cli.logging.List[dict], packages: dict, build_dir: ocebuild.third_party.cpython.pathlib.Path) -> ocebuild.pipeline.build.Tuple[ocebuild.pipeline.packages.Union[ocebuild.third_party.cpython.pathlib.Path, None], dict]
+
+   Extracts packages for build entries satisfying the build configuration.
+
+
+.. py:function:: extract_build_directory(opencore_pkg: ocebuild.pipeline.packages.Union[str, ocebuild.third_party.cpython.pathlib.Path], extracted_entries: dict, build_dir: ocebuild.third_party.cpython.pathlib.Path) -> None
+
+   Extracts all package-extracted build entries to the build directory.
+
+
+.. py:function:: cli(env, cwd, out, clean, update, force)
+
+   Builds the project's OpenCore EFI directory.
+
+

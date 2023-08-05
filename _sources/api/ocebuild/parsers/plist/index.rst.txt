@@ -1,0 +1,59 @@
+:py:mod:`ocebuild.parsers.plist`
+================================
+
+.. py:module:: ocebuild.parsers.plist
+
+.. autoapi-nested-parse::
+
+   Parser for converting property list to a Python dictionary.
+
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ocebuild.parsers.plist.parse_plist
+   ocebuild.parsers.plist.write_plist
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   ocebuild.parsers.plist.PLIST_FORMATS
+
+
+.. py:data:: PLIST_FORMATS
+
+   Mapping of format names to plistlib `PlistFormat` enum values.
+
+.. py:function:: parse_plist(lines: Union[str, bytes, io.BufferedReader, io.TextIOWrapper], fmt: Union[None, ocebuild.third_party.cpython.plistlib.PlistFormat] = None, dict_type=dict) -> dict
+
+   Parses a native dictionary from a plist.
+
+   :param lines: Property list (plist) lines.
+   :param fmt: Format of the plist file.
+   :param dict_type: Type of dictionary to return.
+
+   :returns: A dictionary containing the parsed plist.
+
+
+.. py:function:: write_plist(config: dict, fmt: ocebuild.third_party.cpython.plistlib.PlistFormat = FMT_XML, sort_keys: bool = False) -> str
+
+   Writes a native dictionary to a plist.
+
+   :param config: Dictionary to be written.
+   :param fmt: Format of the plist file.
+   :param sort_keys: Whether to sort the keys in the output.
+
+   :returns: A string containing the written plist.
+
+

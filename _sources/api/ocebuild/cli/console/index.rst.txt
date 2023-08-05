@@ -1,0 +1,51 @@
+:py:mod:`ocebuild.cli.console`
+==============================
+
+.. py:module:: ocebuild.cli.console
+
+.. autoapi-nested-parse::
+
+   CLI Console Utilities.
+
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ocebuild.cli.console.traceback_wrapper
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   ocebuild.cli.console.START_TIME
+   ocebuild.cli.console.LOGGING_THEME
+   ocebuild.cli.console.console_wrapper
+
+
+.. py:data:: START_TIME
+
+   The start time of the CLI.
+
+.. py:data:: LOGGING_THEME
+
+   
+
+.. py:data:: console_wrapper
+
+   A wrapper for initializing a rich.console Console class instance.
+
+.. py:function:: traceback_wrapper(suppress: List[any], **kwargs)
+
+   Wraps exception traceback frames and formats a traceback with rich.
+
+

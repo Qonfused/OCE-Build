@@ -1,0 +1,66 @@
+:py:mod:`ocebuild.third_party`
+==============================
+
+.. py:module:: ocebuild.third_party
+
+.. autoapi-nested-parse::
+
+   Vendored third-party dependencies
+
+
+
+Subpackages
+-----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 3
+
+   cpython/index.rst
+
+
+Package Contents
+----------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ocebuild.third_party.inject_module
+   ocebuild.third_party.inject_module_namespace
+
+
+
+.. py:function:: inject_module(name: str, module: str) -> None
+
+   Injects a module into the current Python runtime.
+
+   This will override all consumers of the module, which may cause unexpected
+   behavior if the new module is not compatible with the current runtime.
+
+   Note that if a module is imported before this function is called, it will not
+   be updated with the new module. This is useful for overriding modules that are
+   imported by other dependencies or library consumers.
+
+   Use this function with extreme caution!
+
+   :param name: The name of the module to inject.
+   :param module: The module path to inject.
+
+
+.. py:function:: inject_module_namespace(module, exclude: Optional[set] = None, namespace=globals()) -> Set[str]
+
+   Injects all exported names from a module into the current namespace.
+
+   This excludes built-ins and duplicate names to ensure no existing names are
+   overwritten. This is useful for extending existing modules that may have
+   internal names that are not exported.
+
+   :param module: The module to inject.
+   :param exclude: A set of names to exclude from the module. (Optional)
+   :param namespace: The namespace to inject the module into. (Default: globals())
+
+   :returns: A set of all injected names.
+
+

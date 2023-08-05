@@ -1,0 +1,62 @@
+:py:mod:`ocebuild.sources.dortania`
+===================================
+
+.. py:module:: ocebuild.sources.dortania
+
+.. autoapi-nested-parse::
+
+   Methods for formatting and retrieving Dortania source URLs.
+
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ocebuild.sources.dortania.is_latest_build
+   ocebuild.sources.dortania.has_build
+   ocebuild.sources.dortania.get_latest_sha
+   ocebuild.sources.dortania.dortania_file_url
+   ocebuild.sources.dortania.dortania_release_url
+
+
+
+.. py:function:: is_latest_build() -> bool
+
+   Checks if the cached build catalog is latest.
+
+
+.. py:function:: has_build(plugin: str) -> bool
+
+   Checks if a plugin has a build.
+
+
+.. py:function:: get_latest_sha(plugin: str) -> str
+
+   Gets the latest build sha for a plugin.
+
+
+.. py:function:: dortania_file_url(filepath: str) -> str
+
+   Formats a Dortania build repo file URL.
+
+   :param file: The remote filepath of the file.
+
+   :returns: The formatted Dortania build repo file URL.
+
+
+.. py:function:: dortania_release_url(plugin: str, commit: Optional[str] = None) -> str
+
+   Formats a Dortania build release URL.
+
+   :param plugin: The plugin to get the release URL for.
+   :param commit: The commit to get the release URL for. Defaults to the latest build.
+
+   :returns: The formatted Dortania build release URL.
+
+

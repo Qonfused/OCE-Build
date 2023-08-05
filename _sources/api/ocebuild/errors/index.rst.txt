@@ -1,0 +1,87 @@
+:py:mod:`ocebuild.errors`
+=========================
+
+.. py:module:: ocebuild.errors
+
+.. autoapi-nested-parse::
+
+   Error instrospection and handling utilities.
+
+
+
+Submodules
+----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   _lib/index.rst
+   types/index.rst
+   validation/index.rst
+
+
+Package Contents
+----------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ocebuild.errors.disable_exception_traceback
+   ocebuild.errors.wrap_exception
+
+
+
+.. py:function:: disable_exception_traceback(tracebacklimit: int = 0)
+
+   Suppresses stack trace information from an exception.
+
+   :param tracebacklimit: The number of stack frames to show. Defaults to 0.
+
+   .. rubric:: Example
+
+   >>> with disable_exception_traceback():
+   ...   raise Exception('This exception will not show a stack trace.')
+   # -> Exception: This exception will not show a stack trace.
+
+
+.. py:function:: wrap_exception(suppress: Optional[List[str]] = None, suppress_internal: bool = True, suppress_stdlib: bool = False, hide_modules: Optional[List[types.ModuleType]] = None, hide_suppressed: bool = True, hide_locals: bool = True, max_frames: int = 100, use_rich: bool = False)
+
+   Hides internal stackframes with an optional stylized stack trace.
+
+   :param suppress: A list of paths to suppress from the stack trace.
+   :param suppress_internal: Whether to suppress internal frames (default: True).
+   :param suppress_stdlib: Whether to suppress standard library frames (default: False).
+   :param hide_modules: A list of modules to hide from the stack trace.
+   :param hide_suppressed: Whether to hide suppressed frames (default: True).
+   :param hide_locals: Whether to hide local variables (default: True).
+   :param max_frames: The maximum number of frames to show (default: 100).
+   :param use_rich: Whether to use rich to display the stack trace (default: False).
+
+   .. rubric:: Example
+
+   >>> try:
+   ...   raise Exception('This exception will not show internal frames.')
+   ... except Exception:
+   ...   wrap_exception()
+   # -> Exception: This exception will not show internal frames.
+
+
+.. py:exception:: GitHubRateLimit(message: str, rate_limit: dict)
+
+
+   Bases: :py:obj:`Exception`
+
+   Indicates that the GitHub API rate limit has been exceeded.
+
+
+.. py:exception:: PathValidationError(message: str, name: str, path: str, kind: str)
+
+
+   Bases: :py:obj:`Exception`
+
+   Indicates that a path does not match a given tree schema.
+
+

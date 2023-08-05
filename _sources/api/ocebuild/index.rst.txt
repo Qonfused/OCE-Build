@@ -1,0 +1,49 @@
+:py:mod:`ocebuild`
+==================
+
+.. py:module:: ocebuild
+
+.. autoapi-nested-parse::
+
+   Portable OpenCore EFI dependency & build manager.
+
+
+
+Subpackages
+-----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 3
+
+   cli/index.rst
+   errors/index.rst
+   filesystem/index.rst
+   parsers/index.rst
+   pipeline/index.rst
+   sources/index.rst
+   third_party/index.rst
+   versioning/index.rst
+
+
+Submodules
+----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   constants/index.rst
+   version/index.rst
+
+
+Package Contents
+----------------
+
+.. py:data:: ENV
+
+   Initialized wrapper to securely handle environmental variables.
+
+.. py:data:: __version__
+   :value: '0.0.0-dev'
+
+   
+

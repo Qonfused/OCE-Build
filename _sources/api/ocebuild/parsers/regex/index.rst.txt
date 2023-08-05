@@ -1,0 +1,35 @@
+:py:mod:`ocebuild.parsers.regex`
+================================
+
+.. py:module:: ocebuild.parsers.regex
+
+.. autoapi-nested-parse::
+
+   Helper functions for parsing and executing Regex patterns.
+
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ocebuild.parsers.regex.re_match
+   ocebuild.parsers.regex.re_search
+
+
+
+.. py:function:: re_match(pattern, string, group: int = 0, multiline: bool = False) -> Union[Tuple[str], None]
+
+   Match for a pattern in a string.
+
+
+.. py:function:: re_search(pattern, string, group: int = 0, multiline: bool = False) -> Union[Tuple[str], None]
+
+   Search for a pattern in a string.
+
+

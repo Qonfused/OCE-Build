@@ -1,0 +1,43 @@
+:py:mod:`ocebuild.errors.validation`
+====================================
+
+.. py:module:: ocebuild.errors.validation
+
+.. autoapi-nested-parse::
+
+   Validation methods used for testing and at runtime.
+
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ocebuild.errors.validation.validate
+   ocebuild.errors.validation.validate_path_tree
+
+
+
+.. py:function:: validate(call: Callable[[], bool], err: Union[Exception, Callable[[Tuple[any, Ellipsis]], Exception]], msg: Optional[str]) -> None
+
+   Throws a ValidationError with the given message.
+
+
+.. py:function:: validate_path_tree(path: Union[str, PathLike[str]], tree: dict, delimiter: str = '/') -> Literal[True]
+
+   Validates a given path matches a tree schema.
+
+   :param path: The path to validate.
+   :param tree: The tree schema to validate against.
+   :param delimiter: The delimiter to use when flattening the tree.
+
+   :raises PathValidationError: If the path does not match the tree schema.
+
+   :returns: True if the path matches the tree schema.
+
+

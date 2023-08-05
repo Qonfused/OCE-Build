@@ -1,0 +1,76 @@
+:py:mod:`ocebuild.parsers.dict`
+===============================
+
+.. py:module:: ocebuild.parsers.dict
+
+.. autoapi-nested-parse::
+
+   Dictionary helper functions.
+
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ocebuild.parsers.dict.flatten_dict
+   ocebuild.parsers.dict.nested_get
+   ocebuild.parsers.dict.nested_set
+   ocebuild.parsers.dict.nested_del
+   ocebuild.parsers.dict.merge_dict
+
+
+
+.. py:function:: flatten_dict(dic: dict, delimiter: str = '.') -> Dict[str, any]
+
+   Flattens a dictionary.
+
+   :param dic: The dictionary to flatten.
+   :param delimiter: custom key delimiter.
+   :type delimiter: optional
+
+   :returns: A flattened dictionary
+
+
+.. py:function:: nested_get(dic: dict, keys: List[str], default: Optional[any] = None) -> Union[dict, any, None]
+
+   Retrieves a nested value from a dictionary.
+
+   :param dic: The dictionary to retrieve the value from.
+   :param keys: The keys to traverse the dictionary.
+
+   :returns: The value at the end of the keys list.
+
+
+.. py:function:: nested_set(dic: dict, keys: List[str], value: any) -> None
+
+   Sets a nested value in a dictionary.
+
+   :param dic: The dictionary to set the value in.
+   :param keys: The keys to traverse the dictionary.
+   :param value: The value to set.
+
+
+.. py:function:: nested_del(dic: dict, keys: List[str]) -> None
+
+   Deletes a nested value in a dictionary.
+
+   :param dic: The dictionary to delete the value from.
+   :param keys: The keys to traverse the dictionary.
+
+
+.. py:function:: merge_dict(a: dict, b: dict) -> dict
+
+   Merges two dictionaries recursively.
+
+   :param a: The first dictionary.
+   :param b: The second dictionary.
+
+   :returns: The merged dictionary.
+
+

@@ -1,0 +1,140 @@
+:py:mod:`ocebuild.filesystem`
+=============================
+
+.. py:module:: ocebuild.filesystem
+
+.. autoapi-nested-parse::
+
+   Shared filesystem utilities.
+
+
+
+Submodules
+----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   archives/index.rst
+   cache/index.rst
+   posix/index.rst
+
+
+Package Contents
+----------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ocebuild.filesystem.extract_archive
+   ocebuild.filesystem.clear_cache
+   ocebuild.filesystem.copy
+   ocebuild.filesystem.remove
+   ocebuild.filesystem.rename
+   ocebuild.filesystem.move
+   ocebuild.filesystem.glob
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   ocebuild.filesystem.CACHE_DIR
+   ocebuild.filesystem.UNPACK_DIR
+
+
+.. py:function:: extract_archive(url: Union[str, urllib.request.Request], persist: bool = False) -> Generator[ocebuild.third_party.cpython.pathlib.Path, str, None]
+
+   Extracts a file from a URL and yields a temporary extraction directory.
+
+   :param url: URL of the archive file.
+   :param persist: Flag to disable cleanup of the temporary directory.
+
+   :Yields: *tmp_dir (str)* -- Path to the temporary directory.
+
+   .. rubric:: Example
+
+   >>> with extract_archive('https://example.com/foo.zip') as tmp_dir:
+   print(tmp_dir)
+   # -> "/tmp/xxxxxx"
+
+
+.. py:data:: CACHE_DIR
+
+   Global cache directory for storing and re-using files between builds.
+
+.. py:data:: UNPACK_DIR
+
+   Directory for unpacking and handling remote or cached archives.
+
+.. py:function:: clear_cache(cache_dirs: List[ocebuild.third_party.cpython.pathlib.Path])
+
+   Clears all cache directories
+
+
+.. py:function:: copy(src: Union[str, PathLike[str]], dest: Union[str, PathLike[str]], **kwargs) -> None
+
+   Copies a file or directory.
+
+   :param path: Path to the file or directory.
+
+   :raises ValueError: If the path is not a file or directory.
+
+
+.. py:function:: remove(path: Union[str, PathLike[str]]) -> None
+
+   Removes a file or directory.
+
+   :param path: Path to the file or directory.
+
+   :raises ValueError: If the path is not a file or directory.
+
+
+.. py:function:: rename(path: Union[str, PathLike[str]], name: str) -> ocebuild.third_party.cpython.pathlib.Path
+
+   Renames a file or directory.
+
+   :param path: Path to the file or directory.
+   :param name: New name for the file or directory.
+
+   :returns: The renamed path.
+
+   :raises FileNotFoundError: If the file or directory does not exist.
+   :raises OSError: If the file or directory cannot be renamed.
+
+
+.. py:function:: move(src: Union[str, PathLike[str]], target: Union[str, PathLike[str]], name: Optional[str] = None, **kwargs) -> ocebuild.third_party.cpython.pathlib.Path
+
+   Moves a file or directory to a new location.
+
+   This is a simple wrapper over shutil's `move` method that
+   recursively creates missing directories in the target path.
+
+   :param src: Source path.
+   :param target: Destination path.
+   :param name: Destination file or directory name.
+   :type name: Optional
+
+   :returns: The destination path.
+
+
+.. py:function:: glob(directory: Union[str, PathLike[str]], pattern: str, include: Optional[Union[str, List[str]]] = None, exclude: Optional[Union[str, List[str]]] = None, first: Optional[bool] = False) -> Union[Generator[ocebuild.third_party.cpython.pathlib.Path, None, None], ocebuild.third_party.cpython.pathlib.Path, None]
+
+   Returns a list of paths matching the given pattern.
+
+   :param directory: Directory to search.
+   :param pattern: Glob pattern.
+   :param include: A glob pattern or list of glob patterns to include.
+   :param exclude: A glob pattern or list of glob patterns to exclude.
+   :param first: Whether to return only the first match.
+   :type first: Optional
+
+   :returns: A list of matching paths.
+             Instead returns the first matching path if `first` is `True`.
+
+

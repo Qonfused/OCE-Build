@@ -1,0 +1,70 @@
+:py:mod:`ocebuild.cli.interactive`
+==================================
+
+.. py:module:: ocebuild.cli.interactive
+
+.. autoapi-nested-parse::
+
+   CLI Interactive Utilities.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   ocebuild.cli.interactive.log_progress
+
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ocebuild.cli.interactive.progress_bar
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   ocebuild.cli.interactive.Progress
+
+
+.. py:class:: log_progress(*columns: Union[str, ProgressColumn], console: Optional[rich.console.Console] = None, auto_refresh: bool = True, refresh_per_second: float = 10, speed_estimate_period: float = 30.0, transient: bool = False, redirect_stdout: bool = True, redirect_stderr: bool = True, get_time: Optional[GetTimeCallable] = None, disable: bool = False, expand: bool = False)
+
+
+   Bases: :py:obj:`rich.progress.Progress`
+
+   An extended rich.progress.Progress class for the CLI.
+
+   .. py:method:: get_renderables()
+
+      Renders the progress bar into a `console.log` aligned table
+
+
+
+.. py:data:: Progress
+
+   A customized `log_progress` class wrapper.
+
+.. py:function:: progress_bar(description: str, *args, wrap: Callable = track, **kwargs) -> Generator[Iterator, any, None]
+
+   Stylized progress bar for the CLI.
+
+   :param description: The description to display for the progress bar.
+   :param \*args: Additional arguments to pass to `rich.track()`.
+   :param wrap: The function to wrap the progress bar with. (Optional)
+                This can be a parent rich.Progress() context, or a custom wrapper.
+   :param \*\*kwargs: Additional keyword arguments to pass to `rich.track()`.
+
+   :returns: A partial for a generator that yields an iterator for the progress bar.
+
+

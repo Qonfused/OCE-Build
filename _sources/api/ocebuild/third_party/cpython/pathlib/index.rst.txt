@@ -1,0 +1,76 @@
+:py:mod:`ocebuild.third_party.cpython.pathlib`
+==============================================
+
+.. py:module:: ocebuild.third_party.cpython.pathlib
+
+.. autoapi-nested-parse::
+
+   Overrides the `pathlib` module to support backports and custom subclasses.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   ocebuild.third_party.cpython.pathlib.Path
+   ocebuild.third_party.cpython.pathlib.PurePath
+
+
+
+
+.. py:class:: Path(*args, **kwargs)
+
+
+   Bases: :py:obj:`BasePath`, :py:obj:`Path_flavour := type`\ (\ :py:obj:`pathlib.Path`\ (\ )\ )
+
+   Provides a `pathlib.Path` class that can be subclassed idiomatically.
+
+   .. py:attribute:: TPath
+
+      Path class type alias for overriding built-in method signatures.
+      @internal
+
+   .. py:attribute:: cls_flavour
+
+      
+
+   .. py:attribute:: subclasses
+      :type: List[Path.TPath]
+      :value: []
+
+      
+
+   .. py:method:: relative(path: Union[str, TPath] = '.', from_parent: bool = False) -> str
+
+      Resolves a relative representation from a file or directory path.
+
+
+
+.. py:class:: PurePath(*args, **kwargs)
+
+
+   Bases: :py:obj:`BasePath`, :py:obj:`PurePath_flavour := type`\ (\ :py:obj:`pathlib.PurePath`\ (\ )\ )
+
+   Provides a `pathlib.PurePath` class that can be subclassed idiomatically.
+
+   .. py:attribute:: TPurePath
+
+      PurePath class type alias for overriding built-in method signatures.
+      @internal
+
+   .. py:attribute:: cls_flavour
+
+      
+
+   .. py:attribute:: subclasses
+      :type: List[PurePath.TPurePath]
+      :value: []
+
+      
+
+

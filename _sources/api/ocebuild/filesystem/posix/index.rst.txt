@@ -1,0 +1,89 @@
+:py:mod:`ocebuild.filesystem.posix`
+===================================
+
+.. py:module:: ocebuild.filesystem.posix
+
+.. autoapi-nested-parse::
+
+   Methods for handling cross-platform file system operations.
+
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ocebuild.filesystem.posix.copy
+   ocebuild.filesystem.posix.remove
+   ocebuild.filesystem.posix.rename
+   ocebuild.filesystem.posix.move
+   ocebuild.filesystem.posix.glob
+
+
+
+.. py:function:: copy(src: Union[str, PathLike[str]], dest: Union[str, PathLike[str]], **kwargs) -> None
+
+   Copies a file or directory.
+
+   :param path: Path to the file or directory.
+
+   :raises ValueError: If the path is not a file or directory.
+
+
+.. py:function:: remove(path: Union[str, PathLike[str]]) -> None
+
+   Removes a file or directory.
+
+   :param path: Path to the file or directory.
+
+   :raises ValueError: If the path is not a file or directory.
+
+
+.. py:function:: rename(path: Union[str, PathLike[str]], name: str) -> ocebuild.third_party.cpython.pathlib.Path
+
+   Renames a file or directory.
+
+   :param path: Path to the file or directory.
+   :param name: New name for the file or directory.
+
+   :returns: The renamed path.
+
+   :raises FileNotFoundError: If the file or directory does not exist.
+   :raises OSError: If the file or directory cannot be renamed.
+
+
+.. py:function:: move(src: Union[str, PathLike[str]], target: Union[str, PathLike[str]], name: Optional[str] = None, **kwargs) -> ocebuild.third_party.cpython.pathlib.Path
+
+   Moves a file or directory to a new location.
+
+   This is a simple wrapper over shutil's `move` method that
+   recursively creates missing directories in the target path.
+
+   :param src: Source path.
+   :param target: Destination path.
+   :param name: Destination file or directory name.
+   :type name: Optional
+
+   :returns: The destination path.
+
+
+.. py:function:: glob(directory: Union[str, PathLike[str]], pattern: str, include: Optional[Union[str, List[str]]] = None, exclude: Optional[Union[str, List[str]]] = None, first: Optional[bool] = False) -> Union[Generator[ocebuild.third_party.cpython.pathlib.Path, None, None], ocebuild.third_party.cpython.pathlib.Path, None]
+
+   Returns a list of paths matching the given pattern.
+
+   :param directory: Directory to search.
+   :param pattern: Glob pattern.
+   :param include: A glob pattern or list of glob patterns to include.
+   :param exclude: A glob pattern or list of glob patterns to exclude.
+   :param first: Whether to return only the first match.
+   :type first: Optional
+
+   :returns: A list of matching paths.
+             Instead returns the first matching path if `first` is `True`.
+
+

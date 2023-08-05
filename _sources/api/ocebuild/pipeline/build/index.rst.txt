@@ -1,0 +1,43 @@
+:py:mod:`ocebuild.pipeline.build`
+=================================
+
+.. py:module:: ocebuild.pipeline.build
+
+.. autoapi-nested-parse::
+
+   Methods for handling and manipulating the build configuration.
+
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ocebuild.pipeline.build.read_build_file
+   ocebuild.pipeline.build.unpack_build_entries
+
+
+
+.. py:function:: read_build_file(filepath: str, normalize_entries: bool = True) -> Tuple[dict, dict, List[str]]
+
+   Read the build configuration from the specified build file.
+
+   :param filepath: The path to the build file.
+   :param normalize_entries: Whether to normalize the entries in the build file.
+
+   :returns:   - The build configuration.
+               - The build variables.
+               - The build flags.
+   :rtype: A tuple containing
+
+
+.. py:function:: unpack_build_entries(resolvers: List[dict], project_dir: ocebuild.third_party.cpython.pathlib.Path, *args, __wrapper: Optional[Iterator] = None, **kwargs) -> dict
+
+   Unpacks the build entries from the build configuration.
+
+

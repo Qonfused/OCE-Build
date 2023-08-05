@@ -1,0 +1,76 @@
+:py:mod:`ocebuild.parsers.types`
+================================
+
+.. py:module:: ocebuild.parsers.types
+
+.. autoapi-nested-parse::
+
+   Type parsing helper functions.
+
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ocebuild.parsers.types.encode_data
+   ocebuild.parsers.types.decode_data
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   ocebuild.parsers.types.RE_VALID_BASE64
+   ocebuild.parsers.types.RE_VALID_HEX
+
+
+.. py:data:: RE_VALID_BASE64
+   :value: '^([a-zA-Z0-9+/]{4})*([a-zA-Z0-9+/]{3}=|[a-zA-Z0-9+/]{2}==)?$'
+
+   Regular expression to match a valid base64 string.
+
+.. py:data:: RE_VALID_HEX
+   :value: '^([a-fA-F0-9]{2})*$'
+
+   Regular expression to match a valid hexadecimal string.
+
+.. py:function:: encode_data(value: str) -> bytes
+
+   Encodes a base64 or hexadecimal string to a binary representation.
+
+   :param value: The base64 or hexadecimal string to encode.
+
+   :raises ValueError: If the string is not a valid base64 or hexadecimal string.
+
+   :returns: A binary representation of the string.
+
+   .. rubric:: Examples
+
+   >>> encode_data('<01 00 00 00>')
+   b'\x01\x00\x00\x00'
+   >>> encode_data('01000000')
+   b'\x01\x00\x00\x00'
+   >>> encode_data('AQAAAA==')
+   b'\x01\x00\x00\x00'
+
+
+.. py:function:: decode_data(value: bytes, enc: str = 'base64') -> str
+
+   Decodes a binary representation to a base64 string.
+
+   :param value: The binary representation to decode.
+   :param enc: The encoding format to return. Valid values are 'base64' and 'hex'.
+
+   :raises ValueError: If the format is not a valid format.
+
+   :returns: A base64 or hex string representation of the binary data.
+
+

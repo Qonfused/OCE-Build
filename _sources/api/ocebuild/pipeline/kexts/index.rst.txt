@@ -1,0 +1,57 @@
+:py:mod:`ocebuild.pipeline.kexts`
+=================================
+
+.. py:module:: ocebuild.pipeline.kexts
+
+.. autoapi-nested-parse::
+
+   Methods for retrieving and handling Kext packages and binaries.
+
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ocebuild.pipeline.kexts.parse_kext_plist
+   ocebuild.pipeline.kexts.sort_kext_cfbundle
+   ocebuild.pipeline.kexts.extract_kexts
+
+
+
+.. py:function:: parse_kext_plist(filepath: Union[str, ocebuild.third_party.cpython.pathlib.Path]) -> dict
+
+   Parses the Info.plist of a Kext.
+
+
+.. py:function:: sort_kext_cfbundle(filepaths: List[Union[str, ocebuild.third_party.cpython.pathlib.Path]]) -> collections.OrderedDict
+
+   Sorts the injection order of Kexts based on their CFBundleidentifier.
+
+   This implementation uses a topological sort to order Kexts based on their
+   CFBundleidentifiers and versions. This handles duplicate versions across
+   kexts and their dependencies and ensures that Kexts are injected in the
+   correct order with respect to their dependencies and notes their resolved
+   minimum required versions.
+
+   Dependent Kexts are always injected before their dependents, and duplicate
+   CFBundleIdentifier dependencies are inserted in order of the latest version
+   strings. Additionally, any bundled Kexts are grouped with their parent Kexts.
+
+   :param filepaths: A list of filepaths to Kext *.kext files.
+
+   :raises ValueError: If a Kext is missing a CFBundleidentifier key or a dependency.
+
+   :returns: An sorted dictionary array of Kexts sorted by their CFBundleIdentifier.
+
+
+.. py:function:: extract_kexts(directory: Union[str, ocebuild.third_party.cpython.pathlib.Path], build: Literal[RELEASE, DEBUG] = 'RELEASE') -> dict
+
+   Extracts the metadata of all Kexts in a directory.
+
+

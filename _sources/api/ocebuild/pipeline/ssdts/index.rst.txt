@@ -1,0 +1,82 @@
+:py:mod:`ocebuild.pipeline.ssdts`
+=================================
+
+.. py:module:: ocebuild.pipeline.ssdts
+
+.. autoapi-nested-parse::
+
+   Methods for retrieving and handling SSDT binaries and source code.
+
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ocebuild.pipeline.ssdts.extract_iasl_binary
+   ocebuild.pipeline.ssdts.iasl_wrapper
+   ocebuild.pipeline.ssdts.translate_ssdts
+   ocebuild.pipeline.ssdts.sort_ssdt_symbols
+   ocebuild.pipeline.ssdts.extract_ssdts
+
+
+
+.. py:function:: extract_iasl_binary(url: Optional[str] = None, cache: bool = True, persist: bool = False) -> Generator[Callable[[List[str]], str], any, None]
+
+   Extracts an iasl binary and yields a subprocess wrapper.
+
+   :param url: The URL to the iasl binary. If not provided, the URL will be
+               automatically retrieved based on the current platform.
+   :param cache: Whether to cache the extracted iasl binary for subsequent calls.
+   :param persist: Whether to persist the binary wrapper outside the current context.
+
+   :Yields: A subprocess wrapper for the extracted iasl binary.
+
+
+.. py:function:: iasl_wrapper(cache: bool = True) -> Generator[Callable[[List[str]], str], any, None]
+
+   Returns a subprocess wrapper for an existing or extracted iasl binary.
+
+   By default, this method will attempt to locate an existing iasl binary on the
+   system. If one is not found, it will extract a temporary iasl binary from the
+   Qonfused/iASL repository.
+
+   :param cache: Whether to cache the extracted iasl binary.
+
+   :Yields: A subprocess wrapper for the iasl binary.
+
+
+.. py:function:: translate_ssdts(filepaths: List[Union[str, ocebuild.third_party.cpython.pathlib.Path]], directory: Optional[Union[str, ocebuild.third_party.cpython.pathlib.Path]] = None, persist: bool = False) -> Generator[List[ocebuild.third_party.cpython.pathlib.Path], any, None]
+
+   Decompiles or compiles SSDT tables using iasl.
+
+   :param filepaths: A list of filepaths to SSDT *.aml or *.dsl files.
+   :param persist: Whether to persist the SSDT files.
+
+   :Yields: A list of filepaths to the compiled + decompiled SSDT files.
+
+
+.. py:function:: sort_ssdt_symbols(filepaths: List[Union[str, ocebuild.third_party.cpython.pathlib.Path]]) -> collections.OrderedDict
+
+   Sorts the injection order of SSDT tables by resolving symbolic references.
+
+   This is a naive implementation that does not prune conditional branches or
+   build flags outside of standard ACPI spec. It is intended to be used as a
+   baseline reference for the injection order of SSDT tables in the absence of
+   information about the system's DSDT.
+
+   :param filepaths: A list of filepaths to SSDT *.dsl files.
+
+   :returns: An ordered dictionary of SSDT table names with their exported symbols.
+
+
+.. py:function:: extract_ssdts(directory: Union[str, ocebuild.third_party.cpython.pathlib.Path]) -> dict
+
+   Extracts the metadata of all SSDTs in a directory.
+
+

@@ -1,0 +1,888 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" /><link rel="next" title="ocebuild.sources._lib" href="_lib/index.html" /><link rel="prev" title="ocebuild.pipeline.ssdts" href="../pipeline/ssdts/index.html" />
+
+    <!-- Generated with Sphinx 7.1.2 and Furo 2023.07.26 -->
+        <title>ocebuild.sources - OCE Build</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=362ab14a" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=135e06be" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=eafc0fe6" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=36a5483c" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../../index.html"><div class="brand">OCE Build</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><div class="sidebar-scroll"><a class="sidebar-brand" href="../../../index.html">
+  
+  
+  <span class="sidebar-brand-text">OCE Build</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../schema.html">Schema</a></li>
+<li class="toctree-l1 current has-children"><a class="reference internal" href="../../index.html">API Reference</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of API Reference</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2 current has-children"><a class="reference internal" href="../index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild</span></code></a><input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of ocebuild</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l3 has-children"><a class="reference internal" href="../cli/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.cli</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of ocebuild.cli</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../cli/commands/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.cli.commands</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of ocebuild.cli.commands</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../cli/commands/build/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.cli.commands.build</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../cli/commands/lock/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.cli.commands.lock</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../cli/commands/patch/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.cli.commands.patch</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../cli/__main__/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.cli.__main__</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../cli/_lib/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.cli._lib</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../cli/console/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.cli.console</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../cli/interactive/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.cli.interactive</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../cli/logging/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.cli.logging</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../errors/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.errors</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle navigation of ocebuild.errors</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../errors/_lib/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.errors._lib</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../errors/types/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.errors.types</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../errors/validation/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.errors.validation</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../filesystem/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.filesystem</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle navigation of ocebuild.filesystem</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../filesystem/archives/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.filesystem.archives</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../filesystem/cache/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.filesystem.cache</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../filesystem/posix/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.filesystem.posix</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../parsers/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.parsers</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle navigation of ocebuild.parsers</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../parsers/_lib/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.parsers._lib</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../parsers/asl/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.parsers.asl</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../parsers/dict/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.parsers.dict</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../parsers/plist/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.parsers.plist</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../parsers/regex/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.parsers.regex</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../parsers/schema/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.parsers.schema</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../parsers/types/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.parsers.types</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../parsers/yaml/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.parsers.yaml</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../pipeline/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.pipeline</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><div class="visually-hidden">Toggle navigation of ocebuild.pipeline</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../pipeline/build/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.pipeline.build</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pipeline/config/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.pipeline.config</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pipeline/kexts/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.pipeline.kexts</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pipeline/lock/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.pipeline.lock</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pipeline/opencore/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.pipeline.opencore</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pipeline/packages/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.pipeline.packages</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pipeline/ssdts/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.pipeline.ssdts</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3 current has-children current-page"><a class="current reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.sources</span></code></a><input checked="" class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><div class="visually-hidden">Toggle navigation of ocebuild.sources</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="_lib/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.sources._lib</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="binary/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.sources.binary</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dortania/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.sources.dortania</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="github/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.sources.github</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="resolver/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.sources.resolver</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../third_party/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.third_party</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><div class="visually-hidden">Toggle navigation of ocebuild.third_party</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../third_party/cpython/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.third_party.cpython</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><div class="visually-hidden">Toggle navigation of ocebuild.third_party.cpython</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../third_party/cpython/pathlib/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.third_party.cpython.pathlib</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../third_party/cpython/plistlib/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.third_party.cpython.plistlib</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../versioning/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.versioning</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><div class="visually-hidden">Toggle navigation of ocebuild.versioning</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../versioning/semver/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.versioning.semver</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../constants/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.constants</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../version/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.version</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="edit-this-page">
+  <a class="muted-link" href="https://github.com/Qonfused/OCE-Build/edit/main/docs/api/ocebuild/sources/index.rst" title="Edit this page">
+    <svg aria-hidden="true" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <path d="M4 20h4l10.5 -10.5a1.5 1.5 0 0 0 -4 -4l-10.5 10.5v4" />
+      <line x1="13.5" y1="6.5" x2="17.5" y2="10.5" />
+    </svg>
+    <span class="visually-hidden">Edit this page</span>
+  </a>
+</div><div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <section id="module-ocebuild.sources">
+<span id="ocebuild-sources"></span><h1><a class="reference internal" href="#module-ocebuild.sources" title="ocebuild.sources"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.sources</span></code></a><a class="headerlink" href="#module-ocebuild.sources" title="Permalink to this heading">#</a></h1>
+<p>Methods and Classes for handling external sources.</p>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading">#</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="_lib/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.sources._lib</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="binary/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.sources.binary</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="dortania/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.sources.dortania</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="github/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.sources.github</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="resolver/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.sources.resolver</span></code></a></li>
+</ul>
+</div>
+</section>
+<section id="package-contents">
+<h2>Package Contents<a class="headerlink" href="#package-contents" title="Permalink to this heading">#</a></h2>
+<section id="classes">
+<h3>Classes<a class="headerlink" href="#classes" title="Permalink to this heading">#</a></h3>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ocebuild.sources.RequestWrapper" title="ocebuild.sources.RequestWrapper"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RequestWrapper</span></code></a></p></td>
+<td><p>Wrapper for urllib.request.Request to provide a nicer interface.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#ocebuild.sources.GitHubResolver" title="ocebuild.sources.GitHubResolver"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GitHubResolver</span></code></a></p></td>
+<td><p>Resolves a GitHub URL based on the class parameters.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ocebuild.sources.DortaniaResolver" title="ocebuild.sources.DortaniaResolver"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DortaniaResolver</span></code></a></p></td>
+<td><p>Resolves a Dortania build URL based on the class parameters.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#ocebuild.sources.PathResolver" title="ocebuild.sources.PathResolver"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PathResolver</span></code></a></p></td>
+<td><p>Resolves a filepath based on the class parameters.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Permalink to this heading">#</a></h3>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ocebuild.sources.request" title="ocebuild.sources.request"><code class="xref py py-obj docutils literal notranslate"><span class="pre">request</span></code></a>(→ any)</p></td>
+<td><p>Simple wrapper over urlopen for skipping SSL verification.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#ocebuild.sources.is_latest_build" title="ocebuild.sources.is_latest_build"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_latest_build</span></code></a>(→ bool)</p></td>
+<td><p>Checks if the cached build catalog is latest.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ocebuild.sources.has_build" title="ocebuild.sources.has_build"><code class="xref py py-obj docutils literal notranslate"><span class="pre">has_build</span></code></a>(→ bool)</p></td>
+<td><p>Checks if a plugin has a build.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#ocebuild.sources.get_latest_sha" title="ocebuild.sources.get_latest_sha"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_latest_sha</span></code></a>(→ str)</p></td>
+<td><p>Gets the latest build sha for a plugin.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ocebuild.sources.dortania_file_url" title="ocebuild.sources.dortania_file_url"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dortania_file_url</span></code></a>(→ str)</p></td>
+<td><p>Formats a Dortania build repo file URL.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#ocebuild.sources.dortania_release_url" title="ocebuild.sources.dortania_release_url"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dortania_release_url</span></code></a>(→ str)</p></td>
+<td><p>Formats a Dortania build release URL.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ocebuild.sources.github_api_request" title="ocebuild.sources.github_api_request"><code class="xref py py-obj docutils literal notranslate"><span class="pre">github_api_request</span></code></a>(→ any)</p></td>
+<td><p>Gets a GitHub API request.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#ocebuild.sources.github_rate_limit" title="ocebuild.sources.github_rate_limit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">github_rate_limit</span></code></a>(→ int)</p></td>
+<td><p>Gets the GitHub API rate limit.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ocebuild.sources.get_latest_commit" title="ocebuild.sources.get_latest_commit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_latest_commit</span></code></a>(repository[, branch])</p></td>
+<td><p>Get the latest commit of a branch in a GitHub repository.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#ocebuild.sources.github_suite_id" title="ocebuild.sources.github_suite_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">github_suite_id</span></code></a>(→ Union[int, None])</p></td>
+<td><p>Gets the GitHub check suite ID for a given commit.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ocebuild.sources.github_tag_names" title="ocebuild.sources.github_tag_names"><code class="xref py py-obj docutils literal notranslate"><span class="pre">github_tag_names</span></code></a>(→ Union[List[str], Tuple[List[str], ...)</p></td>
+<td><p>Returns a list of all repository tags.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#ocebuild.sources.github_release_catalog" title="ocebuild.sources.github_release_catalog"><code class="xref py py-obj docutils literal notranslate"><span class="pre">github_release_catalog</span></code></a>(→ dict)</p></td>
+<td><p>Gets the catalog entry for a given release.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ocebuild.sources.github_file_url" title="ocebuild.sources.github_file_url"><code class="xref py py-obj docutils literal notranslate"><span class="pre">github_file_url</span></code></a>(→ str)</p></td>
+<td><p>Formats a GitHub file URL.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#ocebuild.sources.github_archive_url" title="ocebuild.sources.github_archive_url"><code class="xref py py-obj docutils literal notranslate"><span class="pre">github_archive_url</span></code></a>(→ str)</p></td>
+<td><p>Formats a GitHub archive URL.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ocebuild.sources.github_release_url" title="ocebuild.sources.github_release_url"><code class="xref py py-obj docutils literal notranslate"><span class="pre">github_release_url</span></code></a>(→ str)</p></td>
+<td><p>Formats a GitHub release URL.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#ocebuild.sources.github_artifacts_url" title="ocebuild.sources.github_artifacts_url"><code class="xref py py-obj docutils literal notranslate"><span class="pre">github_artifacts_url</span></code></a>(→ Union[str, Tuple[str, str], None])</p></td>
+<td><p>Formats a GitHub artifacts URL.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="attributes">
+<h3>Attributes<a class="headerlink" href="#attributes" title="Permalink to this heading">#</a></h3>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ocebuild.sources.ResolverType" title="ocebuild.sources.ResolverType"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ResolverType</span></code></a></p></td>
+<td><p>A type alias for the Resolver classes.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<dl class="py function">
+<dt class="sig sig-object py" id="ocebuild.sources.request">
+<span class="sig-prename descclassname"><span class="pre">ocebuild.sources.</span></span><span class="sig-name descname"><span class="pre">request</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">urllib.request.Request</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">any</span></span></span><a class="reference internal" href="../../../_modules/ocebuild/sources/_lib.html#request"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ocebuild.sources.request" title="Permalink to this definition">#</a></dt>
+<dd><p>Simple wrapper over urlopen for skipping SSL verification.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>url</strong> – The url to open.</p></li>
+<li><p><strong>*args</strong> – Additional arguments to pass to urlopen.</p></li>
+<li><p><strong>**kwargs</strong> – Additional keyword arguments to pass to urlopen.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>HTTPError</strong> – If the url could not be retrieved.</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The response from urlopen wrapped in a RequestWrapper class.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ocebuild.sources.RequestWrapper">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ocebuild.sources.</span></span><span class="sig-name descname"><span class="pre">RequestWrapper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">response</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/ocebuild/sources/_lib.html#RequestWrapper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ocebuild.sources.RequestWrapper" title="Permalink to this definition">#</a></dt>
+<dd><p>Wrapper for urllib.request.Request to provide a nicer interface.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="ocebuild.sources.RequestWrapper.__enter__">
+<span class="sig-name descname"><span class="pre">__enter__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#ocebuild.sources.RequestWrapper" title="ocebuild.sources.RequestWrapper"><span class="pre">RequestWrapper</span></a></span></span><a class="reference internal" href="../../../_modules/ocebuild/sources/_lib.html#RequestWrapper.__enter__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ocebuild.sources.RequestWrapper.__enter__" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ocebuild.sources.RequestWrapper.__exit__">
+<span class="sig-name descname"><span class="pre">__exit__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../../_modules/ocebuild/sources/_lib.html#RequestWrapper.__exit__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ocebuild.sources.RequestWrapper.__exit__" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ocebuild.sources.RequestWrapper.__getattr__">
+<span class="sig-name descname"><span class="pre">__getattr__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/ocebuild/sources/_lib.html#RequestWrapper.__getattr__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ocebuild.sources.RequestWrapper.__getattr__" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ocebuild.sources.RequestWrapper.json">
+<span class="sig-name descname"><span class="pre">json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">any</span></span></span><a class="reference internal" href="../../../_modules/ocebuild/sources/_lib.html#RequestWrapper.json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ocebuild.sources.RequestWrapper.json" title="Permalink to this definition">#</a></dt>
+<dd><p>Return the response as JSON.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ocebuild.sources.RequestWrapper.text">
+<span class="sig-name descname"><span class="pre">text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">io.TextIOWrapper</span></span></span><a class="reference internal" href="../../../_modules/ocebuild/sources/_lib.html#RequestWrapper.text"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ocebuild.sources.RequestWrapper.text" title="Permalink to this definition">#</a></dt>
+<dd><p>Return the response as text.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ocebuild.sources.is_latest_build">
+<span class="sig-prename descclassname"><span class="pre">ocebuild.sources.</span></span><span class="sig-name descname"><span class="pre">is_latest_build</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../../../_modules/ocebuild/sources/dortania.html#is_latest_build"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ocebuild.sources.is_latest_build" title="Permalink to this definition">#</a></dt>
+<dd><p>Checks if the cached build catalog is latest.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ocebuild.sources.has_build">
+<span class="sig-prename descclassname"><span class="pre">ocebuild.sources.</span></span><span class="sig-name descname"><span class="pre">has_build</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plugin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../../../_modules/ocebuild/sources/dortania.html#has_build"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ocebuild.sources.has_build" title="Permalink to this definition">#</a></dt>
+<dd><p>Checks if a plugin has a build.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ocebuild.sources.get_latest_sha">
+<span class="sig-prename descclassname"><span class="pre">ocebuild.sources.</span></span><span class="sig-name descname"><span class="pre">get_latest_sha</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plugin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../../_modules/ocebuild/sources/dortania.html#get_latest_sha"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ocebuild.sources.get_latest_sha" title="Permalink to this definition">#</a></dt>
+<dd><p>Gets the latest build sha for a plugin.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ocebuild.sources.dortania_file_url">
+<span class="sig-prename descclassname"><span class="pre">ocebuild.sources.</span></span><span class="sig-name descname"><span class="pre">dortania_file_url</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../../_modules/ocebuild/sources/dortania.html#dortania_file_url"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ocebuild.sources.dortania_file_url" title="Permalink to this definition">#</a></dt>
+<dd><p>Formats a Dortania build repo file URL.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>file</strong> – The remote filepath of the file.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The formatted Dortania build repo file URL.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ocebuild.sources.dortania_release_url">
+<span class="sig-prename descclassname"><span class="pre">ocebuild.sources.</span></span><span class="sig-name descname"><span class="pre">dortania_release_url</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plugin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">commit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../../_modules/ocebuild/sources/dortania.html#dortania_release_url"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ocebuild.sources.dortania_release_url" title="Permalink to this definition">#</a></dt>
+<dd><p>Formats a Dortania build release URL.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>plugin</strong> – The plugin to get the release URL for.</p></li>
+<li><p><strong>commit</strong> – The commit to get the release URL for. Defaults to the latest build.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The formatted Dortania build release URL.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ocebuild.sources.github_api_request">
+<span class="sig-prename descclassname"><span class="pre">ocebuild.sources.</span></span><span class="sig-name descname"><span class="pre">github_api_request</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">endpoint</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">any</span></span></span><a class="reference internal" href="../../../_modules/ocebuild/sources/github.html#github_api_request"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ocebuild.sources.github_api_request" title="Permalink to this definition">#</a></dt>
+<dd><p>Gets a GitHub API request.</p>
+<p>This method will automatically add the GitHub token from the environment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>endpoint</strong> – GitHub API endpoint.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>API response.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ocebuild.sources.github_rate_limit">
+<span class="sig-prename descclassname"><span class="pre">ocebuild.sources.</span></span><span class="sig-name descname"><span class="pre">github_rate_limit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kind</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'core'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raise_error</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="../../../_modules/ocebuild/sources/github.html#github_rate_limit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ocebuild.sources.github_rate_limit" title="Permalink to this definition">#</a></dt>
+<dd><p>Gets the GitHub API rate limit.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>kind</strong> – The kind of GitHub API request to query.</p></li>
+<li><p><strong>raise_error</strong> – Raise an exception if the rate limit has been exceeded.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Remaining API calls allowed.</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>Exception</strong> – If the rate limit has been exceeded.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ocebuild.sources.get_latest_commit">
+<span class="sig-prename descclassname"><span class="pre">ocebuild.sources.</span></span><span class="sig-name descname"><span class="pre">get_latest_commit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repository</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">branch</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'main'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/ocebuild/sources/github.html#get_latest_commit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ocebuild.sources.get_latest_commit" title="Permalink to this definition">#</a></dt>
+<dd><p>Get the latest commit of a branch in a GitHub repository.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ocebuild.sources.github_suite_id">
+<span class="sig-prename descclassname"><span class="pre">ocebuild.sources.</span></span><span class="sig-name descname"><span class="pre">github_suite_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repository</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">commit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">workflow_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">status</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'completed'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../../../_modules/ocebuild/sources/github.html#github_suite_id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ocebuild.sources.github_suite_id" title="Permalink to this definition">#</a></dt>
+<dd><p>Gets the GitHub check suite ID for a given commit.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>repository</strong> – GitHub repository name.</p></li>
+<li><p><strong>commit</strong> – Commit hash.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Check suite ID.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ocebuild.sources.github_tag_names">
+<span class="sig-prename descclassname"><span class="pre">ocebuild.sources.</span></span><span class="sig-name descname"><span class="pre">github_tag_names</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repository</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">get_commits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/ocebuild/sources/github.html#github_tag_names"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ocebuild.sources.github_tag_names" title="Permalink to this definition">#</a></dt>
+<dd><p>Returns a list of all repository tags.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>repository</strong> – GitHub repository name.</p></li>
+<li><p><strong>get_commits</strong> – If True, additionally returns a list of commit hashes.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of repository tags.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ocebuild.sources.github_release_catalog">
+<span class="sig-prename descclassname"><span class="pre">ocebuild.sources.</span></span><span class="sig-name descname"><span class="pre">github_release_catalog</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../../../_modules/ocebuild/sources/github.html#github_release_catalog"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ocebuild.sources.github_release_catalog" title="Permalink to this definition">#</a></dt>
+<dd><p>Gets the catalog entry for a given release.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>url</strong> – GitHub release catalog URL.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Release catalog.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ocebuild.sources.github_file_url">
+<span class="sig-prename descclassname"><span class="pre">ocebuild.sources.</span></span><span class="sig-name descname"><span class="pre">github_file_url</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repository</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">branch</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'main'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">commit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../../_modules/ocebuild/sources/github.html#github_file_url"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ocebuild.sources.github_file_url" title="Permalink to this definition">#</a></dt>
+<dd><p>Formats a GitHub file URL.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>repository</strong> – GitHub repository name.</p></li>
+<li><p><strong>path</strong> – Relative path to file.</p></li>
+<li><p><strong>branch</strong> – Branch name.</p></li>
+<li><p><strong>tag</strong> – Tag name.</p></li>
+<li><p><strong>commit</strong> – Commit hash.</p></li>
+<li><p><strong>raw</strong> – If True, returns the raw URL.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>URL of the file.</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">github_file_url</span><span class="p">(</span><span class="s1">&#39;foo/bar&#39;</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s1">&#39;file.json&#39;</span><span class="p">)</span>
+<span class="go"># -&gt; &quot;https://github.com/foo/bar/blob/main/file.json&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">github_file_url</span><span class="p">(</span><span class="s1">&#39;foo/bar&#39;</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s1">&#39;file.json&#39;</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="s1">&#39;dev&#39;</span><span class="p">)</span>
+<span class="go"># -&gt; &quot;https://github.com/foo/bar/blob/dev/file.json&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">github_file_url</span><span class="p">(</span><span class="s1">&#39;foo/bar&#39;</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s1">&#39;file.json&#39;</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="s1">&#39;v1.0.0&#39;</span><span class="p">)</span>
+<span class="go"># -&gt; &quot;https://github.com/foo/bar/blob/v1.0.0/file.json&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">github_file_url</span><span class="p">(</span><span class="s1">&#39;foo/bar&#39;</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s1">&#39;file.json&#39;</span><span class="p">,</span> <span class="n">commit</span><span class="o">=</span><span class="s1">&#39;c0ffee&#39;</span><span class="p">)</span>
+<span class="go"># -&gt; &quot;https://github.com/foo/bar/blob/c0ffee/file.json&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">github_file_url</span><span class="p">(</span><span class="s1">&#39;foo/bar&#39;</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s1">&#39;file.json&#39;</span><span class="p">,</span> <span class="n">raw</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="go"># -&gt; &quot;https://raw.githubusercontent.com/foo/bar/main/file.json&quot;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ocebuild.sources.github_archive_url">
+<span class="sig-prename descclassname"><span class="pre">ocebuild.sources.</span></span><span class="sig-name descname"><span class="pre">github_archive_url</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repository</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">branch</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'main'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">commit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../../_modules/ocebuild/sources/github.html#github_archive_url"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ocebuild.sources.github_archive_url" title="Permalink to this definition">#</a></dt>
+<dd><p>Formats a GitHub archive URL.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>repository</strong> – GitHub repository name.</p></li>
+<li><p><strong>branch</strong> – Branch name.</p></li>
+<li><p><strong>tag</strong> – Tag name.</p></li>
+<li><p><strong>commit</strong> – Commit hash.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>URL of the archive.</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">github_archive_url</span><span class="p">(</span><span class="s1">&#39;foo/bar&#39;</span><span class="p">)</span>
+<span class="go"># -&gt; &quot;https://github.com/foo/bar/archive/refs/heads/main.tar.gz&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">github_archive_url</span><span class="p">(</span><span class="s1">&#39;foo/bar&#39;</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="s1">&#39;dev&#39;</span><span class="p">)</span>
+<span class="go"># -&gt; &quot;https://github.com/foo/bar/archive/refs/heads/dev.tar.gz&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">github_archive_url</span><span class="p">(</span><span class="s1">&#39;foo/bar&#39;</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="s1">&#39;v1.0.0&#39;</span><span class="p">)</span>
+<span class="go"># -&gt; &quot;https://github.com/foo/bar/archive/refs/tags/v1.0.0.tar.gz&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">github_archive_url</span><span class="p">(</span><span class="s1">&#39;foo/bar&#39;</span><span class="p">,</span> <span class="n">commit</span><span class="o">=</span><span class="s1">&#39;c0ffee&#39;</span><span class="p">)</span>
+<span class="go"># -&gt; &quot;https://github.com/foo/bar/archive/c0ffee.tar.gz&quot;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ocebuild.sources.github_release_url">
+<span class="sig-prename descclassname"><span class="pre">ocebuild.sources.</span></span><span class="sig-name descname"><span class="pre">github_release_url</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repository</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../../_modules/ocebuild/sources/github.html#github_release_url"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ocebuild.sources.github_release_url" title="Permalink to this definition">#</a></dt>
+<dd><p>Formats a GitHub release URL.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>repository</strong> – GitHub repository name.</p></li>
+<li><p><strong>tag</strong> – Tag name.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>URL of the release.</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">github_release_url</span><span class="p">(</span><span class="s1">&#39;foo/bar&#39;</span><span class="p">)</span>
+<span class="go"># -&gt; &quot;https://github.com/foo/bar/releases/latest/v2.0.0&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">github_release_url</span><span class="p">(</span><span class="s1">&#39;foo/bar&#39;</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="s1">&#39;v1.0.0&#39;</span><span class="p">)</span>
+<span class="go"># -&gt; &quot;https://github.com/foo/bar/releases/tag/v1.0.0&quot;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ocebuild.sources.github_artifacts_url">
+<span class="sig-prename descclassname"><span class="pre">ocebuild.sources.</span></span><span class="sig-name descname"><span class="pre">github_artifacts_url</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repository</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">branch</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">workflow</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">commit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">get_commit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../../../_modules/ocebuild/sources/github.html#github_artifacts_url"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ocebuild.sources.github_artifacts_url" title="Permalink to this definition">#</a></dt>
+<dd><p>Formats a GitHub artifacts URL.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>repository</strong> – GitHub repository name.</p></li>
+<li><p><strong>branch</strong> – Branch name.</p></li>
+<li><p><strong>tag</strong> – Tag name.</p></li>
+<li><p><strong>commit</strong> – Commit hash.</p></li>
+<li><p><strong>get_commit</strong> – If True, additionally returns the commit hash.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>URL of the artifacts archive.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="ocebuild.sources.ResolverType">
+<span class="sig-prename descclassname"><span class="pre">ocebuild.sources.</span></span><span class="sig-name descname"><span class="pre">ResolverType</span></span><a class="reference internal" href="../../../_modules/ocebuild/sources/resolver.html#ResolverType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ocebuild.sources.ResolverType" title="Permalink to this definition">#</a></dt>
+<dd><p>A type alias for the Resolver classes.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ocebuild.sources.GitHubResolver">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ocebuild.sources.</span></span><span class="sig-name descname"><span class="pre">GitHubResolver</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repository</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ocebuild.sources.github.Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">branch</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ocebuild.sources.github.Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ocebuild.sources.github.Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">workflow</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ocebuild.sources.github.Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">commit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ocebuild.sources.github.Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tarball</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ocebuild.sources.github.Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/ocebuild/sources/resolver.html#GitHubResolver"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ocebuild.sources.GitHubResolver" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseResolver</span></code></p>
+<p>Resolves a GitHub URL based on the class parameters.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="ocebuild.sources.GitHubResolver.extract_asset">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">extract_asset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resolver</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ocebuild.sources.github.Union</span><span class="p"><span class="pre">[</span></span><span class="pre">TGitHubResolver</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">TDortaniaResolver</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">build</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ocebuild.sources.github.Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="pre">RELEASE</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">DEBUG</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../../_modules/ocebuild/sources/resolver.html#GitHubResolver.extract_asset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ocebuild.sources.GitHubResolver.extract_asset" title="Permalink to this definition">#</a></dt>
+<dd><p>Extracts the closest matching asset from a GitHub release url.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ocebuild.sources.GitHubResolver.resolve">
+<span class="sig-name descname"><span class="pre">resolve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">build</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ocebuild.sources.github.Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="pre">RELEASE</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">DEBUG</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../../_modules/ocebuild/sources/resolver.html#GitHubResolver.resolve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ocebuild.sources.GitHubResolver.resolve" title="Permalink to this definition">#</a></dt>
+<dd><p>Returns a URL based on the class parameters.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ocebuild.sources.DortaniaResolver">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ocebuild.sources.</span></span><span class="sig-name descname"><span class="pre">DortaniaResolver</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">commit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ocebuild.sources.github.Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/ocebuild/sources/resolver.html#DortaniaResolver"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ocebuild.sources.DortaniaResolver" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseResolver</span></code></p>
+<p>Resolves a Dortania build URL based on the class parameters.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="ocebuild.sources.DortaniaResolver.has_build">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">has_build</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plugin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/ocebuild/sources/resolver.html#DortaniaResolver.has_build"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ocebuild.sources.DortaniaResolver.has_build" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ocebuild.sources.DortaniaResolver.resolve">
+<span class="sig-name descname"><span class="pre">resolve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">build</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ocebuild.sources.github.Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="pre">RELEASE</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">DEBUG</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../../_modules/ocebuild/sources/resolver.html#DortaniaResolver.resolve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ocebuild.sources.DortaniaResolver.resolve" title="Permalink to this definition">#</a></dt>
+<dd><p>Returns a URL based on the class parameters.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ocebuild.sources.PathResolver">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ocebuild.sources.</span></span><span class="sig-name descname"><span class="pre">PathResolver</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../third_party/cpython/pathlib/index.html#ocebuild.third_party.cpython.pathlib.Path" title="ocebuild.third_party.cpython.pathlib.Path"><span class="pre">ocebuild.third_party.cpython.pathlib.Path</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/ocebuild/sources/resolver.html#PathResolver"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ocebuild.sources.PathResolver" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseResolver</span></code>, <a class="reference internal" href="../third_party/cpython/pathlib/index.html#ocebuild.third_party.cpython.pathlib.Path" title="ocebuild.third_party.cpython.pathlib.Path"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ocebuild.third_party.cpython.pathlib.Path</span></code></a></p>
+<p>Resolves a filepath based on the class parameters.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="ocebuild.sources.PathResolver.glob">
+<span class="sig-name descname"><span class="pre">glob</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pattern</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Generator</span><span class="p"><span class="pre">[</span></span><span class="pre">TPathResolver</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/ocebuild/sources/resolver.html#PathResolver.glob"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ocebuild.sources.PathResolver.glob" title="Permalink to this definition">#</a></dt>
+<dd><p>Iterates from a directory or from a file’s parent directory.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ocebuild.sources.PathResolver.resolve">
+<span class="sig-name descname"><span class="pre">resolve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">strict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../third_party/cpython/pathlib/index.html#ocebuild.third_party.cpython.pathlib.Path" title="ocebuild.third_party.cpython.pathlib.Path"><span class="pre">ocebuild.third_party.cpython.pathlib.Path</span></a></span></span><a class="reference internal" href="../../../_modules/ocebuild/sources/resolver.html#PathResolver.resolve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ocebuild.sources.PathResolver.resolve" title="Permalink to this definition">#</a></dt>
+<dd><p>Resolves a filepath based on the class parameters.</p>
+<p>If the path exists, the checksum is calculated and stored.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>strict</strong> – If True, raises an error if the path does not exist.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The resolved filepath wrapped in a PathResolver instance.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="_lib/index.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.sources._lib</span></code></div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="../pipeline/ssdts/index.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.pipeline.ssdts</span></code></div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2023, The OCE Build Authors
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            <div class="last-updated">
+              Last updated on Aug 05, 2023</div>
+          </div>
+          <div class="right-details">
+            <div class="icons">
+              <a class="muted-link " href="https://github.com/Qonfused/OCE-Build" aria-label="GitHub">
+        <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 16 16">
+          <path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path>
+        </svg>
+      </a>
+              
+            </div>
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.sources</span></code></a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#package-contents">Package Contents</a><ul>
+<li><a class="reference internal" href="#classes">Classes</a></li>
+<li><a class="reference internal" href="#functions">Functions</a></li>
+<li><a class="reference internal" href="#attributes">Attributes</a><ul>
+<li><a class="reference internal" href="#ocebuild.sources.request"><code class="docutils literal notranslate"><span class="pre">request()</span></code></a></li>
+<li><a class="reference internal" href="#ocebuild.sources.RequestWrapper"><code class="docutils literal notranslate"><span class="pre">RequestWrapper</span></code></a><ul>
+<li><a class="reference internal" href="#ocebuild.sources.RequestWrapper.__enter__"><code class="docutils literal notranslate"><span class="pre">RequestWrapper.__enter__()</span></code></a></li>
+<li><a class="reference internal" href="#ocebuild.sources.RequestWrapper.__exit__"><code class="docutils literal notranslate"><span class="pre">RequestWrapper.__exit__()</span></code></a></li>
+<li><a class="reference internal" href="#ocebuild.sources.RequestWrapper.__getattr__"><code class="docutils literal notranslate"><span class="pre">RequestWrapper.__getattr__()</span></code></a></li>
+<li><a class="reference internal" href="#ocebuild.sources.RequestWrapper.json"><code class="docutils literal notranslate"><span class="pre">RequestWrapper.json()</span></code></a></li>
+<li><a class="reference internal" href="#ocebuild.sources.RequestWrapper.text"><code class="docutils literal notranslate"><span class="pre">RequestWrapper.text()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#ocebuild.sources.is_latest_build"><code class="docutils literal notranslate"><span class="pre">is_latest_build()</span></code></a></li>
+<li><a class="reference internal" href="#ocebuild.sources.has_build"><code class="docutils literal notranslate"><span class="pre">has_build()</span></code></a></li>
+<li><a class="reference internal" href="#ocebuild.sources.get_latest_sha"><code class="docutils literal notranslate"><span class="pre">get_latest_sha()</span></code></a></li>
+<li><a class="reference internal" href="#ocebuild.sources.dortania_file_url"><code class="docutils literal notranslate"><span class="pre">dortania_file_url()</span></code></a></li>
+<li><a class="reference internal" href="#ocebuild.sources.dortania_release_url"><code class="docutils literal notranslate"><span class="pre">dortania_release_url()</span></code></a></li>
+<li><a class="reference internal" href="#ocebuild.sources.github_api_request"><code class="docutils literal notranslate"><span class="pre">github_api_request()</span></code></a></li>
+<li><a class="reference internal" href="#ocebuild.sources.github_rate_limit"><code class="docutils literal notranslate"><span class="pre">github_rate_limit()</span></code></a></li>
+<li><a class="reference internal" href="#ocebuild.sources.get_latest_commit"><code class="docutils literal notranslate"><span class="pre">get_latest_commit()</span></code></a></li>
+<li><a class="reference internal" href="#ocebuild.sources.github_suite_id"><code class="docutils literal notranslate"><span class="pre">github_suite_id()</span></code></a></li>
+<li><a class="reference internal" href="#ocebuild.sources.github_tag_names"><code class="docutils literal notranslate"><span class="pre">github_tag_names()</span></code></a></li>
+<li><a class="reference internal" href="#ocebuild.sources.github_release_catalog"><code class="docutils literal notranslate"><span class="pre">github_release_catalog()</span></code></a></li>
+<li><a class="reference internal" href="#ocebuild.sources.github_file_url"><code class="docutils literal notranslate"><span class="pre">github_file_url()</span></code></a></li>
+<li><a class="reference internal" href="#ocebuild.sources.github_archive_url"><code class="docutils literal notranslate"><span class="pre">github_archive_url()</span></code></a></li>
+<li><a class="reference internal" href="#ocebuild.sources.github_release_url"><code class="docutils literal notranslate"><span class="pre">github_release_url()</span></code></a></li>
+<li><a class="reference internal" href="#ocebuild.sources.github_artifacts_url"><code class="docutils literal notranslate"><span class="pre">github_artifacts_url()</span></code></a></li>
+<li><a class="reference internal" href="#ocebuild.sources.ResolverType"><code class="docutils literal notranslate"><span class="pre">ResolverType</span></code></a></li>
+<li><a class="reference internal" href="#ocebuild.sources.GitHubResolver"><code class="docutils literal notranslate"><span class="pre">GitHubResolver</span></code></a><ul>
+<li><a class="reference internal" href="#ocebuild.sources.GitHubResolver.extract_asset"><code class="docutils literal notranslate"><span class="pre">GitHubResolver.extract_asset()</span></code></a></li>
+<li><a class="reference internal" href="#ocebuild.sources.GitHubResolver.resolve"><code class="docutils literal notranslate"><span class="pre">GitHubResolver.resolve()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#ocebuild.sources.DortaniaResolver"><code class="docutils literal notranslate"><span class="pre">DortaniaResolver</span></code></a><ul>
+<li><a class="reference internal" href="#ocebuild.sources.DortaniaResolver.has_build"><code class="docutils literal notranslate"><span class="pre">DortaniaResolver.has_build()</span></code></a></li>
+<li><a class="reference internal" href="#ocebuild.sources.DortaniaResolver.resolve"><code class="docutils literal notranslate"><span class="pre">DortaniaResolver.resolve()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#ocebuild.sources.PathResolver"><code class="docutils literal notranslate"><span class="pre">PathResolver</span></code></a><ul>
+<li><a class="reference internal" href="#ocebuild.sources.PathResolver.glob"><code class="docutils literal notranslate"><span class="pre">PathResolver.glob()</span></code></a></li>
+<li><a class="reference internal" href="#ocebuild.sources.PathResolver.resolve"><code class="docutils literal notranslate"><span class="pre">PathResolver.resolve()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=297cd8a8"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../../_static/scripts/furo.js?v=32e29ea5"></script>
+    </body>
+</html>

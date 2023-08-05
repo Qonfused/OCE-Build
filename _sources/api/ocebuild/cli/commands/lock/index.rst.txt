@@ -1,0 +1,99 @@
+:py:mod:`ocebuild.cli.commands.lock`
+====================================
+
+.. py:module:: ocebuild.cli.commands.lock
+
+.. autoapi-nested-parse::
+
+   CLI entrypoint for the lock command.
+
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ocebuild.cli.commands.lock.rich_resolver
+   ocebuild.cli.commands.lock.rich_revision
+   ocebuild.cli.commands.lock.format_resolvers
+   ocebuild.cli.commands.lock.get_lockfile
+   ocebuild.cli.commands.lock.resolve_lockfile
+   ocebuild.cli.commands.lock.cli
+
+
+
+.. py:function:: rich_resolver(resolver: ocebuild.sources.resolver.ResolverType, resolver_props: dict, resolution: str) -> ocebuild.pipeline.lock.Union[str, None]
+
+   Returns a rich formatted specifier resolver.
+
+   :param resolver: The resolver class.
+   :param resolver_props: The resolver properties.
+   :param resolution: The specifier resolution.
+
+   :returns: A rich formatted specifier resolver.
+
+
+.. py:function:: rich_revision(revision: str) -> str
+
+   Returns a rich formatted revision hash.
+
+   :param revision: The revision entry.
+
+   :returns: A rich formatted commit or checksum hash.
+
+
+.. py:function:: format_resolvers(resolvers: ocebuild.cli.logging.List[dict]) -> rich.table.Table
+
+   Prints the resolved specifiers for the given resolvers.
+
+   Resolvers are presented in a table with the following columns:
+     - Type: The resolver type.
+     - Name: The resolver name.
+     - Version: The resolver version, optionally with the commit or checksum hash.
+     - Resolution: The specifier resolution.
+
+   :param resolvers: A dictionary of resolver entries.
+
+   :returns: A rich formatted table of the resolved specifiers.
+
+
+.. py:function:: get_lockfile(cwd: ocebuild.pipeline.lock.Union[str, ocebuild.third_party.cpython.pathlib.Path], project_dir: ocebuild.pipeline.lock.Union[str, ocebuild.third_party.cpython.pathlib.Path]) -> ocebuild.pipeline.lock.Tuple[dict, ocebuild.third_party.cpython.pathlib.Path]
+
+   Reads the project's lockfile.
+
+   :param cwd: The current working directory.
+   :param project_dir: The project directory.
+
+   :returns:   - The lockfile dictionary.
+               - The lockfile metadata.
+               - The lockfile path.
+   :rtype: A tuple containing
+
+
+.. py:function:: resolve_lockfile(cwd: ocebuild.pipeline.lock.Union[str, ocebuild.third_party.cpython.pathlib.Path], check: bool = False, update: bool = False, force: bool = False, build_config: ocebuild.cli.logging.Optional[dict] = None, project_dir: ocebuild.cli.logging.Optional[ocebuild.third_party.cpython.pathlib.Path] = None) -> ocebuild.pipeline.lock.Tuple[dict, ocebuild.cli.logging.List[dict], ocebuild.third_party.cpython.pathlib.Path]
+
+   Resolves the project's lockfile.
+
+   :param env: The CLI environment.
+   :param cwd: The current working directory.
+   :param check: Whether to check if the lockfile is consistent with the build file.
+   :param update: Whether to update the lockfile.
+   :param force: Whether to force the lockfile update.
+   :param build_config: The build configuration. (Optional)
+   :param project_dir: The project directory. (Optional)
+
+   :returns:   - The lockfile dictionary.
+               - The resolved specifiers.
+   :rtype: A tuple containing
+
+
+.. py:function:: cli(env, cwd, check, update, force)
+
+   Updates the project's lockfile.
+
+

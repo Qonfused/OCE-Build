@@ -1,0 +1,99 @@
+:py:mod:`ocebuild.cli.logging`
+==============================
+
+.. py:module:: ocebuild.cli.logging
+
+.. autoapi-nested-parse::
+
+   CLI Logging Utilities.
+
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ocebuild.cli.logging.echo
+   ocebuild.cli.logging.debug
+   ocebuild.cli.logging.info
+   ocebuild.cli.logging.success
+   ocebuild.cli.logging.error
+   ocebuild.cli.logging.abort
+
+
+
+.. py:function:: echo(msg: str = '', *args, log: bool = True, **kwargs) -> None
+
+   Stylized echo for the CLI.
+
+   :param msg: The message to print.
+   :param \*args: Additional arguments to pass to `console.print()`.
+   :param \*\*kwargs: Additional keyword arguments to pass to `console.print()`.
+
+   .. rubric:: Example
+
+   >>> echo('This is a message.')
+   # -> This is a message.
+
+
+.. py:function:: debug(msg: str, *args, **kwargs)
+
+   Prints a debug message.
+
+   This function is a wrapper for `echo()` that only prints if the global
+   `DEBUG` flag is set.
+
+
+.. py:function:: info(msg: str, *args, **kwargs)
+
+   Prints an info message.
+
+   This function is a wrapper for `echo()` that only prints if the global
+   `VERBOSE` flag is set.
+
+
+.. py:function:: success(msg: str, *args, **kwargs)
+
+   Prints a success message.
+
+
+.. py:function:: error(msg: str, hint: Optional[str] = None, label: str = 'ERROR', traceback: bool = False, suppress: Optional[List[str]] = None, hide_locals: bool = False, **kwargs) -> None
+
+   Stylized error message for the CLI.
+
+   :param msg: The error message to print.
+   :param label: The label to print before the error message.
+   :param hint: A hint to print after the error message. (Optional)
+   :param traceback: Whether to print a traceback. (Optional)
+   :param suppress: A list of filepaths to suppress from the traceback. (Optional)
+
+   .. rubric:: Example
+
+   >>> error('This is an error message.')
+   # -> Error: This is an error message.
+
+
+.. py:function:: abort(msg: str, hint: Optional[str] = None, traceback: bool = True) -> None
+
+   Stylized abort message for the CLI.
+
+   This function is a wrapper for `error()` that exits with a non-zero exit code.
+   By default, a full traceback is printed using `wrap_exception()`, hiding
+   internal stack frames.
+
+   :param msg: The abort message to print.
+   :param hint: A hint to print after the abort message. (Optional)
+   :param traceback: Whether to print a traceback; enabled by default. (Optional)
+
+   .. rubric:: Example
+
+   >>> abort('This is an abort message.')
+   # -> Abort: This is an abort message.
+   # (rich.console `print_exception()` traceback)
+
+

@@ -1,0 +1,30 @@
+:py:mod:`ocebuild.errors.types`
+===============================
+
+.. py:module:: ocebuild.errors.types
+
+.. autoapi-nested-parse::
+
+   Validation methods used for testing and at runtime.
+
+
+
+Module Contents
+---------------
+
+.. py:exception:: GitHubRateLimit(message: str, rate_limit: dict)
+
+
+   Bases: :py:obj:`Exception`
+
+   Indicates that the GitHub API rate limit has been exceeded.
+
+
+.. py:exception:: PathValidationError(message: str, name: str, path: str, kind: str)
+
+
+   Bases: :py:obj:`Exception`
+
+   Indicates that a path does not match a given tree schema.
+
+

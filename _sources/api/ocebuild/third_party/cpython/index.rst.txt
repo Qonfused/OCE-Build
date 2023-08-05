@@ -1,0 +1,21 @@
+:py:mod:`ocebuild.third_party.cpython`
+======================================
+
+.. py:module:: ocebuild.third_party.cpython
+
+.. autoapi-nested-parse::
+
+   CPython extensions and backports for Python 3.6+
+
+
+
+Submodules
+----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   pathlib/index.rst
+   plistlib/index.rst
+
+

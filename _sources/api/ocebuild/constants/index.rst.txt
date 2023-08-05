@@ -1,0 +1,18 @@
+:py:mod:`ocebuild.constants`
+============================
+
+.. py:module:: ocebuild.constants
+
+.. autoapi-nested-parse::
+
+   Global constants for OCE Build.
+
+
+
+Module Contents
+---------------
+
+.. py:data:: ENV
+
+   Initialized wrapper to securely handle environmental variables.
+

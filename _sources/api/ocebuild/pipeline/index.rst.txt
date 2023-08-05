@@ -1,0 +1,26 @@
+:py:mod:`ocebuild.pipeline`
+===========================
+
+.. py:module:: ocebuild.pipeline
+
+.. autoapi-nested-parse::
+
+   Methods and classes for each step of the CLI pipeline.
+
+
+
+Submodules
+----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   build/index.rst
+   config/index.rst
+   kexts/index.rst
+   lock/index.rst
+   opencore/index.rst
+   packages/index.rst
+   ssdts/index.rst
+
+

@@ -1,0 +1,70 @@
+:py:mod:`ocebuild.sources._lib`
+===============================
+
+.. py:module:: ocebuild.sources._lib
+
+.. autoapi-nested-parse::
+
+   Network helper functions.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   ocebuild.sources._lib.RequestWrapper
+
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ocebuild.sources._lib.request
+
+
+
+.. py:class:: RequestWrapper(response: any)
+
+
+   Wrapper for urllib.request.Request to provide a nicer interface.
+
+   .. py:method:: __enter__() -> RequestWrapper
+
+
+   .. py:method:: __exit__(*args: object) -> None
+
+
+   .. py:method:: __getattr__(attr)
+
+
+   .. py:method:: json(*args, **kargs) -> any
+
+      Return the response as JSON.
+
+
+   .. py:method:: text(*args, **kargs) -> io.TextIOWrapper
+
+      Return the response as text.
+
+
+
+.. py:function:: request(url: Union[str, urllib.request.Request], *args, **kwargs) -> any
+
+   Simple wrapper over urlopen for skipping SSL verification.
+
+   :param url: The url to open.
+   :param \*args: Additional arguments to pass to urlopen.
+   :param \*\*kwargs: Additional keyword arguments to pass to urlopen.
+
+   :raises HTTPError: If the url could not be retrieved.
+
+   :returns: The response from urlopen wrapped in a RequestWrapper class.
+
+

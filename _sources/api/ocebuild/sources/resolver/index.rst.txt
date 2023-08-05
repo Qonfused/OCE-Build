@@ -1,0 +1,98 @@
+:py:mod:`ocebuild.sources.resolver`
+===================================
+
+.. py:module:: ocebuild.sources.resolver
+
+.. autoapi-nested-parse::
+
+   Custom specifier resolver classes and methods.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   ocebuild.sources.resolver.GitHubResolver
+   ocebuild.sources.resolver.DortaniaResolver
+   ocebuild.sources.resolver.PathResolver
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   ocebuild.sources.resolver.ResolverType
+
+
+.. py:class:: GitHubResolver(repository: str, path: ocebuild.sources.github.Optional[str] = None, branch: ocebuild.sources.github.Optional[str] = None, tag: ocebuild.sources.github.Optional[str] = None, workflow: ocebuild.sources.github.Optional[str] = None, commit: ocebuild.sources.github.Optional[str] = None, *args, tarball: ocebuild.sources.github.Optional[bool] = False, **kwargs)
+
+
+   Bases: :py:obj:`BaseResolver`
+
+   Resolves a GitHub URL based on the class parameters.
+
+   .. py:method:: extract_asset(resolver: ocebuild.sources.github.Union[TGitHubResolver, TDortaniaResolver], name: str, url: str, build: ocebuild.sources.github.Optional[Literal[RELEASE, DEBUG]] = None) -> str
+      :staticmethod:
+
+      Extracts the closest matching asset from a GitHub release url.
+
+
+   .. py:method:: resolve(build: ocebuild.sources.github.Optional[Literal[RELEASE, DEBUG]] = None) -> str
+
+      Returns a URL based on the class parameters.
+
+
+
+.. py:class:: DortaniaResolver(commit: ocebuild.sources.github.Optional[str] = None, *args, **kwargs)
+
+
+   Bases: :py:obj:`BaseResolver`
+
+   Resolves a Dortania build URL based on the class parameters.
+
+   .. py:method:: has_build(plugin: str)
+      :staticmethod:
+
+
+   .. py:method:: resolve(build: ocebuild.sources.github.Optional[Literal[RELEASE, DEBUG]] = None) -> str
+
+      Returns a URL based on the class parameters.
+
+
+
+.. py:class:: PathResolver(path: ocebuild.third_party.cpython.pathlib.Path, *args, **kwargs)
+
+
+   Bases: :py:obj:`BaseResolver`, :py:obj:`ocebuild.third_party.cpython.pathlib.Path`
+
+   Resolves a filepath based on the class parameters.
+
+   .. py:method:: glob(pattern: str) -> Generator[TPathResolver, any, None]
+
+      Iterates from a directory or from a file's parent directory.
+
+
+   .. py:method:: resolve(strict: bool = False) -> ocebuild.third_party.cpython.pathlib.Path
+
+      Resolves a filepath based on the class parameters.
+
+      If the path exists, the checksum is calculated and stored.
+
+      :param strict: If True, raises an error if the path does not exist.
+
+      :returns: The resolved filepath wrapped in a PathResolver instance.
+
+
+
+.. py:data:: ResolverType
+
+   A type alias for the Resolver classes.
+

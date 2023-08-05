@@ -1,0 +1,73 @@
+:py:mod:`ocebuild.parsers.yaml`
+===============================
+
+.. py:module:: ocebuild.parsers.yaml
+
+.. autoapi-nested-parse::
+
+   Parser for converting annotated YAML to a Python dictionary.
+
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ocebuild.parsers.yaml.parse_yaml_types
+   ocebuild.parsers.yaml.write_yaml_types
+   ocebuild.parsers.yaml.parse_yaml
+   ocebuild.parsers.yaml.write_yaml
+
+
+
+.. py:function:: parse_yaml_types(stype: str, value: str, schema: Literal[annotated, yaml] = 'yaml') -> Union[Tuple[str, any], None]
+
+   Parse YAML types to Python types.
+
+   :param stype: YAML type (literal).
+   :param value: YAML value.
+   :param schema: Flag to control input schema.
+
+   :returns: Tuple of parsed type (literal) and value.
+
+
+.. py:function:: write_yaml_types(value: Union[Tuple[str, any], any], schema: Literal[annotated, yaml] = 'yaml') -> Tuple[str, any]
+
+   Parse Python types to YAML types.
+
+   :param value: Tuple of type (literal) and value.
+   :param schema: Flag to control output schema.
+
+   :returns: Tuple of parsed type (literal) and value.
+
+
+.. py:function:: parse_yaml(lines: List[str], config: Optional[dict] = None, flags: Optional[List[str]] = None, frontmatter: bool = False) -> Union[dict, Tuple[dict, dict]]
+
+   Parses YAML (optionally type annotated) into a Python dictionary.
+
+   :param lines: YAML lines.
+   :param config: Dictionary to be populated.
+   :param flags: List of preprocessor flags.
+   :param frontmatter: Flag to control frontmatter parsing.
+
+   :raises ValueError: If YAML parser reaches an invalid line.
+
+   :returns: Dictionary populated from YAML entries.
+
+
+.. py:function:: write_yaml(config: dict, lines: Optional[List[str]] = None, schema: Literal[annotated, yaml] = 'yaml') -> List[str]
+
+   Writes a Python dictionary to YAML.
+
+   :param lines: YAML lines.
+   :param config: Dictionary to be written.
+   :param schema: Flag to control output schema.
+
+   :returns: YAML lines populated from dictionary entries.
+
+

@@ -1,0 +1,1546 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="#" /><link rel="search" title="Search" href="search.html" />
+
+    <!-- Generated with Sphinx 7.1.2 and Furo 2023.07.26 --><title>Index - OCE Build</title>
+<link rel="stylesheet" type="text/css" href="_static/pygments.css?v=362ab14a" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=135e06be" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=eafc0fe6" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=36a5483c" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="index.html"><div class="brand">OCE Build</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><div class="sidebar-scroll"><a class="sidebar-brand" href="index.html">
+  
+  
+  <span class="sidebar-brand-text">OCE Build</span>
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="schema.html">Schema</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="api/index.html">API Reference</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of API Reference</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="api/ocebuild/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of ocebuild</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="api/ocebuild/cli/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.cli</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of ocebuild.cli</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4 has-children"><a class="reference internal" href="api/ocebuild/cli/commands/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.cli.commands</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of ocebuild.cli.commands</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="api/ocebuild/cli/commands/build/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.cli.commands.build</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/ocebuild/cli/commands/lock/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.cli.commands.lock</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/ocebuild/cli/commands/patch/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.cli.commands.patch</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="api/ocebuild/cli/__main__/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.cli.__main__</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/ocebuild/cli/_lib/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.cli._lib</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/ocebuild/cli/console/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.cli.console</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/ocebuild/cli/interactive/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.cli.interactive</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/ocebuild/cli/logging/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.cli.logging</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="api/ocebuild/errors/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.errors</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle navigation of ocebuild.errors</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/ocebuild/errors/_lib/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.errors._lib</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/ocebuild/errors/types/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.errors.types</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/ocebuild/errors/validation/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.errors.validation</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="api/ocebuild/filesystem/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.filesystem</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle navigation of ocebuild.filesystem</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/ocebuild/filesystem/archives/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.filesystem.archives</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/ocebuild/filesystem/cache/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.filesystem.cache</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/ocebuild/filesystem/posix/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.filesystem.posix</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="api/ocebuild/parsers/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.parsers</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle navigation of ocebuild.parsers</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/ocebuild/parsers/_lib/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.parsers._lib</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/ocebuild/parsers/asl/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.parsers.asl</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/ocebuild/parsers/dict/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.parsers.dict</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/ocebuild/parsers/plist/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.parsers.plist</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/ocebuild/parsers/regex/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.parsers.regex</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/ocebuild/parsers/schema/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.parsers.schema</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/ocebuild/parsers/types/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.parsers.types</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/ocebuild/parsers/yaml/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.parsers.yaml</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="api/ocebuild/pipeline/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.pipeline</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><div class="visually-hidden">Toggle navigation of ocebuild.pipeline</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/ocebuild/pipeline/build/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.pipeline.build</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/ocebuild/pipeline/config/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.pipeline.config</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/ocebuild/pipeline/kexts/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.pipeline.kexts</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/ocebuild/pipeline/lock/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.pipeline.lock</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/ocebuild/pipeline/opencore/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.pipeline.opencore</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/ocebuild/pipeline/packages/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.pipeline.packages</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/ocebuild/pipeline/ssdts/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.pipeline.ssdts</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="api/ocebuild/sources/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.sources</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><div class="visually-hidden">Toggle navigation of ocebuild.sources</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/ocebuild/sources/_lib/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.sources._lib</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/ocebuild/sources/binary/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.sources.binary</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/ocebuild/sources/dortania/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.sources.dortania</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/ocebuild/sources/github/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.sources.github</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/ocebuild/sources/resolver/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.sources.resolver</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="api/ocebuild/third_party/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.third_party</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><div class="visually-hidden">Toggle navigation of ocebuild.third_party</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4 has-children"><a class="reference internal" href="api/ocebuild/third_party/cpython/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.third_party.cpython</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><div class="visually-hidden">Toggle navigation of ocebuild.third_party.cpython</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="api/ocebuild/third_party/cpython/pathlib/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.third_party.cpython.pathlib</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/ocebuild/third_party/cpython/plistlib/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.third_party.cpython.plistlib</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="api/ocebuild/versioning/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.versioning</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><div class="visually-hidden">Toggle navigation of ocebuild.versioning</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/ocebuild/versioning/semver/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.versioning.semver</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api/ocebuild/constants/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.constants</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/ocebuild/version/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ocebuild.version</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          
+<section class="genindex-section">
+  <h1 id="index">Index</h1>
+  <div class="genindex-jumpbox"><a href="#_"><strong>_</strong></a> | <a href="#A"><strong>A</strong></a> | <a href="#B"><strong>B</strong></a> | <a href="#C"><strong>C</strong></a> | <a href="#D"><strong>D</strong></a> | <a href="#E"><strong>E</strong></a> | <a href="#F"><strong>F</strong></a> | <a href="#G"><strong>G</strong></a> | <a href="#H"><strong>H</strong></a> | <a href="#I"><strong>I</strong></a> | <a href="#J"><strong>J</strong></a> | <a href="#L"><strong>L</strong></a> | <a href="#M"><strong>M</strong></a> | <a href="#N"><strong>N</strong></a> | <a href="#O"><strong>O</strong></a> | <a href="#P"><strong>P</strong></a> | <a href="#R"><strong>R</strong></a> | <a href="#S"><strong>S</strong></a> | <a href="#T"><strong>T</strong></a> | <a href="#U"><strong>U</strong></a> | <a href="#V"><strong>V</strong></a> | <a href="#W"><strong>W</strong></a></div>
+</section>
+<section id="_" class="genindex-section">
+  <h2>_</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api/ocebuild/sources/_lib/index.html#ocebuild.sources._lib.RequestWrapper.__enter__">__enter__() (ocebuild.sources._lib.RequestWrapper method)</a>
+
+        <ul>
+          <li><a href="api/ocebuild/sources/index.html#ocebuild.sources.RequestWrapper.__enter__">(ocebuild.sources.RequestWrapper method)</a>
+</li>
+        </ul></li>
+        <li><a href="api/ocebuild/sources/_lib/index.html#ocebuild.sources._lib.RequestWrapper.__exit__">__exit__() (ocebuild.sources._lib.RequestWrapper method)</a>
+
+        <ul>
+          <li><a href="api/ocebuild/sources/index.html#ocebuild.sources.RequestWrapper.__exit__">(ocebuild.sources.RequestWrapper method)</a>
+</li>
+        </ul></li>
+        <li><a href="api/ocebuild/sources/_lib/index.html#ocebuild.sources._lib.RequestWrapper.__getattr__">__getattr__() (ocebuild.sources._lib.RequestWrapper method)</a>
+
+        <ul>
+          <li><a href="api/ocebuild/sources/index.html#ocebuild.sources.RequestWrapper.__getattr__">(ocebuild.sources.RequestWrapper method)</a>
+</li>
+        </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api/ocebuild/cli/_lib/index.html#ocebuild.cli._lib.CLIEnv.__setattr__">__setattr__() (ocebuild.cli._lib.CLIEnv method)</a>
+</li>
+        <li><a href="api/ocebuild/index.html#ocebuild.__version__">__version__ (in module ocebuild)</a>
+
+        <ul>
+          <li><a href="api/ocebuild/cli/index.html#ocebuild.cli.__version__">(in module ocebuild.cli)</a>
+</li>
+          <li><a href="api/ocebuild/version/index.html#ocebuild.version.__version__">(in module ocebuild.version)</a>
+</li>
+        </ul></li>
+        <li><a href="api/ocebuild/cli/__main__/index.html#ocebuild.cli.__main__._main">_main() (in module ocebuild.cli.__main__)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="A" class="genindex-section">
+  <h2>A</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api/ocebuild/cli/logging/index.html#ocebuild.cli.logging.abort">abort() (in module ocebuild.cli.logging)</a>
+</li>
+        <li><a href="api/ocebuild/pipeline/config/index.html#ocebuild.pipeline.config.apply_preprocessor_tags">apply_preprocessor_tags() (in module ocebuild.pipeline.config)</a>
+</li>
+        <li><a href="api/ocebuild/parsers/asl/index.html#ocebuild.parsers.asl.ASL_COMPILER_CONTROLS">ASL_COMPILER_CONTROLS (in module ocebuild.parsers.asl)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api/ocebuild/parsers/asl/index.html#ocebuild.parsers.asl.ASL_PREFIX_MODIFIERS">ASL_PREFIX_MODIFIERS (in module ocebuild.parsers.asl)</a>
+</li>
+        <li><a href="api/ocebuild/parsers/asl/index.html#ocebuild.parsers.asl.ASL_TYPES_CONDITIONALS">ASL_TYPES_CONDITIONALS (in module ocebuild.parsers.asl)</a>
+</li>
+        <li><a href="api/ocebuild/parsers/asl/index.html#ocebuild.parsers.asl.ASL_TYPES_SCOPES">ASL_TYPES_SCOPES (in module ocebuild.parsers.asl)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="B" class="genindex-section">
+  <h2>B</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api/ocebuild/cli/commands/index.html#ocebuild.cli.commands.build_command">build_command() (in module ocebuild.cli.commands)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="C" class="genindex-section">
+  <h2>C</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api/ocebuild/filesystem/index.html#ocebuild.filesystem.CACHE_DIR">CACHE_DIR (in module ocebuild.filesystem)</a>
+
+        <ul>
+          <li><a href="api/ocebuild/filesystem/cache/index.html#ocebuild.filesystem.cache.CACHE_DIR">(in module ocebuild.filesystem.cache)</a>
+</li>
+        </ul></li>
+        <li><a href="api/ocebuild/filesystem/index.html#ocebuild.filesystem.clear_cache">clear_cache() (in module ocebuild.filesystem)</a>
+
+        <ul>
+          <li><a href="api/ocebuild/filesystem/cache/index.html#ocebuild.filesystem.cache.clear_cache">(in module ocebuild.filesystem.cache)</a>
+</li>
+        </ul></li>
+        <li><a href="api/ocebuild/cli/__main__/index.html#ocebuild.cli.__main__.cli">cli() (in module ocebuild.cli.__main__)</a>
+
+        <ul>
+          <li><a href="api/ocebuild/cli/commands/build/index.html#ocebuild.cli.commands.build.cli">(in module ocebuild.cli.commands.build)</a>
+</li>
+          <li><a href="api/ocebuild/cli/commands/lock/index.html#ocebuild.cli.commands.lock.cli">(in module ocebuild.cli.commands.lock)</a>
+</li>
+          <li><a href="api/ocebuild/cli/commands/patch/index.html#ocebuild.cli.commands.patch.cli">(in module ocebuild.cli.commands.patch)</a>
+</li>
+        </ul></li>
+        <li><a href="api/ocebuild/cli/_lib/index.html#ocebuild.cli._lib.cli_command">cli_command() (in module ocebuild.cli._lib)</a>
+</li>
+        <li><a href="api/ocebuild/cli/commands/index.html#ocebuild.cli.commands.cli_commands">cli_commands (in module ocebuild.cli.commands)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api/ocebuild/cli/_lib/index.html#ocebuild.cli._lib.CLIEnv">CLIEnv (class in ocebuild.cli._lib)</a>
+</li>
+        <li><a href="api/ocebuild/third_party/cpython/pathlib/index.html#ocebuild.third_party.cpython.pathlib.Path.cls_flavour">cls_flavour (ocebuild.third_party.cpython.pathlib.Path attribute)</a>
+
+        <ul>
+          <li><a href="api/ocebuild/third_party/cpython/pathlib/index.html#ocebuild.third_party.cpython.pathlib.PurePath.cls_flavour">(ocebuild.third_party.cpython.pathlib.PurePath attribute)</a>
+</li>
+        </ul></li>
+        <li><a href="api/ocebuild/versioning/index.html#ocebuild.versioning.compare_version">compare_version() (in module ocebuild.versioning)</a>
+
+        <ul>
+          <li><a href="api/ocebuild/versioning/semver/index.html#ocebuild.versioning.semver.compare_version">(in module ocebuild.versioning.semver)</a>
+</li>
+        </ul></li>
+        <li><a href="api/ocebuild/versioning/index.html#ocebuild.versioning.COMPARISON_SYMBOLS">COMPARISON_SYMBOLS (in module ocebuild.versioning)</a>
+
+        <ul>
+          <li><a href="api/ocebuild/versioning/semver/index.html#ocebuild.versioning.semver.COMPARISON_SYMBOLS">(in module ocebuild.versioning.semver)</a>
+</li>
+        </ul></li>
+        <li><a href="api/ocebuild/cli/console/index.html#ocebuild.cli.console.console_wrapper">console_wrapper (in module ocebuild.cli.console)</a>
+</li>
+        <li><a href="api/ocebuild/cli/_lib/index.html#ocebuild.cli._lib.CONTEXT_SETTINGS">CONTEXT_SETTINGS (in module ocebuild.cli._lib)</a>
+</li>
+        <li><a href="api/ocebuild/filesystem/index.html#ocebuild.filesystem.copy">copy() (in module ocebuild.filesystem)</a>
+
+        <ul>
+          <li><a href="api/ocebuild/filesystem/posix/index.html#ocebuild.filesystem.posix.copy">(in module ocebuild.filesystem.posix)</a>
+</li>
+        </ul></li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="D" class="genindex-section">
+  <h2>D</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api/ocebuild/cli/logging/index.html#ocebuild.cli.logging.debug">debug() (in module ocebuild.cli.logging)</a>
+</li>
+        <li><a href="api/ocebuild/parsers/types/index.html#ocebuild.parsers.types.decode_data">decode_data() (in module ocebuild.parsers.types)</a>
+</li>
+        <li><a href="api/ocebuild/parsers/asl/index.html#ocebuild.parsers.asl.DEFINITION_BLOCK_ARGS">DEFINITION_BLOCK_ARGS (in module ocebuild.parsers.asl)</a>
+</li>
+        <li><a href="api/ocebuild/errors/index.html#ocebuild.errors.disable_exception_traceback">disable_exception_traceback() (in module ocebuild.errors)</a>
+
+        <ul>
+          <li><a href="api/ocebuild/errors/_lib/index.html#ocebuild.errors._lib.disable_exception_traceback">(in module ocebuild.errors._lib)</a>
+</li>
+        </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api/ocebuild/sources/index.html#ocebuild.sources.dortania_file_url">dortania_file_url() (in module ocebuild.sources)</a>
+
+        <ul>
+          <li><a href="api/ocebuild/sources/dortania/index.html#ocebuild.sources.dortania.dortania_file_url">(in module ocebuild.sources.dortania)</a>
+</li>
+        </ul></li>
+        <li><a href="api/ocebuild/sources/index.html#ocebuild.sources.dortania_release_url">dortania_release_url() (in module ocebuild.sources)</a>
+
+        <ul>
+          <li><a href="api/ocebuild/sources/dortania/index.html#ocebuild.sources.dortania.dortania_release_url">(in module ocebuild.sources.dortania)</a>
+</li>
+        </ul></li>
+        <li><a href="api/ocebuild/sources/index.html#ocebuild.sources.DortaniaResolver">DortaniaResolver (class in ocebuild.sources)</a>
+
+        <ul>
+          <li><a href="api/ocebuild/sources/resolver/index.html#ocebuild.sources.resolver.DortaniaResolver">(class in ocebuild.sources.resolver)</a>
+</li>
+        </ul></li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="E" class="genindex-section">
+  <h2>E</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api/ocebuild/cli/logging/index.html#ocebuild.cli.logging.echo">echo() (in module ocebuild.cli.logging)</a>
+</li>
+        <li><a href="api/ocebuild/parsers/types/index.html#ocebuild.parsers.types.encode_data">encode_data() (in module ocebuild.parsers.types)</a>
+</li>
+        <li><a href="api/ocebuild/index.html#ocebuild.ENV">ENV (in module ocebuild)</a>
+
+        <ul>
+          <li><a href="api/ocebuild/constants/index.html#ocebuild.constants.ENV">(in module ocebuild.constants)</a>
+</li>
+        </ul></li>
+        <li><a href="api/ocebuild/cli/logging/index.html#ocebuild.cli.logging.error">error() (in module ocebuild.cli.logging)</a>
+</li>
+        <li><a href="api/ocebuild/filesystem/index.html#ocebuild.filesystem.extract_archive">extract_archive() (in module ocebuild.filesystem)</a>
+
+        <ul>
+          <li><a href="api/ocebuild/filesystem/archives/index.html#ocebuild.filesystem.archives.extract_archive">(in module ocebuild.filesystem.archives)</a>
+</li>
+        </ul></li>
+        <li><a href="api/ocebuild/sources/index.html#ocebuild.sources.GitHubResolver.extract_asset">extract_asset() (ocebuild.sources.GitHubResolver static method)</a>
+
+        <ul>
+          <li><a href="api/ocebuild/sources/resolver/index.html#ocebuild.sources.resolver.GitHubResolver.extract_asset">(ocebuild.sources.resolver.GitHubResolver static method)</a>
+</li>
+        </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api/ocebuild/cli/commands/build/index.html#ocebuild.cli.commands.build.extract_build_directory">extract_build_directory() (in module ocebuild.cli.commands.build)</a>
+</li>
+        <li><a href="api/ocebuild/pipeline/opencore/index.html#ocebuild.pipeline.opencore.extract_build_entries">extract_build_entries() (in module ocebuild.pipeline.opencore)</a>
+</li>
+        <li><a href="api/ocebuild/pipeline/packages/index.html#ocebuild.pipeline.packages.extract_build_packages">extract_build_packages() (in module ocebuild.pipeline.packages)</a>
+</li>
+        <li><a href="api/ocebuild/pipeline/ssdts/index.html#ocebuild.pipeline.ssdts.extract_iasl_binary">extract_iasl_binary() (in module ocebuild.pipeline.ssdts)</a>
+</li>
+        <li><a href="api/ocebuild/pipeline/kexts/index.html#ocebuild.pipeline.kexts.extract_kexts">extract_kexts() (in module ocebuild.pipeline.kexts)</a>
+</li>
+        <li><a href="api/ocebuild/pipeline/opencore/index.html#ocebuild.pipeline.opencore.extract_ocbinary_archive">extract_ocbinary_archive() (in module ocebuild.pipeline.opencore)</a>
+</li>
+        <li><a href="api/ocebuild/pipeline/opencore/index.html#ocebuild.pipeline.opencore.extract_opencore_archive">extract_opencore_archive() (in module ocebuild.pipeline.opencore)</a>
+</li>
+        <li><a href="api/ocebuild/pipeline/packages/index.html#ocebuild.pipeline.packages.extract_opencore_packages">extract_opencore_packages() (in module ocebuild.pipeline.packages)</a>
+</li>
+        <li><a href="api/ocebuild/cli/commands/build/index.html#ocebuild.cli.commands.build.extract_packages">extract_packages() (in module ocebuild.cli.commands.build)</a>
+</li>
+        <li><a href="api/ocebuild/pipeline/ssdts/index.html#ocebuild.pipeline.ssdts.extract_ssdts">extract_ssdts() (in module ocebuild.pipeline.ssdts)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="F" class="genindex-section">
+  <h2>F</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api/ocebuild/parsers/dict/index.html#ocebuild.parsers.dict.flatten_dict">flatten_dict() (in module ocebuild.parsers.dict)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api/ocebuild/cli/commands/lock/index.html#ocebuild.cli.commands.lock.format_resolvers">format_resolvers() (in module ocebuild.cli.commands.lock)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="G" class="genindex-section">
+  <h2>G</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api/ocebuild/sources/binary/index.html#ocebuild.sources.binary.get_binary_ext">get_binary_ext() (in module ocebuild.sources.binary)</a>
+</li>
+        <li><a href="api/ocebuild/cli/commands/build/index.html#ocebuild.cli.commands.build.get_build_file">get_build_file() (in module ocebuild.cli.commands.build)</a>
+</li>
+        <li><a href="api/ocebuild/pipeline/config/index.html#ocebuild.pipeline.config.get_configuration_schema">get_configuration_schema() (in module ocebuild.pipeline.config)</a>
+</li>
+        <li><a href="api/ocebuild/sources/binary/index.html#ocebuild.sources.binary.get_digest">get_digest() (in module ocebuild.sources.binary)</a>
+</li>
+        <li><a href="api/ocebuild/sources/index.html#ocebuild.sources.get_latest_commit">get_latest_commit() (in module ocebuild.sources)</a>
+
+        <ul>
+          <li><a href="api/ocebuild/sources/github/index.html#ocebuild.sources.github.get_latest_commit">(in module ocebuild.sources.github)</a>
+</li>
+        </ul></li>
+        <li><a href="api/ocebuild/sources/index.html#ocebuild.sources.get_latest_sha">get_latest_sha() (in module ocebuild.sources)</a>
+
+        <ul>
+          <li><a href="api/ocebuild/sources/dortania/index.html#ocebuild.sources.dortania.get_latest_sha">(in module ocebuild.sources.dortania)</a>
+</li>
+        </ul></li>
+        <li><a href="api/ocebuild/cli/commands/lock/index.html#ocebuild.cli.commands.lock.get_lockfile">get_lockfile() (in module ocebuild.cli.commands.lock)</a>
+</li>
+        <li><a href="api/ocebuild/versioning/index.html#ocebuild.versioning.get_minimum_version">get_minimum_version() (in module ocebuild.versioning)</a>
+
+        <ul>
+          <li><a href="api/ocebuild/versioning/semver/index.html#ocebuild.versioning.semver.get_minimum_version">(in module ocebuild.versioning.semver)</a>
+</li>
+        </ul></li>
+        <li><a href="api/ocebuild/pipeline/opencore/index.html#ocebuild.pipeline.opencore.get_opencore_checksum">get_opencore_checksum() (in module ocebuild.pipeline.opencore)</a>
+</li>
+        <li><a href="api/ocebuild/cli/interactive/index.html#ocebuild.cli.interactive.log_progress.get_renderables">get_renderables() (ocebuild.cli.interactive.log_progress method)</a>
+</li>
+        <li><a href="api/ocebuild/sources/binary/index.html#ocebuild.sources.binary.get_stream_digest">get_stream_digest() (in module ocebuild.sources.binary)</a>
+</li>
+        <li><a href="api/ocebuild/versioning/index.html#ocebuild.versioning.get_version">get_version() (in module ocebuild.versioning)</a>
+
+        <ul>
+          <li><a href="api/ocebuild/versioning/semver/index.html#ocebuild.versioning.semver.get_version">(in module ocebuild.versioning.semver)</a>
+</li>
+        </ul></li>
+        <li><a href="api/ocebuild/versioning/index.html#ocebuild.versioning.get_version_str">get_version_str() (in module ocebuild.versioning)</a>
+
+        <ul>
+          <li><a href="api/ocebuild/versioning/semver/index.html#ocebuild.versioning.semver.get_version_str">(in module ocebuild.versioning.semver)</a>
+</li>
+        </ul></li>
+        <li><a href="api/ocebuild/sources/index.html#ocebuild.sources.github_api_request">github_api_request() (in module ocebuild.sources)</a>
+
+        <ul>
+          <li><a href="api/ocebuild/sources/github/index.html#ocebuild.sources.github.github_api_request">(in module ocebuild.sources.github)</a>
+</li>
+        </ul></li>
+        <li><a href="api/ocebuild/sources/index.html#ocebuild.sources.github_archive_url">github_archive_url() (in module ocebuild.sources)</a>
+
+        <ul>
+          <li><a href="api/ocebuild/sources/github/index.html#ocebuild.sources.github.github_archive_url">(in module ocebuild.sources.github)</a>
+</li>
+        </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api/ocebuild/sources/index.html#ocebuild.sources.github_artifacts_url">github_artifacts_url() (in module ocebuild.sources)</a>
+
+        <ul>
+          <li><a href="api/ocebuild/sources/github/index.html#ocebuild.sources.github.github_artifacts_url">(in module ocebuild.sources.github)</a>
+</li>
+        </ul></li>
+        <li><a href="api/ocebuild/sources/index.html#ocebuild.sources.github_file_url">github_file_url() (in module ocebuild.sources)</a>
+
+        <ul>
+          <li><a href="api/ocebuild/sources/github/index.html#ocebuild.sources.github.github_file_url">(in module ocebuild.sources.github)</a>
+</li>
+        </ul></li>
+        <li><a href="api/ocebuild/sources/index.html#ocebuild.sources.github_rate_limit">github_rate_limit() (in module ocebuild.sources)</a>
+
+        <ul>
+          <li><a href="api/ocebuild/sources/github/index.html#ocebuild.sources.github.github_rate_limit">(in module ocebuild.sources.github)</a>
+</li>
+        </ul></li>
+        <li><a href="api/ocebuild/sources/index.html#ocebuild.sources.github_release_catalog">github_release_catalog() (in module ocebuild.sources)</a>
+
+        <ul>
+          <li><a href="api/ocebuild/sources/github/index.html#ocebuild.sources.github.github_release_catalog">(in module ocebuild.sources.github)</a>
+</li>
+        </ul></li>
+        <li><a href="api/ocebuild/sources/index.html#ocebuild.sources.github_release_url">github_release_url() (in module ocebuild.sources)</a>
+
+        <ul>
+          <li><a href="api/ocebuild/sources/github/index.html#ocebuild.sources.github.github_release_url">(in module ocebuild.sources.github)</a>
+</li>
+        </ul></li>
+        <li><a href="api/ocebuild/sources/index.html#ocebuild.sources.github_suite_id">github_suite_id() (in module ocebuild.sources)</a>
+
+        <ul>
+          <li><a href="api/ocebuild/sources/github/index.html#ocebuild.sources.github.github_suite_id">(in module ocebuild.sources.github)</a>
+</li>
+        </ul></li>
+        <li><a href="api/ocebuild/sources/index.html#ocebuild.sources.github_tag_names">github_tag_names() (in module ocebuild.sources)</a>
+
+        <ul>
+          <li><a href="api/ocebuild/sources/github/index.html#ocebuild.sources.github.github_tag_names">(in module ocebuild.sources.github)</a>
+</li>
+        </ul></li>
+        <li><a href="api/ocebuild/errors/index.html#ocebuild.errors.GitHubRateLimit">GitHubRateLimit</a>, <a href="api/ocebuild/errors/types/index.html#ocebuild.errors.types.GitHubRateLimit">[1]</a>
+</li>
+        <li><a href="api/ocebuild/sources/index.html#ocebuild.sources.GitHubResolver">GitHubResolver (class in ocebuild.sources)</a>
+
+        <ul>
+          <li><a href="api/ocebuild/sources/resolver/index.html#ocebuild.sources.resolver.GitHubResolver">(class in ocebuild.sources.resolver)</a>
+</li>
+        </ul></li>
+        <li><a href="api/ocebuild/filesystem/index.html#ocebuild.filesystem.glob">glob() (in module ocebuild.filesystem)</a>
+
+        <ul>
+          <li><a href="api/ocebuild/filesystem/posix/index.html#ocebuild.filesystem.posix.glob">(in module ocebuild.filesystem.posix)</a>
+</li>
+          <li><a href="api/ocebuild/sources/index.html#ocebuild.sources.PathResolver.glob">(ocebuild.sources.PathResolver method)</a>
+</li>
+          <li><a href="api/ocebuild/sources/resolver/index.html#ocebuild.sources.resolver.PathResolver.glob">(ocebuild.sources.resolver.PathResolver method)</a>
+</li>
+        </ul></li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="H" class="genindex-section">
+  <h2>H</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api/ocebuild/sources/index.html#ocebuild.sources.has_build">has_build() (in module ocebuild.sources)</a>
+
+        <ul>
+          <li><a href="api/ocebuild/sources/dortania/index.html#ocebuild.sources.dortania.has_build">(in module ocebuild.sources.dortania)</a>
+</li>
+          <li><a href="api/ocebuild/sources/index.html#ocebuild.sources.DortaniaResolver.has_build">(ocebuild.sources.DortaniaResolver static method)</a>
+</li>
+          <li><a href="api/ocebuild/sources/resolver/index.html#ocebuild.sources.resolver.DortaniaResolver.has_build">(ocebuild.sources.resolver.DortaniaResolver static method)</a>
+</li>
+        </ul></li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="I" class="genindex-section">
+  <h2>I</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api/ocebuild/pipeline/ssdts/index.html#ocebuild.pipeline.ssdts.iasl_wrapper">iasl_wrapper() (in module ocebuild.pipeline.ssdts)</a>
+</li>
+        <li><a href="api/ocebuild/cli/logging/index.html#ocebuild.cli.logging.info">info() (in module ocebuild.cli.logging)</a>
+</li>
+        <li><a href="api/ocebuild/third_party/index.html#ocebuild.third_party.inject_module">inject_module() (in module ocebuild.third_party)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api/ocebuild/third_party/index.html#ocebuild.third_party.inject_module_namespace">inject_module_namespace() (in module ocebuild.third_party)</a>
+</li>
+        <li><a href="api/ocebuild/sources/index.html#ocebuild.sources.is_latest_build">is_latest_build() (in module ocebuild.sources)</a>
+
+        <ul>
+          <li><a href="api/ocebuild/sources/dortania/index.html#ocebuild.sources.dortania.is_latest_build">(in module ocebuild.sources.dortania)</a>
+</li>
+        </ul></li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="J" class="genindex-section">
+  <h2>J</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api/ocebuild/sources/_lib/index.html#ocebuild.sources._lib.RequestWrapper.json">json() (ocebuild.sources._lib.RequestWrapper method)</a>
+
+        <ul>
+          <li><a href="api/ocebuild/sources/index.html#ocebuild.sources.RequestWrapper.json">(ocebuild.sources.RequestWrapper method)</a>
+</li>
+        </ul></li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="L" class="genindex-section">
+  <h2>L</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api/ocebuild/cli/commands/index.html#ocebuild.cli.commands.lock_command">lock_command() (in module ocebuild.cli.commands)</a>
+</li>
+        <li><a href="api/ocebuild/pipeline/lock/index.html#ocebuild.pipeline.lock.LOCKFILE_METADATA">LOCKFILE_METADATA (in module ocebuild.pipeline.lock)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api/ocebuild/pipeline/lock/index.html#ocebuild.pipeline.lock.LOCKFILE_WARNING_COMMENT">LOCKFILE_WARNING_COMMENT (in module ocebuild.pipeline.lock)</a>
+</li>
+        <li><a href="api/ocebuild/cli/interactive/index.html#ocebuild.cli.interactive.log_progress">log_progress (class in ocebuild.cli.interactive)</a>
+</li>
+        <li><a href="api/ocebuild/cli/console/index.html#ocebuild.cli.console.LOGGING_THEME">LOGGING_THEME (in module ocebuild.cli.console)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="M" class="genindex-section">
+  <h2>M</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api/ocebuild/pipeline/config/index.html#ocebuild.pipeline.config.merge_configs">merge_configs() (in module ocebuild.pipeline.config)</a>
+</li>
+        <li><a href="api/ocebuild/parsers/dict/index.html#ocebuild.parsers.dict.merge_dict">merge_dict() (in module ocebuild.parsers.dict)</a>
+</li>
+        <li>
+    module
+
+        <ul>
+          <li><a href="api/ocebuild/index.html#module-ocebuild">ocebuild</a>
+</li>
+          <li><a href="api/ocebuild/cli/index.html#module-ocebuild.cli">ocebuild.cli</a>
+</li>
+          <li><a href="api/ocebuild/cli/__main__/index.html#module-ocebuild.cli.__main__">ocebuild.cli.__main__</a>
+</li>
+          <li><a href="api/ocebuild/cli/_lib/index.html#module-ocebuild.cli._lib">ocebuild.cli._lib</a>
+</li>
+          <li><a href="api/ocebuild/cli/commands/index.html#module-ocebuild.cli.commands">ocebuild.cli.commands</a>
+</li>
+          <li><a href="api/ocebuild/cli/commands/build/index.html#module-ocebuild.cli.commands.build">ocebuild.cli.commands.build</a>
+</li>
+          <li><a href="api/ocebuild/cli/commands/lock/index.html#module-ocebuild.cli.commands.lock">ocebuild.cli.commands.lock</a>
+</li>
+          <li><a href="api/ocebuild/cli/commands/patch/index.html#module-ocebuild.cli.commands.patch">ocebuild.cli.commands.patch</a>
+</li>
+          <li><a href="api/ocebuild/cli/console/index.html#module-ocebuild.cli.console">ocebuild.cli.console</a>
+</li>
+          <li><a href="api/ocebuild/cli/interactive/index.html#module-ocebuild.cli.interactive">ocebuild.cli.interactive</a>
+</li>
+          <li><a href="api/ocebuild/cli/logging/index.html#module-ocebuild.cli.logging">ocebuild.cli.logging</a>
+</li>
+          <li><a href="api/ocebuild/constants/index.html#module-ocebuild.constants">ocebuild.constants</a>
+</li>
+          <li><a href="api/ocebuild/errors/index.html#module-ocebuild.errors">ocebuild.errors</a>
+</li>
+          <li><a href="api/ocebuild/errors/_lib/index.html#module-ocebuild.errors._lib">ocebuild.errors._lib</a>
+</li>
+          <li><a href="api/ocebuild/errors/types/index.html#module-ocebuild.errors.types">ocebuild.errors.types</a>
+</li>
+          <li><a href="api/ocebuild/errors/validation/index.html#module-ocebuild.errors.validation">ocebuild.errors.validation</a>
+</li>
+          <li><a href="api/ocebuild/filesystem/index.html#module-ocebuild.filesystem">ocebuild.filesystem</a>
+</li>
+          <li><a href="api/ocebuild/filesystem/archives/index.html#module-ocebuild.filesystem.archives">ocebuild.filesystem.archives</a>
+</li>
+          <li><a href="api/ocebuild/filesystem/cache/index.html#module-ocebuild.filesystem.cache">ocebuild.filesystem.cache</a>
+</li>
+          <li><a href="api/ocebuild/filesystem/posix/index.html#module-ocebuild.filesystem.posix">ocebuild.filesystem.posix</a>
+</li>
+          <li><a href="api/ocebuild/parsers/index.html#module-ocebuild.parsers">ocebuild.parsers</a>
+</li>
+          <li><a href="api/ocebuild/parsers/_lib/index.html#module-ocebuild.parsers._lib">ocebuild.parsers._lib</a>
+</li>
+          <li><a href="api/ocebuild/parsers/asl/index.html#module-ocebuild.parsers.asl">ocebuild.parsers.asl</a>
+</li>
+          <li><a href="api/ocebuild/parsers/dict/index.html#module-ocebuild.parsers.dict">ocebuild.parsers.dict</a>
+</li>
+          <li><a href="api/ocebuild/parsers/plist/index.html#module-ocebuild.parsers.plist">ocebuild.parsers.plist</a>
+</li>
+          <li><a href="api/ocebuild/parsers/regex/index.html#module-ocebuild.parsers.regex">ocebuild.parsers.regex</a>
+</li>
+          <li><a href="api/ocebuild/parsers/schema/index.html#module-ocebuild.parsers.schema">ocebuild.parsers.schema</a>
+</li>
+          <li><a href="api/ocebuild/parsers/types/index.html#module-ocebuild.parsers.types">ocebuild.parsers.types</a>
+</li>
+          <li><a href="api/ocebuild/parsers/yaml/index.html#module-ocebuild.parsers.yaml">ocebuild.parsers.yaml</a>
+</li>
+          <li><a href="api/ocebuild/pipeline/index.html#module-ocebuild.pipeline">ocebuild.pipeline</a>
+</li>
+          <li><a href="api/ocebuild/pipeline/build/index.html#module-ocebuild.pipeline.build">ocebuild.pipeline.build</a>
+</li>
+          <li><a href="api/ocebuild/pipeline/config/index.html#module-ocebuild.pipeline.config">ocebuild.pipeline.config</a>
+</li>
+          <li><a href="api/ocebuild/pipeline/kexts/index.html#module-ocebuild.pipeline.kexts">ocebuild.pipeline.kexts</a>
+</li>
+          <li><a href="api/ocebuild/pipeline/lock/index.html#module-ocebuild.pipeline.lock">ocebuild.pipeline.lock</a>
+</li>
+          <li><a href="api/ocebuild/pipeline/opencore/index.html#module-ocebuild.pipeline.opencore">ocebuild.pipeline.opencore</a>
+</li>
+          <li><a href="api/ocebuild/pipeline/packages/index.html#module-ocebuild.pipeline.packages">ocebuild.pipeline.packages</a>
+</li>
+          <li><a href="api/ocebuild/pipeline/ssdts/index.html#module-ocebuild.pipeline.ssdts">ocebuild.pipeline.ssdts</a>
+</li>
+          <li><a href="api/ocebuild/sources/index.html#module-ocebuild.sources">ocebuild.sources</a>
+</li>
+          <li><a href="api/ocebuild/sources/_lib/index.html#module-ocebuild.sources._lib">ocebuild.sources._lib</a>
+</li>
+          <li><a href="api/ocebuild/sources/binary/index.html#module-ocebuild.sources.binary">ocebuild.sources.binary</a>
+</li>
+          <li><a href="api/ocebuild/sources/dortania/index.html#module-ocebuild.sources.dortania">ocebuild.sources.dortania</a>
+</li>
+          <li><a href="api/ocebuild/sources/github/index.html#module-ocebuild.sources.github">ocebuild.sources.github</a>
+</li>
+          <li><a href="api/ocebuild/sources/resolver/index.html#module-ocebuild.sources.resolver">ocebuild.sources.resolver</a>
+</li>
+          <li><a href="api/ocebuild/third_party/index.html#module-ocebuild.third_party">ocebuild.third_party</a>
+</li>
+          <li><a href="api/ocebuild/third_party/cpython/index.html#module-ocebuild.third_party.cpython">ocebuild.third_party.cpython</a>
+</li>
+          <li><a href="api/ocebuild/third_party/cpython/pathlib/index.html#module-ocebuild.third_party.cpython.pathlib">ocebuild.third_party.cpython.pathlib</a>
+</li>
+          <li><a href="api/ocebuild/third_party/cpython/plistlib/index.html#module-ocebuild.third_party.cpython.plistlib">ocebuild.third_party.cpython.plistlib</a>
+</li>
+          <li><a href="api/ocebuild/version/index.html#module-ocebuild.version">ocebuild.version</a>
+</li>
+          <li><a href="api/ocebuild/versioning/index.html#module-ocebuild.versioning">ocebuild.versioning</a>
+</li>
+          <li><a href="api/ocebuild/versioning/semver/index.html#module-ocebuild.versioning.semver">ocebuild.versioning.semver</a>
+</li>
+        </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api/ocebuild/filesystem/index.html#ocebuild.filesystem.move">move() (in module ocebuild.filesystem)</a>
+
+        <ul>
+          <li><a href="api/ocebuild/filesystem/posix/index.html#ocebuild.filesystem.posix.move">(in module ocebuild.filesystem.posix)</a>
+</li>
+        </ul></li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="N" class="genindex-section">
+  <h2>N</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api/ocebuild/parsers/dict/index.html#ocebuild.parsers.dict.nested_del">nested_del() (in module ocebuild.parsers.dict)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api/ocebuild/parsers/dict/index.html#ocebuild.parsers.dict.nested_get">nested_get() (in module ocebuild.parsers.dict)</a>
+</li>
+        <li><a href="api/ocebuild/parsers/dict/index.html#ocebuild.parsers.dict.nested_set">nested_set() (in module ocebuild.parsers.dict)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="O" class="genindex-section">
+  <h2>O</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li>
+    ocebuild
+
+        <ul>
+          <li><a href="api/ocebuild/index.html#module-ocebuild">module</a>
+</li>
+        </ul></li>
+        <li>
+    ocebuild.cli
+
+        <ul>
+          <li><a href="api/ocebuild/cli/index.html#module-ocebuild.cli">module</a>
+</li>
+        </ul></li>
+        <li>
+    ocebuild.cli.__main__
+
+        <ul>
+          <li><a href="api/ocebuild/cli/__main__/index.html#module-ocebuild.cli.__main__">module</a>
+</li>
+        </ul></li>
+        <li>
+    ocebuild.cli._lib
+
+        <ul>
+          <li><a href="api/ocebuild/cli/_lib/index.html#module-ocebuild.cli._lib">module</a>
+</li>
+        </ul></li>
+        <li>
+    ocebuild.cli.commands
+
+        <ul>
+          <li><a href="api/ocebuild/cli/commands/index.html#module-ocebuild.cli.commands">module</a>
+</li>
+        </ul></li>
+        <li>
+    ocebuild.cli.commands.build
+
+        <ul>
+          <li><a href="api/ocebuild/cli/commands/build/index.html#module-ocebuild.cli.commands.build">module</a>
+</li>
+        </ul></li>
+        <li>
+    ocebuild.cli.commands.lock
+
+        <ul>
+          <li><a href="api/ocebuild/cli/commands/lock/index.html#module-ocebuild.cli.commands.lock">module</a>
+</li>
+        </ul></li>
+        <li>
+    ocebuild.cli.commands.patch
+
+        <ul>
+          <li><a href="api/ocebuild/cli/commands/patch/index.html#module-ocebuild.cli.commands.patch">module</a>
+</li>
+        </ul></li>
+        <li>
+    ocebuild.cli.console
+
+        <ul>
+          <li><a href="api/ocebuild/cli/console/index.html#module-ocebuild.cli.console">module</a>
+</li>
+        </ul></li>
+        <li>
+    ocebuild.cli.interactive
+
+        <ul>
+          <li><a href="api/ocebuild/cli/interactive/index.html#module-ocebuild.cli.interactive">module</a>
+</li>
+        </ul></li>
+        <li>
+    ocebuild.cli.logging
+
+        <ul>
+          <li><a href="api/ocebuild/cli/logging/index.html#module-ocebuild.cli.logging">module</a>
+</li>
+        </ul></li>
+        <li>
+    ocebuild.constants
+
+        <ul>
+          <li><a href="api/ocebuild/constants/index.html#module-ocebuild.constants">module</a>
+</li>
+        </ul></li>
+        <li>
+    ocebuild.errors
+
+        <ul>
+          <li><a href="api/ocebuild/errors/index.html#module-ocebuild.errors">module</a>
+</li>
+        </ul></li>
+        <li>
+    ocebuild.errors._lib
+
+        <ul>
+          <li><a href="api/ocebuild/errors/_lib/index.html#module-ocebuild.errors._lib">module</a>
+</li>
+        </ul></li>
+        <li>
+    ocebuild.errors.types
+
+        <ul>
+          <li><a href="api/ocebuild/errors/types/index.html#module-ocebuild.errors.types">module</a>
+</li>
+        </ul></li>
+        <li>
+    ocebuild.errors.validation
+
+        <ul>
+          <li><a href="api/ocebuild/errors/validation/index.html#module-ocebuild.errors.validation">module</a>
+</li>
+        </ul></li>
+        <li>
+    ocebuild.filesystem
+
+        <ul>
+          <li><a href="api/ocebuild/filesystem/index.html#module-ocebuild.filesystem">module</a>
+</li>
+        </ul></li>
+        <li>
+    ocebuild.filesystem.archives
+
+        <ul>
+          <li><a href="api/ocebuild/filesystem/archives/index.html#module-ocebuild.filesystem.archives">module</a>
+</li>
+        </ul></li>
+        <li>
+    ocebuild.filesystem.cache
+
+        <ul>
+          <li><a href="api/ocebuild/filesystem/cache/index.html#module-ocebuild.filesystem.cache">module</a>
+</li>
+        </ul></li>
+        <li>
+    ocebuild.filesystem.posix
+
+        <ul>
+          <li><a href="api/ocebuild/filesystem/posix/index.html#module-ocebuild.filesystem.posix">module</a>
+</li>
+        </ul></li>
+        <li>
+    ocebuild.parsers
+
+        <ul>
+          <li><a href="api/ocebuild/parsers/index.html#module-ocebuild.parsers">module</a>
+</li>
+        </ul></li>
+        <li>
+    ocebuild.parsers._lib
+
+        <ul>
+          <li><a href="api/ocebuild/parsers/_lib/index.html#module-ocebuild.parsers._lib">module</a>
+</li>
+        </ul></li>
+        <li>
+    ocebuild.parsers.asl
+
+        <ul>
+          <li><a href="api/ocebuild/parsers/asl/index.html#module-ocebuild.parsers.asl">module</a>
+</li>
+        </ul></li>
+        <li>
+    ocebuild.parsers.dict
+
+        <ul>
+          <li><a href="api/ocebuild/parsers/dict/index.html#module-ocebuild.parsers.dict">module</a>
+</li>
+        </ul></li>
+        <li>
+    ocebuild.parsers.plist
+
+        <ul>
+          <li><a href="api/ocebuild/parsers/plist/index.html#module-ocebuild.parsers.plist">module</a>
+</li>
+        </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li>
+    ocebuild.parsers.regex
+
+        <ul>
+          <li><a href="api/ocebuild/parsers/regex/index.html#module-ocebuild.parsers.regex">module</a>
+</li>
+        </ul></li>
+        <li>
+    ocebuild.parsers.schema
+
+        <ul>
+          <li><a href="api/ocebuild/parsers/schema/index.html#module-ocebuild.parsers.schema">module</a>
+</li>
+        </ul></li>
+        <li>
+    ocebuild.parsers.types
+
+        <ul>
+          <li><a href="api/ocebuild/parsers/types/index.html#module-ocebuild.parsers.types">module</a>
+</li>
+        </ul></li>
+        <li>
+    ocebuild.parsers.yaml
+
+        <ul>
+          <li><a href="api/ocebuild/parsers/yaml/index.html#module-ocebuild.parsers.yaml">module</a>
+</li>
+        </ul></li>
+        <li>
+    ocebuild.pipeline
+
+        <ul>
+          <li><a href="api/ocebuild/pipeline/index.html#module-ocebuild.pipeline">module</a>
+</li>
+        </ul></li>
+        <li>
+    ocebuild.pipeline.build
+
+        <ul>
+          <li><a href="api/ocebuild/pipeline/build/index.html#module-ocebuild.pipeline.build">module</a>
+</li>
+        </ul></li>
+        <li>
+    ocebuild.pipeline.config
+
+        <ul>
+          <li><a href="api/ocebuild/pipeline/config/index.html#module-ocebuild.pipeline.config">module</a>
+</li>
+        </ul></li>
+        <li>
+    ocebuild.pipeline.kexts
+
+        <ul>
+          <li><a href="api/ocebuild/pipeline/kexts/index.html#module-ocebuild.pipeline.kexts">module</a>
+</li>
+        </ul></li>
+        <li>
+    ocebuild.pipeline.lock
+
+        <ul>
+          <li><a href="api/ocebuild/pipeline/lock/index.html#module-ocebuild.pipeline.lock">module</a>
+</li>
+        </ul></li>
+        <li>
+    ocebuild.pipeline.opencore
+
+        <ul>
+          <li><a href="api/ocebuild/pipeline/opencore/index.html#module-ocebuild.pipeline.opencore">module</a>
+</li>
+        </ul></li>
+        <li>
+    ocebuild.pipeline.packages
+
+        <ul>
+          <li><a href="api/ocebuild/pipeline/packages/index.html#module-ocebuild.pipeline.packages">module</a>
+</li>
+        </ul></li>
+        <li>
+    ocebuild.pipeline.ssdts
+
+        <ul>
+          <li><a href="api/ocebuild/pipeline/ssdts/index.html#module-ocebuild.pipeline.ssdts">module</a>
+</li>
+        </ul></li>
+        <li>
+    ocebuild.sources
+
+        <ul>
+          <li><a href="api/ocebuild/sources/index.html#module-ocebuild.sources">module</a>
+</li>
+        </ul></li>
+        <li>
+    ocebuild.sources._lib
+
+        <ul>
+          <li><a href="api/ocebuild/sources/_lib/index.html#module-ocebuild.sources._lib">module</a>
+</li>
+        </ul></li>
+        <li>
+    ocebuild.sources.binary
+
+        <ul>
+          <li><a href="api/ocebuild/sources/binary/index.html#module-ocebuild.sources.binary">module</a>
+</li>
+        </ul></li>
+        <li>
+    ocebuild.sources.dortania
+
+        <ul>
+          <li><a href="api/ocebuild/sources/dortania/index.html#module-ocebuild.sources.dortania">module</a>
+</li>
+        </ul></li>
+        <li>
+    ocebuild.sources.github
+
+        <ul>
+          <li><a href="api/ocebuild/sources/github/index.html#module-ocebuild.sources.github">module</a>
+</li>
+        </ul></li>
+        <li>
+    ocebuild.sources.resolver
+
+        <ul>
+          <li><a href="api/ocebuild/sources/resolver/index.html#module-ocebuild.sources.resolver">module</a>
+</li>
+        </ul></li>
+        <li>
+    ocebuild.third_party
+
+        <ul>
+          <li><a href="api/ocebuild/third_party/index.html#module-ocebuild.third_party">module</a>
+</li>
+        </ul></li>
+        <li>
+    ocebuild.third_party.cpython
+
+        <ul>
+          <li><a href="api/ocebuild/third_party/cpython/index.html#module-ocebuild.third_party.cpython">module</a>
+</li>
+        </ul></li>
+        <li>
+    ocebuild.third_party.cpython.pathlib
+
+        <ul>
+          <li><a href="api/ocebuild/third_party/cpython/pathlib/index.html#module-ocebuild.third_party.cpython.pathlib">module</a>
+</li>
+        </ul></li>
+        <li>
+    ocebuild.third_party.cpython.plistlib
+
+        <ul>
+          <li><a href="api/ocebuild/third_party/cpython/plistlib/index.html#module-ocebuild.third_party.cpython.plistlib">module</a>
+</li>
+        </ul></li>
+        <li>
+    ocebuild.version
+
+        <ul>
+          <li><a href="api/ocebuild/version/index.html#module-ocebuild.version">module</a>
+</li>
+        </ul></li>
+        <li>
+    ocebuild.versioning
+
+        <ul>
+          <li><a href="api/ocebuild/versioning/index.html#module-ocebuild.versioning">module</a>
+</li>
+        </ul></li>
+        <li>
+    ocebuild.versioning.semver
+
+        <ul>
+          <li><a href="api/ocebuild/versioning/semver/index.html#module-ocebuild.versioning.semver">module</a>
+</li>
+        </ul></li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="P" class="genindex-section">
+  <h2>P</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api/ocebuild/parsers/asl/index.html#ocebuild.parsers.asl.parse_definition_block">parse_definition_block() (in module ocebuild.parsers.asl)</a>
+</li>
+        <li><a href="api/ocebuild/pipeline/kexts/index.html#ocebuild.pipeline.kexts.parse_kext_plist">parse_kext_plist() (in module ocebuild.pipeline.kexts)</a>
+</li>
+        <li><a href="api/ocebuild/parsers/plist/index.html#ocebuild.parsers.plist.parse_plist">parse_plist() (in module ocebuild.parsers.plist)</a>
+</li>
+        <li><a href="api/ocebuild/parsers/schema/index.html#ocebuild.parsers.schema.parse_schema">parse_schema() (in module ocebuild.parsers.schema)</a>
+</li>
+        <li><a href="api/ocebuild/pipeline/lock/index.html#ocebuild.pipeline.lock.parse_semver_params">parse_semver_params() (in module ocebuild.pipeline.lock)</a>
+</li>
+        <li><a href="api/ocebuild/pipeline/lock/index.html#ocebuild.pipeline.lock.parse_specifier">parse_specifier() (in module ocebuild.pipeline.lock)</a>
+</li>
+        <li><a href="api/ocebuild/parsers/asl/index.html#ocebuild.parsers.asl.parse_ssdt_namespace">parse_ssdt_namespace() (in module ocebuild.parsers.asl)</a>
+</li>
+        <li><a href="api/ocebuild/parsers/yaml/index.html#ocebuild.parsers.yaml.parse_yaml">parse_yaml() (in module ocebuild.parsers.yaml)</a>
+</li>
+        <li><a href="api/ocebuild/parsers/yaml/index.html#ocebuild.parsers.yaml.parse_yaml_types">parse_yaml_types() (in module ocebuild.parsers.yaml)</a>
+</li>
+        <li><a href="api/ocebuild/cli/commands/index.html#ocebuild.cli.commands.patch_command">patch_command() (in module ocebuild.cli.commands)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api/ocebuild/third_party/cpython/pathlib/index.html#ocebuild.third_party.cpython.pathlib.Path">Path (class in ocebuild.third_party.cpython.pathlib)</a>
+</li>
+        <li><a href="api/ocebuild/sources/index.html#ocebuild.sources.PathResolver">PathResolver (class in ocebuild.sources)</a>
+
+        <ul>
+          <li><a href="api/ocebuild/sources/resolver/index.html#ocebuild.sources.resolver.PathResolver">(class in ocebuild.sources.resolver)</a>
+</li>
+        </ul></li>
+        <li><a href="api/ocebuild/errors/index.html#ocebuild.errors.PathValidationError">PathValidationError</a>, <a href="api/ocebuild/errors/types/index.html#ocebuild.errors.types.PathValidationError">[1]</a>
+</li>
+        <li><a href="api/ocebuild/parsers/plist/index.html#ocebuild.parsers.plist.PLIST_FORMATS">PLIST_FORMATS (in module ocebuild.parsers.plist)</a>
+</li>
+        <li><a href="api/ocebuild/cli/interactive/index.html#ocebuild.cli.interactive.Progress">Progress (in module ocebuild.cli.interactive)</a>
+</li>
+        <li><a href="api/ocebuild/cli/interactive/index.html#ocebuild.cli.interactive.progress_bar">progress_bar() (in module ocebuild.cli.interactive)</a>
+</li>
+        <li><a href="api/ocebuild/pipeline/packages/index.html#ocebuild.pipeline.packages.prune_build_packages">prune_build_packages() (in module ocebuild.pipeline.packages)</a>
+</li>
+        <li><a href="api/ocebuild/pipeline/lock/index.html#ocebuild.pipeline.lock.prune_lockfile">prune_lockfile() (in module ocebuild.pipeline.lock)</a>
+</li>
+        <li><a href="api/ocebuild/pipeline/lock/index.html#ocebuild.pipeline.lock.prune_resolver_entry">prune_resolver_entry() (in module ocebuild.pipeline.lock)</a>
+</li>
+        <li><a href="api/ocebuild/third_party/cpython/pathlib/index.html#ocebuild.third_party.cpython.pathlib.PurePath">PurePath (class in ocebuild.third_party.cpython.pathlib)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="R" class="genindex-section">
+  <h2>R</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api/ocebuild/parsers/asl/index.html#ocebuild.parsers.asl.RE_BLOCK_ARGS">RE_BLOCK_ARGS (in module ocebuild.parsers.asl)</a>
+</li>
+        <li><a href="api/ocebuild/parsers/asl/index.html#ocebuild.parsers.asl.RE_IMPORT_TYPE">RE_IMPORT_TYPE (in module ocebuild.parsers.asl)</a>
+</li>
+        <li><a href="api/ocebuild/parsers/asl/index.html#ocebuild.parsers.asl.RE_LOCAL_VAR">RE_LOCAL_VAR (in module ocebuild.parsers.asl)</a>
+</li>
+        <li><a href="api/ocebuild/parsers/regex/index.html#ocebuild.parsers.regex.re_match">re_match() (in module ocebuild.parsers.regex)</a>
+</li>
+        <li><a href="api/ocebuild/parsers/asl/index.html#ocebuild.parsers.asl.RE_NAME">RE_NAME (in module ocebuild.parsers.asl)</a>
+</li>
+        <li><a href="api/ocebuild/parsers/regex/index.html#ocebuild.parsers.regex.re_search">re_search() (in module ocebuild.parsers.regex)</a>
+</li>
+        <li><a href="api/ocebuild/parsers/asl/index.html#ocebuild.parsers.asl.RE_STATEMENT">RE_STATEMENT (in module ocebuild.parsers.asl)</a>
+</li>
+        <li><a href="api/ocebuild/parsers/types/index.html#ocebuild.parsers.types.RE_VALID_BASE64">RE_VALID_BASE64 (in module ocebuild.parsers.types)</a>
+</li>
+        <li><a href="api/ocebuild/parsers/types/index.html#ocebuild.parsers.types.RE_VALID_HEX">RE_VALID_HEX (in module ocebuild.parsers.types)</a>
+</li>
+        <li><a href="api/ocebuild/pipeline/build/index.html#ocebuild.pipeline.build.read_build_file">read_build_file() (in module ocebuild.pipeline.build)</a>
+</li>
+        <li><a href="api/ocebuild/pipeline/config/index.html#ocebuild.pipeline.config.read_config">read_config() (in module ocebuild.pipeline.config)</a>
+</li>
+        <li><a href="api/ocebuild/pipeline/lock/index.html#ocebuild.pipeline.lock.read_lockfile">read_lockfile() (in module ocebuild.pipeline.lock)</a>
+</li>
+        <li><a href="api/ocebuild/cli/commands/patch/index.html#ocebuild.cli.commands.patch.read_schema">read_schema() (in module ocebuild.cli.commands.patch)</a>
+</li>
+        <li><a href="api/ocebuild/third_party/cpython/pathlib/index.html#ocebuild.third_party.cpython.pathlib.Path.relative">relative() (ocebuild.third_party.cpython.pathlib.Path method)</a>
+</li>
+        <li><a href="api/ocebuild/filesystem/index.html#ocebuild.filesystem.remove">remove() (in module ocebuild.filesystem)</a>
+
+        <ul>
+          <li><a href="api/ocebuild/filesystem/posix/index.html#ocebuild.filesystem.posix.remove">(in module ocebuild.filesystem.posix)</a>
+</li>
+        </ul></li>
+        <li><a href="api/ocebuild/filesystem/index.html#ocebuild.filesystem.rename">rename() (in module ocebuild.filesystem)</a>
+
+        <ul>
+          <li><a href="api/ocebuild/filesystem/posix/index.html#ocebuild.filesystem.posix.rename">(in module ocebuild.filesystem.posix)</a>
+</li>
+        </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api/ocebuild/sources/index.html#ocebuild.sources.request">request() (in module ocebuild.sources)</a>
+
+        <ul>
+          <li><a href="api/ocebuild/sources/_lib/index.html#ocebuild.sources._lib.request">(in module ocebuild.sources._lib)</a>
+</li>
+        </ul></li>
+        <li><a href="api/ocebuild/sources/index.html#ocebuild.sources.RequestWrapper">RequestWrapper (class in ocebuild.sources)</a>
+
+        <ul>
+          <li><a href="api/ocebuild/sources/_lib/index.html#ocebuild.sources._lib.RequestWrapper">(class in ocebuild.sources._lib)</a>
+</li>
+        </ul></li>
+        <li><a href="api/ocebuild/sources/index.html#ocebuild.sources.DortaniaResolver.resolve">resolve() (ocebuild.sources.DortaniaResolver method)</a>
+
+        <ul>
+          <li><a href="api/ocebuild/sources/index.html#ocebuild.sources.GitHubResolver.resolve">(ocebuild.sources.GitHubResolver method)</a>
+</li>
+          <li><a href="api/ocebuild/sources/index.html#ocebuild.sources.PathResolver.resolve">(ocebuild.sources.PathResolver method)</a>
+</li>
+          <li><a href="api/ocebuild/sources/resolver/index.html#ocebuild.sources.resolver.DortaniaResolver.resolve">(ocebuild.sources.resolver.DortaniaResolver method)</a>
+</li>
+          <li><a href="api/ocebuild/sources/resolver/index.html#ocebuild.sources.resolver.GitHubResolver.resolve">(ocebuild.sources.resolver.GitHubResolver method)</a>
+</li>
+          <li><a href="api/ocebuild/sources/resolver/index.html#ocebuild.sources.resolver.PathResolver.resolve">(ocebuild.sources.resolver.PathResolver method)</a>
+</li>
+        </ul></li>
+        <li><a href="api/ocebuild/cli/commands/lock/index.html#ocebuild.cli.commands.lock.resolve_lockfile">resolve_lockfile() (in module ocebuild.cli.commands.lock)</a>
+</li>
+        <li><a href="api/ocebuild/pipeline/lock/index.html#ocebuild.pipeline.lock.resolve_specifiers">resolve_specifiers() (in module ocebuild.pipeline.lock)</a>
+</li>
+        <li><a href="api/ocebuild/versioning/index.html#ocebuild.versioning.resolve_version_specifier">resolve_version_specifier() (in module ocebuild.versioning)</a>
+
+        <ul>
+          <li><a href="api/ocebuild/versioning/semver/index.html#ocebuild.versioning.semver.resolve_version_specifier">(in module ocebuild.versioning.semver)</a>
+</li>
+        </ul></li>
+        <li><a href="api/ocebuild/sources/index.html#ocebuild.sources.ResolverType">ResolverType (in module ocebuild.sources)</a>
+
+        <ul>
+          <li><a href="api/ocebuild/sources/resolver/index.html#ocebuild.sources.resolver.ResolverType">(in module ocebuild.sources.resolver)</a>
+</li>
+        </ul></li>
+        <li><a href="api/ocebuild/cli/commands/lock/index.html#ocebuild.cli.commands.lock.rich_resolver">rich_resolver() (in module ocebuild.cli.commands.lock)</a>
+</li>
+        <li><a href="api/ocebuild/cli/commands/lock/index.html#ocebuild.cli.commands.lock.rich_revision">rich_revision() (in module ocebuild.cli.commands.lock)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="S" class="genindex-section">
+  <h2>S</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api/ocebuild/versioning/index.html#ocebuild.versioning.SEMVER_SYMBOLS">SEMVER_SYMBOLS (in module ocebuild.versioning)</a>
+
+        <ul>
+          <li><a href="api/ocebuild/versioning/semver/index.html#ocebuild.versioning.semver.SEMVER_SYMBOLS">(in module ocebuild.versioning.semver)</a>
+</li>
+        </ul></li>
+        <li><a href="api/ocebuild/versioning/index.html#ocebuild.versioning.sort_dependencies">sort_dependencies() (in module ocebuild.versioning)</a>
+
+        <ul>
+          <li><a href="api/ocebuild/versioning/semver/index.html#ocebuild.versioning.semver.sort_dependencies">(in module ocebuild.versioning.semver)</a>
+</li>
+        </ul></li>
+        <li><a href="api/ocebuild/pipeline/kexts/index.html#ocebuild.pipeline.kexts.sort_kext_cfbundle">sort_kext_cfbundle() (in module ocebuild.pipeline.kexts)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api/ocebuild/pipeline/ssdts/index.html#ocebuild.pipeline.ssdts.sort_ssdt_symbols">sort_ssdt_symbols() (in module ocebuild.pipeline.ssdts)</a>
+</li>
+        <li><a href="api/ocebuild/cli/console/index.html#ocebuild.cli.console.START_TIME">START_TIME (in module ocebuild.cli.console)</a>
+</li>
+        <li><a href="api/ocebuild/third_party/cpython/pathlib/index.html#ocebuild.third_party.cpython.pathlib.Path.subclasses">subclasses (ocebuild.third_party.cpython.pathlib.Path attribute)</a>
+
+        <ul>
+          <li><a href="api/ocebuild/third_party/cpython/pathlib/index.html#ocebuild.third_party.cpython.pathlib.PurePath.subclasses">(ocebuild.third_party.cpython.pathlib.PurePath attribute)</a>
+</li>
+        </ul></li>
+        <li><a href="api/ocebuild/cli/logging/index.html#ocebuild.cli.logging.success">success() (in module ocebuild.cli.logging)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="T" class="genindex-section">
+  <h2>T</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api/ocebuild/parsers/_lib/index.html#ocebuild.parsers._lib.TAGS">TAGS (in module ocebuild.parsers._lib)</a>
+</li>
+        <li><a href="api/ocebuild/sources/_lib/index.html#ocebuild.sources._lib.RequestWrapper.text">text() (ocebuild.sources._lib.RequestWrapper method)</a>
+
+        <ul>
+          <li><a href="api/ocebuild/sources/index.html#ocebuild.sources.RequestWrapper.text">(ocebuild.sources.RequestWrapper method)</a>
+</li>
+        </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api/ocebuild/third_party/cpython/pathlib/index.html#ocebuild.third_party.cpython.pathlib.Path.TPath">TPath (ocebuild.third_party.cpython.pathlib.Path attribute)</a>
+</li>
+        <li><a href="api/ocebuild/third_party/cpython/pathlib/index.html#ocebuild.third_party.cpython.pathlib.PurePath.TPurePath">TPurePath (ocebuild.third_party.cpython.pathlib.PurePath attribute)</a>
+</li>
+        <li><a href="api/ocebuild/cli/console/index.html#ocebuild.cli.console.traceback_wrapper">traceback_wrapper() (in module ocebuild.cli.console)</a>
+</li>
+        <li><a href="api/ocebuild/pipeline/ssdts/index.html#ocebuild.pipeline.ssdts.translate_ssdts">translate_ssdts() (in module ocebuild.pipeline.ssdts)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="U" class="genindex-section">
+  <h2>U</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api/ocebuild/third_party/cpython/plistlib/index.html#ocebuild.third_party.cpython.plistlib.UID">UID (class in ocebuild.third_party.cpython.plistlib)</a>
+</li>
+        <li><a href="api/ocebuild/pipeline/build/index.html#ocebuild.pipeline.build.unpack_build_entries">unpack_build_entries() (in module ocebuild.pipeline.build)</a>
+</li>
+        <li><a href="api/ocebuild/filesystem/index.html#ocebuild.filesystem.UNPACK_DIR">UNPACK_DIR (in module ocebuild.filesystem)</a>
+
+        <ul>
+          <li><a href="api/ocebuild/filesystem/cache/index.html#ocebuild.filesystem.cache.UNPACK_DIR">(in module ocebuild.filesystem.cache)</a>
+</li>
+        </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api/ocebuild/cli/commands/build/index.html#ocebuild.cli.commands.build.unpack_packages">unpack_packages() (in module ocebuild.cli.commands.build)</a>
+</li>
+        <li><a href="api/ocebuild/parsers/_lib/index.html#ocebuild.parsers._lib.update_cursor">update_cursor() (in module ocebuild.parsers._lib)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="V" class="genindex-section">
+  <h2>V</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api/ocebuild/errors/validation/index.html#ocebuild.errors.validation.validate">validate() (in module ocebuild.errors.validation)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api/ocebuild/pipeline/lock/index.html#ocebuild.pipeline.lock.validate_dependencies">validate_dependencies() (in module ocebuild.pipeline.lock)</a>
+</li>
+        <li><a href="api/ocebuild/errors/validation/index.html#ocebuild.errors.validation.validate_path_tree">validate_path_tree() (in module ocebuild.errors.validation)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="W" class="genindex-section">
+  <h2>W</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api/ocebuild/sources/binary/index.html#ocebuild.sources.binary.wrap_binary">wrap_binary() (in module ocebuild.sources.binary)</a>
+</li>
+        <li><a href="api/ocebuild/errors/index.html#ocebuild.errors.wrap_exception">wrap_exception() (in module ocebuild.errors)</a>
+
+        <ul>
+          <li><a href="api/ocebuild/errors/_lib/index.html#ocebuild.errors._lib.wrap_exception">(in module ocebuild.errors._lib)</a>
+</li>
+        </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api/ocebuild/pipeline/lock/index.html#ocebuild.pipeline.lock.write_lockfile">write_lockfile() (in module ocebuild.pipeline.lock)</a>
+</li>
+        <li><a href="api/ocebuild/parsers/plist/index.html#ocebuild.parsers.plist.write_plist">write_plist() (in module ocebuild.parsers.plist)</a>
+</li>
+        <li><a href="api/ocebuild/parsers/yaml/index.html#ocebuild.parsers.yaml.write_yaml">write_yaml() (in module ocebuild.parsers.yaml)</a>
+</li>
+        <li><a href="api/ocebuild/parsers/yaml/index.html#ocebuild.parsers.yaml.write_yaml_types">write_yaml_types() (in module ocebuild.parsers.yaml)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2023, The OCE Build Authors
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            <div class="last-updated">
+              Last updated on Aug 05, 2023</div>
+          </div>
+          <div class="right-details">
+            <div class="icons">
+              <a class="muted-link " href="https://github.com/Qonfused/OCE-Build" aria-label="GitHub">
+        <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 16 16">
+          <path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path>
+        </svg>
+      </a>
+              
+            </div>
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </div>
+</div><script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=297cd8a8"></script>
+    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="_static/scripts/furo.js?v=32e29ea5"></script>
+    </body>
+</html>

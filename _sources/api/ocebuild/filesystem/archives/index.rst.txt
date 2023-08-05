@@ -1,0 +1,40 @@
+:py:mod:`ocebuild.filesystem.archives`
+======================================
+
+.. py:module:: ocebuild.filesystem.archives
+
+.. autoapi-nested-parse::
+
+   Methods for handling and extracting archive formats.
+
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ocebuild.filesystem.archives.extract_archive
+
+
+
+.. py:function:: extract_archive(url: Union[str, urllib.request.Request], persist: bool = False) -> Generator[ocebuild.third_party.cpython.pathlib.Path, str, None]
+
+   Extracts a file from a URL and yields a temporary extraction directory.
+
+   :param url: URL of the archive file.
+   :param persist: Flag to disable cleanup of the temporary directory.
+
+   :Yields: *tmp_dir (str)* -- Path to the temporary directory.
+
+   .. rubric:: Example
+
+   >>> with extract_archive('https://example.com/foo.zip') as tmp_dir:
+   print(tmp_dir)
+   # -> "/tmp/xxxxxx"
+
+

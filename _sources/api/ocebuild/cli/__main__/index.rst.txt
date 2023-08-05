@@ -1,0 +1,35 @@
+:py:mod:`ocebuild.cli.__main__`
+===============================
+
+.. py:module:: ocebuild.cli.__main__
+
+.. autoapi-nested-parse::
+
+   Entry point for the CLI.
+
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ocebuild.cli.__main__.cli
+   ocebuild.cli.__main__._main
+
+
+
+.. py:function:: cli(ctx)
+
+   Main runner for the CLI.
+
+
+.. py:function:: _main()
+
+   Entry point for the CLI.
+
+
