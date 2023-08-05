@@ -178,8 +178,8 @@ def parse_fmarkdown_schema(raw_schema: dict,
     revision = metadata.get('revision', 'Unknown')
 
     header = f"<h1 id=schema>{title} - v{version}</h1>"
-    header += f"\n\n#### Last Updated: `{timestamp}`\n"
-    header += f"\n#### Revision: `{revision}`"
+    header += f"\n\n**Last Updated**: `{timestamp}`\n"
+    header += f"\n**Revision**: `{revision}`"
 
   table_of_contents += '\n\n</details>'
   document = f"{header}\n\n{table_of_contents}{document}"

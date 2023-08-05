@@ -32,13 +32,30 @@ extensions = [
   "sphinx.ext.napoleon",
   "sphinx.ext.todo",
   "sphinx.ext.viewcode",
-  # "sphinx.ext.githubpages",
   # Third-party extensions
-  "autoapi.extension"
+  "autoapi.extension",
+  "myst_parser",
 ]
 
 templates_path = ["_templates"]
 exclude_patterns = []
+
+source_suffix = {
+  '.rst': 'restructuredtext',
+  '.txt': 'markdown',
+  '.md': 'markdown',
+}
+
+html_sidebars = {
+  "**": [
+    "sidebar/scroll-start.html",
+    "sidebar/brand.html",
+    "sidebar/search.html",
+    "sidebar/navigation.html",
+    "sidebar/ethical-ads.html",
+    "sidebar/scroll-end.html",
+  ]
+}
 
 # -- Options for extlinks ------------------------------------------------------
 
