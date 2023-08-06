@@ -16,8 +16,8 @@ dependencies:
       revision: '{ SHA256: 40f7c7e450563729fbf9305af5ba30f97b24e2d48f4f08482ad58cd1c79972f1 }'
     SSDT-B:
       path: './ACPI/SSDT-B.dsl'
-      resolution: 'SSDT-B@file:../../example/src/ACPI/SSDT-B.dsl#checksum=7c231e49947837e5cf5a61b414045b1ca987c2638dff01915bf7116e62c7f4d3'
-      specifier: 'SSDT-B@file:../../example/src/ACPI/SSDT-B.dsl'
+      resolution: 'SSDT-B@file:../src/ACPI/SSDT-B.dsl#checksum=7c231e49947837e5cf5a61b414045b1ca987c2638dff01915bf7116e62c7f4d3'
+      specifier: 'SSDT-B@file:../src/ACPI/SSDT-B.dsl'
       kind: SSDT
       revision: '{ SHA256: 7c231e49947837e5cf5a61b414045b1ca987c2638dff01915bf7116e62c7f4d3 }'
   Kexts:
@@ -37,10 +37,26 @@ dependencies:
       specifier: 'OpenIntelWireless/itlwm@github:2.2.0'
       kind: Kext
       revision: '{ SHA1: a0853fb3e8a8a8f316b16e5c05fa63ab70adc2f3 }'
-    Foo:
+    Lilu:
+      build: DEBUG
+      version: 1.6.7
+      url: 'https://github.com/dortania/build-repo/releases/download/Lilu-1827e19/Lilu-1.6.7-DEBUG.zip'
+      resolution: 'acidanthera/Lilu@github:1.6.7#commit=1827e19108e93128856e5426a3c6fc5d0c106096'
+      specifier: 'acidanthera/Lilu@github'
+      kind: Kext
+      revision: '{ SHA1: 1827e19108e93128856e5426a3c6fc5d0c106096 }'
+    USBToolBox:
+      build: DEBUG
+      version: 1.1.1
+      url: 'https://github.com/USBToolBox/kext/releases/download/1.1.1/USBToolBox-1.1.1-DEBUG.zip'
+      resolution: 'USBToolBox/kext@github:1.1.1#commit=6cf7126a968cb6d7c24aaf6d362f0af47badd842'
+      specifier: 'USBToolBox/kext@github:latest'
+      kind: Kext
+      revision: '{ SHA1: 6cf7126a968cb6d7c24aaf6d362f0af47badd842 }'
+    UTBMap:
       path: ./Kexts/UTBMap.kext
-      resolution: 'Foo@file:Kexts/UTBMap.kext#checksum=872f8d5644ba2358dead1fdd657979dd76c1408546efa9411a44e8a8106e6732'
-      specifier: 'Foo@file:Kexts/UTBMap.kext'
+      resolution: 'UTBMap@file:Kexts/UTBMap.kext#checksum=872f8d5644ba2358dead1fdd657979dd76c1408546efa9411a44e8a8106e6732'
+      specifier: 'UTBMap@file:Kexts/UTBMap.kext'
       kind: Kext
       revision: '{ SHA256: 872f8d5644ba2358dead1fdd657979dd76c1408546efa9411a44e8a8106e6732 }'
     VoodooI2C:

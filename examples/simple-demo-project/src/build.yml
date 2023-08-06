@@ -4,7 +4,7 @@ version: latest
 ---
 ACPI:
   SSDT-A: "file:ACPI/SSDT-A.dsl"
-  SSDT-B: "file:../../example/src/ACPI/SSDT-B.dsl"
+  SSDT-B: "file:../src/ACPI/SSDT-B.dsl"
   SSDT-PNLF: "*"
 Drivers:
   - AudioDxe
@@ -16,6 +16,7 @@ Drivers:
   - ResetNvramEntry
   - Rts5227S
 Kexts:
+  Lilu: latest
   WhateverGreen: latest
   AirportItlwmVentura:
     specifier: OpenIntelWireless/itlwm=2.2.0
@@ -41,7 +42,8 @@ Kexts:
       - VoodooInput
   VoodooI2CHID:
     specifier: "*"
-  Foo: "file:./Kexts/UTBMap.kext"
+  USBToolBox: USBToolBox/kext=latest
+  UTBMap: "file:./Kexts/UTBMap.kext"
 Resources:
 Tools:
   - ControlMsrE2
