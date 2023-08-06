@@ -53,7 +53,7 @@ def get_build_file(cwd: Union[str, Path]
     abort(f"Encountered an error while reading '{BUILD_FILE.name}': {e}",
           'Check the build configuration for errors.')
   else:
-    PROJECT_DIR = Path(BUILD_FILE.parent)
+    PROJECT_DIR = Path(BUILD_FILE.parent).resolve()
     debug(f"Using '{PROJECT_DIR.relative('.')}' as the project root.")
 
   return build_config, build_vars, flags, BUILD_FILE, PROJECT_DIR
