@@ -88,6 +88,7 @@ rich = "^13.4.2"
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^3.3.3"
 pylint = "^2.17.4"
+pyinstaller = { version = "^5.13.0", python = ">=3.7,<3.13" }
 pypiserver = "^1.5.2"
 toml = "^0.10.2"
 
