@@ -4,7 +4,9 @@
 ##
 """Dictionary helper functions."""
 
-from typing import Dict, List, Union, Optional
+from typing import Dict, List, Optional, Union
+
+from .regex import re_search
 
 
 def flatten_dict(dic: dict,
@@ -40,6 +42,19 @@ def flatten_dict(dic: dict,
 
   recurse_flatten(dic)
   return flat_dict
+
+def parse_tree(flat_tree: str) -> List[Union[str, int]]:
+  """Unflattens a flattened tree path."""
+  for j, key in enumerate(tree := str(flat_tree).split('.')):
+      # Avoid parsing literal array indices
+      if isinstance(tree[j], int): continue
+      # Insert array indices as additional keys
+      elif (re_match := re_search(r'(.*)\[([0-9]+)\]', key, group=None)):
+        key, idx = re_match.groups()
+        tree[j] = key
+        tree[j+1:j+1] = [int(idx)]
+
+  return tree
 
 def nested_get(dic: dict,
                keys: List[str],
@@ -117,8 +132,9 @@ def merge_dict(a: dict, b: dict) -> dict:
 
 
 __all__ = [
-  # Functions (5)
+  # Functions (6)
   "flatten_dict",
+  "parse_tree",
   "nested_get",
   "nested_set",
   "nested_del",

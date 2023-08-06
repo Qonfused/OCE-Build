@@ -8,10 +8,13 @@ from functools import partial
 
 from typing import Dict, List, Optional, Tuple, Union
 
-from ocebuild.parsers.dict import merge_dict, nested_del, nested_get, nested_set
+from ocebuild.filesystem import glob
+from ocebuild.parsers.dict import *
 from ocebuild.parsers.plist import parse_plist
 from ocebuild.parsers.schema import parse_schema
 from ocebuild.parsers.yaml import parse_yaml
+from ocebuild.pipeline.kexts import extract_kexts, sort_kext_cfbundle
+from ocebuild.pipeline.ssdts import extract_ssdts, sort_ssdt_symbols
 from ocebuild.sources import request
 from ocebuild.sources.github import github_file_url
 
@@ -87,7 +90,7 @@ def apply_preprocessor_tags(a: dict,
     if   tag == '@append':
       if options is None: nested_set(a, tree, v_a + v_b)
       else:
-        entry = (v_b[0], options.join([str(x[1]) for x in filtered]))
+        entry = options.join([str(x[1]) for x in filtered])
         nested_set(a, tree, entry)
     elif tag == '@delete':
       def del_key(keys):
@@ -121,7 +124,7 @@ def apply_preprocessor_tags(a: dict,
     elif tag == '@prepend':
       if options is None: nested_set(a, tree, v_b + v_a)
       else:
-        entry = (v_b[0], options.join([str(x[1]) for x in reversed(filtered)]))
+        entry = options.join([str(x[1]) for x in reversed(filtered)])
         nested_set(a, tree, entry)
     else:
       raise NotImplementedError(f"Unrecognized preprocessor tag: {tag}")
@@ -150,7 +153,7 @@ def merge_configs(base: Union[str, Path],
     >>> merge_configs('base.plist', 'patch1.yml', 'patch2.plist', 'patch2.yaml')
     {...}
   """
-  base_config, _ = read_config(base)
+  base_config = read_config(base)
   if not flags: flags = []
 
   # Parse config patches
@@ -193,6 +196,35 @@ def get_configuration_schema(repository: str='acidanthera/OpenCorePkg',
 
   return schema
 
+def apply_schema_defaults(config: dict, schema: dict, sample: dict=None) -> dict:
+  """Applies a configuration schema to a configuration file."""
+
+  for flat_tree, value in flatten_dict(schema).items():
+    tree = parse_tree(flat_tree)
+    ptree = tree[:-1]
+    key = tree[-1]
+
+    # Remove parent entries that are not in the sample plist
+    if nested_get(sample, ptree) is None:
+      try:
+        nested_del(schema, ptree)
+      except KeyError: pass
+      continue
+
+    # Apply default values against all object array entries
+    if isinstance(ptree[-1], int):
+      parent_entry = nested_get(config, ptree[:-1])
+      for i, entry in enumerate(parent_entry):
+        if entry.get(key) is None:
+          nested_get(config, ptree[:-1])[i][key] = value
+    # Apply default values against all object entries
+    else:
+      parent_entry = nested_get(config, ptree)
+      if parent_entry.get(key) is None:
+        nested_set(config, tree, value)
+
+  return config
+
 #TODO: Sort kexts by dependency order, including support for:
 # - Including existing entry properties (pointing to an existing `BundlePath`)
 # - Disable entries on:
@@ -200,10 +232,142 @@ def get_configuration_schema(repository: str='acidanthera/OpenCorePkg',
 #   - Missing CFBundleIdentifiers (i.e. unresolved dependencies)
 #   - Missing CFBundleIdentifiers/CFBundleExecutable fields in Info.plist
 
+def acpi_entries(acpi_dir: Union[str, Path]) -> List[dict]:
+  """Returns a list of ACPI entries for the given ACPI directory."""
+  ssdts = extract_ssdts(acpi_dir, persist=True)
+  sources = list(map(lambda e: e['source'], ssdts.values()))
+  sorted_ssdts = sort_ssdt_symbols(sources)
+
+  entries = []
+  for ssdt in sorted_ssdts:
+    if not ssdt in ssdts: continue
+    entry = {
+      'Enabled': True,
+      'Path': ssdts[ssdt]['__path'].replace('./', '')
+    }
+    entries.append(entry)
+
+  return entries
+
+def drivers_entries(drivers_dir: Union[str, Path]) -> List[dict]:
+  """Returns a list of driver entries for the given drivers directory."""
+  drivers = glob(drivers_dir, pattern='**/*.efi')
+
+  entries = []
+  for driver in drivers:
+    entry = {
+      'Enabled': True,
+      'Path': driver.as_posix().replace(Path(drivers_dir).as_posix() + '/', '')
+    }
+    entries.append(entry)
+
+  return entries
+
+def kexts_entries(kext_dir: Union[str, Path]) -> List[dict]:
+  """Returns a list of kext entries for the given kext directory."""
+  kexts = extract_kexts(kext_dir)
+  sources = list(map(lambda e: e['__extracted'], kexts.values()))
+  sorted_kexts = sort_kext_cfbundle(sources)
+
+  def fmt_relative(p: Path):
+    path = Path(p).as_posix()
+    parent = Path(kext_dir).as_posix()
+    return path.replace(parent + '/', '')
+
+  entries = []
+  for kext in sorted_kexts:
+    path = Path(kext_dir, kext['__path'])
+
+    bundle_path = fmt_relative(path)
+    plist_path = fmt_relative(glob(path, '**/Info.plist', first=True))
+    entry = {
+      'BundlePath': bundle_path,
+      'Enabled': True,
+      'PlistPath': plist_path.replace(bundle_path + '/', ''),
+    }
+
+    if executable_path := glob(path, f"**/{kext['executable']}", first=True):
+      executable_path = fmt_relative(executable_path)
+      entry['ExecutablePath'] = executable_path.replace(bundle_path + '/', '')
+
+    entries.append(entry)
+
+  return entries
+
+def tools_entries(tools_dir: Union[str, Path]) -> List[dict]:
+  """Returns a list of tool entries for the given tools directory."""
+  tools = glob(tools_dir, pattern='**/*.efi')
+
+  entries = []
+  for tool in tools:
+    entry = {
+      'Enabled': True,
+      'Name': tool.stem,
+      'Path': tool.as_posix().replace(Path(tools_dir).as_posix() + '/', '')
+    }
+    entries.append(entry)
+
+  return entries
+
+def update_entries(config_path: Union[str, Path], clean: bool=False) -> dict:
+  """Updates the build entries of an OpenCore configuration file.
+
+  This function scans the `ACPI`, `Drivers`, `Kexts`, and `Tools` folders
+  relative to the configuration file and updates their corresponding entries.
+
+  Args:
+    config_path: The path to the OpenCore configuration file.
+    clean: Whether to override existing entries from the configuration file.
+
+  Returns:
+    A dictionary containing the updated configuration entries.
+  """
+
+  def oc_dir(name: str) -> Path:
+    return Path(config_path, f'../{name}').resolve()
+  entries = {
+    'ACPI': { 'Add': acpi_entries(oc_dir('ACPI')) },
+    'UEFI': { 'Drivers': drivers_entries(oc_dir('Drivers')) },
+    'Kernel': { 'Add': kexts_entries(oc_dir('Kexts')) },
+    'Misc': { 'Tools': tools_entries(oc_dir('Tools')) },
+  }
+
+  # Merge new entries with existing config entries
+  config = parse_plist(open(config_path, 'r'))
+  primary_keys = {
+    'ACPI.Add': 'Path',
+    'UEFI.Drivers': 'Path',
+    'Kernel.Add': 'BundlePath',
+    'Misc.Tools': 'Path',
+  }
+  for tree, primary_key in primary_keys.items():
+    keys = tree.split('.')
+    # Merge new entries with existing config entries
+    if clean: nested_set(config, keys, [])
+    base_entries = nested_get(config, keys)
+    new_entries = nested_get(entries, keys)
+    for entry in new_entries:
+      base = next((e for e in base_entries
+                  if e[primary_key] == entry[primary_key]), {})
+      for key, value in base.items():
+        if key in entry: continue
+        entry[key] = value
+    # Update config with new entries
+    nested_set(config, keys, new_entries)
+
+  return config
+
+
 __all__ = [
-  # Functions (4)
+  # Functions (10)
   "read_config",
   "apply_preprocessor_tags",
   "merge_configs",
-  "get_configuration_schema"
+  "get_configuration_schema",
+  "apply_schema_defaults",
+  "acpi_entries",
+  "drivers_entries",
+  "kexts_entries",
+  "tools_entries",
+  "update_entries"
 ]
