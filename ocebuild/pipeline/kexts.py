@@ -97,6 +97,7 @@ def sort_kext_cfbundle(filepaths: List[Union[str, Path]]) -> OrderedDict:
 
   # Resolve Kext dependency versions to determine load order
   sorted_dependencies = []
+  handled_paths = set()
   sorting_scheme = lambda e: get_version(nested_get(e, ['props', 'version'],
                                                     default='latest'))
   for identifier, version in sort_dependencies(dependency_tree):
@@ -115,8 +116,13 @@ def sort_kext_cfbundle(filepaths: List[Union[str, Path]]) -> OrderedDict:
       # Set resolved version
       entry['version_required'] = version or None
 
-      # Filter previous entries to determine whether bundled kexts are present
+      # Avoid duplicating entries on filepath
       path = entry['__path']
+      if not path in handled_paths:
+        handled_paths.add(path)
+      else: continue
+
+      # Filter previous entries to determine whether bundled kexts are present
       parent_kext = path.split('.kext', maxsplit=1)[0] + '.kext'
       bundled_entries = list(e for e in sorted_dependencies
                              if e['__path'].startswith(parent_kext))
