@@ -60,7 +60,7 @@ def _extract_key(command: str, string: str, sol='^') -> Union[str, None]:
     >>> _extract_key('\\\\label', '\\\\texttt{foo}')
     None
   """
-  return re_search(f'{sol}\{command}\{{(.*?)\}}', string, group=1)
+  return re_search(f'{sol}\\{command}\\{{(.*?)\\}}', string, group=1)
 
 def _extract_value(command: str,
                    string: str,
@@ -84,9 +84,9 @@ def _extract_value(command: str,
     >>> _extract_value('\\\\textbf', '\\\\textbf{Type}: foo \\\\texttt{bar}\\\\\\\\', 'Type')
     'foo \\\\texttt{bar}'
   """
-  ln = re_search(f'\{command}\{{{key}\}}:\s?(.*){eol}$', string, group=1)
+  ln = re_search(f'\\{command}\\{{{key}\\}}:\\s?(.*){eol}$', string, group=1)
   if not ln or not eol: return ln
-  return _extract_key(command='\.*?', string=ln.strip(), sol='^') or ln
+  return _extract_key(command='\\.*?', string=ln.strip(), sol='^') or ln
 
 def _parse_attributes(line: str, key: str) -> str:
   """Parses additional attributes from a line.
@@ -103,7 +103,7 @@ def _parse_attributes(line: str, key: str) -> str:
     'foo, bar'
   """
   skey = key.replace('\\', '\\\\')
-  if attr := re_search(f'\{{{skey}\}},?\s?(.*?)\\\\\\\\$', line, group=1):
+  if attr := re_search(f'\\{{{skey}\\}},?\\s?(.*?)\\\\\\\\$', line, group=1):
     key += f", {attr}"
   return key
 
@@ -218,9 +218,9 @@ def _parse_failsafe(stype: str,
     if svalue[:2] == '0x':
       svalue = svalue[2:]
     # Handle filling size-specified data values
-    if   size := re_search(', (\d+) bits?', stype, group=1):
+    if   size := re_search(', (\\d+) bits?', stype, group=1):
       svalue = '0' * 1 * int(size)
-    elif size := re_search(', (\d+) bytes?', stype, group=1):
+    elif size := re_search(', (\\d+) bytes?', stype, group=1):
       svalue = '0' * 2 * int(size)
   elif atype in ('Dictionary'):
     atype = 'Dict'
@@ -275,12 +275,12 @@ def _is_boundary(lnorm: str, indent: str, entry: str) -> bool:
   # Check if the line is a valid root command
   if lnorm[:1] == '\\' and indent <= 1:
     return True
-  if not any(lnorm.startswith(c) for c in ('\item', '\end{enumerate}')):
+  if not any(lnorm.startswith(c) for c in ('\\item', '\\end{enumerate}')):
     return False
   # Handle false positives for \item commands
   list_count = entry.count('\\begin{itemize}')
   is_building_list = list_count == 1 + entry.count('\\end{itemize}') > 0
-  if lnorm != '\item' or is_building_list:
+  if lnorm != '\\item' or is_building_list:
     return False
 
   return True
@@ -350,19 +350,19 @@ def parse_schema(file: Union[List[str], TextIOWrapper],
     # Parse LaTeX commands
     if command := _extract_command(lnorm):
       # Parse section/subsection commands
-      if command in ('\section', '\subsection', '\subsubsection'):
-        name: str = re_search(f'\\{command}\{{(.*?)\}}', lnorm, group=1)
+      if command in ('\\section', '\\subsection', '\\subsubsection'):
+        name: str = re_search(f'\\{command}\\{{(.*?)\\}}', lnorm, group=1)
         # Is a section
-        if command == '\section':
+        if command == '\\section':
           entry = [name] if name in sample_plist.keys() else []
           cursor['tree'] = entry
         # Is a subsection
         else:
           key = re_search(r'([a-zA-Z0-9]+)\s?Properties', name, group=1)
-          if command == '\subsection':
+          if command == '\\subsection':
             entry = [key] if key else []
             cursor['tree'][1:] = entry
-          elif command == '\subsubsection':
+          elif command == '\\subsubsection':
             entry = key.split(maxsplit=1)[:1] if key else []
             cursor['tree'][2:] = entry
       # Parse property fields for keys
