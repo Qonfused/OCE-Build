@@ -15,7 +15,9 @@ import click
 from ocebuild.filesystem import copy, glob, remove
 from ocebuild.filesystem.cache import clear_cache, UNPACK_DIR
 from ocebuild.parsers.dict import merge_dict, nested_del, nested_get
+from ocebuild.parsers.plist import write_plist
 from ocebuild.pipeline.build import *
+from ocebuild.pipeline.config import update_entries
 from ocebuild.pipeline.packages import *
 from ocebuild.pipeline.packages import _iterate_extract_packages
 
@@ -152,6 +154,28 @@ def extract_build_directory(opencore_pkg: Union[str, Path],
 
   return extracted_entries
 
+def update_config_entries(build_dir: Union[str, Path],
+                          clean: bool=False
+                          ) -> Path:
+  """Updates the build entries in the config.plist."""
+  try:
+    with Progress() as progress:
+      progress_bar('Updating build entries in config.plist', wrap=progress)
+      # Copy sample config.plist if it does not exist
+      BUILD_DIR = Path(build_dir).resolve()
+      if not (config_plist := BUILD_DIR.joinpath('EFI/OC/config.plist')).exists():
+        copy(BUILD_DIR.joinpath('Docs/Sample.plist'), config_plist)
+        clean = True
+      # Update config.plist
+      updated_config = update_entries(config_plist, clean=clean)
+      config_plist.write_text(write_plist(updated_config))
+  except Exception as e:
+    error(f"Failed to update config.plist: {e}", traceback=True)
+  else:
+    success(f"Updated config.plist build entries.")
+
+  return config_plist
+
 
 @cli_command(name='build')
 @click.option("-c", "--cwd",
@@ -226,18 +250,28 @@ def cli(env, cwd, out, clean, update, force):
                                              build_dir=BUILD_DIR)
   # Move build entries to the build directory
   extract_build_directory(opencore_pkg, extracted, build_dir=BUILD_DIR)
+  OC_DIR = glob(BUILD_DIR, '**/OC/OpenCore.efi', first=True).parent
   if extracted:
     num_extracted = len([k for e in extracted.values() for k in e.keys()])
-    success(f"Extracted {num_extracted} build entries to '{BUILD_DIR}'.")
+    extracted_dir = OC_DIR.relative(cwd)
+    success(f"Extracted {num_extracted} build entries to '{extracted_dir}'.")
 
-  #TODO: Call the patch command to apply config.plist patches
+  # Update build entries in config.plist
+  config_plist = update_config_entries(BUILD_DIR, clean=clean)
+
+  # Apply patches to config.plist
+  from .patch import apply_patches #pylint: disable=import-outside-toplevel
+  config = apply_patches(out=BUILD_DIR,
+                         config_plist=config_plist,
+                         project_root=PROJECT_DIR)
 
 
 __all__ = [
-  # Functions (5)
+  # Functions (6)
   "get_build_file",
   "unpack_packages",
   "extract_packages",
   "extract_build_directory",
+  "update_config_entries",
   "cli"
 ]

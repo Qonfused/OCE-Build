@@ -6,12 +6,13 @@
 ##
 """CLI entrypoint for the patch command."""
 
-from typing import Optional
+from typing import Optional, Tuple, Union
 
 import click
 
 from ocebuild.filesystem import glob
 from ocebuild.parsers.dict import nested_get
+from ocebuild.parsers.plist import write_plist
 from ocebuild.parsers.regex import re_search
 from ocebuild.pipeline.config import *
 from ocebuild.pipeline.lock import read_lockfile
@@ -23,13 +24,20 @@ from ocebuild_cli.logging import *
 from third_party.cpython.pathlib import Path
 
 
-def read_schema(lockfile: Optional[dict]=None, **kwargs) -> dict:
+def get_schema(cwd: Union[str, Path]='.',
+                lockfile: Optional[dict]=None,
+                **kwargs
+                ) -> Union[dict, Tuple[dict, dict]]:
   """Reads the Sample.plist schema from the resolved OpenCorePkg version.
+
+  If a lockfile is provided or located in the current working directory, the
+  resolved OpenCorePkg version will be used to fetch the Sample.plist schema.
 
   In case no lockfile is provided or no OpenCorePkg dependency is found, the
   latest version of the Sample.plist schema will be used.
 
   Args:
+    cwd: The current working directory (Optional).
     lockfile: The lockfile to read the OpenCore version from (Optional).
     kwargs: Additional keyword arguments to pass to `get_configuration_schema`.
 
@@ -37,13 +45,86 @@ def read_schema(lockfile: Optional[dict]=None, **kwargs) -> dict:
     A dictionary representing failsafe values for the Sample.plist schema.
   """
 
+  if not lockfile:
+    # Attempt to read the lockfile
+    LOCKFILE = glob(cwd, '**/build.lock', first=True)
+    lockfile = read_lockfile(LOCKFILE) if LOCKFILE.exists() else {}
+
   # Attempt to read the resolved OpenCorePkg commit
   entry = nested_get(lockfile, ('dependencies', 'OpenCorePkg', 'OpenCore'), {})
   commit_sha = re_search('(?<=#commit=)[a-f0-9]+', entry.get('resolution'))
   if commit_sha:
-    info(f"Using Sample.plist schema for commit {entry.get('version')[:7]}")
+    info(f"Using Sample.plist schema for commit {commit_sha[:7]}")
 
   return get_configuration_schema(commit=commit_sha, **kwargs)
+
+def apply_patches(cwd: Union[str, Path]='.',
+                  out: Union[str, Path]='.',
+                  *,
+                  config_plist: Optional[Union[str, Path]]=None,
+                  project_root: Optional[Union[str, Path]]=None,
+                  sort_keys: bool=True
+                  ) -> dict:
+  """Applies configuration patches to the config.plist.
+
+  This function will attempt to locate the config.plist and project root
+  relative to the current working directory. If the config.plist is not given,
+  the function will attempt to locate the config.plist relative to the output
+  directory.
+
+  Patches (`config*.{yml|yaml}` or `patch*.{yml|yaml}` files) located under the
+  project root are applied to the config.plist in the order they are found.
+
+  If any of the entries of the configuration file or patches are missing any
+  required keys dictated by the Sample.plist schema, the failsafe values will
+  be used to insert the missing keys.
+
+  Args:
+    cwd: The current working directory (Default: the current working directory).
+    out: The output directory (Default: the current working directory).
+    config_plist: The path to the config.plist (Optional).
+    project_root: The path to the project root (Optional).
+
+  Returns:
+    A dictionary representing the patched config.plist.
+  """
+
+  if not config_plist:
+    config_plist = glob(out, '**/OC/config.plist', first=True)
+
+  if not project_root:
+    # Locate the project root relative to the build configuration
+    build_file = glob(cwd, '**/build.yml', include='**/build.yaml', first=True)
+    if build_file:
+      project_root = build_file.parent
+    # Fall back to the current working directory
+    else: project_root = cwd
+
+  # Extract the Sample.plist schema
+  schema, sample = get_schema(cwd=project_root, get_sample=True)
+
+  # Extract configuration patches
+  patches = set(glob(project_root, '**/config*.yml', include='**/config*.yaml'))
+  patches |= set(glob(project_root, '**/patch*.yml', include='**/patch*.yaml'))
+  debug(f"Found {len(patches)} patch files")
+
+  # Apply patches and schema fallbacks to the config.plist
+  try:
+    with Progress() as progress:
+      progress_bar(progress, "Applying patches to config.plist")
+      # Apply patches and schema defaults
+      merged = merge_configs(config_plist, *patches)
+      config = apply_schema_defaults(merged, schema, sample)
+      # Write the patched config.plist
+      config_plist.write_text(write_plist(config, sort_keys=sort_keys))
+  except Exception as e:
+    error(f"Failed to update config.plist: {e}", traceback=True)
+  else:
+    name = 'file' if len(patches) == 1 else 'files'
+    success(f"Updated config.plist with {len(patches)} patch {name}.")
+
+  return config
+
 
 @cli_command(name='patch')
 @click.option("-c", "--cwd",
@@ -59,16 +140,14 @@ def read_schema(lockfile: Optional[dict]=None, **kwargs) -> dict:
 def cli(env, cwd, out):
   """Patches an existing OpenCore configuration."""
 
-  # Attempt to read the lockfile
-  LOCKFILE = glob(cwd, '**/build.lock', first=True)
-  lockfile = read_lockfile(LOCKFILE) if LOCKFILE.exists() else None
-
-  # # Extract the Sample.plist schema
-  # schema = read_schema(lockfile, raw_schema=(raw_schema := {}))
+  #TODO: Add additional options to the CLI
+  # config = apply_patches(cwd, out)
+  apply_patches(cwd, out)
 
 
 __all__ = [
-  # Functions (2)
-  "read_schema",
+  # Functions (3)
+  "get_schema",
+  "apply_patches",
   "cli"
 ]
