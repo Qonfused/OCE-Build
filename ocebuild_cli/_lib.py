@@ -79,9 +79,19 @@ def cli_command(name: Optional[str]=None):
                          debug: bool,
                          **kwargs):
       """Simple environment wrapper for CLI commands."""
+      _rich_traceback_omit = True #pylint: disable=invalid-name,unused-variable
+
+      # Set the global verbose and debug flags.
       env.verbose = verbose
       env.debug = debug
-      _rich_traceback_omit = True #pylint: disable=invalid-name,unused-variable
+
+      # Note the entrypoint of the CLI command.
+      if debug:
+        from third_party.cpython.pathlib import Path
+        from .logging import debug as debug_log
+        entrypoint = Path(__file__).with_name('__main__.py')
+        debug_log(f"Launching CLI from {entrypoint}.")
+
       return func(env, *args, **kwargs)
     return _command_wrapper
   return cli_wrapper
