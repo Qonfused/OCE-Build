@@ -166,6 +166,46 @@ def sort_kext_cfbundle(filepaths: List[Union[str, Path]]) -> OrderedDict:
       else:
         sorted_dependencies.append(entry)
 
+  def num_dependents(kext: dict) -> int:
+    return sum(1 if kext['identifier'] in k['dependencies'] else 0
+               for k in sorted_dependencies)
+  def has_resolved_dependencies(kext: dict) -> bool:
+    return any(k in identifier_map for k in kext.get('dependencies', {}))
+  def is_bundled_kext(kext: dict) -> bool:
+    return kext['__path'].count('.kext') > 1
+  def is_standalone_kext(kext: dict) -> bool:
+    return not num_dependents(kext) and not is_bundled_kext(kext)
+
+  # Group each node alphabetically by dependency name
+  offset = 0
+  nodes = []
+  for idx, kext in enumerate(sorted_dependencies):
+    if is_standalone_kext(kext) and not has_resolved_dependencies(kext):
+      nodes.append([kext])
+      offset = idx + 1
+    elif num_dependents(kext) and not (is_bundled_kext(kext), offset == idx):
+      offset = idx + 1
+      nodes.append(sorted_dependencies[offset:idx])
+    elif not (has_resolved_dependencies(kext) or is_bundled_kext(kext)):
+      nodes.append(sorted_dependencies[offset:idx])
+      offset = idx
+    # Last node
+    elif idx == len(sorted_dependencies) - 1:
+      nodes.append(sorted_dependencies[offset:idx])
+    else: continue
+
+    # Sort the inserted node's standalone dependents alphabetically
+    ordered, unordered = [], []
+    for k in nodes[-1]:
+      (ordered if num_dependents(k) else unordered).append(k)
+    nodes[-1] = ordered + sorted(unordered, key=lambda k: k['name'])
+
+  # Apply new node sorting scheme to sorted kexts list
+  sorted_dependencies = []
+  sorting_scheme = lambda n: (n[0]['name'][:3], -len(n))
+  for node in sorted(filter(None, nodes), key=sorting_scheme):
+    sorted_dependencies += node
+
   return sorted_dependencies
 
 def extract_kexts(directory: Union[str, Path],

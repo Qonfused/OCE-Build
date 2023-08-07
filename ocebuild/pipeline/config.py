@@ -21,6 +21,14 @@ from ocebuild.sources.github import github_file_url
 from third_party.cpython.pathlib import Path
 
 
+ENTRIES_MAP = {
+  'ACPI': ('ACPI', 'Add'),
+  'Drivers': ('UEFI', 'Drivers'),
+  'Kexts': ('Kernel', 'Add'),
+  'Tools': ('Misc', 'Tools'),
+}
+"""A mapping of config.plist build entry types to their respective paths."""
+
 def read_config(filepath: str,
                 frontmatter: bool=False,
                 flags: Optional[List[str]]=None
@@ -309,7 +317,10 @@ def tools_entries(tools_dir: Union[str, Path]) -> List[dict]:
 
   return entries
 
-def update_entries(config_path: Union[str, Path], clean: bool=False) -> dict:
+def update_entries(config_path: Union[str, Path],
+                   build_config: Optional[dict]=None,
+                   clean: bool=False
+                   ) -> dict:
   """Updates the build entries of an OpenCore configuration file.
 
   This function scans the `ACPI`, `Drivers`, `Kexts`, and `Tools` folders
@@ -325,40 +336,44 @@ def update_entries(config_path: Union[str, Path], clean: bool=False) -> dict:
 
   def oc_dir(name: str) -> Path:
     return Path(config_path, f'../{name}').resolve()
-  entries = {
-    'ACPI': { 'Add': acpi_entries(oc_dir('ACPI')) },
-    'UEFI': { 'Drivers': drivers_entries(oc_dir('Drivers')) },
-    'Kernel': { 'Add': kexts_entries(oc_dir('Kexts')) },
-    'Misc': { 'Tools': tools_entries(oc_dir('Tools')) },
-  }
 
-  # Merge new entries with existing config entries
+  # Generate new entries for each present build entry
   config = parse_plist(open(config_path, 'r'))
-  primary_keys = {
-    'ACPI.Add': 'Path',
-    'UEFI.Drivers': 'Path',
-    'Kernel.Add': 'BundlePath',
-    'Misc.Tools': 'Path',
+  entry_methods = {
+    'ACPI':     (acpi_entries,    'Path'),
+    'Drivers':  (drivers_entries, 'Path'),
+    'Kexts':    (kexts_entries,   'BundlePath'),
+    'Tools':    (tools_entries,   'Path')
   }
-  for tree, primary_key in primary_keys.items():
-    keys = tree.split('.')
-    # Merge new entries with existing config entries
+  for category, (method, primary_key) in entry_methods.items():
+    entries: List[dict] = method(oc_dir(category))
+    build_entries = build_config.get(category, {})
+
+    keys = ENTRIES_MAP[category]
     if clean: nested_set(config, keys, [])
     base_entries = nested_get(config, keys)
-    new_entries = nested_get(entries, keys)
-    for entry in new_entries:
+
+    for idx, entry in enumerate(method(oc_dir(category))):
+      # Merge new entries with build config properties
+      name = Path(entry[primary_key]).stem
+      if props := nested_get(build_entries, [name, 'properties']):
+        entries[idx].update(props)
+      # Merge new entries with existing config entries
       base = next((e for e in base_entries
                   if e[primary_key] == entry[primary_key]), {})
       for key, value in base.items():
-        if key in entry: continue
-        entry[key] = value
+        if key not in entry:
+          entries[idx][key] = value
+
     # Update config with new entries
-    nested_set(config, keys, new_entries)
+    nested_set(config, keys, entries)
 
   return config
 
 
 __all__ = [
+  # Constants (1)
+  "ENTRIES_MAP",
   # Functions (10)
   "read_config",
   "apply_preprocessor_tags",

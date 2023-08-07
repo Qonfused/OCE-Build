@@ -83,7 +83,9 @@ def extract_packages(build_vars: dict,
                      ) -> Tuple[Union[Path, None], dict]:
   """Extracts packages for build entries satisfying the build configuration."""
   extracted_entries = {}
-  def count(d: dict): return len([k for e in d.values() for k in e.keys()])
+
+  def count(d: dict) -> int:
+    return len([k for e in d.values() for k in e.keys()])
 
   # Include build entries from the OpenCore package as (vendored) packages
   if opencore_pkg := nested_get(packages, ['OpenCorePkg', 'OpenCore']):
@@ -100,6 +102,10 @@ def extract_packages(build_vars: dict,
             highlight=False)
     # Report the number of entries bundled with the OpenCore package
     info(f"Extracted {count(extracted)} build entries from OpenCore package.")
+    for category, entries in sorted(extracted.items()):
+      debug(f"Extracted {len(entries)} {category} entries:")
+      for entry in entries.values():
+        debug(f"--> '{entry['__dest'].relative(build_dir)}'")
 
   # Extract remaining packages
   if packages:
@@ -155,6 +161,7 @@ def extract_build_directory(opencore_pkg: Union[str, Path],
   return extracted_entries
 
 def update_config_entries(build_dir: Union[str, Path],
+                          build_config: dict,
                           clean: bool=False
                           ) -> Path:
   """Updates the build entries in the config.plist."""
@@ -167,7 +174,7 @@ def update_config_entries(build_dir: Union[str, Path],
         copy(BUILD_DIR.joinpath('Docs/Sample.plist'), config_plist)
         clean = True
       # Update config.plist
-      updated_config = update_entries(config_plist, clean=clean)
+      updated_config = update_entries(config_plist, build_config, clean=clean)
       config_plist.write_text(write_plist(updated_config))
   except Exception as e:
     error(f"Failed to update config.plist: {e}", traceback=True)
@@ -257,7 +264,7 @@ def cli(env, cwd, out, clean, update, force):
     success(f"Extracted {num_extracted} build entries to '{extracted_dir}'.")
 
   # Update build entries in config.plist
-  config_plist = update_config_entries(BUILD_DIR, clean=clean)
+  config_plist = update_config_entries(BUILD_DIR, build_config, clean=clean)
 
   # Apply patches to config.plist
   from .patch import apply_patches #pylint: disable=import-outside-toplevel
