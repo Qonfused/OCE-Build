@@ -56,7 +56,12 @@ def get_build_file(cwd: Union[str, Path]
           'Check the build configuration for errors.')
   else:
     PROJECT_DIR = Path(BUILD_FILE.parent).resolve()
-    debug(f"Using '{PROJECT_DIR.relative('.')}' as the project root.")
+    try:
+      relative_path = PROJECT_DIR.relative('.')
+      debug(f"Using '{relative_path}' as the project root.")
+    except ValueError:
+      absolute_path = cwd.joinpath(PROJECT_DIR)
+      debug(f"Using {absolute_path} as the project root.")
 
   return build_config, build_vars, flags, BUILD_FILE, PROJECT_DIR
 

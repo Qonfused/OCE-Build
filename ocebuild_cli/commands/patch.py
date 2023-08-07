@@ -54,7 +54,7 @@ def get_schema(cwd: Union[str, Path]='.',
   entry = nested_get(lockfile, ('dependencies', 'OpenCorePkg', 'OpenCore'), {})
   commit_sha = re_search('(?<=#commit=)[a-f0-9]+', entry.get('resolution'))
   if commit_sha:
-    info(f"Using Sample.plist schema for commit {commit_sha[:7]}")
+    info(f"Using Sample.plist schema for commit [cyan]{commit_sha[:7]}[/cyan]")
 
   return get_configuration_schema(commit=commit_sha, **kwargs)
 
