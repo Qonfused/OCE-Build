@@ -1,5 +1,5 @@
 '#Revision':
-  OpenCore-Version:                 String  | "0.9.3"
+  OpenCore-Version:                 String  | "0.9.4"
 ACPI:
   Add:
     - Comment:                      String  | ""
@@ -159,6 +159,7 @@ Misc:
     HibernateMode:                  String  | "None"
     HibernateSkipsPicker:           Boolean | false
     HideAuxiliary:                  Boolean | false
+    InstanceIdentifier:             String  | ""
     LauncherOption:                 String  | "Disabled"
     LauncherPath:                   String  | "Default"
     PickerAttributes:               Number  | 0

@@ -1,8 +1,8 @@
-<h1 id=schema>OpenCore Config.plist Schema - v0.9.3</h1>
+<h1 id=schema>OpenCore Config.plist Schema - v0.9.4</h1>
 
-**Last Updated**: `2023-08-05 15:38:12.338813+00:00`
+**Last Updated**: `2023-08-07 22:00:40.802538+00:00`
 
-**Revision**: `{ SHA1: d52fc46ba650ce1afe00c354331a0657a533ef18 }`
+**Revision**: `{ SHA1: d74d43bb0279e494a75546fad8834d75172eb01e }`
 
 <h2 id=table-of-contents>Table of Contents</h2>
 
@@ -163,6 +163,7 @@
   - [Misc -> Boot -> HibernateMode](#misc-boot-hibernatemode)
   - [Misc -> Boot -> HibernateSkipsPicker](#misc-boot-hibernateskipspicker)
   - [Misc -> Boot -> HideAuxiliary](#misc-boot-hideauxiliary)
+  - [Misc -> Boot -> InstanceIdentifier](#misc-boot-instanceidentifier)
   - [Misc -> Boot -> LauncherOption](#misc-boot-launcheroption)
   - [Misc -> Boot -> LauncherPath](#misc-boot-launcherpath)
   - [Misc -> Boot -> PickerAttributes](#misc-boot-pickerattributes)
@@ -2420,6 +2421,18 @@ An entry is considered auxiliary when at least one of the following applies:
 * Entry is system (e.g. `Reset NVRAM`). 
 
 To display all entries, the picker menu can be reloaded into `'Extended Mode'' by pressing the `Spacebar` key. Hiding auxiliary entries may increase boot performance on multi-disk systems.
+
+<h3 id=misc-boot-instanceidentifier>Misc -> Boot -> InstanceIdentifier</h3>
+
+**Type**: `plist string`
+
+**Default**: Empty
+
+**Failsafe**: Empty
+
+**Description**: An optional identifier for the current instance of OpenCore.
+
+This should typically be a short alphanumeric string. The current use of this value is to optionally target `.contentVisibility` files to specific instances of OpenCore, as explained in the **Boot Algorithm** section.
 
 <h3 id=misc-boot-launcheroption>Misc -> Boot -> LauncherOption</h3>
 
@@ -5105,7 +5118,7 @@ This renderer fully supports `AppleEg2Info` protocol and will provide screen rot
 
 **Description**: Forces `Resolution` to be set in cases where the desired resolution is not available by default, such as on legacy Intel GMA and first generation Intel HD Graphics (Ironlake/Arrandale). Setting `Resolution` to `Max` will try to pull the largest available resolution from the connected display's EDID.
 
-*Note*: This option depends on the [`OC_FORCE_RESOLUTION_PROTOCOL`](https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Acidanthera/Protocol/OcForceResolution.h) protocol being present. This protocol is currently only supported by `OpenDuetPkg`. The `OpenDuetPkg` implementation currently only supports Intel iGPUs.
+*Note*: This option depends on the [`OC_FORCE_RESOLUTION_PROTOCOL`](https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Acidanthera/Protocol/OcForceResolution.h) protocol being present. This protocol is currently only supported by `OpenDuetPkg`. The `OpenDuetPkg` implementation currently only supports Intel iGPUs and certain ATI GPUs.
 
 <h3 id=uefi-output-gopburstmode>UEFI -> Output -> GopBurstMode</h3>
 
