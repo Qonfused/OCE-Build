@@ -98,7 +98,7 @@ def apply_preprocessor_tags(a: dict,
     if   tag == '@append':
       if options is None: nested_set(a, tree, v_a + v_b)
       else:
-        entry = options.join([str(x[1]) for x in filtered])
+        entry = options.join(map(str, filtered))
         nested_set(a, tree, entry)
     elif tag == '@delete':
       def del_key(keys):
@@ -132,7 +132,7 @@ def apply_preprocessor_tags(a: dict,
     elif tag == '@prepend':
       if options is None: nested_set(a, tree, v_b + v_a)
       else:
-        entry = options.join([str(x[1]) for x in reversed(filtered)])
+        entry = options.join(map(str, reversed(filtered)))
         nested_set(a, tree, entry)
     else:
       raise NotImplementedError(f"Unrecognized preprocessor tag: {tag}")
