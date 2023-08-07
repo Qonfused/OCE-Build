@@ -154,17 +154,23 @@ class GitHubResolver(BaseResolver):
       asset = get_match(arr)
 
     # Store the asset version
-    release_version = get_version(release_catalog['tag_name'])
+    if release_catalog['tag_name'].count('.'):
+      release_version = get_version(release_catalog['tag_name'])
+    else:
+      release_version = None
+
+    # Do a best attempt of extracting the version from the asset name
     if not release_version:
       #TODO: Ensure case where the release tag is not a valid version is handled
       try:
-        # Do a best attempt of extracting the version from the asset name
         asset_metastring = "-".join(asset.split('/')[-1].split('-')[1:]) \
           .lower() \
           .replace(f'-{build.lower()}', '')
         version_parts = asset_metastring.split('.')[:-1]
         release_version = get_version(".".join(version_parts))
-      except: pass #pylint: disable=bare-except,multiple-statements
+      except Exception: pass
+
+    # Extract only the public semver properties for the resolver
     if release_version:
       resolver.version = ".".join(map(str, release_version.release))
 
