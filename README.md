@@ -11,7 +11,7 @@
 | ocebuild/pipeline/config.py     |       82 |       67 |     18% |42-58, 82-130, 153-165, 177-194 |
 | ocebuild/pipeline/opencore.py   |       83 |       65 |     22% |33-64, 73-78, 84-88, 109-134, 159-192 |
 | ocebuild/pipeline/packages.py   |       70 |       55 |     21% |40-52, 56-58, 83-139, 143-145, 167-181 |
-| ocebuild/sources/resolver.py    |      164 |       40 |     76% |115, 128, 136, 147, 153-154, 160, 165-171, 198-200, 217, 223, 251-256, 260, 266-287, 308-316, 333-334 |
+| ocebuild/sources/resolver.py    |      167 |       43 |     74% |115, 128, 137-141, 152, 158-159, 165, 170-176, 203-205, 222, 228, 256-261, 265, 271-292, 313-321, 338-339 |
 | ocebuild/pipeline/build.py      |       54 |       40 |     26% |23-26, 43-87, 97-119 |
 | ocebuild/sources/github.py      |      114 |       34 |     70% |57-74, 111-113, 135-136, 152, 154-155, 228, 230, 254-257, 282-284, 305-307 |
 | ocebuild/pipeline/ssdts.py      |       97 |       32 |     67% |53, 86-101, 117-127, 155, 180-196 |
@@ -25,7 +25,7 @@
 | ocebuild/sources/\_lib.py       |       29 |        3 |     90% |     59-61 |
 | ocebuild/parsers/\_lib.py       |       49 |        3 |     94% | 80-82, 88 |
 | ocebuild/filesystem/archives.py |       28 |        3 |     89% |     51-54 |
-|                       **TOTAL** | **1862** |  **929** | **50%** |           |
+|                       **TOTAL** | **1865** |  **932** | **50%** |           |
 
 5 files skipped due to complete coverage.
 
