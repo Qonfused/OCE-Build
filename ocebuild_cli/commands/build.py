@@ -281,7 +281,8 @@ def cli(env, cwd, out, clean, update, force):
   from .patch import apply_patches #pylint: disable=import-outside-toplevel
   config = apply_patches(out=BUILD_DIR,
                          config_plist=config_plist,
-                         project_root=PROJECT_DIR)
+                         project_root=PROJECT_DIR,
+                         flags=flags)
 
 
 __all__ = [

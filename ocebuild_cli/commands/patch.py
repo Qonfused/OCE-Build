@@ -6,7 +6,7 @@
 ##
 """CLI entrypoint for the patch command."""
 
-from typing import Optional, Tuple, Union
+from typing import List, Optional, Tuple, Union
 
 import click
 
@@ -63,6 +63,7 @@ def apply_patches(cwd: Union[str, Path]='.',
                   *,
                   config_plist: Optional[Union[str, Path]]=None,
                   project_root: Optional[Union[str, Path]]=None,
+                  flags: Optional[List[str]]=None,
                   sort_keys: bool=True
                   ) -> dict:
   """Applies configuration patches to the config.plist.
@@ -113,7 +114,7 @@ def apply_patches(cwd: Union[str, Path]='.',
     with Progress() as progress:
       progress_bar(progress, "Applying patches to config.plist")
       # Apply patches and schema defaults
-      merged = merge_configs(config_plist, *patches)
+      merged = merge_configs(config_plist, *patches, flags=flags)
       config = apply_schema_defaults(merged, schema, sample)
       # Write the patched config.plist
       config_plist.write_text(write_plist(config, sort_keys=sort_keys))
