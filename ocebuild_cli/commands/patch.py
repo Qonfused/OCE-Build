@@ -6,6 +6,8 @@
 ##
 """CLI entrypoint for the patch command."""
 
+from os import getcwd
+
 from typing import List, Optional, Tuple, Union
 
 import click
@@ -141,9 +143,18 @@ def apply_patches(cwd: Union[str, Path]='.',
 def cli(env, cwd, out):
   """Patches an existing OpenCore configuration."""
 
+  if not cwd: cwd = getcwd()
+  else: debug(f"(--cwd) Using '{cwd}' as the working directory.")
+
+  if not out: out = 'dist'
+  else: debug(f"(--out) Using '{out}' as the build directory.")
+
+  #TODO: Re-use cwd and out parameter wrappers to resolve the build directory
+  BUILD_DIR = Path(cwd, out)
+
   #TODO: Add additional options to the CLI
   # config = apply_patches(cwd, out)
-  apply_patches(cwd, out)
+  apply_patches(cwd, out=BUILD_DIR)
 
 
 __all__ = [
