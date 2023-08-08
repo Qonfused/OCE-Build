@@ -129,11 +129,16 @@ class GitHubResolver(BaseResolver):
 
     # Split tokens on capital letters, dashes, and underscores
     name_parts = split('-|_| ', re.sub( r"([A-Z])", r"-\1", name).lower())
-    def get_match(arr: List[dict], cutoff=0.25):
+    def get_match(arr: List[dict], cutoff=0.25, target=name):
       """Finds the closest kext bundle in a list of release assets."""
-      closest = get_close_matches(name, [a['name'] for a in arr], n=1, cutoff=cutoff)
+      closest = get_close_matches(target, [a['name'] for a in arr], 1, cutoff)
       if not closest or not any(s in closest[0].lower() for s in name_parts):
-        raise ValueError(f'Unable to resolve {name}.')
+        # Fallback to the repo name if the kext name isn't listed in the assets
+        repo_name = resolver.repository.rsplit('/', 1)[-1]
+        if name != repo_name:
+          return get_match(arr, target=repo_name)
+        else:
+          raise ValueError(f'Unable to resolve {target}.')
       return next(a['browser_download_url'] for a in arr if a['name'] == closest[0])
 
     # Get the asset with the closest name to the resolver and build target
