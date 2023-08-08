@@ -268,6 +268,12 @@ def cli(env, cwd, out, clean, update, force):
     extracted_dir = OC_DIR.relative(cwd)
     success(f"Extracted {num_extracted} build entries to '{extracted_dir}'.")
 
+  # Validate build entries
+  missing_entries = validate_build_directory(build_config, out_dir=BUILD_DIR)
+  if missing_entries:
+    num_missing = len([k for e in missing_entries.values() for k in e.keys()])
+    abort(f"Could not extract {num_missing} build entries.", traceback=False)
+
   # Update build entries in config.plist
   config_plist = update_config_entries(BUILD_DIR, build_config, clean=clean)
 
