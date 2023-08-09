@@ -54,8 +54,8 @@
             </div>
         </aside>
         <h2>
-            <span class="text">167 statements &nbsp;</span>
-            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">124<span class="text"> run</span></button>
+            <span class="text">168 statements &nbsp;</span>
+            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">125<span class="text"> run</span></button>
             <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">43<span class="text"> missing</span></button>
             <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">0<span class="text"> excluded</span></button>
         </h2>
@@ -65,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="d_2770110f17ecdc95_semver_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.2.7">coverage.py v7.2.7</a>,
-            created at 2023-08-08 15:23 +0000
+            created at 2023-08-09 00:36 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"/>
@@ -413,28 +413,30 @@
     <p class="pln"><span class="n"><a id="t331" href="#t331">331</a></span><span class="t"><span class="str">    Returns:</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t332" href="#t332">332</a></span><span class="t"><span class="str">      The resolved filepath wrapped in a PathResolver instance.</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t333" href="#t333">333</a></span><span class="t"><span class="str">    """</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t334" href="#t334">334</a></span><span class="t">    <span class="nam">resolved_path</span> <span class="op">=</span> <span class="nam">PathResolver</span><span class="op">(</span><span class="nam">self</span><span class="op">.</span><span class="nam">__getinstance__</span><span class="op">(</span><span class="op">)</span><span class="op">.</span><span class="nam">resolve</span><span class="op">(</span><span class="nam">strict</span><span class="op">=</span><span class="nam">strict</span><span class="op">)</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t335" href="#t335">335</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t336" href="#t336">336</a></span><span class="t">    <span class="key">if</span> <span class="nam">strict</span> <span class="key">or</span> <span class="nam">resolved_path</span><span class="op">.</span><span class="nam">exists</span><span class="op">(</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t337" href="#t337">337</a></span><span class="t">      <span class="com"># Get checksum of the resolved filepath</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t338" href="#t338">338</a></span><span class="t">      <span class="key">from</span> <span class="op">.</span><span class="nam">binary</span> <span class="key">import</span> <span class="nam">get_digest</span> <span class="com">#pylint: disable=import-outside-toplevel</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t339" href="#t339">339</a></span><span class="t">      <span class="nam">self</span><span class="op">.</span><span class="nam">checksum</span> <span class="op">=</span> <span class="nam">get_digest</span><span class="op">(</span><span class="nam">resolved_path</span><span class="op">,</span> <span class="nam">algorithm</span><span class="op">=</span><span class="nam">sha256</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t340" href="#t340">340</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t341" href="#t341">341</a></span><span class="t">    <span class="com">#TODO: Handle additional path type verifications here</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t342" href="#t342">342</a></span><span class="t">    <span class="key">return</span> <span class="nam">resolved_path</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t343" href="#t343">343</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t344" href="#t344">344</a></span><span class="t"><span class="nam">ResolverType</span> <span class="op">=</span> <span class="nam">Union</span><span class="op">[</span><span class="nam">GitHubResolver</span><span class="op">,</span> <span class="nam">DortaniaResolver</span><span class="op">,</span> <span class="nam">PathResolver</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t345" href="#t345">345</a></span><span class="t"><span class="str">"""A type alias for the Resolver classes."""</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t346" href="#t346">346</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t347" href="#t347">347</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t348" href="#t348">348</a></span><span class="t"><span class="nam">__all__</span> <span class="op">=</span> <span class="op">[</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t349" href="#t349">349</a></span><span class="t">  <span class="com"># Variables (1)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t350" href="#t350">350</a></span><span class="t">  <span class="str">"ResolverType"</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t351" href="#t351">351</a></span><span class="t">  <span class="com"># Classes (3)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t352" href="#t352">352</a></span><span class="t">  <span class="str">"GitHubResolver"</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t353" href="#t353">353</a></span><span class="t">  <span class="str">"DortaniaResolver"</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t354" href="#t354">354</a></span><span class="t">  <span class="str">"PathResolver"</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t355" href="#t355">355</a></span><span class="t"><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t334" href="#t334">334</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t335" href="#t335">335</a></span><span class="t">    <span class="nam">cls</span> <span class="op">=</span> <span class="nam">self</span><span class="op">.</span><span class="nam">__getinstance__</span><span class="op">(</span><span class="op">)</span><span class="op">.</span><span class="nam">__class__</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t336" href="#t336">336</a></span><span class="t">    <span class="nam">resolved_path</span> <span class="op">=</span> <span class="nam">cls</span><span class="op">(</span><span class="nam">self</span><span class="op">.</span><span class="nam">path</span><span class="op">)</span><span class="op">.</span><span class="nam">resolve</span><span class="op">(</span><span class="nam">strict</span><span class="op">=</span><span class="nam">strict</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t337" href="#t337">337</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t338" href="#t338">338</a></span><span class="t">    <span class="key">if</span> <span class="nam">strict</span> <span class="key">or</span> <span class="nam">resolved_path</span><span class="op">.</span><span class="nam">exists</span><span class="op">(</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t339" href="#t339">339</a></span><span class="t">      <span class="com"># Get checksum of the resolved filepath</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t340" href="#t340">340</a></span><span class="t">      <span class="key">from</span> <span class="op">.</span><span class="nam">binary</span> <span class="key">import</span> <span class="nam">get_digest</span> <span class="com">#pylint: disable=import-outside-toplevel</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t341" href="#t341">341</a></span><span class="t">      <span class="nam">self</span><span class="op">.</span><span class="nam">checksum</span> <span class="op">=</span> <span class="nam">get_digest</span><span class="op">(</span><span class="nam">resolved_path</span><span class="op">,</span> <span class="nam">algorithm</span><span class="op">=</span><span class="nam">sha256</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t342" href="#t342">342</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t343" href="#t343">343</a></span><span class="t">    <span class="com">#TODO: Handle additional path type verifications here</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t344" href="#t344">344</a></span><span class="t">    <span class="key">return</span> <span class="nam">resolved_path</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t345" href="#t345">345</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t346" href="#t346">346</a></span><span class="t"><span class="nam">ResolverType</span> <span class="op">=</span> <span class="nam">Union</span><span class="op">[</span><span class="nam">GitHubResolver</span><span class="op">,</span> <span class="nam">DortaniaResolver</span><span class="op">,</span> <span class="nam">PathResolver</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t347" href="#t347">347</a></span><span class="t"><span class="str">"""A type alias for the Resolver classes."""</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t348" href="#t348">348</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t349" href="#t349">349</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t350" href="#t350">350</a></span><span class="t"><span class="nam">__all__</span> <span class="op">=</span> <span class="op">[</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t351" href="#t351">351</a></span><span class="t">  <span class="com"># Variables (1)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t352" href="#t352">352</a></span><span class="t">  <span class="str">"ResolverType"</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t353" href="#t353">353</a></span><span class="t">  <span class="com"># Classes (3)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t354" href="#t354">354</a></span><span class="t">  <span class="str">"GitHubResolver"</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t355" href="#t355">355</a></span><span class="t">  <span class="str">"DortaniaResolver"</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t356" href="#t356">356</a></span><span class="t">  <span class="str">"PathResolver"</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t357" href="#t357">357</a></span><span class="t"><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
 </main>
 <footer>
     <div class="content">
@@ -444,7 +446,7 @@
             <a id="nextFileLink" class="nav" href="d_2770110f17ecdc95_semver_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.2.7">coverage.py v7.2.7</a>,
-            created at 2023-08-08 15:23 +0000
+            created at 2023-08-09 00:36 +0000
         </p>
     </div>
 </footer>

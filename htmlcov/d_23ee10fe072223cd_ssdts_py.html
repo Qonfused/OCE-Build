@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Coverage for ocebuild/pipeline/ssdts.py: 67%</title>
+    <title>Coverage for ocebuild/pipeline/ssdts.py: 66%</title>
     <link rel="icon" sizes="32x32" href="favicon_32.png">
     <link rel="stylesheet" href="style.css" type="text/css">
     <script type="text/javascript" src="coverage_html.js" defer></script>
@@ -12,7 +12,7 @@
     <div class="content">
         <h1>
             <span class="text">Coverage for </span><b>ocebuild/pipeline/ssdts.py</b>:
-            <span class="pc_cov">67%</span>
+            <span class="pc_cov">66%</span>
         </h1>
         <aside id="help_panel_wrapper">
             <input id="help_panel_state" type="checkbox">
@@ -54,9 +54,9 @@
             </div>
         </aside>
         <h2>
-            <span class="text">97 statements &nbsp;</span>
+            <span class="text">99 statements &nbsp;</span>
             <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">65<span class="text"> run</span></button>
-            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">32<span class="text"> missing</span></button>
+            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">34<span class="text"> missing</span></button>
             <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">0<span class="text"> excluded</span></button>
         </h2>
         <p class="text">
@@ -65,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="d_c69d1f17b951105a__lib_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.2.7">coverage.py v7.2.7</a>,
-            created at 2023-08-08 15:23 +0000
+            created at 2023-08-09 00:36 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"/>
@@ -257,7 +257,7 @@
     <p class="pln"><span class="n"><a id="t175" href="#t175">175</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t176" href="#t176">176</a></span><span class="t">  <span class="key">return</span> <span class="nam">sorted_dependencies</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t177" href="#t177">177</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t178" href="#t178">178</a></span><span class="t"><span class="key">def</span> <span class="nam">extract_ssdts</span><span class="op">(</span><span class="nam">directory</span><span class="op">:</span> <span class="nam">Union</span><span class="op">[</span><span class="nam">str</span><span class="op">,</span> <span class="nam">Path</span><span class="op">]</span><span class="op">)</span> <span class="op">-></span> <span class="nam">dict</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t178" href="#t178">178</a></span><span class="t"><span class="key">def</span> <span class="nam">extract_ssdts</span><span class="op">(</span><span class="nam">directory</span><span class="op">:</span> <span class="nam">Union</span><span class="op">[</span><span class="nam">str</span><span class="op">,</span> <span class="nam">Path</span><span class="op">]</span><span class="op">,</span> <span class="nam">persist</span><span class="op">:</span> <span class="nam">bool</span><span class="op">=</span><span class="key">False</span><span class="op">)</span> <span class="op">-></span> <span class="nam">dict</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t179" href="#t179">179</a></span><span class="t">  <span class="str">"""Extracts the metadata of all SSDTs in a directory."""</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t180" href="#t180">180</a></span><span class="t">  <span class="nam">ssdts</span> <span class="op">=</span> <span class="op">{</span><span class="op">}</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t181" href="#t181">181</a></span><span class="t">  <span class="nam">ssdt_paths</span> <span class="op">=</span> <span class="nam">glob</span><span class="op">(</span><span class="nam">directory</span><span class="op">,</span> <span class="str">'**/*.aml'</span><span class="op">,</span> <span class="nam">include</span><span class="op">=</span><span class="str">'**/*.dsl'</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
@@ -273,19 +273,22 @@
     <p class="pln"><span class="n"><a id="t191" href="#t191">191</a></span><span class="t">      <span class="op">}</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t192" href="#t192">192</a></span><span class="t">      <span class="com">#&#160;Cleanup</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t193" href="#t193">193</a></span><span class="t">      <span class="nam">source_path</span> <span class="op">=</span> <span class="nam">Path</span><span class="op">(</span><span class="nam">str</span><span class="op">(</span><span class="nam">ssdt_path</span><span class="op">)</span><span class="op">.</span><span class="nam">replace</span><span class="op">(</span><span class="str">'.aml'</span><span class="op">,</span> <span class="str">'.dsl'</span><span class="op">)</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t194" href="#t194">194</a></span><span class="t">      <span class="nam">remove</span><span class="op">(</span><span class="nam">source_path</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t195" href="#t195">195</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t196" href="#t196">196</a></span><span class="t">  <span class="key">return</span> <span class="nam">ssdts</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t197" href="#t197">197</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t194" href="#t194">194</a></span><span class="t">      <span class="key">if</span> <span class="key">not</span> <span class="nam">persist</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t195" href="#t195">195</a></span><span class="t">        <span class="nam">remove</span><span class="op">(</span><span class="nam">source_path</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t196" href="#t196">196</a></span><span class="t">      <span class="key">else</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t197" href="#t197">197</a></span><span class="t">        <span class="nam">ssdts</span><span class="op">[</span><span class="nam">name</span><span class="op">]</span><span class="op">[</span><span class="str">"source"</span><span class="op">]</span> <span class="op">=</span> <span class="nam">source_path</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t198" href="#t198">198</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t199" href="#t199">199</a></span><span class="t"><span class="nam">__all__</span> <span class="op">=</span> <span class="op">[</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t200" href="#t200">200</a></span><span class="t">  <span class="com"># Functions (5)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t201" href="#t201">201</a></span><span class="t">  <span class="str">"extract_iasl_binary"</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t202" href="#t202">202</a></span><span class="t">  <span class="str">"iasl_wrapper"</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t203" href="#t203">203</a></span><span class="t">  <span class="str">"translate_ssdts"</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t204" href="#t204">204</a></span><span class="t">  <span class="str">"sort_ssdt_symbols"</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t205" href="#t205">205</a></span><span class="t">  <span class="str">"extract_ssdts"</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t206" href="#t206">206</a></span><span class="t"><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t199" href="#t199">199</a></span><span class="t">  <span class="key">return</span> <span class="nam">ssdts</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t200" href="#t200">200</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t201" href="#t201">201</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t202" href="#t202">202</a></span><span class="t"><span class="nam">__all__</span> <span class="op">=</span> <span class="op">[</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t203" href="#t203">203</a></span><span class="t">  <span class="com"># Functions (5)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t204" href="#t204">204</a></span><span class="t">  <span class="str">"extract_iasl_binary"</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t205" href="#t205">205</a></span><span class="t">  <span class="str">"iasl_wrapper"</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t206" href="#t206">206</a></span><span class="t">  <span class="str">"translate_ssdts"</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t207" href="#t207">207</a></span><span class="t">  <span class="str">"sort_ssdt_symbols"</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t208" href="#t208">208</a></span><span class="t">  <span class="str">"extract_ssdts"</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t209" href="#t209">209</a></span><span class="t"><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
 </main>
 <footer>
     <div class="content">
@@ -295,7 +298,7 @@
             <a id="nextFileLink" class="nav" href="d_c69d1f17b951105a__lib_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.2.7">coverage.py v7.2.7</a>,
-            created at 2023-08-08 15:23 +0000
+            created at 2023-08-09 00:36 +0000
         </p>
     </div>
 </footer>
