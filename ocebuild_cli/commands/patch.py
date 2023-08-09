@@ -62,7 +62,7 @@ def get_schema(cwd: Union[str, Path]='.',
 
 def apply_patches(cwd: Union[str, Path]='.',
                   out: Union[str, Path]='.',
-                  *,
+                  *patches: List[Union[str, Path]],
                   config_plist: Optional[Union[str, Path]]=None,
                   project_root: Optional[Union[str, Path]]=None,
                   flags: Optional[List[str]]=None,
@@ -85,8 +85,11 @@ def apply_patches(cwd: Union[str, Path]='.',
   Args:
     cwd: The current working directory (Default: the current working directory).
     out: The output directory (Default: the current working directory).
+    patches: A list of paths to configuration patches (Optional).
     config_plist: The path to the config.plist (Optional).
     project_root: The path to the project root (Optional).
+    flags: A list of flags to pass to `merge_configs` (Optional).
+    sort_keys: Whether to sort the keys of the config.plist (Default: True).
 
   Returns:
     A dictionary representing the patched config.plist.
@@ -107,9 +110,12 @@ def apply_patches(cwd: Union[str, Path]='.',
   schema, sample = get_schema(cwd=project_root, get_sample=True)
 
   # Extract configuration patches
-  patches = set(glob(project_root, '**/config*.yml', include='**/config*.yaml'))
-  patches |= set(glob(project_root, '**/patch*.yml', include='**/patch*.yaml'))
-  debug(f"Found {len(patches)} patch files")
+  if not patches:
+    patches = set(glob(project_root, '**/config*.yml', include='**/config*.yaml'))
+    patches |= set(glob(project_root, '**/patch*.yml', include='**/patch*.yaml'))
+    debug(f"Found {len(patches)} patch files")
+  elif cwd:
+    patches = set(Path(cwd, patch).resolve(strict=True) for patch in patches)
 
   # Apply patches and schema fallbacks to the config.plist
   try:
@@ -140,7 +146,11 @@ def apply_patches(cwd: Union[str, Path]='.',
 @click.option("-o", "--out",
               type=click.Path(path_type=Path),
               help="Use the specified directory as the output directory.")
-def cli(env, cwd, out):
+@click.option("-p", "--patches",
+              type=click.Path(path_type=Path),
+              multiple=True,
+              help="A list of paths to configuration patches.")
+def cli(env, cwd, out, patches):
   """Patches an existing OpenCore configuration."""
 
   if not cwd: cwd = getcwd()
@@ -154,7 +164,7 @@ def cli(env, cwd, out):
 
   #TODO: Add additional options to the CLI
   # config = apply_patches(cwd, out)
-  apply_patches(cwd, out=BUILD_DIR)
+  apply_patches(cwd, BUILD_DIR, *patches)
 
 
 __all__ = [

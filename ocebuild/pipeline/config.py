@@ -52,8 +52,9 @@ def read_config(filepath: str,
   """
   if not flags: flags = []
   with open(filepath, 'r', encoding='UTF-8') as f:
+    file_name = Path(filepath).name
     file_ext = Path(filepath).suffix
-    if   file_ext in ('.plist'):
+    if   file_ext in ('.plist',):
       file = parse_plist(f)
       if frontmatter:
         return file, None
@@ -63,6 +64,10 @@ def read_config(filepath: str,
         return file, frontmatter
       else:
         file = parse_yaml(f, flags=flags)
+    elif file_name in ('.serialdata',):
+      serialdata, frontmatter = parse_yaml(f, flags=flags, frontmatter=True)
+      file = { 'PlatformInfo': { 'Generic': serialdata } }
+      return file, frontmatter
     else:
       raise ValueError(f"Unsupported file extension: {file_ext}")
 
