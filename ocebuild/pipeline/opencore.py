@@ -10,7 +10,7 @@ from tempfile import mkdtemp, NamedTemporaryFile
 
 from typing import Generator, Iterator, List, Literal, Optional, Tuple, Union
 
-from mmap import mmap, PROT_READ
+from mmap import mmap, ACCESS_READ
 
 from .lock import prune_resolver_entry
 
@@ -166,7 +166,7 @@ def get_opencore_checksum(file_path: Union[str, Path],
 
     # Get the offset of the vault header
     vault_header = b'=BEGIN OC VAULT='
-    with mmap(f.fileno(), 0, PROT_READ) as mf:
+    with mmap(f.fileno(), 0, ACCESS_READ) as mf:
       offset = mf.find(vault_header)
       if offset != -1:
         f.seek(offset + len(vault_header))
