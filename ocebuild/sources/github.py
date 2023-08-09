@@ -151,6 +151,8 @@ def github_release_catalog(url: str) -> dict:
     if not release_entry:
       raise ValueError(f'No release catalog entry found for {tag}.')
     return release_entry
+  except StopIteration:
+    raise ValueError(f'No release catalog entry found in {url} for {tag}.')
   except:
     if not github_rate_limit(raise_error=True): raise
 

@@ -15,7 +15,9 @@ import click
 from ocebuild.filesystem import copy, glob, remove
 from ocebuild.filesystem.cache import clear_cache, UNPACK_DIR
 from ocebuild.parsers.dict import merge_dict, nested_del, nested_get
+from ocebuild.parsers.plist import write_plist
 from ocebuild.pipeline.build import *
+from ocebuild.pipeline.config import update_entries
 from ocebuild.pipeline.packages import *
 from ocebuild.pipeline.packages import _iterate_extract_packages
 
@@ -53,8 +55,13 @@ def get_build_file(cwd: Union[str, Path]
     abort(f"Encountered an error while reading '{BUILD_FILE.name}': {e}",
           'Check the build configuration for errors.')
   else:
-    PROJECT_DIR = Path(BUILD_FILE.parent)
-    debug(f"Using '{PROJECT_DIR.relative('.')}' as the project root.")
+    PROJECT_DIR = Path(BUILD_FILE.parent).resolve()
+    try:
+      relative_path = PROJECT_DIR.relative('.')
+      debug(f"Using '{relative_path}' as the project root.")
+    except ValueError:
+      absolute_path = cwd.joinpath(PROJECT_DIR)
+      debug(f"Using {absolute_path} as the project root.")
 
   return build_config, build_vars, flags, BUILD_FILE, PROJECT_DIR
 
@@ -81,7 +88,9 @@ def extract_packages(build_vars: dict,
                      ) -> Tuple[Union[Path, None], dict]:
   """Extracts packages for build entries satisfying the build configuration."""
   extracted_entries = {}
-  def count(d: dict): return len([k for e in d.values() for k in e.keys()])
+
+  def count(d: dict) -> int:
+    return len([k for e in d.values() for k in e.keys()])
 
   # Include build entries from the OpenCore package as (vendored) packages
   if opencore_pkg := nested_get(packages, ['OpenCorePkg', 'OpenCore']):
@@ -98,6 +107,10 @@ def extract_packages(build_vars: dict,
             highlight=False)
     # Report the number of entries bundled with the OpenCore package
     info(f"Extracted {count(extracted)} build entries from OpenCore package.")
+    for category, entries in sorted(extracted.items()):
+      debug(f"Extracted {len(entries)} {category} entries:")
+      for entry in entries.values():
+        debug(f"--> '{entry['__dest'].relative(build_dir)}'")
 
   # Extract remaining packages
   if packages:
@@ -151,6 +164,29 @@ def extract_build_directory(opencore_pkg: Union[str, Path],
   clear_cache(cache_dirs=[UNPACK_DIR])
 
   return extracted_entries
+
+def update_config_entries(build_dir: Union[str, Path],
+                          build_config: dict,
+                          clean: bool=False
+                          ) -> Path:
+  """Updates the build entries in the config.plist."""
+  try:
+    with Progress() as progress:
+      progress_bar('Updating build entries in config.plist', wrap=progress)
+      # Copy sample config.plist if it does not exist
+      BUILD_DIR = Path(build_dir).resolve()
+      if not (config_plist := BUILD_DIR.joinpath('EFI/OC/config.plist')).exists():
+        copy(BUILD_DIR.joinpath('Docs/Sample.plist'), config_plist)
+        clean = True
+      # Update config.plist
+      updated_config = update_entries(config_plist, build_config, clean=clean)
+      config_plist.write_text(write_plist(updated_config))
+  except Exception as e:
+    error(f"Failed to update config.plist: {e}", traceback=True)
+  else:
+    success(f"Updated config.plist build entries.")
+
+  return config_plist
 
 
 @cli_command(name='build')
@@ -226,18 +262,35 @@ def cli(env, cwd, out, clean, update, force):
                                              build_dir=BUILD_DIR)
   # Move build entries to the build directory
   extract_build_directory(opencore_pkg, extracted, build_dir=BUILD_DIR)
+  OC_DIR = glob(BUILD_DIR, '**/OC/OpenCore.efi', first=True).parent
   if extracted:
     num_extracted = len([k for e in extracted.values() for k in e.keys()])
-    success(f"Extracted {num_extracted} build entries to '{BUILD_DIR}'.")
+    extracted_dir = OC_DIR.relative(cwd)
+    success(f"Extracted {num_extracted} build entries to '{extracted_dir}'.")
 
-  #TODO: Call the patch command to apply config.plist patches
+  # Validate build entries
+  missing_entries = validate_build_directory(build_config, out_dir=BUILD_DIR)
+  if missing_entries:
+    num_missing = len([k for e in missing_entries.values() for k in e.keys()])
+    abort(f"Could not extract {num_missing} build entries.", traceback=False)
+
+  # Update build entries in config.plist
+  config_plist = update_config_entries(BUILD_DIR, build_config, clean=clean)
+
+  # Apply patches to config.plist
+  from .patch import apply_patches #pylint: disable=import-outside-toplevel
+  config = apply_patches(out=BUILD_DIR,
+                         config_plist=config_plist,
+                         project_root=PROJECT_DIR,
+                         flags=flags)
 
 
 __all__ = [
-  # Functions (5)
+  # Functions (6)
   "get_build_file",
   "unpack_packages",
   "extract_packages",
   "extract_build_directory",
+  "update_config_entries",
   "cli"
 ]

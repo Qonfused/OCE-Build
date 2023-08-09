@@ -4,12 +4,15 @@
 ##
 """Methods for sorting and handling versioning."""
 
+from collections import OrderedDict
 from graphlib import TopologicalSorter
 from itertools import chain
 
-from typing import Dict, Generator, List, Tuple, Union
+from typing import Dict, Generator, List, Set, Tuple, Union
 
 from packaging import version as vpkg
+
+from ocebuild.parsers.regex import re_search
 
 
 SEMVER_SYMBOLS      = ('~', '^')
@@ -64,10 +67,17 @@ def get_version(string: str) -> Union[vpkg.Version, None]:
     >>> get_version('latest')
     # -> None
   """
+
+  # Try using the packaging parse method
+  version_str = get_version_str(string)
   try:
-    return vpkg.parse(get_version_str(string))
-  except vpkg.InvalidVersion:
-    return None
+    return vpkg.parse(version_str)
+  except vpkg.InvalidVersion: pass
+  # Fallback to regex parsing
+  if version_str := re_search(r'[0-9][0-9.]*', version_str):
+    try:
+      return vpkg.parse(version_str)
+    except Exception: pass
 
 def compare_version(v1: Union[str, vpkg.Version],
                     v2: Union[str, vpkg.Version],
@@ -200,8 +210,35 @@ def get_minimum_version(dependencies: Dict[str, Tuple[str, str]],
   """
   versions = set(k[1] for k in list(chain(*dependencies.values()))
                  if k[0] == library)
-  (versions := list(versions)).sort(key=vpkg.Version)
+  (versions := list(versions)).sort(key=get_version)
   return (library, f'^{str(versions[-1])}' if versions else None)
+
+def _sort_static_tree(dependencies: Dict[str, Tuple[str, str]]
+                      ) -> Dict[str, Set[str]]:
+  """Sorts the insertion order for dependencies before topological sorting."""
+
+  dependency_tree = { k: set(v[0] for v in t) for k,t in dependencies.items() }
+
+  # Determines the weight of a dependency tree node for insertion.
+  num_dependencies = {}
+  num_dependents = {}
+  for key, links in dependency_tree.items():
+    num_dependencies[key] = sum(1 if l in dependencies else 0 for l in links)
+    for l in links:
+      if l in num_dependents:
+        num_dependents[l] += 1
+      else:
+        num_dependents[l] = 1
+
+  # Sorts the dependency tree by the updated weights.
+  dependency_tree = OrderedDict(sorted(dependency_tree.items(),
+                                       key=lambda t: (
+                                         -num_dependents.get(t[0], 0),
+                                         -num_dependencies.get(t[0], 0),
+                                         t[0],
+                                         t[1]
+                                       )))
+  return dependency_tree
 
 def sort_dependencies(dependencies: Dict[str, Tuple[str, str]],
                      ) -> Generator[Tuple[str, str], any, None]:
@@ -225,8 +262,35 @@ def sort_dependencies(dependencies: Dict[str, Tuple[str, str]],
     >>> list(sort_dependencies(dependencies))
     # -> [('lib3', '^3.0.0'), ('lib2', '^2.0.0'), ('lib1', None)]
   """
-  dependency_tree = { k: set(v[0] for v in t) for k,t in dependencies.items() }
-  for library in TopologicalSorter(dependency_tree).static_order():
+
+  # Sort dependency tree by dependency weights
+  dependency_tree = _sort_static_tree(dependencies)
+
+  # for library in TopologicalSorter(dependency_tree).static_order():
+  #   yield get_minimum_version(dependencies, library)
+
+  static_dependency_tree = []
+  self = TopologicalSorter(dependency_tree)
+  self.prepare()
+  invalid_nodes = set()
+  while self.is_active():
+    node_group = self.get_ready()
+    # Handle invalid hoists of zero-dependency nodes
+    if not (static_dependency_tree or invalid_nodes):
+      invalid_nodes |= set(n for n in node_group
+                           if dependency_tree.get(n, None) == set())
+    # Add nodes to static dependency tree
+    for node in node_group:
+      if node not in invalid_nodes:
+        static_dependency_tree.append(node)
+    # Mark nodes as processed
+    self.done(*node_group)
+
+  # Append invalid-hoisted nodes to static dependency tree
+  for node in invalid_nodes:
+    static_dependency_tree.append(node)
+
+  for library in static_dependency_tree:
     yield get_minimum_version(dependencies, library)
 
 

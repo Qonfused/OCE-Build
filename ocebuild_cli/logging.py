@@ -87,7 +87,7 @@ def error(msg: str,
           label: str='ERROR',
           traceback: bool=False,
           suppress: Optional[List[str]]=None,
-          hide_locals: bool=False,
+          hide_locals: bool=True,
           **kwargs
           ) -> None:
   """Stylized error message for the CLI.

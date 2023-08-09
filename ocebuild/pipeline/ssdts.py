@@ -175,7 +175,7 @@ def sort_ssdt_symbols(filepaths: List[Union[str, Path]]) -> OrderedDict:
 
   return sorted_dependencies
 
-def extract_ssdts(directory: Union[str, Path]) -> dict:
+def extract_ssdts(directory: Union[str, Path], persist: bool=False) -> dict:
   """Extracts the metadata of all SSDTs in a directory."""
   ssdts = {}
   ssdt_paths = glob(directory, '**/*.aml', include='**/*.dsl')
@@ -191,7 +191,10 @@ def extract_ssdts(directory: Union[str, Path]) -> dict:
       }
       # Cleanup
       source_path = Path(str(ssdt_path).replace('.aml', '.dsl'))
-      remove(source_path)
+      if not persist:
+        remove(source_path)
+      else:
+        ssdts[name]["source"] = source_path
 
   return ssdts
 

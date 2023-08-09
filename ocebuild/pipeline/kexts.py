@@ -97,6 +97,7 @@ def sort_kext_cfbundle(filepaths: List[Union[str, Path]]) -> OrderedDict:
 
   # Resolve Kext dependency versions to determine load order
   sorted_dependencies = []
+  handled_paths = set()
   sorting_scheme = lambda e: get_version(nested_get(e, ['props', 'version'],
                                                     default='latest'))
   for identifier, version in sort_dependencies(dependency_tree):
@@ -115,8 +116,13 @@ def sort_kext_cfbundle(filepaths: List[Union[str, Path]]) -> OrderedDict:
       # Set resolved version
       entry['version_required'] = version or None
 
-      # Filter previous entries to determine whether bundled kexts are present
+      # Avoid duplicating entries on filepath
       path = entry['__path']
+      if not path in handled_paths:
+        handled_paths.add(path)
+      else: continue
+
+      # Filter previous entries to determine whether bundled kexts are present
       parent_kext = path.split('.kext', maxsplit=1)[0] + '.kext'
       bundled_entries = list(e for e in sorted_dependencies
                              if e['__path'].startswith(parent_kext))
@@ -146,8 +152,7 @@ def sort_kext_cfbundle(filepaths: List[Union[str, Path]]) -> OrderedDict:
               has_mutual_dependency = dependency in next_entry['dependencies']
               if matches and (has_mutual_keys or has_mutual_dependency):
                 insertion_index += 1
-              else:
-                break
+              else: break
           except IndexError:
             pass #de-op
         # Upsert standalone dependents with dependencies/mutual dependents
@@ -159,6 +164,47 @@ def sort_kext_cfbundle(filepaths: List[Union[str, Path]]) -> OrderedDict:
       # Handle dependencies
       else:
         sorted_dependencies.append(entry)
+
+  def num_dependents(kext: dict) -> int:
+    return sum(1 if kext['identifier'] in k['dependencies'] else 0
+               for k in sorted_dependencies)
+
+  # Group each node alphabetically by dependency name
+  offset = 0
+  nodes = []
+  for idx, kext in enumerate(sorted_dependencies):
+    has_resolved_dependencies = any(k in identifier_map
+                                    for k in kext.get('dependencies', {}))
+    is_bundled_kext = kext['__path'].count('.kext') > 1
+    is_standalone_kext = not num_dependents(kext) and not is_bundled_kext
+    # Has no dependencies on any nodes' dependents
+    if is_standalone_kext and not has_resolved_dependencies:
+      nodes.append([kext])
+      offset = idx + 1
+    # Has dependents in the current node
+    elif num_dependents(kext) and not (is_bundled_kext, offset == idx):
+      offset = idx + 1
+      nodes.append(sorted_dependencies[offset:idx])
+    # Is bundled or has dependencies in the current node
+    elif not (has_resolved_dependencies or is_bundled_kext):
+      nodes.append(sorted_dependencies[offset:idx])
+      offset = idx
+    # Ensures the last node is added
+    elif idx == len(sorted_dependencies) - 1:
+      nodes.append(sorted_dependencies[offset:idx])
+    else: continue
+
+    # Sort the inserted node's standalone dependents alphabetically
+    ordered, unordered = [], []
+    for k in nodes[-1]:
+      (ordered if num_dependents(k) else unordered).append(k)
+    nodes[-1] = ordered + sorted(unordered, key=lambda k: k['name'])
+
+  # Apply new node sorting scheme to sorted kexts list
+  sorted_dependencies = []
+  sorting_scheme = lambda n: (n[0]['name'][:3], -len(n))
+  for node in sorted(filter(None, nodes), key=sorting_scheme):
+    sorted_dependencies += node
 
   return sorted_dependencies
 

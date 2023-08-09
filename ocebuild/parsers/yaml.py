@@ -116,6 +116,12 @@ def write_yaml_types(value: Union[Tuple[str, any], any],
       svalue = f'"{svalue}"'
     else:
       svalue = str(svalue)
+
+    # Remove existing quotes from strings
+    for quote in ('"', "'"):
+      if svalue.startswith(quote) and svalue.endswith(quote):
+        svalue = svalue[1:-1]
+
     # Escape control and reserved characters
     # @see https://symfony.com/doc/current/reference/formats/yaml.html
     reserve_chars = (':',     '{',    '}',    '[',    ']',    ',',    '&',

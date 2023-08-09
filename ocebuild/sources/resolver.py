@@ -331,7 +331,9 @@ class PathResolver(BaseResolver, Path):
     Returns:
       The resolved filepath wrapped in a PathResolver instance.
     """
-    resolved_path = PathResolver(self.__getinstance__().resolve(strict=strict))
+
+    cls = self.__getinstance__().__class__
+    resolved_path = cls(self.path).resolve(strict=strict)
 
     if strict or resolved_path.exists():
       # Get checksum of the resolved filepath

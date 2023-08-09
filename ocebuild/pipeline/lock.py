@@ -179,7 +179,7 @@ def parse_semver_params(entry: Union[str, dict],
 def parse_specifier(name: str,
                     entry: Union[str, Dict[str, any]],
                     base_path: Optional[str]=getcwd()
-                    ) -> Union[GitHubResolver, PathResolver, DortaniaResolver, None]:
+                    ) -> Union[ResolverType, None]:
   """Parses a specifier string for a resolver class.
 
   Args:
@@ -194,6 +194,15 @@ def parse_specifier(name: str,
   if not isinstance(specifier, str): specifier = ''
   parameters: Dict[str, str]={}
   resolver_props = { '__name__': name, '__specifier__': specifier }
+
+  # Specifier points to a local file
+  if specifier.startswith('file:'):
+    specifier = specifier \
+      .replace('file://', '') \
+      .replace('file:', '')
+  if (filepath := PathResolver(base_path, specifier)).exists():
+    parameters['path'] = filepath
+    return PathResolver(**parameters, **resolver_props)
 
   # Specifier points to a github repository
   if isinstance(entry, dict) and 'repository' in entry:
@@ -215,15 +224,6 @@ def parse_specifier(name: str,
   if DortaniaResolver.has_build(name):
     parameters = parse_semver_params(entry, specifier, parameters)
     return DortaniaResolver(**parameters, **resolver_props)
-
-  # Specifier points to a local file
-  if specifier.startswith('file:'):
-    specifier = specifier \
-      .replace('file://', '') \
-      .replace('file:', '')
-  if (filepath := PathResolver(base_path, specifier)).exists():
-    parameters['path'] = filepath
-    return PathResolver(**parameters, **resolver_props)
 
   # No resolver matched
   return None

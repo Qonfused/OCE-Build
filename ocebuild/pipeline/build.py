@@ -7,13 +7,14 @@
 from shutil import unpack_archive
 from tempfile import mkdtemp
 
-from typing import Iterator, List, Optional, Tuple
+from typing import Dict, Iterator, List, Optional, Tuple, Union
 
-from ocebuild.filesystem import copy
+from ocebuild.filesystem import copy, glob
 from ocebuild.filesystem.archives import extract_archive
 from ocebuild.filesystem.cache import UNPACK_DIR
 from ocebuild.parsers.dict import nested_get, nested_set
 from ocebuild.parsers.yaml import parse_yaml
+from ocebuild.pipeline.lock import _category_extension
 
 from third_party.cpython.pathlib import Path
 
@@ -118,9 +119,31 @@ def unpack_build_entries(resolvers: List[dict],
 
   return extracted
 
+def validate_build_directory(build_config: dict,
+                             out_dir: Union[str, Path]
+                             ) -> Dict[str, List[str]]:
+  """Verifies that all build entries are present in the build directory."""
+
+  missing_entries = {}
+  oc_dir = glob(out_dir, '**/OC/OpenCore.efi', first=True).parent
+  for category, entries in build_config.items():
+    path = oc_dir.joinpath(category)
+    if not path.exists(): continue
+    ext, _ = _category_extension(category)
+    matched_entries = set(f.stem for f in glob(path, f'**/*{ext}'))
+    for name, entry in entries.items():
+      if name not in matched_entries:
+        missing_entries.setdefault(category, []).append(name)
+      for bundled in entry.get('bundled', []):
+        if bundled not in matched_entries:
+          missing_entries.setdefault(category, []).append(bundled)
+
+  return missing_entries
+
 
 __all__ = [
-  # Functions (2)
+  # Functions (3)
   "read_build_file",
-  "unpack_build_entries"
+  "unpack_build_entries",
+  "validate_build_directory"
 ]
