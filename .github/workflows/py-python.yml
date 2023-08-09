@@ -1,7 +1,7 @@
 name: Python PR trigger
 on:
   workflow_run:
-    workflows: ["ci:python"]
+    workflows: ["ci-python"]
     types:
       - completed
 jobs:
