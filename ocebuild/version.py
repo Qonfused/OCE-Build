@@ -6,11 +6,11 @@
 
 # This project uses Semantic Versioning (https://semver.org/)
 _MAJOR_VERSION = 0
-_MINOR_VERSION = 0
+_MINOR_VERSION = 1
 _PATCH_VERSION = 0
 _PRE_RELEASE   = 'dev'
 _BUILD         = 0
 
 # Export the OCE Build version string.
-__version__    = '0.0.0-dev'
+__version__    = '0.1.0-dev'
 __all__        = ["__version__"] #pragma preserve-exports
