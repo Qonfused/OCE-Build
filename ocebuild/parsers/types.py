@@ -4,9 +4,8 @@
 ##
 """Type parsing helper functions."""
 
-from plistlib import _encode_base64
-
 from binascii import a2b_base64, a2b_hex, hexlify
+from plistlib import _encode_base64
 
 from ocebuild.parsers.regex import re_match, re_search
 

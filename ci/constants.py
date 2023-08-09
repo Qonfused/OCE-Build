@@ -84,7 +84,13 @@ PURELIB_MODULES = _enumerate_modules(get_paths()['purelib'])
 #                            Python Module Sources                             #
 ################################################################################
 
-BUILTIN_MODULES = set(builtin_module_names)
+BUILTIN_ADDITIONS = {
+  'binascii',
+  'mmap',
+}
+"""Python built-in modules that are not listed in the build-in Python paths."""
+
+BUILTIN_MODULES = set([*builtin_module_names, *BUILTIN_ADDITIONS])
 """Set of all Python built-in modules."""
 
 PYTHON_MODULES = BUILTIN_MODULES | PLATSTDLIB_MODULES | STDLIB_MODULES
@@ -95,7 +101,7 @@ EXTERNAL_MODULES = PLATLIB_MODULES | PURELIB_MODULES
 
 
 __all__ = [
-  # Constants (16)
+  # Constants (17)
   "PROJECT_ENTRYPOINT",
   "PROJECT_ROOT",
   "PROJECT_DOCS",
@@ -109,6 +115,7 @@ __all__ = [
   "PLATSTDLIB_MODULES",
   "PLATLIB_MODULES",
   "PURELIB_MODULES",
+  "BUILTIN_ADDITIONS",
   "BUILTIN_MODULES",
   "PYTHON_MODULES",
   "EXTERNAL_MODULES"

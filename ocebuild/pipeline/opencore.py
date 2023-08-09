@@ -5,12 +5,11 @@
 """Methods for retrieving and handling OpenCore packages."""
 
 from hashlib import sha256
+from mmap import mmap, ACCESS_READ
 from shutil import copyfile, copytree
 from tempfile import mkdtemp, NamedTemporaryFile
 
 from typing import Generator, Iterator, List, Literal, Optional, Tuple, Union
-
-from mmap import mmap, ACCESS_READ
 
 from .lock import prune_resolver_entry
 

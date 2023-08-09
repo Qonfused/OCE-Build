@@ -179,7 +179,7 @@ def _main(entrypoint: Optional[str]=None) -> None:
       # Sort imports by type
       file_text = sort_file_imports(file_text)
       # Write to file
-    Path(package).write_text(file_text, encoding='UTF-8')
+    Path(package).write_text(file_text, encoding='UTF-8', newline='\n')
 
 
 __all__ = [

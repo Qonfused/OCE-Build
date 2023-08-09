@@ -311,7 +311,7 @@ def _main(entrypoint: Optional[str]=None) -> None:
     # Update package file
     if not 'no-implicit' in pragma_line:
       package_text = '\n'.join(package_lines) + '\n'
-      Path(package).write_text(package_text, encoding='UTF-8')
+      Path(package).write_text(package_text, encoding='UTF-8', newline='\n')
 
 if __name__ == '__main__':
   parser = ArgumentParser()

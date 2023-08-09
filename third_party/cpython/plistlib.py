@@ -7,11 +7,10 @@
 """Overrides the `plistlib` module to support backports and custom subclasses."""
 
 import plistlib
+from binascii import b2a_base64
 from plistlib import InvalidFileException, FMT_BINARY, FMT_XML
 from plistlib import dump, dumps, load, loads
 from plistlib import PlistFormat, _FORMATS
-
-from binascii import b2a_base64
 
 from .. import inject_module_namespace
 
