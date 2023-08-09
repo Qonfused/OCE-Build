@@ -15,12 +15,13 @@ DefinitionBlock ("", "SSDT", 2, "SSDTB", "TEST", 0x00000000)
       Scope (__SB.PCI0._FIZ)
       {
         Device (^^BAR) {                          // SB.BAR
-          // ...
+          Name (_HID, EisaId ("BAR0000"))
         }
       }
       Name(FUUB, One)                             // FUUB
       Device (\_SB.FOO)                           // SB.FOO
       {
+        Name (_HID, EisaId ("FOO0000"))
         Name (XUUQ, Buffer (0x02) { 0x01, 0xFF }) // SB.FOO.XUUQ
       }
       Name(BUUF, Zero)                            // BUUF
