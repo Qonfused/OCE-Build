@@ -10,16 +10,16 @@ dependencies:
   ACPI:
     SSDT-A:
       path: './ACPI/SSDT-A.dsl'
-      resolution: 'SSDT-A@file:ACPI/SSDT-A.dsl#checksum=40f7c7e450563729fbf9305af5ba30f97b24e2d48f4f08482ad58cd1c79972f1'
+      resolution: 'SSDT-A@file:ACPI/SSDT-A.dsl#checksum=be88502bd6d6aab5df32db9fae703201d0aa25ce0e39bab8e1e0eb01ed268867'
       specifier: 'SSDT-A@file:ACPI/SSDT-A.dsl'
       kind: SSDT
-      revision: '{ SHA256: 40f7c7e450563729fbf9305af5ba30f97b24e2d48f4f08482ad58cd1c79972f1 }'
+      revision: '{ SHA256: be88502bd6d6aab5df32db9fae703201d0aa25ce0e39bab8e1e0eb01ed268867 }'
     SSDT-B:
       path: './ACPI/SSDT-B.dsl'
-      resolution: 'SSDT-B@file:../src/ACPI/SSDT-B.dsl#checksum=7c231e49947837e5cf5a61b414045b1ca987c2638dff01915bf7116e62c7f4d3'
+      resolution: 'SSDT-B@file:../src/ACPI/SSDT-B.dsl#checksum=f2f0cd22fe2a10b39380fc6968802139bcd6e8c5876c62d2e214a1eb01aec210'
       specifier: 'SSDT-B@file:../src/ACPI/SSDT-B.dsl'
       kind: SSDT
-      revision: '{ SHA256: 7c231e49947837e5cf5a61b414045b1ca987c2638dff01915bf7116e62c7f4d3 }'
+      revision: '{ SHA256: f2f0cd22fe2a10b39380fc6968802139bcd6e8c5876c62d2e214a1eb01aec210 }'
   Kexts:
     AirportItlwm-BigSur:
       build: DEBUG
@@ -85,9 +85,9 @@ dependencies:
       revision: '{ SHA1: 4e7e1b7465aae297d706afe5de5c4d1572d86917 }'
     OpenCore:
       build: DEBUG
-      version: 0.9.3
-      url: 'https://github.com/acidanthera/OpenCorePkg/releases/download/0.9.3/OpenCore-0.9.3-DEBUG.zip'
-      resolution: 'acidanthera/OpenCorePkg@github:0.9.3#commit=d52fc46ba650ce1afe00c354331a0657a533ef18'
+      version: 0.9.4
+      url: 'https://github.com/acidanthera/OpenCorePkg/releases/download/0.9.4/OpenCore-0.9.4-DEBUG.zip'
+      resolution: 'acidanthera/OpenCorePkg@github:0.9.4#commit=d74d43bb0279e494a75546fad8834d75172eb01e'
       specifier: 'acidanthera/OpenCorePkg@github:latest'
       kind: Binary
-      revision: '{ SHA1: d52fc46ba650ce1afe00c354331a0657a533ef18 }'
+      revision: '{ SHA1: d74d43bb0279e494a75546fad8834d75172eb01e }'

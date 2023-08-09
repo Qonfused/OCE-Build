@@ -271,7 +271,7 @@ def cli(env, cwd, out, clean, update, force):
   # Validate build entries
   missing_entries = validate_build_directory(build_config, out_dir=BUILD_DIR)
   if missing_entries:
-    num_missing = len([k for e in missing_entries.values() for k in e.keys()])
+    num_missing = sum(len(e) for e in missing_entries.values())
     abort(f"Could not extract {num_missing} build entries.", traceback=False)
 
   # Update build entries in config.plist

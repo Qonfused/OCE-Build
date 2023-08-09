@@ -5,7 +5,7 @@
 """Methods for handling and extracting archive formats."""
 
 from contextlib import contextmanager
-from shutil import rmtree, unpack_archive
+from shutil import _find_unpack_format, rmtree, unpack_archive
 from tempfile import mkdtemp, NamedTemporaryFile
 from urllib.request import Request
 
@@ -52,13 +52,19 @@ def extract_archive(url: Union[str, Request],
         extension = f'.{url.split(".")[-1]}'
       else:
         extension = url.rsplit("/", maxsplit=1)[-1]
+
       # Write archive to a temporary file.
-      with NamedTemporaryFile(suffix=f'-{filename or extension}',
-                              dir=UNPACK_DIR) as tmp_file:
-        tmp_file.write(response.read())
-        tmp_file.seek(0)
-        # Extract the zip file to the temporary directory.
-        unpack_archive(tmp_file.name, tmp_dir)
+      suffix = f'-{filename or extension}'
+      with NamedTemporaryFile(suffix=suffix, dir=UNPACK_DIR, delete=False) as f:
+        f.write(response.read())
+        f.seek(0)
+
+      # Extract the zip file to the temporary directory.
+      archive_format = _find_unpack_format(f.name)
+      unpack_archive(f.name, tmp_dir, format=archive_format)
+      # Cleanup the temporary file
+      Path(f.name).unlink()
+
     # Yield the temporary directory.
     yield Path(tmp_dir)
   finally:

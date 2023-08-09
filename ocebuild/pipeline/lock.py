@@ -82,7 +82,7 @@ def _format_resolver(resolver: Union[ResolverType, None],
   if 'version' in resolver_props:
     resolution += f":{resolver_props['version']}"
   elif isinstance(resolver, PathResolver):
-    resolution += f":{resolver.path.relative_to(base_path)}"
+    resolution += f":{resolver.path.relative_to(base_path).as_posix()}"
 
   # Add the resolver checksum
   if 'commit' in resolver_props:
@@ -392,7 +392,7 @@ def resolve_specifiers(build_config: dict,
         if isinstance(resolver, PathResolver):
           # Resolve the path for the specifier
           path = resolver.resolve(strict=True) #pylint: disable=E1123
-          resolver_props['path'] = f'./{path.relative_to(base_path)}'
+          resolver_props['path'] = f'./{path.relative_to(base_path).as_posix()}'
         elif isinstance(resolver, (GitHubResolver, DortaniaResolver)):
           # Extract the build type (default to OpenCore build type)
           build = nested_get(entry, ['build'], default=default_build)

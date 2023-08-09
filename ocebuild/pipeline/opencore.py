@@ -115,7 +115,7 @@ def extract_build_entries(opencore_pkg: Path,
   bundled = list(filter(lambda e: e['specifier'] == '*', resolvers))
   for category, path in iterator:
     # Include only binaries that are specified as bundled in the build config
-    matches = filter(lambda e: str(e['__filepath']).find(path) > 0, bundled)
+    matches = filter(lambda e: e['__filepath'].as_posix().find(path)>0, bundled)
     if entry := next(matches, None):
       filepath = Path(entry['__filepath']).as_posix()
       prune_resolver_entry(resolvers, key='__filepath', value=filepath)
