@@ -109,12 +109,12 @@ def test_parse_ssdt_namespace():
                                         ('OEMID', 'SSDTA'),
                                         ('TableID', 'TEST'),
                                         ('OEMRevision', '0x00000000')]),
-      'imports': OrderedDict([('SB', 'DeviceObj'),
-                              ('SB.PCI0', 'DeviceObj')]),
-      'statements': OrderedDict([('QUX', 'Name'),
-                                 ('SB.BAZ', 'Device'),
-                                 ('SB.BAZ.HID', 'Name'),
-                                 ('SB.PCI0.QUUX', 'Name')])}
+       'imports': OrderedDict([('SB', 'DeviceObj'),
+                               ('SB.PCI0', 'DeviceObj')]),
+       'statements': OrderedDict([('QUX', 'Name'),
+                                  ('SB.BAZ', 'Device'),
+                                  ('SB.BAZ.HID', 'Name'),
+                                  ('SB.PCI0.QUUX', 'Name')])}
 
   # Test against SSDT-B
   with open(f'{SIMPLE_DEMO}/ACPI/SSDT-B.dsl', encoding='UTF-8') as ssdt_file:
@@ -125,12 +125,14 @@ def test_parse_ssdt_namespace():
                                         ('OEMID', 'SSDTB'),
                                         ('TableID', 'TEST'),
                                         ('OEMRevision', '0x00000000')]),
-      'imports': OrderedDict([('SB', 'DeviceObj'),
-                              ('SB.PCI0.FIZ', 'DeviceObj'),
-                              ('SB.BAZ', 'DeviceObj')]),
-      'statements': OrderedDict([('SB.BAR', 'Device'),
-                                 ('FUUB', 'Name'),
-                                 ('SB.FOO', 'Device'),
-                                 ('SB.FOO.XUUQ', 'Name'),
-                                 ('BUUF', 'Name'),
-                                 ('BUUX', 'Name')])}
+       'imports': OrderedDict([('SB', 'DeviceObj'),
+                               ('SB.PCI0.FIZ', 'DeviceObj'),
+                               ('SB.BAZ', 'DeviceObj')]),
+       'statements': OrderedDict([('SB.BAR', 'Device'),
+                                  ('SB.BAR.HID', 'Name'),
+                                  ('FUUB', 'Name'),
+                                  ('SB.FOO', 'Device'),
+                                  ('SB.FOO.HID', 'Name'),
+                                  ('SB.FOO.XUUQ', 'Name'),
+                                  ('BUUF', 'Name'),
+                                  ('BUUX', 'Name')])}
