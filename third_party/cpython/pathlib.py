@@ -106,6 +106,11 @@ class BasePath():
 
     return cls_instance
 
+  def __getsuperclass__(self: TBasePath) -> TBasePath:
+    """Extracts the base class of the superclass proxy or the returned class."""
+    return getattr(self.__getinstance__(),'__thisclass__',
+                   self.__getinstance__().__class__)
+
 class Path(BasePath, Path_flavour := type(pathlib.Path())):
   """Provides a `pathlib.Path` class that can be subclassed idiomatically."""
 

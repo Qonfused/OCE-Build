@@ -320,6 +320,15 @@ class PathResolver(BaseResolver, Path):
     # Re-initialize PathResolver instances
     return (PathResolver(p) for p in glob_iter)
 
+  def absolute(self: TPathResolver) -> Path:
+    """Returns the absolute path of the resolver."""
+    cls = self.__getsuperclass__()
+    absolute_path: Path = cls(self.path).absolute()
+    if not absolute_path.is_absolute():
+      raise ValueError(f"Path '{self.path}' cannot be an absolute path.")
+
+    return absolute_path
+
   def resolve(self: TPathResolver, strict: bool = False) -> Path:
     """Resolves a filepath based on the class parameters.
 
@@ -331,8 +340,7 @@ class PathResolver(BaseResolver, Path):
     Returns:
       The resolved filepath wrapped in a PathResolver instance.
     """
-
-    cls = self.__getinstance__().__class__
+    cls = self.__getsuperclass__()
     resolved_path = cls(self.path).resolve(strict=strict)
 
     if strict or resolved_path.exists():
