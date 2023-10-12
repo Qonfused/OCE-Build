@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Coverage for ocebuild/sources/github.py: 69%</title>
+    <title>Coverage for ocebuild/sources/github.py: 68%</title>
     <link rel="icon" sizes="32x32" href="favicon_32.png">
     <link rel="stylesheet" href="style.css" type="text/css">
     <script type="text/javascript" src="coverage_html.js" defer></script>
@@ -12,7 +12,7 @@
     <div class="content">
         <h1>
             <span class="text">Coverage for </span><b>ocebuild/sources/github.py</b>:
-            <span class="pc_cov">69%</span>
+            <span class="pc_cov">68%</span>
         </h1>
         <aside id="help_panel_wrapper">
             <input id="help_panel_state" type="checkbox">
@@ -55,8 +55,8 @@
         </aside>
         <h2>
             <span class="text">116 statements &nbsp;</span>
-            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">80<span class="text"> run</span></button>
-            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">36<span class="text"> missing</span></button>
+            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">79<span class="text"> run</span></button>
+            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">37<span class="text"> missing</span></button>
             <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">0<span class="text"> excluded</span></button>
         </h2>
         <p class="text">
@@ -64,8 +64,8 @@
             <a id="indexLink" class="nav" href="index.html">&Hat; index</a> &nbsp; &nbsp;
             <a id="nextFileLink" class="nav" href="d_c69d1f17b951105a_resolver_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
-            <a class="nav" href="https://coverage.readthedocs.io/en/7.2.7">coverage.py v7.2.7</a>,
-            created at 2023-08-09 04:20 +0000
+            <a class="nav" href="https://coverage.readthedocs.io/en/7.3.2">coverage.py v7.3.2</a>,
+            created at 2023-10-12 17:57 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"/>
@@ -385,7 +385,7 @@
     <p class="run"><span class="n"><a id="t303" href="#t303">303</a></span><span class="t">      <span class="key">if</span> <span class="op">(</span><span class="nam">suite_id</span> <span class="op">:=</span> <span class="nam">github_suite_id</span><span class="op">(</span><span class="nam">repository</span><span class="op">,</span> <span class="nam">head_sha</span><span class="op">,</span> <span class="nam">w_id</span><span class="op">)</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t304" href="#t304">304</a></span><span class="t">        <span class="nam">url</span> <span class="op">=</span> <span class="str">f'https://github.com/{repository}/suites/{suite_id}/artifacts/{r_id}'</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t305" href="#t305">305</a></span><span class="t">        <span class="key">if</span> <span class="nam">get_commit</span><span class="op">:</span> <span class="key">return</span> <span class="nam">url</span><span class="op">,</span> <span class="nam">head_sha</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t306" href="#t306">306</a></span><span class="t">        <span class="key">return</span> <span class="nam">url</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t306" href="#t306">306</a></span><span class="t">        <span class="key">return</span> <span class="nam">url</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t307" href="#t307">307</a></span><span class="t">  <span class="key">except</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t308" href="#t308">308</a></span><span class="t">    <span class="key">if</span> <span class="key">not</span> <span class="nam">github_rate_limit</span><span class="op">(</span><span class="nam">raise_error</span><span class="op">=</span><span class="key">True</span><span class="op">)</span><span class="op">:</span> <span class="key">raise</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t309" href="#t309">309</a></span><span class="t">  <span class="key">return</span> <span class="key">None</span>&nbsp;</span><span class="r"></span></p>
@@ -412,8 +412,8 @@
             <a id="indexLink" class="nav" href="index.html">&Hat; index</a> &nbsp; &nbsp;
             <a id="nextFileLink" class="nav" href="d_c69d1f17b951105a_resolver_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
-            <a class="nav" href="https://coverage.readthedocs.io/en/7.2.7">coverage.py v7.2.7</a>,
-            created at 2023-08-09 04:20 +0000
+            <a class="nav" href="https://coverage.readthedocs.io/en/7.3.2">coverage.py v7.3.2</a>,
+            created at 2023-10-12 17:57 +0000
         </p>
     </div>
 </footer>
