@@ -1,8 +1,8 @@
-<h1 id=schema>OpenCore Config.plist Schema - v0.9.4</h1>
+<h1 id=schema>OpenCore Config.plist Schema - v0.9.5</h1>
 
-**Last Updated**: `2023-08-07 22:00:40.802538+00:00`
+**Last Updated**: `2023-10-12 15:57:36.055580+00:00`
 
-**Revision**: `{ SHA1: d74d43bb0279e494a75546fad8834d75172eb01e }`
+**Revision**: `{ SHA1: dac51abbab2ce67945092727d32b5a4b2b58b1e7 }`
 
 <h2 id=table-of-contents>Table of Contents</h2>
 
@@ -426,6 +426,7 @@
   - [UEFI -> Quirks -> RequestBootVarRouting](#uefi-quirks-requestbootvarrouting)
   - [UEFI -> Quirks -> ResizeGpuBars](#uefi-quirks-resizegpubars)
   - [UEFI -> Quirks -> ResizeUsePciRbIo](#uefi-quirks-resizeusepcirbio)
+  - [UEFI -> Quirks -> ShimRetainProtocol](#uefi-quirks-shimretainprotocol)
   - [UEFI -> Quirks -> TscSyncTimeout](#uefi-quirks-tscsynctimeout)
   - [UEFI -> Quirks -> UnblockFsConnect](#uefi-quirks-unblockfsconnect)
 - [UEFI -> ReservedMemory](#uefi-reservedmemory)
@@ -1146,7 +1147,7 @@ Reports security violation during attempts to write to `db`, `dbx`, `PK`, and `K
 
 Some modern firmware, including on virtual machines such as VMware, may update pointers to UEFI services during driver loading and related actions. Consequently, this directly obstructs other quirks that affect memory management, such as `DevirtualiseMmio`, `ProtectMemoryRegions`, or `RebuildAppleMemoryMap`, and may also obstruct other quirks depending on the scope of such.
 
-GRUB shim makes similar on-the-fly changes to various UEFI image services, which are also protected against by this quirk.
+GRUB Shim makes similar on-the-fly changes to various UEFI image services, which are also protected against by this quirk.
 
 *Note 1*: On VMware, the need for this quirk may be determined by the appearance of the `'Your Mac OS guest might run unreliably with more than one virtual core.'' message.
 
@@ -5726,6 +5727,18 @@ Consider a GPU with 2 BARs:
 **Description**: Use PciRootBridgeIo for `ResizeGpuBars` and `ResizeAppleGpuBars`
 
 The quirk makes `ResizeGpuBars` and `ResizeAppleGpuBars` use `PciRootBridgeIo` instead of PciIo. This is needed on systems with a buggy `PciIo` implementation where trying to configure Resizable BAR results in `Capability I/O Error`. Typically this is required on older systems which have been modified with [ReBarUEFI](https://github.com/xCuri0/ReBarUEFI).
+
+<h3 id=uefi-quirks-shimretainprotocol>UEFI -> Quirks -> ShimRetainProtocol</h3>
+
+**Type**: `plist boolean`
+
+**Default**: `false`
+
+**Failsafe**: `false`
+
+**Description**: Request Linux Shim to keep protocol installed for subsequent image loads.
+
+This option is only required if chaining OpenCore from Shim. It must be set in order to allow OpenCore to launch items which are verified by certificates present in Shim, but not in the system Secure Boot database.
 
 <h3 id=uefi-quirks-tscsynctimeout>UEFI -> Quirks -> TscSyncTimeout</h3>
 

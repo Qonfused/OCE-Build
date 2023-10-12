@@ -5,7 +5,7 @@
 	<key>#Revision</key>
 	<dict>
 		<key>OpenCore-Version</key>
-		<string>0.9.4</string>
+		<string>0.9.5</string>
 	</dict>
 	<key>ACPI</key>
 	<dict>
@@ -926,6 +926,8 @@
 			<key>RequestBootVarRouting</key>
 			<false/>
 			<key>ResizeUsePciRbIo</key>
+			<false/>
+			<key>ShimRetainProtocol</key>
 			<false/>
 			<key>ResizeGpuBars</key>
 			<integer>-1</integer>

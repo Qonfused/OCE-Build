@@ -1,5 +1,5 @@
 '#Revision':
-  OpenCore-Version:                 String  | "0.9.4"
+  OpenCore-Version:                 String  | "0.9.5"
 ACPI:
   Add:
     - Comment:                      String  | ""
@@ -425,6 +425,7 @@ UEFI:
     ReloadOptionRoms:               Boolean | false
     RequestBootVarRouting:          Boolean | false
     ResizeUsePciRbIo:               Boolean | false
+    ShimRetainProtocol:             Boolean | false
     ResizeGpuBars:                  Number  | -1
     TscSyncTimeout:                 Number  | 0
     UnblockFsConnect:               Boolean | false
