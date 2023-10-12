@@ -15,6 +15,8 @@ from ocebuild.parsers.regex import re_match, re_search
 from ocebuild.parsers.yaml import parse_yaml, write_yaml
 from ocebuild.sources.resolver import *
 
+from third_party.cpython.pathlib import Path
+
 
 LOCKFILE_METADATA = {
   # The version key denotes the revision of the resolved dependencies.
@@ -200,7 +202,7 @@ def parse_specifier(name: str,
     specifier = specifier \
       .replace('file://', '') \
       .replace('file:', '')
-  if (filepath := PathResolver(base_path, specifier)).exists():
+  if (filepath := Path(base_path, specifier)).exists():
     parameters['path'] = filepath
     return PathResolver(**parameters, **resolver_props)
 
