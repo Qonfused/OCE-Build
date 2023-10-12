@@ -33,11 +33,13 @@ jobs:
             experimental: false
           - python-version: "3.11"
             experimental: false
+          - python-version: "3.12"
+            experimental: false
           # Experimental versions
           # @see https://raw.githubusercontent.com/actions/python-versions/main/versions-manifest.json
-          - python-version: "3.12-dev"
-            python-min-version: "3.12.0rc1"
-            experimental: true
+          # - python-version: "3.13-dev"
+          #   python-min-version: "3.13.0rc1"
+          #   experimental: true
         # os: [ubuntu-latest, windows-latest, macos-latest]
     name: "Test (python ${{ matrix.python-version }})"
     steps:
@@ -65,6 +67,10 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: poetry
           cache-dependency-path: poetry.lock
+      - name: Install python dev dependencies
+        run: |
+          pip3 install packaging \
+            --ignore-installed
       # Verify installed python version in poetry virtualenv
       - name: Validate experimental python versions
         id: validate-experimental
