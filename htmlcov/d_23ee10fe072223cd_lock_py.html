@@ -65,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="d_23ee10fe072223cd_opencore_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.3.2">coverage.py v7.3.2</a>,
-            created at 2023-10-12 18:13 +0000
+            created at 2023-10-24 21:19 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"/>
@@ -495,9 +495,9 @@
     <p class="pln"><span class="n"><a id="t413" href="#t413">413</a></span><span class="t">        <span class="com"># Format the resolution</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t414" href="#t414">414</a></span><span class="t">        <span class="nam">resolver_props</span><span class="op">[</span><span class="str">'resolution'</span><span class="op">]</span> <span class="op">=</span> <span class="nam">_format_resolver</span><span class="op">(</span><span class="nam">resolver</span><span class="op">,</span> <span class="nam">base_path</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t415" href="#t415">415</a></span><span class="t">      <span class="key">except</span> <span class="nam">ValueError</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t416" href="#t416">416</a></span><span class="t">        <span class="key">continue</span> <span class="com">#TODO: Add warning</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t416" href="#t416">416</a></span><span class="t">        <span class="key">raise</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t417" href="#t417">417</a></span><span class="t">      <span class="key">except</span> <span class="nam">FileNotFoundError</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t418" href="#t418">418</a></span><span class="t">        <span class="key">continue</span> <span class="com">#TODO: Add warning</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t418" href="#t418">418</a></span><span class="t">        <span class="key">raise</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t419" href="#t419">419</a></span><span class="t">      <span class="key">else</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t420" href="#t420">420</a></span><span class="t">        <span class="com"># Check if the resolution is already in the lockfile</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t421" href="#t421">421</a></span><span class="t">        <span class="key">if</span> <span class="nam">force</span> <span class="key">and</span> <span class="nam">lockfile_entry</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
@@ -578,7 +578,7 @@
             <a id="nextFileLink" class="nav" href="d_23ee10fe072223cd_opencore_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.3.2">coverage.py v7.3.2</a>,
-            created at 2023-10-12 18:13 +0000
+            created at 2023-10-24 21:19 +0000
         </p>
     </div>
 </footer>
