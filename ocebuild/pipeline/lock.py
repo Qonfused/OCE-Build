@@ -413,9 +413,9 @@ def resolve_specifiers(build_config: dict,
         # Format the resolution
         resolver_props['resolution'] = _format_resolver(resolver, base_path)
       except ValueError:
-        continue #TODO: Add warning
+        raise
       except FileNotFoundError:
-        continue #TODO: Add warning
+        raise
       else:
         # Check if the resolution is already in the lockfile
         if force and lockfile_entry:
