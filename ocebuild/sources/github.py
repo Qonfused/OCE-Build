@@ -144,17 +144,24 @@ def github_release_catalog(url: str) -> dict:
   Returns:
     Release catalog.
   """
-  try:
-    base_url, tag = url.replace('https://github.com', '/repos').split('/tag/')
-    release_catalog = github_api_request(base_url + '?per_page=100').json()
-    release_entry = next(e for e in release_catalog if e['tag_name'] == tag)
-    if not release_entry:
-      raise ValueError(f'No release catalog entry found for {tag}.')
-    return release_entry
-  except StopIteration:
-    raise ValueError(f'No release catalog entry found in {url} for {tag}.')
-  except:
-    if not github_rate_limit(raise_error=True): raise
+  page = 1
+  page_retries = 5
+  while (page_retries > 0):
+    try:
+      base_url, tag = url.replace('https://github.com', '/repos').split('/tag/')
+      release_catalog = github_api_request(base_url + f'?per_page=100&page={page}').json()
+      release_entry = next(e for e in release_catalog if e['tag_name'] == tag)
+      if not release_entry:
+        raise ValueError(f'No release catalog entry found for {tag}.')
+      return release_entry
+    except StopIteration:
+      page += 1
+      if not page_retries:
+        raise ValueError(f'No release catalog entry found in {url} for {tag}.')
+      else:
+        page_retries -= 1
+    except:
+      if not github_rate_limit(raise_error=True): raise
 
 ################################################################################
 #                        URL formatting/retrieval functions                    #
