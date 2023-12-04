@@ -1,0 +1,132 @@
+name: Nightly Build
+on:
+  push:
+  schedule:
+    - cron: '0 0 * * 1-5'
+  workflow_dispatch:
+env:
+  python-version: 3.12
+  poetry-version: 1.5.0
+jobs:
+  check-commit:
+    runs-on: ubuntu-latest
+    outputs:
+      alive: ${{ steps.check.outputs.alive }}
+    steps:
+      - name: Get new commits
+        id: check
+        run: |
+          if [[ $(git log --oneline --since '24 hours ago' | wc -l) -gt 1 ]]; then
+            echo "alive=true" >> $GITHUB_ENV
+          else
+            echo "alive=false" >> $GITHUB_ENV
+          fi
+  build:
+    runs-on: ${{ matrix.os }}
+    needs: [check-commit]
+    if: ${{ needs.check-commit.outputs.alive == 'true' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: "Windows 64bit"
+            os: windows-latest
+            arch: x64
+          - name: "Linux 64bit"
+            os: ubuntu-latest
+            arch: x64
+          - name: "macOS 64bit"
+            os: macos-latest
+            arch: x64
+    steps:
+      # Fetches remote repository without --progress option.
+      #
+      # The default behavior of @actions/checkout outputs many noisy lines of
+      # status output in the workflow log, which is problematic for log size.
+      - name: Checkout latest repository commit
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+
+      # Setup python virtual environment
+      - name: Install poetry
+        run: pipx install poetry==${{ env.poetry-version }}
+      - name: Print Poetry version
+        run: poetry --version
+      - name: Setup Python ${{ env.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.python-version }}
+          cache: poetry
+          cache-dependency-path: poetry.lock
+      - name: Install python dev dependencies
+        run: pip3 install packaging --ignore-installed
+
+      # Setup Poetry virtual environment
+      - name: Use matrix python version in Poetry virtualenv
+        run: poetry env use $(python3 -c "import sys; print(sys.executable)")
+      - name: Setup Poetry plugins and project dependencies
+        run: poetry install -n
+      # Build pyinstaller binary
+      - name: Build pyinstaller binary
+        run: poetry pyinstaller
+
+      # Upload artifacts
+      - name: Rename Binaries
+        shell: bash
+        run: |
+          if [[ "$OSTYPE" == "msys" ]]; then
+            : #mv ocebuild.exe ocebuild.exe
+          elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+            mv ocebuild     ocebuild.linux
+          elif [[ "$OSTYPE" == "darwin"* ]]; then
+            : #mv ocebuild     ocebuild
+          fi
+        working-directory: dist
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ocebuild-py${{ env.python-version }}
+          path: dist/*
+          if-no-files-found: error
+          retention-days: 7
+  release:
+    runs-on: ubuntu-latest
+    needs: [check-commit, build]
+    if: ${{ needs.check-commit.outputs.alive == 'true' }}
+    permissions:
+      contents: write
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: ocebuild-py${{ env.python-version }}
+          path: dist
+      - name: Display structure of downloaded files
+        run: ls -R
+        working-directory: dist
+      - name: Set executable permissions
+        run: chmod +x dist/*
+
+      - name: Get metadata for the latest commit hash and branch name
+        shell: bash
+        run: |
+          echo "sha_short=$(git rev-parse --short "$GITHUB_SHA")" >> "$GITHUB_ENV"
+          echo "branch=$(echo ${GITHUB_REF#refs/heads/})" >> "$GITHUB_ENV"
+
+      - name: Upload to Release
+        uses: meeDamian/github-release@2.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: nightly
+          name: Nightly Build
+          body: |
+            This release contains a nightly build of ocebuild for Windows, Linux and macOS.
+
+            This build is automatically generated from the [latest commit](https://github.com/Qonfused/OCE-Build/commit/${{ env.sha_short }}) on the ${{ env.branch }} branch and is not guaranteed to be stable.
+
+            For information about changes present in this pre-release version, refer to the [CHANGELOG](https://github.com/Qonfused/OCE-Build/blob/main/CHANGELOG.md).
+          files: dist/ocebuild*
+          gzip: folders
+          prerelease: true
+          allow_override: true
