@@ -5,7 +5,7 @@
 	<key>#Revision</key>
 	<dict>
 		<key>OpenCore-Version</key>
-		<string>0.9.5</string>
+		<string>0.9.6</string>
 	</dict>
 	<key>ACPI</key>
 	<dict>
@@ -143,6 +143,8 @@
 			<key>EnableSafeModeSlide</key>
 			<false/>
 			<key>EnableWriteUnprotector</key>
+			<false/>
+			<key>FixupAppleEfiImages</key>
 			<false/>
 			<key>ForceBooterSignature</key>
 			<false/>

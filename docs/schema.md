@@ -1,8 +1,8 @@
-<h1 id=schema>OpenCore Config.plist Schema - v0.9.5</h1>
+<h1 id=schema>OpenCore Config.plist Schema - v0.9.6</h1>
 
-**Last Updated**: `2023-10-12 15:57:36.055580+00:00`
+**Last Updated**: `2023-12-04 18:11:13.408002+00:00`
 
-**Revision**: `{ SHA1: dac51abbab2ce67945092727d32b5a4b2b58b1e7 }`
+**Revision**: `{ SHA1: 1bc9e74ed116a7413c87aaaeba388606d94429e9 }`
 
 <h2 id=table-of-contents>Table of Contents</h2>
 
@@ -66,6 +66,7 @@
   - [Booter -> Quirks -> DiscardHibernateMap](#booter-quirks-discardhibernatemap)
   - [Booter -> Quirks -> EnableSafeModeSlide](#booter-quirks-enablesafemodeslide)
   - [Booter -> Quirks -> EnableWriteUnprotector](#booter-quirks-enablewriteunprotector)
+  - [Booter -> Quirks -> FixupAppleEfiImages](#booter-quirks-fixupappleefiimages)
   - [Booter -> Quirks -> ForceBooterSignature](#booter-quirks-forcebootersignature)
   - [Booter -> Quirks -> ForceExitBootServices](#booter-quirks-forceexitbootservices)
   - [Booter -> Quirks -> ProtectMemoryRegions](#booter-quirks-protectmemoryregions)
@@ -1074,6 +1075,26 @@ This option is relevant to users with issues booting to safe mode (e.g. by holdi
 This option bypasses `W^{`X} permissions in code pages of UEFI runtime services by removing write protection (`WP`) bit from `CR0` register during their execution. This quirk requires `OC_FIRMWARE_RUNTIME` protocol implemented in `OpenRuntime.efi`.
 
 *Note*: This quirk may potentially weaken firmware security. Please use `RebuildAppleMemoryMap` if the firmware supports memory attributes table (MAT). Refer to the `OCABC: MAT support is 1/0` log entry to determine whether MAT is supported.
+
+<h3 id=booter-quirks-fixupappleefiimages>Booter -> Quirks -> FixupAppleEfiImages</h3>
+
+**Type**: `plist boolean`
+
+**Default**: `false`
+
+**Failsafe**: `false`
+
+**Description**: Fix errors in early Mac OS X boot.efi images.
+
+Modern secure PE loaders will refuse to load `boot.efi` images from Mac OS X 10.4 and 10.5 due to these files containing `W^{`X} errors and illegal overlapping sections.
+
+This quirk detects these issues and pre-processes such images in memory, so that a modern loader can accept them.
+
+Pre-processing in memory is incompatible with secure boot, as the image loaded is not the image on disk, so you cannot sign files which are loaded in this way based on their original disk image contents. Certain firmware will offer to register the hash of new, unknown images - this would still work. On the other hand, it is not particularly realistic to want to start such early, insecure images with secure boot anyway.
+
+*Note 1*: The quirk is only applied to Apple-specific 'fat' (both 32-bit and 64-bit versions in one image) `.efi` files, and is never applied during the Apple secure boot path for newer macOS.
+
+*Note 2*: The quirk is only needed for loading Mac OS X 10.4 and 10.5, and even then only if the firmware itself includes a modern, more secure PE COFF image loader. This includes current builds of OpenDuet.
 
 <h3 id=booter-quirks-forcebootersignature>Booter -> Quirks -> ForceBooterSignature</h3>
 
@@ -2287,7 +2308,7 @@ The algorithm used to determine the preferred kernel architecture is set out bel
 * Board identifier (from SMBIOS) based on EfiBoot version disables `x86_64` support on an unsupported model if any `i386` variant is supported. `Auto` is not consulted here as the list is not overridable in EfiBoot.
 * `KernelArch` restricts the support to the explicitly specified architecture (when not set to `Auto`) if the architecture remains present in the capabilities.
 * The best supported architecture is chosen in this order: `x86_64`, `i386`, `i386-user32`. 
-Unlike macOS~10.7 (where certain board identifiers are treated as the `i386` only machines), and macOS~10.5 or earlier (where `x86_64` is not supported by the macOS kernel), macOS~10.6 is very special. The architecture choice on macOS~10.6 depends on many factors including not only the board identifier, but also the macOS product type (client vs server), macOS point release, and amount of RAM. The detection of all these is complicated and impractical, as several point releases had implementation flaws resulting in a failure to properly execute the server detection in the first place. For this reason, OpenCore on macOS~10.6 falls back on the `x86_64` architecture whenever it is supported by the board, as it is on macOS~10.7.
+Unlike macOS~10.7 (where certain board identifiers are treated as `i386` only machines), and macOS~10.5 or earlier (where `x86_64` is not supported by the macOS kernel), macOS~10.6 is very special. The architecture choice on macOS~10.6 depends on many factors including not only the board identifier, but also the macOS product type (client vs server), macOS point release, and amount of RAM. The detection of all these is complicated and impractical, as several point releases had implementation flaws resulting in a failure to properly execute the server detection in the first place. For this reason when `Auto` is set, OpenCore on macOS~10.6 falls back to the `x86_64` architecture when it is supported by the board, as on macOS~10.7. The 32-bit `KernelArch` options can still be configured explicitly however.
 
 A 64-bit Mac model compatibility matrix corresponding to actual EfiBoot behaviour on macOS 10.6.8 and 10.7.5 is outlined below.
 
@@ -5178,7 +5199,9 @@ This option provides the GOP protocol via a UGA-based proxy for firmware that do
 
 **Description**: Selects the internal `ConsoleControl` mode in which `TextRenderer` will operate.
 
-Available values are `Auto`, `Text` and `Graphics`. `Text` and `Graphics` specify the named mode. `Auto` uses the current mode of the system `ConsoleControl` protocol when one exists, defaulting to `Text` mode otherwise.UEFI firmware typically supports `ConsoleControl` with two rendering modes: `Graphics` and `Text`. Some types of firmware do not provide a native `ConsoleControl` and rendering modes. OpenCore and macOS expect text to only be shown in `Text` mode but graphics to be drawn in any mode, and this is how the OpenCore `Builtin` renderer behaves. Since this is not required by the UEFI specification, behaviour of the system `ConsoleControl` protocol, when it exists, may vary.
+Available values are `Auto`, `Text` and `Graphics`. `Text` and `Graphics` specify the named mode. `Auto` uses the current mode of the system `ConsoleControl` protocol when one exists, defaulting to `Text` mode otherwise.
+
+UEFI firmware typically supports `ConsoleControl` with two rendering modes: `Graphics` and `Text`. Some types of firmware do not provide a native `ConsoleControl` and rendering modes. OpenCore and macOS expect text to only be shown in `Text` mode but graphics to be drawn in any mode, and this is how the OpenCore `Builtin` renderer behaves. Since this is not required by the UEFI specification, behaviour of the system `ConsoleControl` protocol, when it exists, may vary.
 
 <h3 id=uefi-output-provideconsolegop>UEFI -> Output -> ProvideConsoleGop</h3>
 
