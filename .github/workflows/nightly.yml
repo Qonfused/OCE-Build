@@ -55,6 +55,17 @@ jobs:
         run: poetry pyinstaller
 
       # Upload artifacts
+      - name: Rename Binaries
+        shell: bash
+        run: |
+          if [[ "$OSTYPE" == "msys" ]]; then
+            mv ocebuild.exe ocebuild.exe
+          elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+            mv ocebuild     ocebuild.linux
+          elif [[ "$OSTYPE" == "darwin"* ]]; then
+            mv ocebuild     ocebuild
+          fi
+        working-directory: dist
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
@@ -97,10 +108,7 @@ jobs:
             This build is automatically generated from the [latest commit](https://github.com/Qonfused/OCE-Build/commit/${{ env.sha_short }}) on the ${{ env.branch }} branch and is not guaranteed to be stable.
 
             For information about changes present in this pre-release version, refer to the [CHANGELOG](https://github.com/Qonfused/OCE-Build/blob/main/CHANGELOG.md).
-          files: |
-            dist/ocebuild
-            dist/ocebuild.exe
-            dist/ocebuild.linux
+          files: dist/ocebuild*
           gzip: folders
           prerelease: true
           allow_override: true
