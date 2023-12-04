@@ -113,15 +113,16 @@ jobs:
         run: |
           echo "sha_short=$(git rev-parse --short "$GITHUB_SHA")" >> "$GITHUB_ENV"
           echo "branch=$(echo ${GITHUB_REF#refs/heads/})" >> "$GITHUB_ENV"
+          echo "version=$(curl -s https://raw.githubusercontent.com/Qonfused/OCE-Build/main/ci/registry/project.json | jq -r '.version')" >> "$GITHUB_ENV"
 
       - name: Upload to Release
         uses: meeDamian/github-release@2.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           tag: nightly
-          name: Nightly Build
+          name: Nightly Build (v${{ env.version }})
           body: |
-            This release contains a nightly build of ocebuild for Windows, Linux and macOS.
+            This release contains a nightly build of ocebuild v${{ env.version }} for Windows, Linux and macOS.
 
             This build is automatically generated from the [latest commit](https://github.com/Qonfused/OCE-Build/commit/${{ env.sha_short }}) on the ${{ env.branch }} branch and is not guaranteed to be stable.
 
