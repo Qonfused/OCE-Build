@@ -47,7 +47,7 @@ jobs:
 
       # Setup Poetry virtual environment
       - name: Use matrix python version in Poetry virtualenv
-        run: poetry env use ${{ env.python-version }}
+        run: poetry env use $(python3 -c "import sys; print(sys.executable)")
       - name: Setup Poetry plugins and project dependencies
         run: poetry install -n
       # Build pyinstaller binary
