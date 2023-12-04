@@ -22,7 +22,7 @@ from third_party.cpython.pathlib import Path
 
 
 POSTINSTALL_CMDS = (
-  'poetry run pre-commit install',
+  # 'poetry run pre-commit install',
 )
 
 def get_poetry_plugins() -> Set[str]:
