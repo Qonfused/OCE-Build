@@ -59,11 +59,11 @@ jobs:
         shell: bash
         run: |
           if [[ "$OSTYPE" == "msys" ]]; then
-            mv ocebuild.exe ocebuild.exe
+            : #mv ocebuild.exe ocebuild.exe
           elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
             mv ocebuild     ocebuild.linux
           elif [[ "$OSTYPE" == "darwin"* ]]; then
-            mv ocebuild     ocebuild
+            : #mv ocebuild     ocebuild
           fi
         working-directory: dist
       - name: Upload artifacts
