@@ -1,13 +1,30 @@
 name: Nightly Build
 on:
   push:
-  # workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * 1-5'
+  workflow_dispatch:
 env:
   python-version: 3.12
   poetry-version: 1.5.0
 jobs:
+  check-commit:
+    runs-on: ubuntu-latest
+    outputs:
+      alive: ${{ steps.check.outputs.alive }}
+    steps:
+      - name: Get new commits
+        id: check
+        run: |
+          if [[ $(git log --oneline --since '24 hours ago' | wc -l) -gt 1 ]]; then
+            echo "alive=true" >> $GITHUB_ENV
+          else
+            echo "alive=false" >> $GITHUB_ENV
+          fi
   build:
     runs-on: ${{ matrix.os }}
+    needs: [check-commit]
+    if: ${{ needs.check-commit.outputs.alive == 'true' }}
     strategy:
       fail-fast: false
       matrix:
@@ -75,7 +92,8 @@ jobs:
           retention-days: 7
   release:
     runs-on: ubuntu-latest
-    needs: build
+    needs: [check-commit, build]
+    if: ${{ needs.check-commit.outputs.alive == 'true' }}
     permissions:
       contents: write
     steps:
