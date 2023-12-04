@@ -1,8 +1,10 @@
 name: Nightly Build
 on:
-  workflow_dispatch:
+  push:
+  # workflow_dispatch:
 env:
   python-version: 3.12
+  poetry-version: 1.5.0
 jobs:
   build:
     runs-on: ${{ matrix.os }}
@@ -31,31 +33,26 @@ jobs:
 
       # Setup python virtual environment
       - name: Install poetry
-        shell: bash
-        run: |
-          ci/scripts/lib/install-poetry.sh
-          echo "PATH=${HOME}/.poetry/bin:${PATH}" >> $GITHUB_ENV
-          poetry --version
+        run: pipx install poetry==${{ env.poetry-version }}
+      - name: Print Poetry version
+        run: poetry --version
       - name: Setup Python ${{ env.python-version }}
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ env.python-version }}
           cache: poetry
           cache-dependency-path: poetry.lock
       - name: Install python dev dependencies
-        run: |
-          pip3 install packaging \
-            --ignore-installed
+        run: pip3 install packaging --ignore-installed
 
       # Setup Poetry virtual environment
       - name: Use matrix python version in Poetry virtualenv
-        run: |
-          poetry env use ${{ env.python-version }}
+        run: poetry env use ${{ env.python-version }}
       - name: Setup Poetry plugins and project dependencies
         run: poetry install -n
       # Build pyinstaller binary
       - name: Build pyinstaller binary
-        run: poetry run poe pyinstaller
+        run: poetry pyinstaller
 
       # Upload artifacts
       - name: Upload artifacts
