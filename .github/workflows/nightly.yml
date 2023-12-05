@@ -10,7 +10,7 @@ jobs:
   check-commit:
     runs-on: ubuntu-latest
     outputs:
-      alive: ${{ steps.check.outputs.alive }}
+      alive: ${{ steps.check.outputs.alive || github.event_name == 'workflow_dispatch' }}
     steps:
       - name: Get new commits
         id: check
