@@ -13,6 +13,8 @@ on:
       - 'poetry.lock'
       - 'pyproject.toml'
   workflow_dispatch:
+env:
+  poetry-version: 1.5.0
 jobs:
   # Runs test suite
   tests:
@@ -53,9 +55,7 @@ jobs:
           show-progress: false
       # Setup python virtual environment
       - name: Install poetry
-        run: |
-          bash ci/scripts/lib/install-poetry.sh
-          echo "PATH=${HOME}/.poetry/bin:${PATH}" >> $GITHUB_ENV
+        run: pipx install poetry==${{ env.poetry-version }}
       - name: Setup Python ${{ matrix.python-version }}
         uses: actions/setup-python@v3
         with:

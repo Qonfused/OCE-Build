@@ -50,8 +50,6 @@ jobs:
       # Setup python virtual environment
       - name: Install poetry
         run: pipx install poetry==${{ env.poetry-version }}
-      - name: Print Poetry version
-        run: poetry --version
       - name: Setup Python ${{ env.python-version }}
         uses: actions/setup-python@v4
         with:
