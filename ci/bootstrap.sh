@@ -13,10 +13,14 @@ OCEBUILD_VERSION="nightly"
 #region Shell Macros
 
 os() {
-  if   [[ "$OSTYPE" == "msys" || $(grep -i Microsoft /proc/version) ]]; then
+  if   [[ "$OSTYPE" == "msys" ]]; then
     echo "windows"
   elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    echo "linux"
+    if [[ $(grep -i Microsoft /proc/version 2>/dev/null) ]]; then
+      echo "windows" # running in WSL
+    else
+      echo "linux"
+    fi
   elif [[ "$OSTYPE" == "darwin"* ]]; then
     echo "macos"
   fi
@@ -38,7 +42,7 @@ cmd() {
 
 # Arrange for the binary to be deleted when the script terminates
 BINARY_PATH="./$(ext ocebuild)"
-trap 'rm -f "$BINARY_PATH"' 0
+trap 'rm -f "$BINARY_PATH" 2>/dev/null' 0
 trap 'exit $?' 1 2 3 15
 
 # Download the binary release for the current platform
@@ -46,5 +50,5 @@ BINARY_URL="$OCEBUILD_URL/releases/download/$OCEBUILD_VERSION/$(ext ocebuild)"
 $(cmd curl) -sSL -k $BINARY_URL > "$BINARY_PATH"
 
 # Executes OCE Build with provided arguments
-if [[ $(os) != "windows" ]]; then chmod +x "$BINARY_PATH" fi
+if [[ $(os) != "windows" ]]; then chmod +x "$BINARY_PATH"; fi
 $BINARY_PATH "$@"
