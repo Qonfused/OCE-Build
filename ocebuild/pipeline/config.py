@@ -75,7 +75,7 @@ def read_config(filepath: str,
 
 def apply_preprocessor_tags(a: dict,
                             b: dict,
-                            tags: List[Tuple[str, List[str], Union[str, None]]]
+                            tags: List[Tuple[str, List[str], Optional[str]]]
                             ) -> None:
   """Applies preprocessor tags from dict `b` on dict `a`.
 
@@ -129,11 +129,10 @@ def apply_preprocessor_tags(a: dict,
               # Override object in parent array with new object
               nested_set(a, tree[:-1] + [idx], merge_dict(entry, parent_dict))
               break
-          # Cleanup parent entry
-          nested_del(b, tree)
-          continue
       # Handle overrides for dictionaries
-      else: nested_set(a, tree, v_b)
+      else:
+        nested_set(a, tree, v_b)
+        continue
     elif tag == '@prepend':
       if options is None: nested_set(a, tree, v_b + v_a)
       else:
@@ -314,6 +313,7 @@ def tools_entries(tools_dir: Union[str, Path]) -> List[dict]:
   entries = []
   for tool in tools:
     entry = {
+      'Auxiliary': True,
       'Enabled': True,
       'Name': tool.stem,
       'Path': tool.as_posix().replace(Path(tools_dir).as_posix() + '/', '')
