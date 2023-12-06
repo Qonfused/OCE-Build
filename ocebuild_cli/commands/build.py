@@ -81,6 +81,7 @@ def unpack_packages(resolvers: List[dict], project_dir: Path) -> dict:
   return unpacked_entries
 
 def extract_packages(build_vars: dict,
+                     build_config: dict,
                      lockfile: dict,
                      resolvers: List[dict],
                      packages: dict,
@@ -116,7 +117,8 @@ def extract_packages(build_vars: dict,
   if packages:
     with Progress() as progress:
       bar = progress_bar('Extracting packages', wrap=progress)
-      extracted = extract_build_packages(build_vars, resolvers, packages,
+      extracted = extract_build_packages(build_vars, build_config,
+                                         resolvers, packages,
                                          build_dir=build_dir,
                                          # Interactive arguments
                                          __wrapper=bar)
@@ -257,7 +259,8 @@ def cli(env, cwd, out, clean, update, force):
 
   # Extract all build entries to a temporary directory
   packages = unpack_packages(resolvers, project_dir=PROJECT_DIR)
-  opencore_pkg, extracted = extract_packages(build_vars, lockfile, resolvers,
+  opencore_pkg, extracted = extract_packages(build_vars, build_config,
+                                             lockfile, resolvers,
                                              packages=packages,
                                              build_dir=BUILD_DIR)
   # Move build entries to the build directory

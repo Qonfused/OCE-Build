@@ -58,6 +58,7 @@ def _iterate_extract_packages(unpacked_entries: dict):
   return list(chain(*[group_entries(c,e) for c,e in unpacked_entries.items()]))
 
 def extract_build_packages(build_vars: dict,
+                           build_config: dict,
                            resolvers: List[dict],
                            packages: dict,
                            build_dir: Path,
@@ -69,6 +70,7 @@ def extract_build_packages(build_vars: dict,
 
   Args:
     build_vars: The configured build variables.
+    build_config: The configured build specification.
     resolvers: The list of resolver entries to update.
     packages: The list of packages to extract.
     build_dir: The path to the build directory.
@@ -102,19 +104,21 @@ def extract_build_packages(build_vars: dict,
       extract = ssdts.extract_ssdts(tmpdir)
     # Extract kexts from the archive
     elif category == 'Kexts':
+      entry_cfg = nested_get(build_config, ['Kexts', resolver_entry['name']], {})
       entry_build = resolver_entry.get('build') or default_build
       extract = kexts.extract_kexts(tmpdir, build=entry_build)
       # Filter out plugins that are not bundled
       for k_name, kext in extract.copy().items():
         # Exclude plugins that are already bundled
-        is_plugin = '.kext/' in kext['__path']
-        if is_plugin:
+        if is_plugin := '.kext/' in kext['__path']:
           nested_del(extract, [k_name])
+          # Prune implicitly excluded plugins
+          if k_name not in entry_cfg.get('bundled', []):
+            # Prune plugins that don't match a wildcard specifier
+            plugin_entry = build_config['Kexts'].get(k_name, {})
+            if plugin_entry.get('specifier') != "*":
+              remove(kext['__extracted'])
         else: continue
-        # Prune implicitly excluded plugins
-        if (bundled := kext.get('bundled')):
-          if k_name not in bundled:
-            remove(kext['__extracted'])
     # Extract drivers or tools from the archive
     elif category in ('Drivers', 'Tools'):
       extract = {}
