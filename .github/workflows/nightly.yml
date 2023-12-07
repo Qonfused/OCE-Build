@@ -12,6 +12,14 @@ jobs:
     outputs:
       alive: ${{ steps.check.outputs.alive || github.event_name == 'workflow_dispatch' }}
     steps:
+      # Fetches remote repository without --progress option.
+      #
+      # The default behavior of @actions/checkout outputs many noisy lines of
+      # status output in the workflow log, which is problematic for log size.
+      - name: Checkout latest repository commit
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
       - name: Get new commits
         id: check
         run: |
