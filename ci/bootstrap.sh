@@ -15,7 +15,7 @@ OCEBUILD_VERSION="nightly"
 os() {
   if   [[ "$OSTYPE" == "msys" ]]; then
     echo "windows"
-  elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+  elif [[ "$OSTYPE" == "linux"* ]]; then
     if [[ $(grep -i Microsoft /proc/version 2>/dev/null) ]]; then
       echo "windows" # running in WSL
     else
