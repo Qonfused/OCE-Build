@@ -76,10 +76,7 @@ def nested_get(dic: dict,
   except KeyError:
     return default
 
-def nested_set(dic: dict,
-               keys: List[str],
-               value: any
-               ) -> None:
+def nested_set(dic, keys, value):
   """Sets a nested value in a dictionary.
 
   Args:
@@ -87,11 +84,16 @@ def nested_set(dic: dict,
     keys: The keys to traverse the dictionary.
     value: The value to set.
   """
+  d = dic
   for key in keys[:-1]:
-    if isinstance(dic, dict):
-      dic = dic.setdefault(key, {})
-    else: return
-  dic[keys[-1]] = value
+    if key in d or isinstance(d, list):
+      d = d[key]
+    elif isinstance(d, dict):
+      d = d.setdefault(key, {})
+
+  d[keys[-1]] = value
+
+  return dic
 
 def nested_del(dic: dict,
                keys: List[str]
