@@ -211,6 +211,22 @@ def get_configuration_schema(repository: str='acidanthera/OpenCorePkg',
 def apply_schema_defaults(config: dict, schema: dict, sample: dict=None) -> dict:
   """Applies a configuration schema to a configuration file."""
 
+  # Apply overrides to the schema to match user expectations for entry defaults.
+  overrides: Dict[Tuple[str], bool] = {
+    # Enable all user-defined entries by default (otherwise they are ignored).
+    ('ACPI',   'Delete',         0, 'Enabled'): True,
+    ('ACPI',   'Patch',          0, 'Enabled'): True,
+    ('Booter', 'MmioWhitelist',  0, 'Enabled'): True,
+    ('Booter', 'Patch',          0, 'Enabled'): True,
+    ('Kernel', 'Block',          0, 'Enabled'): True,
+    ('Kernel', 'Force',          0, 'Enabled'): True,
+    ('Kernel', 'Patch',          0, 'Enabled'): True,
+    ('Misc',   'Entries',        0, 'Enabled'): True
+  }
+  for tree, value in overrides.items():
+    nested_set(schema, tree, value)
+
+  # Apply schema defaults to the configuration file
   for flat_tree, value in flatten_dict(schema).items():
     tree = parse_tree(flat_tree)
     ptree = tree[:-1]
