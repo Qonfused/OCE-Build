@@ -1,8 +1,8 @@
-<h1 id=schema>OpenCore Config.plist Schema - v0.9.6</h1>
+<h1 id=schema>OpenCore Config.plist Schema - v0.9.7</h1>
 
-**Last Updated**: `2023-12-04 18:11:13.408002+00:00`
+**Last Updated**: `2023-12-12 07:11:58.868454+00:00`
 
-**Revision**: `{ SHA1: 1bc9e74ed116a7413c87aaaeba388606d94429e9 }`
+**Revision**: `{ SHA1: 6a961f1652ef485f4f295e38e17b3c353dbdbf15 }`
 
 <h2 id=table-of-contents>Table of Contents</h2>
 
@@ -1086,15 +1086,20 @@ This option bypasses `W^{`X} permissions in code pages of UEFI runtime services 
 
 **Description**: Fix errors in early Mac OS X boot.efi images.
 
-Modern secure PE loaders will refuse to load `boot.efi` images from Mac OS X 10.4 and 10.5 due to these files containing `W^{`X} errors and illegal overlapping sections.
+Modern secure PE loaders will refuse to load `boot.efi` images from macOS 10.4 to 10.12 due to these files containing `W^{`X} errors (in all versions) and illegal overlapping sections (in 10.4 and 10.5 32-bit versions only).
 
-This quirk detects these issues and pre-processes such images in memory, so that a modern loader can accept them.
+This quirk detects these issues and pre-processes such images in memory, so that a modern loader will accept them.
 
-Pre-processing in memory is incompatible with secure boot, as the image loaded is not the image on disk, so you cannot sign files which are loaded in this way based on their original disk image contents. Certain firmware will offer to register the hash of new, unknown images - this would still work. On the other hand, it is not particularly realistic to want to start such early, insecure images with secure boot anyway.
+Pre-processing in memory is incompatible with secure boot, as the image loaded is not the image on disk, so you cannot sign files which are loaded in this way based on their original disk image contents. Certain firmware will offer to register the hash of new, unknown images - this would still work. On the other hand, it is not particularly realistic to want to start these early, insecure images with secure boot anyway.
 
-*Note 1*: The quirk is only applied to Apple-specific 'fat' (both 32-bit and 64-bit versions in one image) `.efi` files, and is never applied during the Apple secure boot path for newer macOS.
+*Note 1*: The quirk is never applied during the Apple secure boot path for newer macOS. The Apple secure boot path includes its own separate mitigations for `boot.efi` `W^{`X} issues.
 
-*Note 2*: The quirk is only needed for loading Mac OS X 10.4 and 10.5, and even then only if the firmware itself includes a modern, more secure PE COFF image loader. This includes current builds of OpenDuet.
+*Note 2*: When enabled, and when not processing for Apple secure boot, this quirk is applied to:
+* All images from Apple Fat binaries (32-bit and 64-bit versions in one image).
+* All Apple-signed images.
+* All images at `\System\Library\CoreServices\boot.efi` within their filesystem. 
+
+*Note 3*: This quirk is needed for macOS 10.4 to 10.12 (and higher, if Apple secure boot is not enabled), but only when the firmware itself includes a modern, more secure PE COFF image loader. This applies to current builds of OpenDuet, and to OVMF if built from audk source code.
 
 <h3 id=booter-quirks-forcebootersignature>Booter -> Quirks -> ForceBooterSignature</h3>
 
