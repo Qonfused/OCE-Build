@@ -23,7 +23,7 @@ jobs:
       - name: Get new commits
         id: check
         run: |
-          if [[ $(git log --oneline --since '24 hours ago' | wc -l) -gt 1 ]]; then
+          if [[ $(git log --oneline --since '24 hours ago' | wc -l) -gt 0 ]]; then
             echo "alive=true" >> $GITHUB_ENV
           else
             echo "alive=false" >> $GITHUB_ENV
