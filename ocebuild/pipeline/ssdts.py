@@ -7,7 +7,7 @@
 from collections import OrderedDict
 from contextlib import contextmanager
 from functools import partial
-from graphlib import TopologicalSorter
+from graphlib import CycleError, TopologicalSorter
 from os import makedirs, SEEK_END
 from shutil import copyfile, rmtree, which
 from tempfile import mkdtemp, NamedTemporaryFile
@@ -154,10 +154,30 @@ def sort_ssdt_symbols(filepaths: List[Union[str, Path]]) -> OrderedDict:
       else:
         dependency_tree[symbol].append(ssdt)
 
+  # Handle any circular dependencies found in the sorter
+  sorter = TopologicalSorter(dependency_tree)
+  while (cycle := sorter._find_cycle()):
+    # Verify whether this is a cycle in SSDT dependencies
+    cycle_ssdts = set(cycle).intersection(ssdt_names)
+    if len(cycle_ssdts) > 1:
+      raise CycleError(f'Cycle detected in SSDT dependencies: {cycle}',
+                       list(cycle_ssdts))
+    # Otherwise, handle individual symbol dependencies
+    if cycle[0] in cycle_ssdts:
+      # Symbol does not have a dependency on the SSDT
+      if cycle[1] in dependency_tree.get(cycle[0], []):
+        dependency_tree[cycle[0]].remove(cycle[1])
+      # SSDT does not have a dependency on the symbol
+      elif cycle[0] in dependency_tree.get(cycle[1], []):
+        dependency_tree[cycle[1]].remove(cycle[0])
+
+    # Update the sorter with the modified dependency tree
+    sorter = TopologicalSorter(dependency_tree)
+
   # Sort table load order
   sorted_dependencies = OrderedDict()
   table = 'DSDT'
-  for symbol in TopologicalSorter(dependency_tree).static_order():
+  for symbol in sorter.static_order():
     # Handle SSDT dependencies
     if symbol in ssdt_names:
       table = symbol
