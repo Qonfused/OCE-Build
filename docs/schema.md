@@ -1,8 +1,8 @@
-<h1 id=schema>OpenCore Config.plist Schema - v0.9.7</h1>
+<h1 id=schema>OpenCore Config.plist Schema - v0.9.8</h1>
 
-**Last Updated**: `2023-12-12 07:11:58.868454+00:00`
+**Last Updated**: `2024-02-07 23:57:50.764973+00:00`
 
-**Revision**: `{ SHA1: 6a961f1652ef485f4f295e38e17b3c353dbdbf15 }`
+**Revision**: `{ SHA1: 7a3f8cc4269a2f176969534c036b3951c07c3a26 }`
 
 <h2 id=table-of-contents>Table of Contents</h2>
 
@@ -2550,7 +2550,11 @@ Things to keep in mind:
 * For security reasons `Ext<Flavour>.icns` and `<Flavour>.icns` are both supported, and only `Ext<Flavour>.icns` will be used if the entry is on an external drive (followed by default fallback `ExtHardDrive.icns`).
 * Where both apply `.VolumeIcon.icns` takes precence over `.contentFlavour`.
 * In order to allow icons and audio assist to work correctly for tools (e.g. for UEFI Shell), system default boot entry icons (see `Docs/Flavours.md`) specified in the `Flavour` setting for `Tools` or `Entries` will continue to apply even when flavour is disabled. Non-system icons will be ignored in thiscase. In addition, the flavours `UEFIShell` and `NVRAMReset` are given special processing, identifying their respective tools to apply correct audio-assist, default builtin labels, etc.
-* A list of recommended flavours is provided in `Docs/Flavours.md`.
+* A list of recommended flavours is provided in `Docs/Flavours.md`. 
+* `0x0100` --- `OC_ATTR_USE_REVERSED_UI`, reverse position of Shutdown and Restart buttons, affects OpenCanopy and builtin picker. The reversed setting matches older macOS, and since it was the previous default in OpenCore it may better match some custom backgrounds. Only applicable when `OC_ATTR_USE_MINIMAL_UI` is not set.
+* `0x0200` --- `OC_ATTR_REDUCE_MOTION`, reduce password and menu animation in `OpenCanopy`, leaving only animations which communicate information not otherwise provided.
+
+*Note*: These same animations, plus additional animations whose information is provided by voice-over, are automatically disabled when `PickerAudioAssist` is enabled.
 
 <h3 id=misc-boot-pickeraudioassist>Misc -> Boot -> PickerAudioAssist</h3>
 

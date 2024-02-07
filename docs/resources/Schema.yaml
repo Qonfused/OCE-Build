@@ -1,5 +1,5 @@
 '#Revision':
-  OpenCore-Version:                 String  | "0.9.7"
+  OpenCore-Version:                 String  | "0.9.8"
 ACPI:
   Add:
     - Comment:                      String  | ""
