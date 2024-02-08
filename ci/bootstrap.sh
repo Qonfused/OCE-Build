@@ -45,9 +45,12 @@ BINARY_PATH="./$(ext ocebuild)"
 trap 'rm -f "$BINARY_PATH" 2>/dev/null' 0
 trap 'exit $?' 1 2 3 15
 
+echo "Downloading OCE Build CLI..."
+
 # Download the binary release for the current platform
 BINARY_URL="$OCEBUILD_URL/releases/download/$OCEBUILD_VERSION/$(ext ocebuild)"
 $(cmd curl) -sSL -k $BINARY_URL > "$BINARY_PATH"
+echo "Done.\n"
 
 # Executes OCE Build with provided arguments
 if [[ $(os) != "windows" ]]; then chmod +x "$BINARY_PATH"; fi

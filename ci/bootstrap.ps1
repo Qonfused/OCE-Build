@@ -36,10 +36,16 @@ function Bootstrap-Exe {
   }
 
   $ProgressPreference = 'Continue'
-  Start-Process -Wait $dest -NoNewWindow -ArgumentList $args
-  Remove-Item $dest
 }
 
+Write-Host "Downloading OCE Build CLI..."
+
 $BINARY_URL="$OCEBUILD_URL/releases/download/$OCEBUILD_VERSION/ocebuild.exe"
-Bootstrap-Exe -uri $BINARY_URL -dest ocebuild.exe `
-  $($arguments -join ' ')
+$BINARY_PATH="$env:TEMP\ocebuild.exe"
+Bootstrap-Exe -uri $BINARY_URL -dest $BINARY_PATH
+
+Write-Host "Done.`n"
+
+$ARGS = $($arguments -join ' ')
+Start-Process -Wait $BINARY_PATH -NoNewWindow -ArgumentList $ARGS
+Remove-Item $BINARY_PATH
