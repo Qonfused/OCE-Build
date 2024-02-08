@@ -89,7 +89,7 @@ jobs:
           fi
         working-directory: dist
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: ocebuild-py${{ env.python-version }}
           path: dist/*
@@ -103,7 +103,7 @@ jobs:
       contents: write
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v3
         with:
           name: ocebuild-py${{ env.python-version }}
           path: dist
@@ -121,10 +121,7 @@ jobs:
           echo "version=$(curl -s https://raw.githubusercontent.com/Qonfused/OCE-Build/main/ci/registry/project.json | jq -r '.version')" >> "$GITHUB_ENV"
 
       - name: Upload to Release
-        # uses: meeDamian/github-release@2.0
-        uses: vmware-tanzu-learning/github-release@fix-deprecations
-        # Fixes set-env and set-output depreciation notices:
-        # - https://github.com/meeDamian/github-release/pull/35
+        uses: meeDamian/github-release@2.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           tag: nightly
