@@ -202,6 +202,10 @@ def update_config_entries(build_dir: Union[str, Path],
 @click.option("-o", "--out",
               type=click.Path(path_type=Path),
               help="Use the specified directory as the output directory.")
+@click.option("-p", "--patches",
+              type=click.Path(path_type=Path),
+              multiple=True,
+              help="A list of paths to configuration patches.")
 @click.option("--clean",
               is_flag=True,
               help="Clean the output directory before building.")
@@ -211,7 +215,7 @@ def update_config_entries(build_dir: Union[str, Path],
 @click.option("--force",
               is_flag=True,
               help="Force the build even if the lockfile is up to date.")
-def cli(env, cwd, out, clean, update, force):
+def cli(env, cwd, out, patches, clean, update, force):
   """Builds the project's OpenCore EFI directory."""
 
   if not cwd: cwd = getcwd()
@@ -282,7 +286,7 @@ def cli(env, cwd, out, clean, update, force):
 
   # Apply patches to config.plist
   from .patch import apply_patches #pylint: disable=import-outside-toplevel
-  config = apply_patches(out=BUILD_DIR,
+  config = apply_patches(PROJECT_DIR, BUILD_DIR, *patches,
                          config_plist=config_plist,
                          project_root=PROJECT_DIR,
                          flags=flags)

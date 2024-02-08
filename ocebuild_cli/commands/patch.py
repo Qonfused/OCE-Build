@@ -113,10 +113,12 @@ def apply_patches(cwd: Union[str, Path]='.',
   if not patches:
     patches = set(glob(project_root, '**/config*.yml', include='**/config*.yaml'))
     patches |= set(glob(project_root, '**/patch*.yml', include='**/patch*.yaml'))
-    patches |= set(glob(project_root, '**/.serialdata'))
     debug(f"Found {len(patches)} patch files")
   elif cwd:
     patches = set(Path(cwd, patch).resolve(strict=True) for patch in patches)
+
+  # Append serial data patches to the list of applicable patches
+  patches |= set(glob(project_root, '**/.serialdata'))
 
   # Apply patches and schema fallbacks to the config.plist
   try:
