@@ -54,9 +54,9 @@
             </div>
         </aside>
         <h2>
-            <span class="text">177 statements &nbsp;</span>
+            <span class="text">176 statements &nbsp;</span>
             <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">26<span class="text"> run</span></button>
-            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">151<span class="text"> missing</span></button>
+            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">150<span class="text"> missing</span></button>
             <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">1<span class="text"> excluded</span></button>
         </h2>
         <p class="text">
@@ -65,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="d_23ee10fe072223cd_kexts_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.4.1">coverage.py v7.4.1</a>,
-            created at 2024-02-08 22:49 +0000
+            created at 2024-02-18 09:06 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"/>
@@ -214,14 +214,14 @@
     <p class="pln"><span class="n"><a id="t132" href="#t132">132</a></span><span class="t">      <span class="com"># Handle overrides for dictionaries</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t133" href="#t133">133</a></span><span class="t">      <span class="key">else</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t134" href="#t134">134</a></span><span class="t">        <span class="nam">nested_set</span><span class="op">(</span><span class="nam">a</span><span class="op">,</span> <span class="nam">tree</span><span class="op">,</span> <span class="nam">v_b</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t135" href="#t135">135</a></span><span class="t">        <span class="key">continue</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t136" href="#t136">136</a></span><span class="t">    <span class="key">elif</span> <span class="nam">tag</span> <span class="op">==</span> <span class="str">'@prepend'</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t137" href="#t137">137</a></span><span class="t">      <span class="key">if</span> <span class="nam">options</span> <span class="key">is</span> <span class="key">None</span><span class="op">:</span> <span class="nam">nested_set</span><span class="op">(</span><span class="nam">a</span><span class="op">,</span> <span class="nam">tree</span><span class="op">,</span> <span class="nam">v_b</span> <span class="op">+</span> <span class="nam">v_a</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t138" href="#t138">138</a></span><span class="t">      <span class="key">else</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t139" href="#t139">139</a></span><span class="t">        <span class="nam">entry</span> <span class="op">=</span> <span class="nam">options</span><span class="op">.</span><span class="nam">join</span><span class="op">(</span><span class="nam">map</span><span class="op">(</span><span class="nam">str</span><span class="op">,</span> <span class="nam">reversed</span><span class="op">(</span><span class="nam">filtered</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t140" href="#t140">140</a></span><span class="t">        <span class="nam">nested_set</span><span class="op">(</span><span class="nam">a</span><span class="op">,</span> <span class="nam">tree</span><span class="op">,</span> <span class="nam">entry</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t141" href="#t141">141</a></span><span class="t">    <span class="key">else</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="exc show_exc"><span class="n"><a id="t142" href="#t142">142</a></span><span class="t">      <span class="key">raise</span> <span class="nam">NotImplementedError</span><span class="op">(</span><span class="str">f"Unrecognized preprocessor tag: {tag}"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t135" href="#t135">135</a></span><span class="t">    <span class="key">elif</span> <span class="nam">tag</span> <span class="op">==</span> <span class="str">'@prepend'</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t136" href="#t136">136</a></span><span class="t">      <span class="key">if</span> <span class="nam">options</span> <span class="key">is</span> <span class="key">None</span><span class="op">:</span> <span class="nam">nested_set</span><span class="op">(</span><span class="nam">a</span><span class="op">,</span> <span class="nam">tree</span><span class="op">,</span> <span class="nam">v_b</span> <span class="op">+</span> <span class="nam">v_a</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t137" href="#t137">137</a></span><span class="t">      <span class="key">else</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t138" href="#t138">138</a></span><span class="t">        <span class="nam">entry</span> <span class="op">=</span> <span class="nam">options</span><span class="op">.</span><span class="nam">join</span><span class="op">(</span><span class="nam">map</span><span class="op">(</span><span class="nam">str</span><span class="op">,</span> <span class="nam">reversed</span><span class="op">(</span><span class="nam">filtered</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t139" href="#t139">139</a></span><span class="t">        <span class="nam">nested_set</span><span class="op">(</span><span class="nam">a</span><span class="op">,</span> <span class="nam">tree</span><span class="op">,</span> <span class="nam">entry</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t140" href="#t140">140</a></span><span class="t">    <span class="key">else</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="exc show_exc"><span class="n"><a id="t141" href="#t141">141</a></span><span class="t">      <span class="key">raise</span> <span class="nam">NotImplementedError</span><span class="op">(</span><span class="str">f"Unrecognized preprocessor tag: {tag}"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t142" href="#t142">142</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t143" href="#t143">143</a></span><span class="t">    <span class="com"># Cleanup dict b by deleting the (now duplicate) entry</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t144" href="#t144">144</a></span><span class="t">    <span class="key">try</span><span class="op">:</span> <span class="nam">nested_del</span><span class="op">(</span><span class="nam">b</span><span class="op">,</span> <span class="nam">tree</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t145" href="#t145">145</a></span><span class="t">    <span class="key">except</span> <span class="nam">KeyError</span><span class="op">:</span> <span class="key">pass</span>&nbsp;</span><span class="r"></span></p>
@@ -498,7 +498,7 @@
             <a id="nextFileLink" class="nav" href="d_23ee10fe072223cd_kexts_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.4.1">coverage.py v7.4.1</a>,
-            created at 2024-02-08 22:49 +0000
+            created at 2024-02-18 09:06 +0000
         </p>
     </div>
 </footer>
