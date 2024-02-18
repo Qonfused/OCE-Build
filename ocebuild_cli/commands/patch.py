@@ -134,6 +134,7 @@ def apply_patches(cwd: Union[str, Path]='.',
   else:
     name = 'file' if len(patches) == 1 else 'files'
     success(f"Updated config.plist with {len(patches)} patch {name}.")
+    for patch in patches: debug(f"--> Applied patch: {patch}")
 
   return config
 
