@@ -132,7 +132,6 @@ def apply_preprocessor_tags(a: dict,
       # Handle overrides for dictionaries
       else:
         nested_set(a, tree, v_b)
-        continue
     elif tag == '@prepend':
       if options is None: nested_set(a, tree, v_b + v_a)
       else:
@@ -140,6 +139,7 @@ def apply_preprocessor_tags(a: dict,
         nested_set(a, tree, entry)
     else:
       raise NotImplementedError(f"Unrecognized preprocessor tag: {tag}")
+
     # Cleanup dict b by deleting the (now duplicate) entry
     try: nested_del(b, tree)
     except KeyError: pass
