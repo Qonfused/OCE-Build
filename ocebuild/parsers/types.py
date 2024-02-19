@@ -36,9 +36,11 @@ def encode_data(value: str) -> bytes:
     >>> encode_data('AQAAAA==')
     b'\\x01\\x00\\x00\\x00'
   """
-  bits = "".join(map(lambda s: re_search(r'[a-zA-Z0-9+/=]+', s), value.split()))
+  bits = "".join(map(lambda s: re_search(r'[a-zA-Z0-9+/=]+', s) or '',
+                     value.split()))
   if not bits: return b''
-  elif (hex_str := re_match(RE_VALID_HEX, bits)):
+
+  if (hex_str := re_match(RE_VALID_HEX, bits)):
     return a2b_hex(hex_str)
   elif (base64_str := re_match(RE_VALID_BASE64, bits)):
     return a2b_base64(base64_str)
