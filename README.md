@@ -21,11 +21,11 @@
 | ocebuild/sources/binary.py      |       53 |       28 |     47% |27, 29, 35-39, 43-45, 49-56, 68-76, 88-90 |
 | ocebuild/sources/dortania.py    |       42 |       24 |     43% |34-48, 54-59, 68-74, 90, 106-110 |
 | ocebuild/filesystem/cache.py    |       33 |       12 |     64% |40-47, 60-66 |
-| ocebuild/parsers/types.py       |       23 |        9 |     61% |39-46, 62, 66 |
 | ocebuild/sources/\_lib.py       |       29 |        3 |     90% |     59-61 |
 | ocebuild/parsers/\_lib.py       |       49 |        3 |     94% | 80-82, 88 |
 | ocebuild/filesystem/archives.py |       31 |        3 |     90% |     51-54 |
-|                       **TOTAL** | **2087** | **1147** | **45%** |           |
+| ocebuild/parsers/types.py       |       23 |        2 |     91% |    64, 68 |
+|                       **TOTAL** | **2087** | **1140** | **45%** |           |
 
 5 files skipped due to complete coverage.
 
