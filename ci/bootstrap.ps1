@@ -44,7 +44,7 @@ $BINARY_URL="$OCEBUILD_URL/releases/download/$OCEBUILD_VERSION/ocebuild.exe"
 $BINARY_PATH="$env:TEMP\ocebuild.exe"
 Bootstrap-Exe -uri $BINARY_URL -dest $BINARY_PATH
 
-Write-Host "Done.`n"
+Write-Host ""
 
 $ARGS = $($arguments -join ' ')
 Start-Process -Wait $BINARY_PATH -NoNewWindow -ArgumentList $ARGS
