@@ -13,13 +13,17 @@ param (
 $OCEBUILD_URL="https://github.com/Qonfused/OCE-Build"
 $OCEBUILD_VERSION="nightly"
 
-
 function Bootstrap-Exe {
   param (
     [string]$uri,
     [string]$dest
   )
 
+  # Trap native errors halt script execution on any error
+  $PSNativeCommandUseErrorActionPreference = $true
+  $ErrorActionPreference = 'Stop'
+
+  # Download the executable through a BITS transfer job
   $ProgressPreference = 'SilentlyContinue'
   $bitsJobObj = Start-BitsTransfer $uri `
     -Destination $dest `
@@ -35,6 +39,7 @@ function Bootstrap-Exe {
     }
   }
 
+  # Restore the progress preference
   $ProgressPreference = 'Continue'
 }
 
