@@ -1,8 +1,8 @@
-<h1 id=schema>OpenCore Config.plist Schema - v0.9.8</h1>
+<h1 id=schema>OpenCore Config.plist Schema - v0.9.9</h1>
 
-**Last Updated**: `2024-02-07 23:57:50.764973+00:00`
+**Last Updated**: `2024-03-17 00:44:29.767381+00:00`
 
-**Revision**: `{ SHA1: 7a3f8cc4269a2f176969534c036b3951c07c3a26 }`
+**Revision**: `{ SHA1: 9b5fb72da3a38446417a7577f8e5e293fdad672e }`
 
 <h2 id=table-of-contents>Table of Contents</h2>
 
