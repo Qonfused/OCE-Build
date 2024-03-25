@@ -61,7 +61,7 @@ def sort_kext_cfbundle(filepaths: List[Union[str, Path]]) -> OrderedDict:
   """
   plist_paths = list(chain(*(Path(f).glob('**/Info.plist')
                              for f in filepaths)))
-  kext_names = list(Path(str(f).rsplit('.kext')[-2]).stem
+  kext_names = list(Path(str(f).rsplit('.kext')[-2]).name
                     for f in plist_paths)
 
   # Extract flat tree of Kext dependencies
@@ -84,7 +84,7 @@ def sort_kext_cfbundle(filepaths: List[Union[str, Path]]) -> OrderedDict:
 
     # Add Kext to identifier map
     kext_path = filepath.parents[1].as_posix()
-    relative_path = ".kext".join(p if i else Path(p).stem for
+    relative_path = ".kext".join(p if i else Path(p).name for
                                  i,p in enumerate(kext_path.split('.kext')))
     identifier_entry = dict(__path=relative_path, name=name, props=plist_props)
     if not key in identifier_map:
