@@ -7,6 +7,7 @@
 #pylint: disable=cell-var-from-loop
 
 from datetime import datetime
+#from re import findall
 from shlex import split
 
 from typing import List, Literal, Optional, Tuple, Union
@@ -309,13 +310,14 @@ def write_yaml(config: dict,
   if lines is None: lines = []
 
   cursor = { 'keys': [], 'indent': 2 }
-  flat_dict = flatten_dict(config)
+  flat_dict = flatten_dict(config, delimiter='$')
 
   # Pre-process and prettify tree indentations
   trees = []; max_tree_len = 0
   for keys in flat_dict:
     # Seek or create head index for current tree level
-    for j, key in enumerate(tree := str(keys).split('.')):
+    #tree = findall(r"(?:'[^']*'|\"[^\"]*\"|[^.])+", str(keys))
+    for j, key in enumerate(tree := str(keys).split('$')):
       # Avoid parsing literal array indices
       if isinstance(tree[j], int): continue
       # Insert array indices as additional keys
