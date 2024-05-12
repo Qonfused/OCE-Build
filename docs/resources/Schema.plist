@@ -5,7 +5,7 @@
 	<key>#Revision</key>
 	<dict>
 		<key>OpenCore-Version</key>
-		<string>0.9.9</string>
+		<string>1.0.0</string>
 	</dict>
 	<key>ACPI</key>
 	<dict>
@@ -353,6 +353,8 @@
 	</dict>
 	<key>Misc</key>
 	<dict>
+		<key>BlessOverride</key>
+		<array/>
 		<key>Boot</key>
 		<dict>
 			<key>ConsoleAttributes</key>
@@ -373,6 +375,10 @@
 			<integer>0</integer>
 			<key>PickerAudioAssist</key>
 			<false/>
+			<key>PickerMode</key>
+			<string>Builtin</string>
+			<key>PickerVariant</key>
+			<string>Auto</string>
 			<key>PollAppleHotKeys</key>
 			<false/>
 			<key>ShowPicker</key>
@@ -381,13 +387,7 @@
 			<integer>0</integer>
 			<key>Timeout</key>
 			<integer>0</integer>
-			<key>PickerMode</key>
-			<string>Builtin</string>
-			<key>PickerVariant</key>
-			<string>Auto</string>
 		</dict>
-		<key>BlessOverride</key>
-		<array/>
 		<key>Debug</key>
 		<dict>
 			<key>AppleDebug</key>
@@ -453,12 +453,12 @@
 			</data>
 			<key>PasswordSalt</key>
 			<data></data>
-			<key>Vault</key>
-			<string>Secure</string>
 			<key>ScanPolicy</key>
 			<integer>17760515</integer>
 			<key>SecureBootModel</key>
 			<string>Default</string>
+			<key>Vault</key>
+			<string>Secure</string>
 		</dict>
 		<key>Serial</key>
 		<dict>
@@ -539,69 +539,59 @@
 		<false/>
 		<key>CustomMemory</key>
 		<false/>
-		<key>UpdateDataHub</key>
-		<false/>
-		<key>UpdateNVRAM</key>
-		<false/>
-		<key>UpdateSMBIOS</key>
-		<false/>
-		<key>UpdateSMBIOSMode</key>
-		<string>Create</string>
-		<key>UseRawUuidEncoding</key>
-		<false/>
-		<key>Generic</key>
-		<dict>
-			<key>SpoofVendor</key>
-			<false/>
-			<key>AdviseFeatures</key>
-			<false/>
-			<key>MaxBIOSVersion</key>
-			<false/>
-			<key>SystemMemoryStatus</key>
-			<string>Auto</string>
-			<key>ProcessorType</key>
-			<integer>0</integer>
-			<key>SystemProductName</key>
-			<string></string>
-			<key>SystemSerialNumber</key>
-			<string></string>
-			<key>SystemUUID</key>
-			<string></string>
-			<key>MLB</key>
-			<string></string>
-			<key>ROM</key>
-			<data>AAAAAAAA</data>
-		</dict>
 		<key>DataHub</key>
 		<dict>
-			<key>PlatformName</key>
-			<string></string>
-			<key>SystemProductName</key>
-			<string></string>
-			<key>SystemSerialNumber</key>
-			<string></string>
-			<key>SystemUUID</key>
-			<string></string>
+			<key>ARTFrequency</key>
+			<integer>0</integer>
 			<key>BoardProduct</key>
 			<string></string>
 			<key>BoardRevision</key>
 			<data>AA==</data>
-			<key>StartupPowerEvents</key>
-			<integer>0</integer>
-			<key>InitialTSC</key>
+			<key>DevicePathsSupported</key>
 			<integer>0</integer>
 			<key>FSBFrequency</key>
 			<integer>0</integer>
-			<key>ARTFrequency</key>
+			<key>InitialTSC</key>
 			<integer>0</integer>
-			<key>DevicePathsSupported</key>
-			<integer>0</integer>
-			<key>SmcRevision</key>
-			<data>AAAAAAAA</data>
+			<key>PlatformName</key>
+			<string></string>
 			<key>SmcBranch</key>
 			<data>AAAAAAAAAAA=</data>
 			<key>SmcPlatform</key>
 			<data>AAAAAAAAAAA=</data>
+			<key>SmcRevision</key>
+			<data>AAAAAAAA</data>
+			<key>StartupPowerEvents</key>
+			<integer>0</integer>
+			<key>SystemProductName</key>
+			<string></string>
+			<key>SystemSerialNumber</key>
+			<string></string>
+			<key>SystemUUID</key>
+			<string></string>
+		</dict>
+		<key>Generic</key>
+		<dict>
+			<key>AdviseFeatures</key>
+			<false/>
+			<key>MLB</key>
+			<string></string>
+			<key>MaxBIOSVersion</key>
+			<false/>
+			<key>ProcessorType</key>
+			<integer>0</integer>
+			<key>ROM</key>
+			<data>AAAAAAAA</data>
+			<key>SpoofVendor</key>
+			<false/>
+			<key>SystemMemoryStatus</key>
+			<string>Auto</string>
+			<key>SystemProductName</key>
+			<string></string>
+			<key>SystemSerialNumber</key>
+			<string></string>
+			<key>SystemUUID</key>
+			<string></string>
 		</dict>
 		<key>Memory</key>
 		<dict>
@@ -645,14 +635,14 @@
 		<dict>
 			<key>BID</key>
 			<string></string>
-			<key>ROM</key>
-			<data>AAAAAAAA</data>
-			<key>MLB</key>
-			<string></string>
 			<key>FirmwareFeatures</key>
 			<data>AAAAAAAAAAA=</data>
 			<key>FirmwareFeaturesMask</key>
 			<data>AAAAAAAAAAA=</data>
+			<key>MLB</key>
+			<string></string>
+			<key>ROM</key>
+			<data>AAAAAAAA</data>
 			<key>SystemSerialNumber</key>
 			<string></string>
 			<key>SystemUUID</key>
@@ -660,61 +650,71 @@
 		</dict>
 		<key>SMBIOS</key>
 		<dict>
+			<key>BIOSReleaseDate</key>
+			<string></string>
 			<key>BIOSVendor</key>
 			<string></string>
 			<key>BIOSVersion</key>
 			<string></string>
-			<key>BIOSReleaseDate</key>
+			<key>BoardAssetTag</key>
 			<string></string>
-			<key>SystemManufacturer</key>
-			<string></string>
-			<key>SystemProductName</key>
-			<string></string>
-			<key>SystemVersion</key>
-			<string></string>
-			<key>SystemSerialNumber</key>
-			<string></string>
-			<key>SystemUUID</key>
-			<string></string>
-			<key>SystemSKUNumber</key>
-			<string></string>
-			<key>SystemFamily</key>
+			<key>BoardLocationInChassis</key>
 			<string></string>
 			<key>BoardManufacturer</key>
 			<string></string>
 			<key>BoardProduct</key>
 			<string></string>
-			<key>BoardVersion</key>
-			<string></string>
 			<key>BoardSerialNumber</key>
-			<string></string>
-			<key>BoardAssetTag</key>
 			<string></string>
 			<key>BoardType</key>
 			<integer>0</integer>
-			<key>BoardLocationInChassis</key>
+			<key>BoardVersion</key>
+			<string></string>
+			<key>ChassisAssetTag</key>
 			<string></string>
 			<key>ChassisManufacturer</key>
+			<string></string>
+			<key>ChassisSerialNumber</key>
 			<string></string>
 			<key>ChassisType</key>
 			<integer>0</integer>
 			<key>ChassisVersion</key>
 			<string></string>
-			<key>ChassisSerialNumber</key>
-			<string></string>
-			<key>ChassisAssetTag</key>
-			<string></string>
-			<key>PlatformFeature</key>
-			<integer>4294967295</integer>
-			<key>SmcVersion</key>
-			<data>AAAAAAAAAAAAAAAAAAAAAA==</data>
 			<key>FirmwareFeatures</key>
 			<data>AAAAAAAAAAA=</data>
 			<key>FirmwareFeaturesMask</key>
 			<data>AAAAAAAAAAA=</data>
+			<key>PlatformFeature</key>
+			<integer>4294967295</integer>
 			<key>ProcessorType</key>
 			<integer>0</integer>
+			<key>SmcVersion</key>
+			<data>AAAAAAAAAAAAAAAAAAAAAA==</data>
+			<key>SystemFamily</key>
+			<string></string>
+			<key>SystemManufacturer</key>
+			<string></string>
+			<key>SystemProductName</key>
+			<string></string>
+			<key>SystemSKUNumber</key>
+			<string></string>
+			<key>SystemSerialNumber</key>
+			<string></string>
+			<key>SystemUUID</key>
+			<string></string>
+			<key>SystemVersion</key>
+			<string></string>
 		</dict>
+		<key>UpdateDataHub</key>
+		<false/>
+		<key>UpdateNVRAM</key>
+		<false/>
+		<key>UpdateSMBIOS</key>
+		<false/>
+		<key>UpdateSMBIOSMode</key>
+		<string>Create</string>
+		<key>UseRawUuidEncoding</key>
+		<false/>
 	</dict>
 	<key>UEFI</key>
 	<dict>
@@ -739,28 +739,28 @@
 			<string>Auto</string>
 			<key>CustomDelays</key>
 			<false/>
+			<key>GraphicsInputMirroring</key>
+			<false/>
 			<key>KeyInitialDelay</key>
 			<integer>50</integer>
 			<key>KeySubsequentDelay</key>
 			<integer>5</integer>
-			<key>GraphicsInputMirroring</key>
-			<false/>
-			<key>PointerPollMin</key>
-			<integer>0</integer>
-			<key>PointerPollMax</key>
-			<integer>0</integer>
-			<key>PointerPollMask</key>
-			<integer>-1</integer>
-			<key>PointerSpeedDiv</key>
-			<integer>1</integer>
-			<key>PointerSpeedMul</key>
-			<integer>1</integer>
 			<key>PointerDwellClickTimeout</key>
 			<integer>0</integer>
 			<key>PointerDwellDoubleClickTimeout</key>
 			<integer>0</integer>
 			<key>PointerDwellRadius</key>
 			<integer>0</integer>
+			<key>PointerPollMask</key>
+			<integer>-1</integer>
+			<key>PointerPollMax</key>
+			<integer>0</integer>
+			<key>PointerPollMin</key>
+			<integer>0</integer>
+			<key>PointerSpeedDiv</key>
+			<integer>1</integer>
+			<key>PointerSpeedMul</key>
+			<integer>1</integer>
 		</dict>
 		<key>Audio</key>
 		<dict>
@@ -792,15 +792,15 @@
 		<key>Drivers</key>
 		<array>
 			<dict>
+				<key>Arguments</key>
+				<string></string>
 				<key>Comment</key>
 				<string></string>
 				<key>Enabled</key>
 				<false/>
-				<key>Path</key>
-				<string></string>
 				<key>LoadEarly</key>
 				<false/>
-				<key>Arguments</key>
+				<key>Path</key>
 				<string></string>
 			</dict>
 		</array>
@@ -825,21 +825,15 @@
 		</dict>
 		<key>Output</key>
 		<dict>
-			<key>InitialMode</key>
-			<string>Auto</string>
-			<key>TextRenderer</key>
-			<string>BuiltinGraphics</string>
+			<key>ClearScreenOnModeSwitch</key>
+			<false/>
 			<key>ConsoleFont</key>
 			<string></string>
 			<key>ConsoleMode</key>
 			<string></string>
-			<key>Resolution</key>
-			<string></string>
-			<key>ForceResolution</key>
-			<false/>
-			<key>ClearScreenOnModeSwitch</key>
-			<false/>
 			<key>DirectGopRendering</key>
+			<false/>
+			<key>ForceResolution</key>
 			<false/>
 			<key>GopBurstMode</key>
 			<false/>
@@ -847,16 +841,22 @@
 			<string>Disabled</string>
 			<key>IgnoreTextInGraphics</key>
 			<false/>
-			<key>ReplaceTabWithSpace</key>
-			<false/>
+			<key>InitialMode</key>
+			<string>Auto</string>
 			<key>ProvideConsoleGop</key>
 			<false/>
 			<key>ReconnectGraphicsOnConnect</key>
 			<false/>
 			<key>ReconnectOnResChange</key>
 			<false/>
+			<key>ReplaceTabWithSpace</key>
+			<false/>
+			<key>Resolution</key>
+			<string></string>
 			<key>SanitiseClearScreen</key>
 			<false/>
+			<key>TextRenderer</key>
+			<string>BuiltinGraphics</string>
 			<key>UIScale</key>
 			<integer>-1</integer>
 			<key>UgaPassThrough</key>
@@ -907,11 +907,11 @@
 		<dict>
 			<key>ActivateHpetSupport</key>
 			<false/>
+			<key>DisableSecurityPolicy</key>
+			<false/>
 			<key>EnableVectorAcceleration</key>
 			<false/>
 			<key>EnableVmx</key>
-			<false/>
-			<key>DisableSecurityPolicy</key>
 			<false/>
 			<key>ExitBootServicesDelay</key>
 			<integer>0</integer>
@@ -927,12 +927,12 @@
 			<false/>
 			<key>RequestBootVarRouting</key>
 			<false/>
+			<key>ResizeGpuBars</key>
+			<integer>-1</integer>
 			<key>ResizeUsePciRbIo</key>
 			<false/>
 			<key>ShimRetainProtocol</key>
 			<false/>
-			<key>ResizeGpuBars</key>
-			<integer>-1</integer>
 			<key>TscSyncTimeout</key>
 			<integer>0</integer>
 			<key>UnblockFsConnect</key>
@@ -945,12 +945,12 @@
 				<integer>0</integer>
 				<key>Comment</key>
 				<string></string>
+				<key>Enabled</key>
+				<false/>
 				<key>Size</key>
 				<integer>0</integer>
 				<key>Type</key>
 				<string>Reserved</string>
-				<key>Enabled</key>
-				<false/>
 			</dict>
 		</array>
 	</dict>

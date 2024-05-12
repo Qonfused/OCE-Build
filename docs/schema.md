@@ -1,8 +1,8 @@
-<h1 id=schema>OpenCore Config.plist Schema - v0.9.9</h1>
+<h1 id=schema>OpenCore Config.plist Schema - v1.0.0</h1>
 
-**Last Updated**: `2024-03-17 00:44:29.767381+00:00`
+**Last Updated**: `2024-05-12 02:46:17.751350+00:00`
 
-**Revision**: `{ SHA1: 9b5fb72da3a38446417a7577f8e5e293fdad672e }`
+**Revision**: `{ SHA1: b83537dde8b146ba4f3f4a3d2c7e6ea43b0522fa }`
 
 <h2 id=table-of-contents>Table of Contents</h2>
 
@@ -970,9 +970,9 @@ To be filled with `plist dictionary` values, describing each patch. Refer to the
 The relocation block is a scratch buffer allocated in the lower 4 GB used for loading the kernel and related structures by EfiBoot on firmware where the lower memory region is otherwise occupied by (assumed) non-runtime data. Right before kernel startup, the relocation block is copied back to lower addresses. Similarly, all the other addresses pointing to the relocation block are also carefully adjusted. The relocation block can be used when:
 * No better slide exists (all the memory is used)
 * `slide=0` is forced (by an argument or safe mode)
-* KASLR (slide) is unsupported (this is macOS 10.7 or older) 
+* KASLR (slide) is unsupported (this is Mac OS X 10.7 or older) 
 
-This quirk requires `ProvideCustomSlide` to be enabled and typically also requires enabling `AvoidRuntimeDefrag` to function correctly. Hibernation is not supported when booting with a relocation block, which will only be used if required when the quirk is enabled.
+This quirk typically requires `ProvideCustomSlide` and `AvoidRuntimeDefrag` to be enabled to function correctly. Hibernation is not supported when booting with a relocation block, which will only be used if required when the quirk is enabled.
 
 *Note*: While this quirk is required to run older macOS versions on platforms with used lower memory, it is not compatible with some hardware and macOS 11. In such cases, consider using `EnableSafeModeSlide` instead.
 
@@ -1086,7 +1086,7 @@ This option bypasses `W^{`X} permissions in code pages of UEFI runtime services 
 
 **Description**: Fix errors in early Mac OS X boot.efi images.
 
-Modern secure PE loaders will refuse to load `boot.efi` images from macOS 10.4 to 10.12 due to these files containing `W^{`X} errors (in all versions) and illegal overlapping sections (in 10.4 and 10.5 32-bit versions only).
+Modern secure PE loaders will refuse to load `boot.efi` images from Mac OS X 10.4 to macOS 10.12 due to these files containing `W^{`X} errors (in all versions) and illegal overlapping sections (in 10.4 and 10.5 32-bit versions only).
 
 This quirk detects these issues and pre-processes such images in memory, so that a modern loader will accept them.
 
@@ -1099,7 +1099,7 @@ Pre-processing in memory is incompatible with secure boot, as the image loaded i
 * All Apple-signed images.
 * All images at `\System\Library\CoreServices\boot.efi` within their filesystem. 
 
-*Note 3*: This quirk is needed for macOS 10.4 to 10.12 (and higher, if Apple secure boot is not enabled), but only when the firmware itself includes a modern, more secure PE COFF image loader. This applies to current builds of OpenDuet, and to OVMF if built from audk source code.
+*Note 3*: This quirk is needed for Mac OS X 10.4 to macOS 10.12 (and higher, if Apple secure boot is not enabled), but only when the firmware itself includes a modern, more secure PE COFF image loader. This applies to current builds of OpenDuet, and to OVMF if built from audk source code.
 
 <h3 id=booter-quirks-forcebootersignature>Booter -> Quirks -> ForceBooterSignature</h3>
 
@@ -1225,7 +1225,7 @@ To workaround these limitations, this quirk applies memory attribute table permi
 
 *Note 1*: Since several types of firmware come with incorrect memory protection tables, this quirk often comes paired with `SyncRuntimePermissions`.
 
-*Note 2*: The need for this quirk is determined by early boot failures. This quirk replaces `EnableWriteUnprotector` on firmware supporting Memory Attribute Tables (MAT). This quirk is typically unnecessary when using `OpenDuetPkg` but may be required to boot macOS 10.6, and earlier, for reasons that are as yet unclear.
+*Note 2*: The need for this quirk is determined by early boot failures. This quirk replaces `EnableWriteUnprotector` on firmware supporting Memory Attribute Tables (MAT). This quirk is typically unnecessary when using `OpenDuetPkg` but may be required to boot Mac OS X 10.6, and earlier, for reasons that are as yet unclear.
 
 <h3 id=booter-quirks-resizeapplegpubars>Booter -> Quirks -> ResizeAppleGpuBars</h3>
 
@@ -2246,7 +2246,7 @@ One way to workaround the problem is to increase the timeout to an extremely hig
 
 **Failsafe**: `false`
 
-**Requirement**: 10.11 (not required for older)
+**Requirement**: 10.11+ (not required for older)
 
 **Description**: Patch various kexts (AppleUSBXHCI.kext, AppleUSBXHCIPCI.kext, IOUSBHostFamily.kext) to remove USB port count limit of 15 ports.
 
@@ -2280,9 +2280,9 @@ Unsupported platforms including `Atom` and `AMD` require modified versions of XN
 
 **Description**: Use `kernelcache` with different checksums when available.
 
-On macOS 10.6 and earlier, `kernelcache` filename has a checksum, which essentially is `adler32` from SMBIOS product name and EfiBoot device path. On certain firmware, the EfiBoot device path differs between UEFI and macOS due to ACPI or hardware specifics, rendering `kernelcache` checksum as always different.
+On Mac OS X 10.6 and earlier, `kernelcache` filename has a checksum, which essentially is `adler32` from SMBIOS product name and EfiBoot device path. On certain firmware, the EfiBoot device path differs between UEFI and macOS due to ACPI or hardware specifics, rendering `kernelcache` checksum as always different.
 
-This setting allows matching the latest `kernelcache` with a suitable architecture when the `kernelcache` without suffix is unavailable, improving macOS 10.6 boot performance on several platforms.
+This setting allows matching the latest `kernelcache` with a suitable architecture when the `kernelcache` without suffix is unavailable, improving Mac OS X 10.6 boot performance on several platforms.
 
 <h3 id=kernel-scheme-kernelarch>Kernel -> Scheme -> KernelArch</h3>
 
@@ -2294,11 +2294,11 @@ This setting allows matching the latest `kernelcache` with a suitable architectu
 
 **Description**: Prefer specified kernel architecture (`i386`, `i386-user32`, `x86_64`) when available.
 
-On macOS 10.7 and earlier, the XNU kernel can boot with architectures different from the usual `x86_64`. This setting will use the specified architecture to boot macOS when it is supported by the macOS and the configuration:
+On Mac OS X 10.7 and earlier, the XNU kernel can boot with architectures different from the usual `x86_64`. This setting will use the specified architecture to boot macOS when it is supported by the macOS and the configuration:
 * `i386` --- Use `i386` (32-bit) kernel when available.
 * `i386-user32` --- Use `i386` (32-bit) kernel when available and force the use of 32-bit userspace on 64-bit capable processors if supported by the operating system.
-* On macOS, 64-bit capable processors are assumed to support `SSSE3`. This is not the case for older 64-bit capable Pentium processors, which cause some applications to crash on macOS~10.6. This behaviour corresponds to the `-legacy` kernel boot argument.
-* This option is unavailable on macOS~10.4 and 10.5 when running on 64-bit firmware due to an uninitialised 64-bit segment in the XNU kernel, which causes AppleEFIRuntime to incorrectly execute 64-bit code as 16-bit code. 
+* On macOS, 64-bit capable processors are assumed to support `SSSE3`. This is not the case for older 64-bit capable Pentium processors, which cause some applications to crash on Mac OS X~10.6. This behaviour corresponds to the `-legacy` kernel boot argument.
+* This option is unavailable on Mac OS X~10.4 and 10.5 when running on 64-bit firmware due to an uninitialised 64-bit segment in the XNU kernel, which causes AppleEFIRuntime to incorrectly execute 64-bit code as 16-bit code. 
 * `x86_64` --- Use `x86_64` (64-bit) kernel when available. 
 
 The algorithm used to determine the preferred kernel architecture is set out below.
@@ -2313,9 +2313,9 @@ The algorithm used to determine the preferred kernel architecture is set out bel
 * Board identifier (from SMBIOS) based on EfiBoot version disables `x86_64` support on an unsupported model if any `i386` variant is supported. `Auto` is not consulted here as the list is not overridable in EfiBoot.
 * `KernelArch` restricts the support to the explicitly specified architecture (when not set to `Auto`) if the architecture remains present in the capabilities.
 * The best supported architecture is chosen in this order: `x86_64`, `i386`, `i386-user32`. 
-Unlike macOS~10.7 (where certain board identifiers are treated as `i386` only machines), and macOS~10.5 or earlier (where `x86_64` is not supported by the macOS kernel), macOS~10.6 is very special. The architecture choice on macOS~10.6 depends on many factors including not only the board identifier, but also the macOS product type (client vs server), macOS point release, and amount of RAM. The detection of all these is complicated and impractical, as several point releases had implementation flaws resulting in a failure to properly execute the server detection in the first place. For this reason when `Auto` is set, OpenCore on macOS~10.6 falls back to the `x86_64` architecture when it is supported by the board, as on macOS~10.7. The 32-bit `KernelArch` options can still be configured explicitly however.
+Unlike Mac OS X~10.7 (where certain board identifiers are treated as `i386` only machines), and Mac OS X~10.5 or earlier (where `x86_64` is not supported by the macOS kernel), Mac OS X~10.6 is very special. The architecture choice on Mac OS X~10.6 depends on many factors including not only the board identifier, but also the macOS product type (client vs server), macOS point release, and amount of RAM. The detection of all these is complicated and impractical, as several point releases had implementation flaws resulting in a failure to properly execute the server detection in the first place. For this reason when `Auto` is set, OpenCore on Mac OS X~10.6 falls back to the `x86_64` architecture when it is supported by the board, as on Mac OS X~10.7. The 32-bit `KernelArch` options can still be configured explicitly however.
 
-A 64-bit Mac model compatibility matrix corresponding to actual EfiBoot behaviour on macOS 10.6.8 and 10.7.5 is outlined below.
+A 64-bit Mac model compatibility matrix corresponding to actual EfiBoot behaviour on Mac OS X 10.6.8 and 10.7.5 is outlined below.
 
 
  
@@ -2617,8 +2617,8 @@ An icon set is a directory path relative to `Resources\Image`, where the icons a
 
 Sample resources provided as a part of [OcBinaryData repository](https://github.com/acidanthera/OcBinaryData) provide the following icon set:
 * `Acidanthera\GoldenGate` --- macOS 11 styled icon set.
-* `Acidanthera\Syrah` --- macOS 10.10 styled icon set.
-* `Acidanthera\Chardonnay` --- macOS 10.4 styled icon set. 
+* `Acidanthera\Syrah` --- OS X 10.10 styled icon set.
+* `Acidanthera\Chardonnay` --- Mac OS X 10.4 styled icon set. 
 
 For convenience purposes there also are predefined aliases:
 * `Auto` --- Automatically select one set of icons based on the `DefaultBackground` colour: `Acidanthera\GoldenGate` for Syrah Black and `Acidanthera\Chardonnay` for Light Gray.
@@ -5421,7 +5421,7 @@ Only one set of audio protocols can be available at a time, so this setting shou
 
 **Failsafe**: `false`
 
-**Description**: Replaces the Apple Framebuffer Info protocol with a builtin version. This may be used to override framebuffer information on VMs and legacy Macs to improve compatibility with legacy EfiBoot such as the one in macOS 10.4.
+**Description**: Replaces the Apple Framebuffer Info protocol with a builtin version. This may be used to override framebuffer information on VMs and legacy Macs to improve compatibility with legacy EfiBoot such as the one in Mac OS X 10.4.
 
 *Note*: The current implementation of this property results in it only being active when GOP is available (it is always equivalent to `false` otherwise).
 
