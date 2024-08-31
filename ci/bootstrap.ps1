@@ -13,7 +13,7 @@ param (
 $OCEBUILD_URL="https://github.com/Qonfused/OCE-Build"
 $OCEBUILD_VERSION="nightly"
 
-function Bootstrap-Exe {
+function Bootstrap {
   param (
     [string]$uri,
     [string]$dest
@@ -23,34 +23,28 @@ function Bootstrap-Exe {
   $PSNativeCommandUseErrorActionPreference = $true
   $ErrorActionPreference = 'Stop'
 
-  # Download the executable through a BITS transfer job
-  $ProgressPreference = 'SilentlyContinue'
-  $bitsJobObj = Start-BitsTransfer $uri `
-    -Destination $dest `
-    -DisplayName "Downloading $uri"
+  # Download the executable from the specified URI
+  Invoke-WebRequest -Uri $uri -OutFile $dest
 
-  switch ($bitsJobObj.JobState) {
-    'Transferred' {
-      Complete-BitsTransfer -BitsJob $bitsJobObj
-      break
-    }
-    'Error' {
-      throw 'Error downloading'
-    }
+  # Grant read execute permissions to the destination file
+  if ($IsWindows) {
+    icals $dest /remove 'Everyone'
+    icals $dest /grant  'Everyone:(RX)'
+  } else {
+    chmod +x $dest.replace('/\', '/')
   }
-
-  # Restore the progress preference
-  $ProgressPreference = 'Continue'
 }
 
 Write-Host "Downloading OCE Build CLI..."
 
-$BINARY_URL="$OCEBUILD_URL/releases/download/$OCEBUILD_VERSION/ocebuild.exe"
-$BINARY_PATH="$env:TEMP\ocebuild.exe"
-Bootstrap-Exe -uri $BINARY_URL -dest $BINARY_PATH
+# Check the OS platform to determine the executable file extension
+$EXT = if ($IsWindows) { ".exe" } elseif ($IsLinux) { ".linux" } else { "" }
+
+$BINARY_URL="$OCEBUILD_URL/releases/download/$OCEBUILD_VERSION/ocebuild$EXT"
+$BINARY_PATH="$([System.IO.Path]::GetTempPath())\ocebuild$EXT"
+Bootstrap -uri $BINARY_URL -dest $BINARY_PATH
 
 Write-Host ""
 
-$ARGS = $($arguments -join ' ')
-Start-Process -Wait $BINARY_PATH -NoNewWindow -ArgumentList $ARGS
+Start-Process -Wait $BINARY_PATH -NoNewWindow -ArgumentList "build -c $pwd $patches"
 Remove-Item $BINARY_PATH
