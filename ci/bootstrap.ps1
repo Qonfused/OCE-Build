@@ -27,10 +27,7 @@ function Bootstrap {
   Invoke-WebRequest -Uri $uri -OutFile $dest
 
   # Grant read execute permissions to the destination file
-  if ($IsWindows) {
-    icals $dest /remove 'Everyone'
-    icals $dest /grant  'Everyone:(RX)'
-  } else {
+  if (-not $IsWindows) {
     chmod +x $dest.replace('/\', '/')
   }
 }
