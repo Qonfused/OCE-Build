@@ -1,8 +1,8 @@
-<h1 id=schema>OpenCore Config.plist Schema - v1.0.1</h1>
+<h1 id=schema>OpenCore Config.plist Schema - v1.0.2</h1>
 
-**Last Updated**: `2024-08-19 19:00:40.229525+00:00`
+**Last Updated**: `2024-10-08 18:26:07.539152+00:00`
 
-**Revision**: `{ SHA1: 9d30e2b75e1935f27ec7578e88be5c28ff0d0d07 }`
+**Revision**: `{ SHA1: 22171e0903954cac74e7734c945d031c32a7c8c7 }`
 
 <h2 id=table-of-contents>Table of Contents</h2>
 
@@ -436,6 +436,7 @@
   - [UEFI -> ReservedMemory[] -> Enabled](#uefi-reservedmemory-enabled)
   - [UEFI -> ReservedMemory[] -> Size](#uefi-reservedmemory-size)
   - [UEFI -> ReservedMemory[] -> Type](#uefi-reservedmemory-type)
+- [UEFI -> Unload](#uefi-unload)
 
 </details>
 
@@ -1080,26 +1081,26 @@ This option bypasses `W^{`X} permissions in code pages of UEFI runtime services 
 
 **Type**: `plist boolean`
 
-**Default**: `false`
+**Default**: `true`
 
 **Failsafe**: `false`
 
-**Description**: Fix errors in early Mac OS X boot.efi images.
+**Description**: Fix permissions and section errors in macOS `boot.efi` images.
 
-Modern secure PE loaders will refuse to load `boot.efi` images from Mac OS X 10.4 to macOS 10.12 due to these files containing `W^{`X} errors (in all versions) and illegal overlapping sections (in 10.4 and 10.5 32-bit versions only).
+Mac OS X `boot.efi` images contain `W^{`X} permissions errors in all versions, and 10.4 and 10.5 32-bit versions also contain illegal overlapping sections. Modern, strict PE loaders will refuse to load such images unless additional mitigations are applied. The image loader which matters here is the one provided by the system firmware, or by OpenDuet if OpenDuet is providing the UEFI compatibility layer. Image loaders which enforce these stricter rules include the loader provided with current versions of OpenDuet, the loader in OVMF if compiled from [audk](https://github.com/acidanthera/audk), and possibly the image loaders of some very recent 3rd party firmware (e.g. Microsoft).
 
-This quirk detects these issues and pre-processes such images in memory, so that a modern loader will accept them.
+This quirk detects these issues and pre-processes such images in memory so that a stricter loader will accept them.
 
-Pre-processing in memory is incompatible with secure boot, as the image loaded is not the image on disk, so you cannot sign files which are loaded in this way based on their original disk image contents. Certain firmware will offer to register the hash of new, unknown images - this would still work. On the other hand, it is not particularly realistic to want to start these early, insecure images with secure boot anyway.
+On a system with such a modern, stricter loader this quirk is required to load Mac OS X 10.4 to macOS 10.12, and is required for all newer macOS when `SecureBootModel` is set to `Disabled`.
 
-*Note 1*: The quirk is never applied during the Apple secure boot path for newer macOS. The Apple secure boot path includes its own separate mitigations for `boot.efi` `W^{`X} issues.
+*Note 1*: The quirk is never applied during the Apple secure boot path for newer macOS. The Apple secure boot path in OpenCore includes its own separate mitigations for `boot.efi` `W^{`X} issues.
 
 *Note 2*: When enabled, and when not processing for Apple secure boot, this quirk is applied to:
 * All images from Apple Fat binaries (32-bit and 64-bit versions in one image).
 * All Apple-signed images.
 * All images at `\System\Library\CoreServices\boot.efi` within their filesystem. 
 
-*Note 3*: This quirk is needed for Mac OS X 10.4 to macOS 10.12 (and higher, if Apple secure boot is not enabled), but only when the firmware itself includes a modern, more secure PE COFF image loader. This applies to current builds of OpenDuet, and to OVMF if built from audk source code.
+*Note 3*: Pre-processing in memory is incompatible with UEFI secure boot, as the image loaded is not the image on disk, so you cannot sign files which are loaded in this way based on their original disk image contents. Certain firmware will offer to register the hash of new, unknown images for future secure boot - this would still work. On the other hand, it is not particularly realistic to want to start these early, insecure images with secure boot anyway.
 
 <h3 id=booter-quirks-forcebootersignature>Booter -> Quirks -> ForceBooterSignature</h3>
 
@@ -5876,3 +5877,21 @@ The addresses written here must be part of the memory map, have a `EfiConvention
 * `MemoryMappedIO` --- `EfiMemoryMappedIO`
 * `MemoryMappedIOPortSpace` --- `EfiMemoryMappedIOPortSpace`
 * `PalCode` --- `EfiPalCode`
+
+<h2 id=uefi-unload>UEFI -> Unload</h2>
+
+**Type**: `plist array`
+
+**Default**: Empty
+
+**Failsafe**: Empty
+
+**Description**: Unload specified firmware drivers.
+
+To be filled with `plist string` entries containing the names of firmware drivers to unload before loading the `Drivers` section. This setting is typically only required if a user-provided driver is a variant of an existing system firmware driver, and if the new driver would detect itself as partially loaded, or otherwise fail to operate correctly, if the old driver is not unloaded first.
+
+**Warning**: Unloading system firmware drivers is usually not required and not recommended. Poorly written drivers may crash when unloaded, or cause subsequent crashes (e.g by allowing themselves to be unloaded even though they have active dependencies). However standard UEFI network stack drivers should unload cleanly.
+
+*Note 1*: See `SysReport/Drivers/DriverImageNames.txt` for the list of drivers which this option can attempt to unload. The relevant name is the driver component name. Drivers are only listed if they implement `DriverBindingProtocol` and `LoadedImageProtocol`, and have an available component name.
+
+*Note 2*: The NVRAM `Lang` and `PlatformLang` variables are ignored when determining the driver component names recognised by this option, and listed in the `SysReport` file. This is in order to make unloading images stable across changes in these variables. The UEFI Shell `dh` command takes account of these variables, so in some circumstances may display different driver component names from those listed for this option, unless these variables are cleared.
