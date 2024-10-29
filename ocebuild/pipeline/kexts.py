@@ -200,6 +200,19 @@ def sort_kext_cfbundle(filepaths: List[Union[str, Path]]) -> OrderedDict:
       (ordered if num_dependents(k) else unordered).append(k)
     nodes[-1] = ordered + sorted(unordered, key=lambda k: k['name'])
 
+  # Handle colliding cfbundleidentifiers (or unmapped kexts)
+  for kext in sorted_dependencies:
+    if not any(kext in node for node in nodes):
+      for node in nodes:
+        for i,k in enumerate(node):
+          # If the kext has a duplicate cfbundleidentifier, upsert it before the
+          # colliding kext in the node list. Here, we assume that the kexts are
+          # never loaded at the same time (i.e. they have exclusive MinKernel
+          # and MaxKernel versions).
+          if kext['identifier'] == k['identifier']:
+            node.insert(i if kext['__path'] < k['__path'] else i + 1, kext)
+            break
+
   # Apply new node sorting scheme to sorted kexts list
   sorted_dependencies = []
   sorting_scheme = lambda n: (n[0]['name'][:3], -len(n))
