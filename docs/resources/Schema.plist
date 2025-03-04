@@ -5,7 +5,7 @@
 	<key>#Revision</key>
 	<dict>
 		<key>OpenCore-Version</key>
-		<string>1.0.2</string>
+		<string>1.0.4</string>
 	</dict>
 	<key>ACPI</key>
 	<dict>
@@ -131,6 +131,8 @@
 			<key>AllowRelocationBlock</key>
 			<false/>
 			<key>AvoidRuntimeDefrag</key>
+			<false/>
+			<key>ClearTaskSwitchBit</key>
 			<false/>
 			<key>DevirtualiseMmio</key>
 			<false/>

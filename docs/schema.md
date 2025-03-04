@@ -1,8 +1,8 @@
-<h1 id=schema>OpenCore Config.plist Schema - v1.0.2</h1>
+<h1 id=schema>OpenCore Config.plist Schema - v1.0.4</h1>
 
-**Last Updated**: `2024-10-08 18:26:07.539152+00:00`
+**Last Updated**: `2025-03-04 15:42:37.708632+00:00`
 
-**Revision**: `{ SHA1: 22171e0903954cac74e7734c945d031c32a7c8c7 }`
+**Revision**: `{ SHA1: ceb0e8d733c9afc32cebe5fcde69d1e4251ecc37 }`
 
 <h2 id=table-of-contents>Table of Contents</h2>
 
@@ -60,6 +60,7 @@
 - [Booter -> Quirks](#booter-quirks)
   - [Booter -> Quirks -> AllowRelocationBlock](#booter-quirks-allowrelocationblock)
   - [Booter -> Quirks -> AvoidRuntimeDefrag](#booter-quirks-avoidruntimedefrag)
+  - [Booter -> Quirks -> ClearTaskSwitchBit](#booter-quirks-cleartaskswitchbit)
   - [Booter -> Quirks -> DevirtualiseMmio](#booter-quirks-devirtualisemmio)
   - [Booter -> Quirks -> DisableSingleUser](#booter-quirks-disablesingleuser)
   - [Booter -> Quirks -> DisableVariableWrite](#booter-quirks-disablevariablewrite)
@@ -990,6 +991,20 @@ This quirk typically requires `ProvideCustomSlide` and `AvoidRuntimeDefrag` to b
 This option fixes UEFI runtime services (date, time, NVRAM, power control, etc.) support on firmware that uses SMM backing for certain services such as variable storage. SMM may try to access memory by physical addresses in non-SMM areas but this may sometimes have been moved by boot.efi. This option prevents boot.efi from moving such data.
 
 *Note*: Most types of firmware, apart from Apple and VMware, need this quirk.
+
+<h3 id=booter-quirks-cleartaskswitchbit>Booter -> Quirks -> ClearTaskSwitchBit</h3>
+
+**Type**: `plist boolean`
+
+**Default**: `false`
+
+**Failsafe**: `false`
+
+**Description**: Clear task switch bit during UEFI runtime services calls.
+
+This quirk resolves FPU-related crashes in UEFI runtime services when using either the 32-bit kernel on a 64-bit UEFI implementation, or the 64-bit kernel on a 32-bit UEFI implementation by removing the task switch (`TS`) bit from `CR0` register during their execution. These crashes occur if there is any FPU/SSE instruction usage in UEFI runtime services as XNU is unable to handle exceptions from mixed-mode code. This quirk requires `OC_FIRMWARE_RUNTIME` protocol implemented in `OpenRuntime.efi`.
+
+*Note*: This quirk should only be required when running older macOS versions when the 32-bit kernel is used on a 64-bit UEFI implementation, such as Microsoft Hyper-V.
 
 <h3 id=booter-quirks-devirtualisemmio>Booter -> Quirks -> DevirtualiseMmio</h3>
 
@@ -2549,7 +2564,7 @@ Using flavours means that you can switch between icon sets easily, with the flav
 
 Things to keep in mind:
 * For security reasons `Ext<Flavour>.icns` and `<Flavour>.icns` are both supported, and only `Ext<Flavour>.icns` will be used if the entry is on an external drive (followed by default fallback `ExtHardDrive.icns`).
-* Where both apply `.VolumeIcon.icns` takes precence over `.contentFlavour`.
+* Where both apply `.VolumeIcon.icns` takes precedence over `.contentFlavour`.
 * In order to allow icons and audio assist to work correctly for tools (e.g. for UEFI Shell), system default boot entry icons (see `Docs/Flavours.md`) specified in the `Flavour` setting for `Tools` or `Entries` will continue to apply even when flavour is disabled. Non-system icons will be ignored in thiscase. In addition, the flavours `UEFIShell` and `NVRAMReset` are given special processing, identifying their respective tools to apply correct audio-assist, default builtin labels, etc.
 * A list of recommended flavours is provided in `Docs/Flavours.md`. 
 * `0x0100` --- `OC_ATTR_USE_REVERSED_UI`, reverse position of Shutdown and Restart buttons, affects OpenCanopy and builtin picker. The reversed setting matches older macOS, and since it was the previous default in OpenCore it may better match some custom backgrounds. Only applicable when `OC_ATTR_USE_MINIMAL_UI` is not set.
@@ -2602,7 +2617,7 @@ The following actions are currently considered:
 
 *Note 2*: In addition to `OPT`, OpenCore supports using both the `Escape` and `Zero` keys to enter the OpenCore picker when `ShowPicker` is disabled. `Escape` exists to support co-existence with the Apple picker (including OpenCore `Apple` picker mode) and to support firmware that fails to report held `OPT` key, as on some PS/2 keyboards. In addition, `Zero` is provided to support systems on which `Escape` is already assigned to some other pre-boot firmware feature. In systems which do not require `KeySupport`, pressing and holding one of these keys from after power on until the picker appears should always be successful. The same should apply when using `KeySupport` mode if it is correctly configured for the system, i.e. with a long enough `KeyForgetThreshold`. If pressing and holding the key is not successful to reliably enter the picker, multiple repeated keypresses may be tried instead.
 
-*Note 3*: On Macs with problematic GOP, it may be difficult to re-bless OpenCore if its bless status is lost. The `BootKicker` utility can be used to work around this problem, if set up as a Tool in OpenCore with `FullNvramAccess` enabled. It will launch the Apple picker, which allows selection of an item to boot next (with `Enter`), or next and from then on until the next change (with `CTRL+Enter`). Note that after the selection is made, the system *will reboot* before the chosen entry is booted. While this behaviour might seem surprising, it can be used both to switch which OpenCore installation is blessed, with `CTRL+Enter`, e.g. from a recovery OpenCore installation on CD (selected with the `C` key on boot) back to the main installion of OpenCore on the hard drive, if this is lost after an NVRAM reset. It can also be used, even when the native picker cannot be shown normally (unsupported GPU), to do a one-shot boot without OpenCore, e.g. to another OS or tool, or to an earlier version of macOS.
+*Note 3*: On Macs with problematic GOP, it may be difficult to re-bless OpenCore if its bless status is lost. The `BootKicker` utility can be used to work around this problem, if set up as a Tool in OpenCore with `FullNvramAccess` enabled. It will launch the Apple picker, which allows selection of an item to boot next (with `Enter`), or next and from then on until the next change (with `CTRL+Enter`). Note that after the selection is made, the system *will reboot* before the chosen entry is booted. While this behaviour might seem surprising, it can be used both to switch which OpenCore installation is blessed, with `CTRL+Enter`, e.g. from a recovery OpenCore installation on CD (selected with the `C` key on boot) back to the main installation of OpenCore on the hard drive, if this is lost after an NVRAM reset. It can also be used, even when the native picker cannot be shown normally (unsupported GPU), to do a one-shot boot without OpenCore, e.g. to another OS or tool, or to an earlier version of macOS.
 
 <h3 id=misc-boot-pickervariant>Misc -> Boot -> PickerVariant</h3>
 
@@ -3170,18 +3185,18 @@ The `vault.plist` file should contain SHA-256 hashes for all files used by OpenC
 The `vault.sig` file should contain a raw 256 byte RSA-2048 signature from a SHA-256 hash of `vault.plist`. The signature is verified against the public key embedded into `OpenCore.efi`.
 
 To embed the public key, either one of the following should be performed:
-* Provide public key during the `OpenCore.efi` compilation in [`OpenCoreVault.c`](https://github.com/acidanthera/OpenCorePkg/blob/master/Platform/OpenCore/OpenCoreVault.c) file.
+* Provide public key during the `OpenCore.efi` compilation in [`OpenCoreVault.c`](https://github.com/acidanthera/OpenCorePkg/blob/master/Library/OcMainLib/OpenCoreVault.c) file.
 * Binary patch `OpenCore.efi` replacing zeroes with the public key between `=BEGIN OC VAULT=` and `==END OC VAULT==` ASCII markers. 
 
 The RSA public key 520 byte format description can be found in Chromium OS documentation. To convert the public key from X.509 certificate or from PEM file use [RsaTool](https://github.com/acidanthera/OpenCorePkg/tree/master/Utilities/CreateVault).
 
-The complete set of commands to:
+The steps to binary patch `OpenCore.efi` are:
 * Create `vault.plist`.
 * Create a new RSA key (always do this to avoid loading old configuration).
 * Embed RSA key into `OpenCore.efi`.
 * Create `vault.sig`. 
 
-Can look as follows:
+A script to do this is privided in OpenCore releases:
 
 <h2 id=misc-serial>Misc -> Serial</h2>
 
@@ -3363,7 +3378,7 @@ This option will override serial port properties listed in the **`Serial Custom 
 
 To be filled with `plist dict` values, describing each load entry. Refer to the **Entry Properties** section below for details.
 
-*Note*: Certain UEFI tools, such as UEFI Shell, can be very dangerous and **MUST NOT** appear in production configurations, paticularly in vaulted configurations as well as those protected by secure boot, as such tools can be used to bypass the secure boot chain. Refer to the **UEFI** section for examples of UEFI tools.
+*Note*: Certain UEFI tools, such as UEFI Shell, can be very dangerous and **MUST NOT** appear in production configurations, particularly in vaulted configurations as well as those protected by secure boot, as such tools can be used to bypass the secure boot chain. Refer to the **UEFI** section for examples of UEFI tools.
 
 <h3 id=misc-tools-arguments>Misc -> Tools[] -> Arguments</h3>
 
@@ -4478,7 +4493,7 @@ The APFS driver version connects the APFS driver with the macOS release. Apple u
 **Description**: Determine whether the OpenCore builtin or the OEM Apple Event protocol is used.
 
 This option determines whether the OEM Apple Event protocol is used (where available), or whether OpenCore's reversed engineered and updated re-implementation is used. In general OpenCore's re-implementation should be preferred, since it contains updates such as noticeably improved fine mouse cursor movement and configurable key repeat delays.
-* `Auto` --- Use the OEM Apple Event implementation if available, connected and recent enough to be used, otherwise use the OpenCore re-implementation. On non-Apple hardware, this will use the OpenCore builtin implementation. On some Macs such as Classic Mac Pros, this will prefer the Apple implementation but on both older and newer Mac models than these, this option will typically use the OpenCore re-implementation instead. On older Macs, this is because the implementation available is too old to be used while on newer Macs, it is because of optimisations added by Apple which do not connect the Apple Event protocol except when needed -- e.g. except when the Apple boot picker is explicitly started. Due to its somewhat unpredicatable results, this option is not typically recommended.
+* `Auto` --- Use the OEM Apple Event implementation if available, connected and recent enough to be used, otherwise use the OpenCore re-implementation. On non-Apple hardware, this will use the OpenCore builtin implementation. On some Macs such as Classic Mac Pros, this will prefer the Apple implementation but on both older and newer Mac models than these, this option will typically use the OpenCore re-implementation instead. On older Macs, this is because the implementation available is too old to be used while on newer Macs, it is because of optimisations added by Apple which do not connect the Apple Event protocol except when needed -- e.g. except when the Apple boot picker is explicitly started. Due to its somewhat unpredictable results, this option is not typically recommended.
 * `Builtin` ---Always use OpenCore's updated re-implementation of the Apple Event protocol. Use of this setting is recommended even on Apple hardware, due to improvements (better fine mouse control, configurable key delays) made in the OpenCore re-implementation of the protocol.
 * `OEM` --- Assume Apple's protocol will be available at driver connection. On all Apple hardware where a recent enough Apple OEM version of the protocol is available -- whether or not connected automatically by Apple's firmware -- this option will reliably access the Apple implementation. On all other systems, this option will result in no keyboard or mouse support. For the reasons stated, `Builtin` is recommended in preference to this option in most cases.
 
@@ -4793,7 +4808,7 @@ May be required on some systems (e.g. Apple hardware, VMware Fusion guest) to al
 
 All UEFI audio will use this gain setting when the system amplifier gain read from the `SystemAudioVolumeDB` NVRAM variable is higher than this. This is to avoid over-loud UEFI audio when the system volume is set very high, or the `SystemAudioVolumeDB` NVRAM value has been misconfigured.
 
-*Note 1*: Decibels (dB) specify gain (postive values; increase in volume) or attenuation (negative values; decrease in volume) compared to some reference level. When you hear the sound level of a jet plane expressed as 120 decibels, say, the reference level is the sound level just audible to an average human. However generally in acoustic science and computer audio any reference level can be specified. Intel HDA and macOS natively use decibels to specify volume level. On most Intel HDA hardware the reference level of 0 dB is the *loudest* volume of the hardware, and all lower volumes are therefore negative numbers. The quietest volume on typical sound hardware is around -55 dB to -60 dB.
+*Note 1*: Decibels (dB) specify gain (positive values; increase in volume) or attenuation (negative values; decrease in volume) compared to some reference level. When you hear the sound level of a jet plane expressed as 120 decibels, say, the reference level is the sound level just audible to an average human. However generally in acoustic science and computer audio any reference level can be specified. Intel HDA and macOS natively use decibels to specify volume level. On most Intel HDA hardware the reference level of 0 dB is the *loudest* volume of the hardware, and all lower volumes are therefore negative numbers. The quietest volume on typical sound hardware is around -55 dB to -60 dB.
 
 *Note 2*: Matching how macOS handles decibel values, this value is converted to a signed byte; therefore values outside $-128$ dB to $+127$ dB (which are well beyond physically plausible volume levels) are not allowed.
 
@@ -4827,7 +4842,7 @@ The screen reader will use this amplifier gain if the system amplifier gain read
 
 The boot chime will not play if the system amplifier gain level in the `SystemAudioVolumeDB` NVRAM variable is lower than this.
 
-*Note 1*: This setting is designed to save unecessary pauses due to audio setup at inaudible volume levels, when no sound will be heard anyway. Whether there are inaudible volume levels depends on the hardware. On some hardware (including Apple) the audio values are well enough matched to the hardware that the lowest volume levels available are very quiet but audible, whereas on some other hardware combinations, the lowest part of the volume range may not be audible at all.
+*Note 1*: This setting is designed to save unnecessary pauses due to audio setup at inaudible volume levels, when no sound will be heard anyway. Whether there are inaudible volume levels depends on the hardware. On some hardware (including Apple) the audio values are well enough matched to the hardware that the lowest volume levels available are very quiet but audible, whereas on some other hardware combinations, the lowest part of the volume range may not be audible at all.
 
 *Note 2*: See `MaximumGain` for an explanation of decibel volume levels.
 
@@ -5237,7 +5252,7 @@ macOS bootloader requires GOP or UGA (for 10.4 EfiBoot) to be present on console
 
 **Description**: Reconnect all graphics drivers during driver connection.
 
-On certain firmware, it may be desireable to use an alternative graphics driver, for example BiosVideo.efi, providing better screen resolution options on legacy machines, or a driver supporting `ForceResolution`. This option attempts to disconnect all currently connected graphics drivers before connecting newly loaded drivers.
+On certain firmware, it may be desirable to use an alternative graphics driver, for example BiosVideo.efi, providing better screen resolution options on legacy machines, or a driver supporting `ForceResolution`. This option attempts to disconnect all currently connected graphics drivers before connecting newly loaded drivers.
 
 *Note*: This option requires `ConnectDrivers` to be enabled.
 
@@ -5277,7 +5292,7 @@ On certain firmware, the controllers that produce the console protocols (simple 
 
 **Description**: Sets console output screen resolution.
 * Set to `WxH@Bpp` (e.g. `1920x1080@32`) or `WxH` (e.g. `1920x1080`) formatted string to request custom resolution from GOP if available.
-* Set to `Max` to attempt using the largest available screen resolution. 
+* Set to `Max` to attempt using the largest available screen resolution. When set to `Max` all available resolutions will be listed in lines starting `OCC: Mode` in the debug log. 
 
 On HiDPI screens `APPLE_VENDOR_VARIABLE_GUID` `UIScale` NVRAM variable may need to be set to `02` to enable HiDPI scaling in `Builtin` text renderer, FileVault 2 UEFI password interface, and boot screen logo. Refer to the **Recommended Variables** section for details.
 
@@ -5892,6 +5907,8 @@ To be filled with `plist string` entries containing the names of firmware driver
 
 **Warning**: Unloading system firmware drivers is usually not required and not recommended. Poorly written drivers may crash when unloaded, or cause subsequent crashes (e.g by allowing themselves to be unloaded even though they have active dependencies). However standard UEFI network stack drivers should unload cleanly.
 
-*Note 1*: See `SysReport/Drivers/DriverImageNames.txt` for the list of drivers which this option can attempt to unload. The relevant name is the driver component name. Drivers are only listed if they implement `DriverBindingProtocol` and `LoadedImageProtocol`, and have an available component name.
+*Note 1*: Drivers specified in this option will be unloaded in the reverse of the order in which they were loaded, regardless of the order in which they are specified here.
 
-*Note 2*: The NVRAM `Lang` and `PlatformLang` variables are ignored when determining the driver component names recognised by this option, and listed in the `SysReport` file. This is in order to make unloading images stable across changes in these variables. The UEFI Shell `dh` command takes account of these variables, so in some circumstances may display different driver component names from those listed for this option, unless these variables are cleared.
+*Note 2*: See `SysReport/Drivers/DriverImageNames.txt` for the list of drivers which this option can attempt to unload. The relevant name is the driver component name. Drivers are only listed if they implement `DriverBindingProtocol` and `LoadedImageProtocol`, and have an available component name.
+
+*Note 3*: The NVRAM `Lang` and `PlatformLang` variables are ignored when determining the driver component names recognised by this option, and listed in the `SysReport` file. This is in order to make unloading images stable across changes in these variables. The UEFI Shell `dh` command takes account of these variables, so in some circumstances may display different driver component names from those listed for this option, unless these variables are cleared.

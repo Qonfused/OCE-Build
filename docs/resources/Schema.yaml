@@ -1,5 +1,5 @@
 '#Revision':
-  OpenCore-Version:                 String  | "1.0.2"
+  OpenCore-Version:                 String  | "1.0.4"
 ACPI:
   Add:
     - Comment:                      String  | ""
@@ -54,6 +54,7 @@ Booter:
   Quirks:
     AllowRelocationBlock:           Boolean | false
     AvoidRuntimeDefrag:             Boolean | false
+    ClearTaskSwitchBit:             Boolean | false
     DevirtualiseMmio:               Boolean | false
     DisableSingleUser:              Boolean | false
     DisableVariableWrite:           Boolean | false
