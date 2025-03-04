@@ -102,9 +102,9 @@ jobs:
       # Upload coverage data
       - name: Store coverage file
         if: steps.python-pytest.outcome != 'failure'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: coverage
+          name: coverage-${{ matrix.python-version }}
           path: .coverage.${{ matrix.python-version }}
   # Verify python matrix results for branch protection
   # @see https://github.com/orgs/community/discussions/33579#discussioncomment-3796858
@@ -144,11 +144,12 @@ jobs:
       pull-requests: write
       contents: write
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/download-artifact@v3
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
         id: download
         with:
-          name: 'coverage'
+          pattern: coverage-
+          merge-multiple: true
       - name: Coverage comment
         id: coverage_comment
         uses: py-cov-action/python-coverage-comment-action@v3
@@ -203,7 +204,7 @@ jobs:
 
             {{ marker }}
       - name: Store Pull Request comment to be posted
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: steps.coverage_comment.outputs.COMMENT_FILE_WRITTEN == 'true'
         with:
           name: python-coverage-comment-action
