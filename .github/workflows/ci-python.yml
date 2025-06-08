@@ -37,10 +37,12 @@ jobs:
             experimental: false
           - python-version: "3.12"
             experimental: false
+          - python-version: "3.13"
+            experimental: false
           # Experimental versions
           # @see https://raw.githubusercontent.com/actions/python-versions/main/versions-manifest.json
-          # - python-version: "3.13-dev"
-          #   python-min-version: "3.13.0rc1"
+          # - python-version: "3.14-dev"
+          #   python-min-version: "3.14.0rc1"
           #   experimental: true
         # os: [ubuntu-latest, windows-latest, macos-latest]
     name: "Test (python ${{ matrix.python-version }})"
@@ -78,10 +80,11 @@ jobs:
             --max "${{ matrix.python-max-version }}"
       # Setup Poetry virtual environment
       - name: Use matrix python version in Poetry virtualenv
+        shell: bash
         run: |
           poetry env use ${{ matrix.python-version }}
       - name: Setup Poetry plugins and project dependencies
-        run: poetry install -n
+        run: poetry install -n --with test
       # Check the current runner environment
       - name: Check GitHub API limit
         if: steps.validate-experimental.outcome != 'failure'
@@ -97,15 +100,15 @@ jobs:
         run: |
           poetry test -vvv
         env:
-          COVERAGE_FILE: ".coverage.${{ matrix.python-version }}"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COVERAGE_FILE: .coverage
       # Upload coverage data
       - name: Store coverage file
         if: steps.python-pytest.outcome != 'failure'
         uses: actions/upload-artifact@v4
         with:
           name: coverage-${{ matrix.python-version }}
-          path: .coverage.${{ matrix.python-version }}
+          path: .coverage
   # Verify python matrix results for branch protection
   # @see https://github.com/orgs/community/discussions/33579#discussioncomment-3796858
   check:
