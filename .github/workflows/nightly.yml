@@ -91,7 +91,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ocebuild-py${{ env.python-version }}
+          name: ocebuild-py${{ env.python-version }}-${{ matrix.os }}-${{ matrix.arch }}
           path: dist/*
           if-no-files-found: error
           retention-days: 7
@@ -102,16 +102,19 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Download artifact
+      - name: Download all platform artifacts
         uses: actions/download-artifact@v4
         with:
-          name: ocebuild-py${{ env.python-version }}
+          pattern: ocebuild-py${{ env.python-version }}-*
           path: dist
       - name: Display structure of downloaded files
         run: ls -R
         working-directory: dist
       - name: Set executable permissions
-        run: chmod +x dist/*
+        run: |
+          find dist -mindepth 2 -type f -exec mv -t dist {} + && \
+          find dist -type d -empty -delete && \
+          chmod +x dist/*
 
       - name: Get metadata for the latest commit hash and branch name
         shell: bash
