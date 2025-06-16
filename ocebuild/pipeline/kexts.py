@@ -172,6 +172,7 @@ def sort_kext_cfbundle(filepaths: List[Union[str, Path]]) -> OrderedDict:
   # Group each node alphabetically by dependency name
   offset = 0
   nodes = []
+  included = set()
   for idx, kext in enumerate(sorted_dependencies):
     has_resolved_dependencies = any(k in identifier_map
                                     for k in kext.get('dependencies', {}))
@@ -182,43 +183,60 @@ def sort_kext_cfbundle(filepaths: List[Union[str, Path]]) -> OrderedDict:
     # Has no dependencies on any nodes' dependents
     if is_standalone_kext and not has_resolved_dependencies:
       nodes.append([kext])
+      included.add(id(kext))
       offset = idx + 1
       node_added = True
     # Has dependents in the current node
     elif num_dependents(kext) and not (is_bundled_kext or offset == idx):
       # Append previous node group if it exists
-      prev_node = sorted_dependencies[offset:idx]
+      prev_node = [k for k in sorted_dependencies[offset:idx] if id(k) not in included]
       if prev_node:
-          nodes.append(prev_node)
-          node_added = True # Mark that a node was potentially added
+        nodes.append(prev_node)
+        for k in prev_node:
+          included.add(id(k))
+        node_added = True
       # Start new offset for the current kext (which might start a new node later)
       offset = idx
-      # Note: Current kext is not added here, handled in subsequent iterations or final step
     # Is bundled or has dependencies in the current node (group with previous)
     elif not (has_resolved_dependencies or is_bundled_kext):
       # Append node including current kext, update offset for next group
-      nodes.append(sorted_dependencies[offset : idx + 1])
+      node = [k for k in sorted_dependencies[offset : idx + 1] if id(k) not in included]
+      if node:
+        nodes.append(node)
+        for k in node:
+          included.add(id(k))
+        node_added = True
       offset = idx + 1
-      node_added = True
     # Ensures the last node is added (includes all remaining kexts)
     elif idx == len(sorted_dependencies) - 1:
       # Append the final node including the last kext
-      final_node = sorted_dependencies[offset : idx + 1]
+      final_node = [k for k in sorted_dependencies[offset : idx + 1] if id(k) not in included]
       if final_node:
-          nodes.append(final_node)
-          node_added = True
+        nodes.append(final_node)
+        for k in final_node:
+          included.add(id(k))
+        node_added = True
     else:
       # Otherwise, continue processing without creating a new node yet
       continue
 
     # Sort the inserted node's standalone dependents alphabetically, only if a node was added
     if node_added and nodes and nodes[-1]: # Check if nodes is not empty and last node is not empty
-        last_node = nodes[-1]
-        ordered, unordered = [], []
-        for k in last_node:
-          (ordered if num_dependents(k) else unordered).append(k)
-        # Only replace if the sorting actually changes something or if it's necessary
-        nodes[-1] = ordered + sorted(unordered, key=lambda k: k['name'])
+      last_node = nodes[-1]
+      ordered, unordered = [], []
+      for k in last_node:
+        (ordered if num_dependents(k) else unordered).append(k)
+      # Only replace if the sorting actually changes something or if it's necessary
+      nodes[-1] = ordered + sorted(unordered, key=lambda k: k['name'])
+
+  # Ensure all kexts are included in nodes (no dropped/overwritten kexts)
+  missing = [k for k in sorted_dependencies if id(k) not in included]
+  if missing:
+    # Only append if at least one kext in missing is not already included
+    if any(id(k) not in included for k in missing):
+      nodes.append([k for k in missing if id(k) not in included])
+      for k in missing:
+        included.add(id(k))
 
   # Handle colliding cfbundleidentifiers (or unmapped kexts)
   for kext in sorted_dependencies:
