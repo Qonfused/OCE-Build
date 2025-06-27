@@ -41,10 +41,10 @@ def main(cpu, hyperv, out):
     plist_file = next(tmp_dir.glob('**/patches.plist'))
     amd_patches = write_yaml(read_config(plist_file), schema='annotated')
     amd_patches = "\n".join(amd_patches)\
-      .replace('<B8000000 0000>', f'<B8{cpu:X}0000 0000>')\
-      .replace('<BA000000 0000>', f'<BA{cpu:X}0000 0000>')\
-      .replace('<BA000000 0090>', f'<BA{cpu:X}0000 0090>')\
-      .replace('<BA000000 00>',   f'<BA{cpu:X}0000 00>')
+      .replace('<B8000000 0000>', f'<B8{cpu:02X}0000 0000>')\
+      .replace('<BA000000 0000>', f'<BA{cpu:02X}0000 0000>')\
+      .replace('<BA000000 0090>', f'<BA{cpu:02X}0000 0090>')\
+      .replace('<BA000000 00>',   f'<BA{cpu:02X}0000 00>')
 
   wmsr_patch = ''
   if hyperv:
