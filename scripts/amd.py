@@ -10,7 +10,7 @@
 # description = "Generate patches.yaml from AMD Vanilla and WMSR patches"
 # dependencies = [
 #   "click",
-#   "ocebuild>=0.1.0.dev0",
+#   "ocebuild>=0.1.1.dev0",
 # ]
 # ///
 

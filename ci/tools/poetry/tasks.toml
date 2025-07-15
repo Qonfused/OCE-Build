@@ -7,6 +7,7 @@
 
 ################################################################################
 
+# poetry run poe bump-version --major
 [tool.poe.tasks.bump-version]
 script  = "ci.scripts.bump_version:_main"
 help    = "[CI] Bumps the project version using the given semver string."

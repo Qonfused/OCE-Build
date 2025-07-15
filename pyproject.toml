@@ -1,6 +1,6 @@
 [tool.poetry]
 name          = "ocebuild"
-version       = "0.1.0-dev"
+version       = "0.1.1-dev"
 description   = "Portable OpenCore EFI dependency & build manager."
 authors       = [ "Cory Bennett <csquaredbennett@gmail.com>" ]
 readme        = "README.md"
