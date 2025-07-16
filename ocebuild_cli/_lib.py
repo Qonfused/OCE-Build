@@ -6,7 +6,7 @@
 
 from functools import wraps as functools_wraps
 
-from typing import Optional
+from typing import List, Optional
 
 import click
 
@@ -28,6 +28,7 @@ class CLIEnv:
   """Shared CLI environment."""
 
   tmpdir: Optional[str] = None
+  pargs: List[str] = []
 
   global VERBOSE, DEBUG
   def __init__(self,

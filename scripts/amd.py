@@ -14,6 +14,9 @@
 # ]
 # ///
 
+from os import getcwd
+from pathlib import Path
+
 import click
 from ocebuild.filesystem import extract_archive
 from ocebuild.parsers.yaml import write_yaml
@@ -25,6 +28,13 @@ WMSR_PATCH_ARCHIVE = 'https://github.com/user-attachments/files/18508274/patch.p
 
 
 @click.command()
+@click.option("-c", "--cwd",
+              type=click.Path(exists=True,
+                              file_okay=False,
+                              readable=True,
+                              writable=True,
+                              path_type=Path),
+              help="Use the specified directory as the working directory.")
 @click.option('--cpu',
               required=True,
               type=int,
@@ -36,7 +46,11 @@ WMSR_PATCH_ARCHIVE = 'https://github.com/user-attachments/files/18508274/patch.p
               default='patch.amd.yml',
               show_default=True,
               help='Output path for the generated YAML file')
-def main(cpu, hyperv, out):
+def main(cwd, cpu, hyperv, out):
+  if not cwd: cwd = getcwd()
+  cwd = Path(cwd).resolve()
+  out = cwd / out
+
   with extract_archive(AMD_PATCH_ARCHIVE) as tmp_dir:
     plist_file = next(tmp_dir.glob('**/patches.plist'))
     amd_patches = write_yaml(read_config(plist_file), schema='annotated')

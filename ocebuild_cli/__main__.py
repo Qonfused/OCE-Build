@@ -66,7 +66,7 @@ class PassthroughCommand(click.Group):
 
         # Store the script path and remaining args in the context
         ctx.params['exec_file'] = script_path
-        ctx.params['args'] = new_args
+        ctx.obj.pargs = new_args
 
         return []  # No more arguments to process
 
@@ -78,18 +78,19 @@ class PassthroughCommand(click.Group):
 @click.option('-e', '--exec', 'exec_file',
   type=click.Path(exists=True, dir_okay=False),
   help='Run the specified Python file with the CLI environment.')
-@click.argument('args', nargs=-1, type=click.UNPROCESSED)
 @click.version_option(message='ocebuild-cli %(version)s', version=__version__)
 @click.pass_context
-def cli(ctx, exec_file=None, args=None):
+def cli(ctx, exec_file=None):
   """Main runner for the CLI."""
+
   if exec_file and ctx.invoked_subcommand is None:
     try:
       # Run python script in a controlled namespace (inherits pyinstaller env)
       import runpy, sys
 
-      sys.argv = [exec_file] + list(args) if args else [exec_file]
-      ctx.obj.__dict__['argv'] = list(args) if args else []
+      args = ctx.obj.pargs
+      sys.argv = [exec_file] + list(args)
+      ctx.obj.__dict__['argv'] = args
 
       runpy.run_path(exec_file, run_name="__main__", init_globals=ctx.obj.__dict__)
       return
