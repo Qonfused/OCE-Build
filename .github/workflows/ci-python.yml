@@ -135,80 +135,80 @@ jobs:
     #         "description": "Updated status to reflect required python tests.",
     #         "context": "ci:python"
     #       }'
-  # Generate coverage branch data and PR comment text
-  #
-  # Updates `python-coverage-comment-action` branch
-  # and edits cached PR comment text reporting test coverage.
-  coverage-branch:
-    name: Coverage (python >=3.8)
-    runs-on: ubuntu-latest
-    needs: tests
-    permissions:
-      pull-requests: write
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
-        id: download
-        with:
-          pattern: coverage-
-          merge-multiple: true
-      - name: Coverage comment
-        id: coverage_comment
-        uses: py-cov-action/python-coverage-comment-action@v3
-        with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # If true, will run `coverage combine` before reading the `.coverage` file.
-          MERGE_COVERAGE_FILES: true
-          # If true, will create an annotation on every line with missing coverage on a pull request.
-          ANNOTATE_MISSING_LINES: false
-          # Only needed if ANNOTATE_MISSING_LINES is set to true. This parameter allows you to choose between
-          # notice, warning and error as annotation type. For more information look here:
-          # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-a-notice-message
-          ANNOTATION_TYPE: warning
-          # An alternative template for the comment for pull requests.
-          COMMENT_TEMPLATE: |
-            ### Python Coverage: `{{ coverage.info.percent_covered | pct }}`
+  # # Generate coverage branch data and PR comment text
+  # #
+  # # Updates `python-coverage-comment-action` branch
+  # # and edits cached PR comment text reporting test coverage.
+  # coverage-branch:
+  #   name: Coverage (python >=3.8)
+  #   runs-on: ubuntu-latest
+  #   needs: tests
+  #   permissions:
+  #     pull-requests: write
+  #     contents: write
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: actions/download-artifact@v4
+  #       id: download
+  #       with:
+  #         pattern: coverage-
+  #         merge-multiple: true
+  #     - name: Coverage comment
+  #       id: coverage_comment
+  #       uses: py-cov-action/python-coverage-comment-action@v3
+  #       with:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #         # If true, will run `coverage combine` before reading the `.coverage` file.
+  #         MERGE_COVERAGE_FILES: true
+  #         # If true, will create an annotation on every line with missing coverage on a pull request.
+  #         ANNOTATE_MISSING_LINES: false
+  #         # Only needed if ANNOTATE_MISSING_LINES is set to true. This parameter allows you to choose between
+  #         # notice, warning and error as annotation type. For more information look here:
+  #         # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-a-notice-message
+  #         ANNOTATION_TYPE: warning
+  #         # An alternative template for the comment for pull requests.
+  #         COMMENT_TEMPLATE: |
+  #           ### Python Coverage: `{{ coverage.info.percent_covered | pct }}`
 
-            Line Coverage Summary:
-            | (Files)                                    | Diff (Changed Lines)                  | Covered Lines                                                                                                        | Missing Lines                                                                                                        | Excluded Lines                                                                                                         | (Total)                            |
-            | ------------------------------------------ | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
-            | {{ diff_coverage.files.items() | length }} | {{ diff_coverage.num_changed_lines }} | {{ coverage.info.covered_lines }} ({{ (coverage.info.covered_lines|int / coverage.info.num_statements|int) | pct }}) | {{ coverage.info.missing_lines }} ({{ (coverage.info.missing_lines|int / coverage.info.num_statements|int) | pct }}) | {{ coverage.info.excluded_lines }} ({{ (coverage.info.excluded_lines|int / coverage.info.num_statements|int) | pct }}) | {{ coverage.info.num_statements }} |
+  #           Line Coverage Summary:
+  #           | (Files)                                    | Diff (Changed Lines)                  | Covered Lines                                                                                                        | Missing Lines                                                                                                        | Excluded Lines                                                                                                         | (Total)                            |
+  #           | ------------------------------------------ | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
+  #           | {{ diff_coverage.files.items() | length }} | {{ diff_coverage.num_changed_lines }} | {{ coverage.info.covered_lines }} ({{ (coverage.info.covered_lines|int / coverage.info.num_statements|int) | pct }}) | {{ coverage.info.missing_lines }} ({{ (coverage.info.missing_lines|int / coverage.info.num_statements|int) | pct }}) | {{ coverage.info.excluded_lines }} ({{ (coverage.info.excluded_lines|int / coverage.info.num_statements|int) | pct }}) | {{ coverage.info.num_statements }} |
 
-            {%if diff_coverage.files -%}
-            <details>
-            <summary>Diff Coverage Details (click to unfold)</summary>
+  #           {%if diff_coverage.files -%}
+  #           <details>
+  #           <summary>Diff Coverage Details (click to unfold)</summary>
 
-            | (#)              | File (^Test)                                                                                                                                                                                                                                                   | Diff (%)                                                                                                                      | Covered Lines                                                                                                         | Missing Lines                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Excluded Lines                                                                                                                                                         | (Total)                                            |
-            | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
-            {% for filename, diff_file_coverage in diff_coverage.files | dictsort -%}
-              {%- set list=diff_file_coverage.violation_lines -%}
-              {%- set stack={ 'first': None, 'last': None, 'pending': None } -%}
-              {%- set output=[] -%}
-              {%- for line in list -%}
-                {%- if loop.index0 and line == list[loop.index0-1] + 1 -%}
-                  {{ stack.update({ 'last': line }) or "" }}
-                  {%- set range = stack.first ~ '-' ~ stack.last -%}
-                  {{ stack.update({ 'pending': ('#L' ~ range | replace("-", "-L")) }) or "" }}
-                {%- else -%}
-                  {{ stack.update({ 'first': line, 'last': None, 'pending': '#L' ~ line }) or "" }}
-                {%- endif -%}
-                {%- if (line+1 != list[loop.index]) -%}
-                  {{ output.append(stack['pending']) or "" }}
-                {%- endif -%}
-              {%- endfor -%}
-            | {{ loop.index }} | [`{{ filename | replace("ocebuild/", "", 1) }}`](https://github.com/${{github.repository}}/blob/${{github.head_ref}}/{{ filename }}) ([^](https://github.com/${{github.repository}}/blob/${{github.head_ref}}/{{ filename | replace(".py", "_test.py", 1) }})) | {{ "%+.0f" | format((coverage.files[filename].info.percent_covered - diff_file_coverage.percent_covered) | round | float) }}% | {{ coverage.files[filename].info.covered_lines }} ({{ coverage.files[filename].info.percent_covered | float | pct }}) | {%- if diff_file_coverage.violation_lines -%}<details><summary>{{ diff_file_coverage.violation_lines | count }} ({{ ((diff_file_coverage.violation_lines | count) / coverage.files[filename].info.num_statements) | float | pct }})</summary>{% set separator = joiner(", ") %}{% for range in output %}{{ separator() }}[`{{ range | replace('L','') | replace('#','') }}`](https://github.com/${{github.repository}}/blob/${{github.head_ref}}/{{ filename ~ range }}){% endfor %}</details>{%- else -%}`None`{%- endif %} | {{ coverage.files[filename].info.excluded_lines }} ({{ (coverage.files[filename].info.excluded_lines / coverage.files[filename].info.num_statements) | float | pct }}) | {{ coverage.files[filename].info.num_statements }} |
-            {% endfor -%}
+  #           | (#)              | File (^Test)                                                                                                                                                                                                                                                   | Diff (%)                                                                                                                      | Covered Lines                                                                                                         | Missing Lines                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Excluded Lines                                                                                                                                                         | (Total)                                            |
+  #           | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
+  #           {% for filename, diff_file_coverage in diff_coverage.files | dictsort -%}
+  #             {%- set list=diff_file_coverage.violation_lines -%}
+  #             {%- set stack={ 'first': None, 'last': None, 'pending': None } -%}
+  #             {%- set output=[] -%}
+  #             {%- for line in list -%}
+  #               {%- if loop.index0 and line == list[loop.index0-1] + 1 -%}
+  #                 {{ stack.update({ 'last': line }) or "" }}
+  #                 {%- set range = stack.first ~ '-' ~ stack.last -%}
+  #                 {{ stack.update({ 'pending': ('#L' ~ range | replace("-", "-L")) }) or "" }}
+  #               {%- else -%}
+  #                 {{ stack.update({ 'first': line, 'last': None, 'pending': '#L' ~ line }) or "" }}
+  #               {%- endif -%}
+  #               {%- if (line+1 != list[loop.index]) -%}
+  #                 {{ output.append(stack['pending']) or "" }}
+  #               {%- endif -%}
+  #             {%- endfor -%}
+  #           | {{ loop.index }} | [`{{ filename | replace("ocebuild/", "", 1) }}`](https://github.com/${{github.repository}}/blob/${{github.head_ref}}/{{ filename }}) ([^](https://github.com/${{github.repository}}/blob/${{github.head_ref}}/{{ filename | replace(".py", "_test.py", 1) }})) | {{ "%+.0f" | format((coverage.files[filename].info.percent_covered - diff_file_coverage.percent_covered) | round | float) }}% | {{ coverage.files[filename].info.covered_lines }} ({{ coverage.files[filename].info.percent_covered | float | pct }}) | {%- if diff_file_coverage.violation_lines -%}<details><summary>{{ diff_file_coverage.violation_lines | count }} ({{ ((diff_file_coverage.violation_lines | count) / coverage.files[filename].info.num_statements) | float | pct }})</summary>{% set separator = joiner(", ") %}{% for range in output %}{{ separator() }}[`{{ range | replace('L','') | replace('#','') }}`](https://github.com/${{github.repository}}/blob/${{github.head_ref}}/{{ filename ~ range }}){% endfor %}</details>{%- else -%}`None`{%- endif %} | {{ coverage.files[filename].info.excluded_lines }} ({{ (coverage.files[filename].info.excluded_lines / coverage.files[filename].info.num_statements) | float | pct }}) | {{ coverage.files[filename].info.num_statements }} |
+  #           {% endfor -%}
 
-            </details>
-            {%- endif %}
+  #           </details>
+  #           {%- endif %}
 
-            Last updated: `{{ coverage.meta.timestamp }}`
+  #           Last updated: `{{ coverage.meta.timestamp }}`
 
-            {{ marker }}
-      - name: Store Pull Request comment to be posted
-        uses: actions/upload-artifact@v4
-        if: steps.coverage_comment.outputs.COMMENT_FILE_WRITTEN == 'true'
-        with:
-          name: python-coverage-comment-action
-          path: python-coverage-comment-action.txt
+  #           {{ marker }}
+  #     - name: Store Pull Request comment to be posted
+  #       uses: actions/upload-artifact@v4
+  #       if: steps.coverage_comment.outputs.COMMENT_FILE_WRITTEN == 'true'
+  #       with:
+  #         name: python-coverage-comment-action
+  #         path: python-coverage-comment-action.txt
