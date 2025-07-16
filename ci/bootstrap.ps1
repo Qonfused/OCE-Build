@@ -58,5 +58,5 @@ Bootstrap -uri $BINARY_URL -dest $BINARY_PATH
 
 Write-Host ""
 
-Start-Process -Wait $BINARY_PATH -NoNewWindow -ArgumentList "build -c $pwd $patches"
+Start-Process -Wait $BINARY_PATH -NoNewWindow -ArgumentList $arguments
 Remove-Item $BINARY_PATH
