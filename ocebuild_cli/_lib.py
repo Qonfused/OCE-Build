@@ -27,6 +27,8 @@ DEBUG = False
 class CLIEnv:
   """Shared CLI environment."""
 
+  tmpdir: Optional[str] = None
+
   global VERBOSE, DEBUG
   def __init__(self,
                verbose_flag: bool=VERBOSE,
