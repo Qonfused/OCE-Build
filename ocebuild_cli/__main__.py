@@ -58,7 +58,7 @@ class PassthroughCommand(click.Group):
               from os.path import join, basename
               ctx.obj.tmpdir = tmpdir
               script_path = join(tmpdir, basename(urlparse(script_path).path))
-              with open(script_path, 'wb') as f:
+              with open(script_path, 'wb', encoding="UTF-8") as f:
                 f.write(response.read())
 
         # Remove -e/--exec and script_path from args

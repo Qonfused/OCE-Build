@@ -67,7 +67,7 @@ def main(cwd, cpu, hyperv, out):
       wmsr_patch = write_yaml(read_config(plist_file), schema='annotated')
       wmsr_patch = "\n".join(wmsr_patch)
 
-  with open(out, 'w') as f:
+  with open(out, 'w', encoding="UTF-8") as f:
     f.write(f"""\
 # AMD Patches
 # - Required as AMD does not have a native power management driver in macOS.
