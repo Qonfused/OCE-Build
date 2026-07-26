@@ -12,6 +12,7 @@ from typing import List, Optional, Tuple, Union
 
 import click
 from rich import box
+from rich.markup import escape
 from rich.table import Table
 
 from ocebuild.parsers.yaml import parse_yaml
@@ -45,20 +46,30 @@ def rich_resolver(resolver: ResolverType,
   elif 'path' in resolver_props:
     path_ = Path(resolver.path)
     # _checksum = resolver_props['__resolver'].checksum
-    name, resolution_str = resolution.split('@file:')
-    resolution_str = f'file:{resolution_str}' \
-      .replace(':', '[/dim cyan][dim]:[/dim][dim yellow]', 1) \
-      .replace(path_.name, f'[bold yellow]{path_.name}', 1) \
-      .replace('#', '[/bold yellow][/dim yellow][dim]#[dim bold]') \
-      .replace('=', '[/dim bold][dim]=')
+    name, resolution_str = resolution.split('@file:', 1)
+    name = escape(name)
+    resolution_str = escape(f'file:{resolution_str}') \
+      .replace(':', '[/dim cyan][dim]:[/dim][dim yellow]', 1)
+    path_name = escape(path_.name)
+    if path_name and path_name in resolution_str:
+      resolution_str = resolution_str.replace(
+        path_name, f'[bold yellow]{path_name}', 1)
+      hash_style = '[/bold yellow][/dim yellow][dim]#[dim bold]'
+    else:
+      # Compiled artifacts can have a different suffix than their specifier.
+      hash_style = '[/dim yellow][dim]#[dim bold]'
+    resolution_str = resolution_str \
+      .replace('#', hash_style, 1) \
+      .replace('=', '[/dim bold][dim]=', 1)
   elif 'url' in resolver_props:
     has_version_ = ':' in resolution
     close_color_ = "[/green]" if has_version_ else "[/dim cyan]"
-    name, resolution_str = resolution.split('@')
-    resolution_str = resolution_str \
+    name, resolution_str = resolution.split('@', 1)
+    name = escape(name)
+    resolution_str = escape(resolution_str) \
       .replace(':', '[/dim cyan][dim]:[/dim][green]', 1) \
-      .replace('#', f'{ close_color_ }[dim]#[dim bold]') \
-      .replace('=', '[/dim bold][dim]=')
+      .replace('#', f'{ close_color_ }[dim]#[dim bold]', 1) \
+      .replace('=', '[/dim bold][dim]=', 1)
 
   return f"[cyan]{name}[/cyan][dim cyan]@{resolution_str}"
 
