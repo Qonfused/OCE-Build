@@ -147,16 +147,27 @@ class GitHubResolver(BaseResolver):
       return all(s in asset['name'].lower() for s in name_parts)
     def with_build(asset):
       return build.lower() in asset['name'].lower()
-    # Handle ambiguous or close matches
+    # Priority 1: Exact name + build match
     if arr := list(filter(lambda a: with_name(a) and with_build(a), assets)):
       asset = get_match(arr)
-    # Handle case where there are no build targets
+    # Priority 2: Name match, no build indicator in asset name
     elif arr := list(filter(lambda a: with_name(a) and not with_build(a), assets)):
       asset = get_match(arr)
-    # Handle case where there is no clear resolution of the desired kext
-    # i.e. there is no release asset with the same name and build
-    elif arr := list(filter(lambda a: not (with_name(a) and with_build(a)), assets)):
+    # Priority 3: Build match only (fallback to repo name in get_match)
+    elif arr := list(filter(lambda a: with_build(a), assets)):
       asset = get_match(arr)
+    # Priority 4: No asset matches requested build - FAIL instead of wrong build
+    else:
+      available_builds = set()
+      for a in assets:
+        if 'release' in a['name'].lower():
+          available_builds.add('RELEASE')
+        if 'debug' in a['name'].lower():
+          available_builds.add('DEBUG')
+      raise ValueError(
+        f'No {build} asset found for {name} in {resolver.repository}. '
+        f'Available builds: {", ".join(sorted(available_builds)) or "none"}'
+      )
 
     # Store the asset version
     if release_catalog['tag_name'].count('.'):
