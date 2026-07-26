@@ -33,3 +33,25 @@ def test_rich_resolver_escapes_path_markup():
   formatted = rich_resolver(resolver, {'path': resolver.path}, resolution)
 
   assert render(formatted).plain == resolution
+
+
+def test_rich_resolver_escapes_url_markup():
+  """URL text containing Rich markup syntax must remain literal."""
+  resolution = \
+    'Example@github.com/user/repo[release]#checksum=abc123'
+  resolver = SimpleNamespace(url='https://github.com/user/repo[release]')
+
+  formatted = rich_resolver(resolver, {'url': resolver.url}, resolution)
+
+  assert render(formatted).plain == resolution
+
+
+def test_rich_resolver_escapes_name_markup():
+  """Resolver name containing Rich markup syntax must remain literal."""
+  resolution = \
+    'Example[bold]@file:Kexts/Example.kext#checksum=abc123'
+  resolver = SimpleNamespace(path='Kexts/Example.kext')
+
+  formatted = rich_resolver(resolver, {'path': resolver.path}, resolution)
+
+  assert render(formatted).plain == resolution
