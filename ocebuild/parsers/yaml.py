@@ -18,6 +18,36 @@ from .regex import re_search
 from .types import decode_data, encode_data
 
 
+def _strip_inline_comments(line: str) -> str:
+  """Strip YAML comments outside of quoted strings.
+  
+  Args:
+    line: A line of YAML text.
+    
+  Returns:
+    The line with inline comments removed.
+  """
+  result = []
+  in_single_quote = False
+  in_double_quote = False
+  i = 0
+  while i < len(line):
+    char = line[i]
+    if char == "'" and not in_double_quote:
+      in_single_quote = not in_single_quote
+      result.append(char)
+    elif char == '"' and not in_single_quote:
+      in_double_quote = not in_double_quote
+      result.append(char)
+    elif char == '#' and not in_single_quote and not in_double_quote:
+      # Found comment start outside quotes - stop here
+      break
+    else:
+      result.append(char)
+    i += 1
+  return ''.join(result).rstrip()
+
+
 def parse_yaml_types(stype: str,
                      value: str,
                      schema: Literal['annotated', 'yaml']='yaml'
@@ -180,7 +210,12 @@ def parse_yaml(lines: List[str],
     # Skip empty lines
     if len(lnorm := line.lstrip()) == 0:
       continue
-    # Check if first non-whitespace character is a comment
+    # Strip inline comments (but preserve # inside quoted strings)
+    lnorm = _strip_inline_comments(lnorm)
+    # Check if line is now empty after stripping comments
+    if len(lnorm) == 0:
+      continue
+    # Check if first non-whitespace character is a comment (after stripping)
     if lnorm.startswith('#'):
       continue
     # Check if crossing frontmatter

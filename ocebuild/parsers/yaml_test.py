@@ -110,3 +110,46 @@ def test_parse_yaml():
       assert entry is not None
 
 def test_write_yaml(): pass # Not implemented
+
+def test_parse_yaml_inline_comments():
+  """Test that inline comments are properly stripped."""
+  # List entry with comment
+  result = parse_yaml(["Drivers:", "  - HfsPlus # comment"])
+  assert result == {"Drivers": ["HfsPlus"]}
+  
+  # Scalar with comment
+  result = parse_yaml(["Kexts:", "  Lilu: latest # comment"])
+  assert result == {"Kexts": {"Lilu": "latest"}}
+  
+  # Property with comment
+  result = parse_yaml([
+      "Kexts:",
+      "  Foo:",
+      "    properties:",
+      '      MinKernel: "24.0.0" # comment',
+  ])
+  assert result == {"Kexts": {"Foo": {"properties": {"MinKernel": "24.0.0"}}}}
+  
+  # Quoted scalar with literal #
+  result = parse_yaml(['path: "Kexts/[#release]/Example.kext"'])
+  assert result == {"path": "Kexts/[#release]/Example.kext"}
+  
+  # Comment at start of line (existing behavior)
+  result = parse_yaml(["# full line comment", "key: value"])
+  assert result == {"key": "value"}
+  
+  # Multiple inline comments
+  result = parse_yaml([
+      "Kexts:",
+      "  Lilu: latest # first comment",
+      "  WhateverGreen: latest # second comment",
+  ])
+  assert result == {"Kexts": {"Lilu": "latest", "WhateverGreen": "latest"}}
+  
+  # Comment with special characters
+  result = parse_yaml(['key: "value # with # hashes" # real comment'])
+  assert result == {"key": "value # with # hashes"}
+  
+  # Empty line after comment stripping
+  result = parse_yaml(["key: value # comment", "", "other: value"])
+  assert result == {"key": "value", "other": "value"}
