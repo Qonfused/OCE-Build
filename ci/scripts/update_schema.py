@@ -221,14 +221,14 @@ def _main(tag: Optional[str]=None, commit: Optional[str]=None) -> None:
   })
 
   schema_dict = merge_dict(schema_meta, schema)
-  with open(PROJECT_DOCS.joinpath('resources', 'Schema.plist'), 'w') as file:
+  with open(PROJECT_DOCS.joinpath('resources', 'Schema.plist'), 'w', encoding="UTF-8") as file:
     schema_plist = write_plist(merge_dict(schema_meta, schema))
     file.write(schema_plist)
-  with open(PROJECT_DOCS.joinpath('resources', 'Schema.yaml'), 'w') as file:
+  with open(PROJECT_DOCS.joinpath('resources', 'Schema.yaml'), 'w', encoding="UTF-8") as file:
     schema_yaml = "\n".join(write_yaml(schema_dict, schema='annotated'))
     file.write(schema_yaml)
 
-  with open(PROJECT_DOCS.joinpath('schema.md'), 'w') as file:
+  with open(PROJECT_DOCS.joinpath('schema.md'), 'w', encoding="UTF-8") as file:
     schema_doc = parse_fmarkdown_schema(raw_schema, schema, sample,
                                         title="OpenCore Config.plist Schema",
                                         metadata=entry)

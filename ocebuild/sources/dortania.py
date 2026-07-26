@@ -40,7 +40,7 @@ def is_latest_build() -> bool:
 
   # Revalidate build catalog timestamp
   latest_timestamp = datetime.fromisoformat(
-      request(dortania_file_url('last_updated.txt')).text().read())
+      request(dortania_file_url('last_updated.txt')).text(encoding='utf-8').read())
   if not DORTANIA_LAST_UPDATED or latest_timestamp > DORTANIA_LAST_UPDATED:
     DORTANIA_LAST_UPDATED = latest_timestamp
     return False

@@ -102,7 +102,7 @@ def test_write_plist():
       sample_plist = parse_plist(file)
     # Write parsed config.plist as plist
     output_plist_filepath = opencore_dir.joinpath('Docs', 'Sample.plist')
-    with open(output_plist_filepath, 'w') as f:
+    with open(output_plist_filepath, 'w', encoding="UTF-8") as f:
       lines = write_plist(sample_plist)
       f.writelines(lines)
     # Validate output with ocvalidate binary

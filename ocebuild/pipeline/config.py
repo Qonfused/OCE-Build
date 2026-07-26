@@ -200,8 +200,8 @@ def get_configuration_schema(repository: str='acidanthera/OpenCorePkg',
   configuration_url = file_url(path='Docs/Configuration.tex')
   sample_plist_url = file_url(path='Docs/Sample.plist')
 
-  sample_plist = parse_plist(request(url=sample_plist_url).text())
-  with request(url=configuration_url).text() as file:
+  sample_plist = parse_plist(request(url=sample_plist_url).text(encoding='utf-8'))
+  with request(url=configuration_url).text(encoding='utf-8') as file:
     schema = parse_schema(file, sample_plist, **kwargs)
 
   if get_sample: return schema, sample_plist
@@ -359,7 +359,7 @@ def update_entries(config_path: Union[str, Path],
     return Path(config_path, f'../{name}').resolve()
 
   # Generate new entries for each present build entry
-  config = parse_plist(open(config_path, 'r'))
+  config = parse_plist(open(config_path, 'r', encoding="UTF-8"))
   entry_methods = {
     'ACPI':     (acpi_entries,    'Path'),
     'Drivers':  (drivers_entries, 'Path'),

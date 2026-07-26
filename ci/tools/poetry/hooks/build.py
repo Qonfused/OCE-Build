@@ -63,7 +63,7 @@ def clean(stage: Optional[str]=None):
     target_path = f'{PROJECT_BUILD_STAGING}/{target}'
     rmtree(target_path)
     makedirs(target_path)
-    open(f'{target_path}/__init__.py', 'w').close()
+    open(f'{target_path}/__init__.py', 'w', encoding="UTF-8").close()
 
 def _main():
   PROJECT_BUILD_DIR = Path(PROJECT_ROOT, 'ci/tools/poetry/build')
