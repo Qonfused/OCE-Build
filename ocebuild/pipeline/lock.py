@@ -119,6 +119,8 @@ def _format_dependency_entry(entry: Dict[str, any]) -> dict:
     'specifier',
     'kind',
     'revision',
+    # Wildcard tracking
+    '_wildcard_parent',
   )
   def _try_index(k: str) -> int:
     """Attempts to find the index of the key in the sorted keys list."""
@@ -388,6 +390,8 @@ def resolve_specifiers(build_config: dict,
       resolvers.append({ **resolver_props, **lockfile_entry })
     # Otherwise, prune matching resolvers and outdated entries from lockfile
     elif specifier == '*':
+      # Wildcard parent - track its children in lockfile
+      resolver_props['_wildcard_parent'] = name
       resolvers.append(resolver_props)
     elif resolver is not None:
       try:
@@ -454,10 +458,40 @@ def validate_dependencies(lockfile: dict, build_config: dict) -> None:
   if not dependencies:
     raise AssertionError('Lockfile contains no build configuration entries.')
 
+  # Get all lockfile keys
   lockfile_keys = set(k for e in dependencies.values() for k in e.keys())
-  buildcfg_keys = set(k for c,d in build_config.items()
-                          for k,e in d.items()
-                            if e.get('specifier') != '*')
+  
+  # Get build config keys, expanding wildcard entries to their parent and siblings
+  buildcfg_keys = set()
+  
+  for category, entries in build_config.items():
+    # Find all wildcard entries and their parent
+    wildcard_entries = {name: entry for name, entry in entries.items() 
+                        if entry.get('specifier') == '*'}
+    non_wildcard_entries = {name: entry for name, entry in entries.items() 
+                            if entry.get('specifier') != '*'}
+    
+    # Add non-wildcard entries directly
+    for name in non_wildcard_entries:
+      buildcfg_keys.add(name)
+    
+    # For wildcard entries, find their parent and add parent + all wildcard siblings
+    for wildcard_name, wildcard_entry in wildcard_entries.items():
+      # Find the parent (non-wildcard entry in same category that has children in lockfile)
+      parent = None
+      for lock_name, lock_entry in dependencies.get(category, {}).items():
+        if lock_entry.get('_wildcard_parent') and lock_entry['_wildcard_parent'] in non_wildcard_entries:
+          parent = lock_entry['_wildcard_parent']
+          break
+      
+      if parent:
+        # Add parent and all wildcard siblings from build config
+        buildcfg_keys.add(parent)
+        for sibling_name in wildcard_entries:
+          buildcfg_keys.add(sibling_name)
+      else:
+        # No parent found in lockfile, just add the wildcard entry name
+        buildcfg_keys.add(wildcard_name)
 
   if lockfile_keys == buildcfg_keys:
     return # Pass: Lockfile is consistent with the build file.
