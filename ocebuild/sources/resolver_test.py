@@ -52,7 +52,7 @@ def test_extract_asset_preserves_build_target():
     'tag_name': '2.7.2'
   }
   
-  with patch('ocebuild.sources.github.github_release_catalog', return_value=mock_catalog):
+  with patch('ocebuild.sources.resolver.github_release_catalog', return_value=mock_catalog):
     resolver = GitHubResolver(repository='acidanthera/BrcmPatchRAM', __name__='BlueToolFixup')
     
     # Request RELEASE - should get RELEASE
@@ -78,7 +78,7 @@ def test_extract_asset_fails_when_build_unavailable():
     'tag_name': '2.7.2'
   }
   
-  with patch('ocebuild.sources.github.github_release_catalog', return_value=mock_catalog):
+  with patch('ocebuild.sources.resolver.github_release_catalog', return_value=mock_catalog):
     resolver = GitHubResolver(repository='acidanthera/BrcmPatchRAM', __name__='BlueToolFixup')
     
     # Request RELEASE but only DEBUG available - should fail
@@ -102,7 +102,7 @@ def test_extract_asset_name_match_no_build_indicator():
     'tag_name': '1.0.0'
   }
   
-  with patch('ocebuild.sources.github.github_release_catalog', return_value=mock_catalog):
+  with patch('ocebuild.sources.resolver.github_release_catalog', return_value=mock_catalog):
     resolver = GitHubResolver(repository='acidanthera/MyKext', __name__='MyKext')
     
     # Should work when no build indicator present
