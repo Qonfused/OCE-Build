@@ -40,7 +40,7 @@ def _get_stream_hash(stream, hash) -> str:
 
 def _get_file_digest(filename, hash) -> str:
   """Gets a digest for a file."""
-  with open(filename, 'rb', encoding="UTF-8") as file:
+  with open(filename, 'rb') as file:
     hash = _get_stream_hash(file, hash)
   return hash
 
