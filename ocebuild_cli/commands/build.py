@@ -272,7 +272,7 @@ def cli(env, cwd, out, patches, clean, update, force):
   OC_DIR = glob(BUILD_DIR, '**/OC/OpenCore.efi', first=True).parent
   if extracted:
     num_extracted = len([k for e in extracted.values() for k in e.keys()])
-    extracted_dir = OC_DIR.relative(cwd)
+    extracted_dir = OC_DIR.as_posix()
     success(f"Extracted {num_extracted} build entries to '{extracted_dir}'.")
 
   # Validate build entries
