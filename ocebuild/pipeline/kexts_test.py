@@ -3,6 +3,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 ##
 
+import plistlib
+
 import pytest
 
 from .kexts import *
@@ -49,3 +51,60 @@ def __virtualsmc_archive():
 #       './WhateverGreen-1.6.6-DEBUG.zip/WhateverGreen.kext'
 #     assert kexts['WhateverGreen']['__url'] == url
 #     assert kexts['WhateverGreen']['version'] == '1.6.6'
+
+
+def _bundle(root, name, identifier, dependencies=None, version='1.0.0'):
+  bundle = root / name
+  contents = bundle / 'Contents'
+  contents.mkdir(parents=True, exist_ok=True)
+  info = {
+    'CFBundleName': bundle.stem,
+    'CFBundleIdentifier': identifier,
+    'CFBundleVersion': version,
+    'OSBundleLibraries': dependencies or {},
+  }
+  (contents / 'Info.plist').write_bytes(plistlib.dumps(info))
+  return bundle
+
+
+def test_grouping_preserves_library_dependencies(tmp_path):
+  parent = _bundle(tmp_path, 'DuoLink.kext', 'example.duolink', {
+    'example.lilu': '1.0.0', 'example.services': '1.0.0',
+  })
+  plugins = parent / 'Contents/PlugIns'
+  _bundle(plugins, 'Services.kext', 'example.services')
+  _bundle(plugins, 'Touch.kext', 'example.touch', {
+    'example.duolink': '1.0.0', 'example.external': '1.0.0',
+  })
+  lilu = _bundle(tmp_path, 'Lilu.kext', 'example.lilu')
+  external = _bundle(tmp_path, 'Z.kext', 'example.external')
+
+  entries = sort_kext_cfbundle([parent, lilu, external])
+  ids = [entry['identifier'] for entry in entries]
+  assert ids.index('example.lilu') < ids.index('example.duolink')
+  assert ids.index('example.services') < ids.index('example.duolink')
+  assert ids.index('example.duolink') < ids.index('example.touch')
+  assert ids.index('example.external') < ids.index('example.touch')
+
+
+def test_provider_versions_remain_newest_first(tmp_path):
+  older = _bundle(tmp_path, 'Older.kext', 'example.library', version='1.0.0')
+  support = _bundle(tmp_path, 'Support.kext', 'example.support')
+  newer = _bundle(tmp_path, 'Newer.kext', 'example.library',
+                  {'example.support': '1.0.0'}, version='2.0.0')
+  consumer = _bundle(tmp_path, 'Consumer.kext', 'example.consumer',
+                     {'example.library': '1.0.0'})
+
+  entries = sort_kext_cfbundle([older, consumer, newer, support])
+  assert [entry['name'] for entry in entries] == [
+    'Support', 'Newer', 'Older', 'Consumer',
+  ]
+
+
+def test_valid_dependency_order_is_preserved(tmp_path):
+  library = _bundle(tmp_path, 'A.kext', 'example.a')
+  consumer = _bundle(tmp_path, 'B.kext', 'example.b', {'example.a': '1.0.0'})
+  other = _bundle(tmp_path, 'Z.kext', 'example.z')
+
+  entries = sort_kext_cfbundle([library, consumer, other])
+  assert [entry['name'] for entry in entries] == ['A', 'B', 'Z']

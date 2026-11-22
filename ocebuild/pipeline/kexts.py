@@ -5,6 +5,7 @@
 """Methods for retrieving and handling Kext packages and binaries."""
 
 from collections import OrderedDict
+from graphlib import TopologicalSorter
 from itertools import chain
 
 from typing import List, Literal, Union
@@ -257,7 +258,35 @@ def sort_kext_cfbundle(filepaths: List[Union[str, Path]]) -> OrderedDict:
   for node in sorted(filter(None, nodes), key=sorting_scheme):
     sorted_dependencies += node
 
-  return sorted_dependencies
+  # Alphabetical grouping can place a kext before a library it requires.
+  # Move libraries ahead of their dependants without changing valid orders,
+  # using bundle paths to preserve entries with duplicate identifiers.
+  by_path = {entry['__path']: entry for entry in sorted_dependencies}
+  providers = {}
+  for path, entry in by_path.items():
+    providers.setdefault(entry['identifier'], []).append(path)
+  graph = {}
+  for path, entry in by_path.items():
+    graph[path] = [provider for identifier in entry['dependencies']
+                  for provider in providers.get(identifier, [])]
+
+  # Reject cycles so the dependency walk cannot loop indefinitely.
+  TopologicalSorter(graph).prepare()
+  ordered = []
+  emitted = set()
+  pending = list(reversed(by_path))
+  while pending:
+    path = pending[-1]
+    if path in emitted:
+      pending.pop()
+      continue
+    dependencies = [p for p in graph[path] if p not in emitted]
+    if dependencies:
+      pending.extend(reversed(dependencies))
+    else:
+      emitted.add(path)
+      ordered.append(by_path[pending.pop()])
+  return ordered
 
 def extract_kexts(directory: Union[str, Path],
                   build: Literal['RELEASE', 'DEBUG']='RELEASE',
