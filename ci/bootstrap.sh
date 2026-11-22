@@ -7,6 +7,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 ##
 
+set -euo pipefail
+
 OCEBUILD_URL="https://github.com/Qonfused/OCE-Build"
 OCEBUILD_VERSION="nightly"
 
@@ -47,17 +49,18 @@ cmd() {
 #endregion
 
 # Arrange for the binary to be deleted when the script terminates
-BINARY_PATH="./$(ext ocebuild)"
-trap 'rm -f "$BINARY_PATH" 2>/dev/null' 0
+BINARY_DIR=$(mktemp -d)
+BINARY_PATH="$BINARY_DIR/$(ext ocebuild)"
+trap 'rm -rf "$BINARY_DIR"' 0
 trap 'exit $?' 1 2 3 15
 
 echo "Downloading OCE Build CLI..."
 
 # Download the binary release for the current platform
 BINARY_URL="$OCEBUILD_URL/releases/download/$OCEBUILD_VERSION/$(ext ocebuild)"
-$(cmd curl) -sSL -k $BINARY_URL > "$BINARY_PATH"
+"$(cmd curl)" -fsSL "$BINARY_URL" -o "$BINARY_PATH"
 echo ""
 
 # Executes OCE Build with provided arguments
 if [[ $(os) != "windows" ]]; then chmod +x "$BINARY_PATH"; fi
-$BINARY_PATH "$@"
+"$BINARY_PATH" "$@"
