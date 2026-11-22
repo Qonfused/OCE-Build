@@ -18,7 +18,7 @@ env:
 jobs:
   # Runs test suite
   tests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     continue-on-error: ${{ matrix.experimental }}
     strategy:
       fail-fast: false
