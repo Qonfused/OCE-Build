@@ -10,6 +10,7 @@ import re
 from difflib import get_close_matches
 from hashlib import sha256
 from re import split
+from shutil import get_unpack_formats
 
 from typing import Generator, List, Literal, Optional, Tuple, TypeVar, Union
 
@@ -118,14 +119,16 @@ class GitHubResolver(BaseResolver):
 
     release_catalog = github_release_catalog(url)
 
-    # Get the release assets for a given release url
-    assets = release_catalog['assets']
+    # Package extraction uses shutil.unpack_archive, so exclude checksum files
+    # and other attachments that it cannot unpack.
+    archive_extensions = tuple(ext for _, extensions, _ in get_unpack_formats()
+                               for ext in extensions)
     exclusion_list = {'debug-symbols'}
-    assets = list(filter(lambda a: not any(s in a['name'].lower()
-                                           for s in exclusion_list),
-                         assets))
+    assets = [a for a in release_catalog['assets']
+              if a['name'].endswith(archive_extensions)
+              and not any(s in a['name'].lower() for s in exclusion_list)]
     if not assets:
-      raise ValueError(f'Release catalog for {name} has no assets.')
+      raise ValueError(f'Release catalog for {name} has no package archives.')
 
     # Split tokens on capital letters, dashes, and underscores
     name_parts = split('-|_| ', re.sub( r"([A-Z])", r"-\1", name).lower())
@@ -135,7 +138,7 @@ class GitHubResolver(BaseResolver):
       if not closest or not any(s in closest[0].lower() for s in name_parts):
         # Fallback to the repo name if the kext name isn't listed in the assets
         repo_name = resolver.repository.rsplit('/', 1)[-1]
-        if name != repo_name:
+        if target != repo_name:
           return get_match(arr, target=repo_name)
         else:
           raise ValueError(f'Unable to resolve {target}.')
@@ -147,16 +150,22 @@ class GitHubResolver(BaseResolver):
       return all(s in asset['name'].lower() for s in name_parts)
     def with_build(asset):
       return build.lower() in asset['name'].lower()
+    def without_build(asset):
+      return not any(variant in asset['name'].lower()
+                     for variant in ('debug', 'release'))
     # Priority 1: Exact name + build match
     if arr := list(filter(lambda a: with_name(a) and with_build(a), assets)):
       asset = get_match(arr)
     # Priority 2: Name match, no build indicator in asset name
-    elif arr := list(filter(lambda a: with_name(a) and not with_build(a), assets)):
+    elif arr := list(filter(lambda a: with_name(a) and without_build(a),
+                            assets)):
       asset = get_match(arr)
     # Priority 3: Build match only (fallback to repo name in get_match)
     elif arr := list(filter(lambda a: with_build(a), assets)):
       asset = get_match(arr)
-    # Priority 4: No asset matches requested build - FAIL instead of wrong build
+    # Priority 4: Archive without a DEBUG/RELEASE label
+    elif arr := list(filter(without_build, assets)):
+      asset = get_match(arr)
     else:
       available_builds = set()
       for a in assets:

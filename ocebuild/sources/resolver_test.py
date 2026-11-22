@@ -66,7 +66,8 @@ def test_extract_asset_preserves_build_target():
     assert 'RELEASE' not in url
 
 
-def test_extract_asset_fails_when_build_unavailable():
+@pytest.mark.parametrize('name', ['BlueToolFixup', 'BrcmPatchRAM'])
+def test_extract_asset_fails_when_build_unavailable(name):
   """Test that resolution fails when requested build is not available."""
   from unittest.mock import patch
   
@@ -74,23 +75,29 @@ def test_extract_asset_fails_when_build_unavailable():
   mock_catalog = {
     'assets': [
       {'name': 'BrcmPatchRAM-2.7.2-DEBUG.zip', 'browser_download_url': 'https://example.com/DEBUG.zip'},
+      {'name': 'BrcmPatchRAM-2.7.2.sha256',
+       'browser_download_url': 'https://example.com/checksum.sha256'},
     ],
     'tag_name': '2.7.2'
   }
   
   with patch('ocebuild.sources.resolver.github_release_catalog', return_value=mock_catalog):
-    resolver = GitHubResolver(repository='acidanthera/BrcmPatchRAM', __name__='BlueToolFixup')
+    resolver = GitHubResolver(
+      repository='acidanthera/BrcmPatchRAM', __name__=name)
     
     # Request RELEASE but only DEBUG available - should fail
     try:
-      resolver.extract_asset(resolver, 'BlueToolFixup', 'https://example.com/releases/tag/2.7.2', build='RELEASE')
+      resolver.extract_asset(
+        resolver, name, 'https://example.com/releases/tag/2.7.2',
+        build='RELEASE')
       assert False, "Should have raised ValueError"
     except ValueError as e:
       assert 'No RELEASE asset found' in str(e)
       assert 'DEBUG' in str(e)
 
 
-def test_extract_asset_name_match_no_build_indicator():
+@pytest.mark.parametrize('name', ['MyKext', 'MyKextPlugin'])
+def test_extract_asset_name_match_no_build_indicator(name):
   """Test fallback when assets have name match but no build indicator."""
   from unittest.mock import patch
   
@@ -103,10 +110,11 @@ def test_extract_asset_name_match_no_build_indicator():
   }
   
   with patch('ocebuild.sources.resolver.github_release_catalog', return_value=mock_catalog):
-    resolver = GitHubResolver(repository='acidanthera/MyKext', __name__='MyKext')
+    resolver = GitHubResolver(repository='acidanthera/MyKext', __name__=name)
     
     # Should work when no build indicator present
-    url = resolver.extract_asset(resolver, 'MyKext', 'https://example.com/releases/tag/1.0.0', build='RELEASE')
+    url = resolver.extract_asset(
+      resolver, name, 'https://example.com/releases/tag/1.0.0', build='RELEASE')
     assert 'MyKext-1.0.0.zip' in url
 
 
