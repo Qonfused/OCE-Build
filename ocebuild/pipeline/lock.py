@@ -383,11 +383,28 @@ def resolve_specifiers(build_config: dict,
       "kind": kind
     }
 
-    # Skip updating entries if not specified
     if lockfile_entry and not (force or update):
-      # Reserve the `__resolver` key for revalidated entries
+      # An object in __resolver marks an entry for the CLI to rewrite.
       resolver_props['__resolver'] = None
-      resolvers.append({ **resolver_props, **lockfile_entry })
+      cached_entry = dict(lockfile_entry)
+      build = nested_get(entry, ['build'], default=default_build)
+      if (build is not None and 'build' in cached_entry and
+          cached_entry['build'] != build):
+        # Select an archive from the GitHub release recorded in build.lock
+        # so resolving `latest` again cannot change the dependency version.
+        url = cached_entry.get('url', '')
+        repository_url, separator, asset_path = url.partition(
+          '/releases/download/')
+        if separator and repository_url.startswith('https://github.com/'):
+          tag = asset_path.split('/', 1)[0]
+          repository = repository_url[len('https://github.com/'):]
+          asset_resolver = GitHubResolver(repository, __name__=name)
+          release_url = repository_url + '/releases/tag/' + tag
+          cached_entry['url'] = GitHubResolver.extract_asset(
+            asset_resolver, name, release_url, build)
+        cached_entry['build'] = build
+        resolver_props['__resolver'] = resolver
+      resolvers.append({ **resolver_props, **cached_entry })
     # Otherwise, prune matching resolvers and outdated entries from lockfile
     elif specifier == '*':
       # Wildcard parent - track its children in lockfile
@@ -426,8 +443,10 @@ def resolve_specifiers(build_config: dict,
           nested_del(lockfile, entry_path)
         elif update and lockfile_entry:
           if resolution := nested_get(resolver_props, ['resolution']):
-            if resolution == lockfile_entry['resolution']: continue
-            else: nested_del(lockfile, entry_path)
+            if (resolution == lockfile_entry['resolution'] and
+                resolver_props.get('build') == lockfile_entry.get('build')):
+              continue
+            nested_del(lockfile, entry_path)
 
         # Extract revision key
         if resolver_props['__resolver'] is not None:

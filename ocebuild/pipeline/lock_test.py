@@ -199,3 +199,51 @@ def test_validate_dependencies_wildcard_extra_children():
   # This should raise AssertionError for outdated entries
   with pytest.raises(AssertionError, match='outdated build configuration entries'):
     validate_dependencies(lockfile, build_config)
+
+
+@pytest.mark.parametrize('update', [False, True])
+@pytest.mark.parametrize('default,override', [
+  ('RELEASE', None), ('DEBUG', 'RELEASE'),
+])
+def test_build_selection_preserves_dependency_version(
+    monkeypatch, default, override, update):
+  from unittest.mock import Mock
+  from ocebuild.sources.resolver import GitHubResolver, DortaniaResolver
+
+  release = 'https://github.com/owner/Example/releases'
+  locked = {
+    'build': 'DEBUG', 'version': '1.0.0',
+    'url': release + '/download/v1.0.0/Example-DEBUG.zip',
+    'resolution': 'owner/Example@github:1.0.0#commit=abc123',
+    'specifier': 'owner/Example@github:latest',
+    'revision': '{ SHA1: abc123 }', 'kind': 'Kext',
+  }
+  fetch = Mock(return_value={'tag_name': 'v1.0.0', 'assets': [{
+    'name': 'Example-RELEASE.zip',
+    'browser_download_url': release + '/download/v1.0.0/Example-RELEASE.zip',
+  }]})
+  monkeypatch.setattr('ocebuild.sources.resolver.github_release_catalog', fetch)
+  monkeypatch.setattr(DortaniaResolver, 'has_build', lambda name: False)
+
+  def resolve(resolver, build=None):
+    resolver.commit = 'abc123'
+    return resolver.extract_asset(
+      resolver, 'Example', release + '/tag/v1.0.0', build)
+
+  monkeypatch.setattr(GitHubResolver, 'resolve', resolve)
+  dependency = {'specifier': 'owner/Example=latest'}
+  if override:
+    dependency['build'] = override
+  config = {
+    'OpenCorePkg': {'OpenCore': {'specifier': '*', 'build': default}},
+    'Kexts': {'Example': dependency},
+  }
+  lockfile = {'dependencies': {'Kexts': {'Example': locked}}}
+  entries = resolve_specifiers(config, lockfile, update=update)
+  resolved = next(entry for entry in entries if entry['name'] == 'Example')
+
+  assert resolved['build'] == 'RELEASE'
+  assert resolved['url'].endswith('Example-RELEASE.zip')
+  for key in ('version', 'revision', 'resolution', 'specifier'):
+    assert resolved[key] == locked[key]
+  fetch.assert_called_once_with(release + '/tag/v1.0.0')

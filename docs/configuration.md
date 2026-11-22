@@ -22,7 +22,16 @@ build: DEBUG
 ---
 ```
 
-This build configuration is optional and defaults to the latest release build of OpenCore. It is however recommended to specify this build configuration to ensure that builds are reproducible.
+Omitting these properties selects the latest RELEASE build of OpenCore.
+Once dependencies are resolved, `build.lock` records their versions so
+subsequent builds can reuse them. Pass `--update` or `--force` to refresh
+dependency versions.
+
+For dependencies downloaded from GitHub releases, changing `build` selects
+an archive for the requested build type from the same GitHub release,
+keeping dependency versions unchanged. A package's `build` setting takes
+precedence over the global setting, allowing RELEASE-only kexts to be used
+in a DEBUG build.
 
 ## Package entries
 

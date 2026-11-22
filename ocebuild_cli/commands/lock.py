@@ -210,12 +210,12 @@ def resolve_lockfile(cwd: Union[str, Path],
           hint='Check the build configuration for errors.')
   else:
     info(f'Resolved {len(resolvers)} total entries.')
-    removed, resolved = [], {}
+    removed = []
     if (update or force) or not lockfile:
       # Remove lockfile entries that are not in the build configuration
       removed = prune_lockfile(build_config, lockfile)
-      # Filter out non-resolver entries
-      resolved = [ e for e in resolvers if e['__resolver'] ]
+    # Write build changes even when dependency versions are unchanged.
+    resolved = [ e for e in resolvers if e['__resolver'] ]
 
   # Validate that the lockfile matches the build configuration
   if check:
@@ -229,9 +229,9 @@ def resolve_lockfile(cwd: Union[str, Path],
       exit(0)
   # Handle updating the lockfile
   elif resolved or removed:
-    # Display added lockfile entries
+    # Report added or updated lockfile entries
     if resolved:
-      msg = f'Added {len(resolved)} new entries'
+      msg = f'Resolved {len(resolved)} lockfile entries'
       if lib.VERBOSE:
         info(f'{msg}:', format_resolvers(resolved))
       else:
