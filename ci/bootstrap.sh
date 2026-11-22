@@ -30,7 +30,13 @@ ext() {
   case $(os) in
     windows*) echo "$1.exe";;
     linux*)   echo "$1.linux";;
-    macos*)   echo "$1";;
+    macos*)
+      if [[ $(uname -m) == arm64 ]]; then
+        echo "$1.macos-arm64"
+      else
+        echo "$1"
+      fi
+      ;;
   esac
 }
 

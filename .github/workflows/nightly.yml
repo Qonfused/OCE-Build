@@ -4,13 +4,13 @@ on:
     - cron: '0 0 * * 1-5'
   workflow_dispatch:
 env:
-  python-version: 3.12
+  python-version: "3.11"
   poetry-version: 1.5.0
 jobs:
   check-commit:
     runs-on: ubuntu-latest
     outputs:
-      alive: ${{ steps.check.outputs.alive || github.event_name == 'workflow_dispatch' }}
+      alive: ${{ steps.check.outputs.alive }}
     steps:
       # Fetches remote repository without --progress option.
       #
@@ -23,10 +23,12 @@ jobs:
       - name: Get new commits
         id: check
         run: |
-          if [[ $(git log --oneline --since '24 hours ago' | wc -l) -gt 0 ]]; then
-            echo "alive=true" >> $GITHUB_ENV
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]] ||
+             [[ $(git log --oneline --since '24 hours ago' |
+                  wc -l) -gt 0 ]]; then
+            echo "alive=true" >> "$GITHUB_OUTPUT"
           else
-            echo "alive=false" >> $GITHUB_ENV
+            echo "alive=false" >> "$GITHUB_OUTPUT"
           fi
   build:
     runs-on: ${{ matrix.os }}
@@ -39,12 +41,19 @@ jobs:
           - name: "Windows 64bit"
             os: windows-latest
             arch: x64
+            binary: ocebuild.exe
           - name: "Linux 64bit"
             os: ubuntu-latest
             arch: x64
-          - name: "macOS 64bit"
-            os: macos-latest
+            binary: ocebuild.linux
+          - name: "macOS Intel"
+            os: macos-15-intel
             arch: x64
+            binary: ocebuild
+          - name: "macOS Apple Silicon"
+            os: macos-15
+            arch: arm64
+            binary: ocebuild.macos-arm64
     steps:
       # Fetches remote repository without --progress option.
       #
@@ -62,6 +71,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.python-version }}
+          architecture: ${{ matrix.arch }}
           cache: poetry
           cache-dependency-path: poetry.lock
       - name: Install python dev dependencies
@@ -77,22 +87,28 @@ jobs:
         run: poetry pyinstaller
 
       # Upload artifacts
-      - name: Rename Binaries
+      - name: Rename binary
         shell: bash
         run: |
-          if [[ "$OSTYPE" == "msys" ]]; then
-            : #mv ocebuild.exe ocebuild.exe
-          elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
-            mv ocebuild     ocebuild.linux
-          elif [[ "$OSTYPE" == "darwin"* ]]; then
-            : #mv ocebuild     ocebuild
+          source=ocebuild
+          if [[ "$OSTYPE" == "msys"* ]]; then source=ocebuild.exe; fi
+          if [[ "$source" != "${{ matrix.binary }}" ]]; then
+            mv "$source" "${{ matrix.binary }}"
           fi
         working-directory: dist
+      - name: Verify macOS architecture
+        if: runner.os == 'macOS'
+        run: |
+          lipo "dist/${{ matrix.binary }}" -verify_arch \
+            "${{ matrix.arch == 'x64' && 'x86_64' || 'arm64' }}"
+      - name: Run packaged CLI
+        shell: bash
+        run: ./dist/${{ matrix.binary }} --version
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: ocebuild-py${{ env.python-version }}-${{ matrix.os }}-${{ matrix.arch }}
-          path: dist/*
+          path: dist/${{ matrix.binary }}
           if-no-files-found: error
           retention-days: 7
   release:
@@ -102,6 +118,10 @@ jobs:
     permissions:
       contents: write
     steps:
+      - name: Checkout source metadata
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
       - name: Download all platform artifacts
         uses: actions/download-artifact@v4
         with:
@@ -124,10 +144,10 @@ jobs:
           echo "version=$(curl -s https://raw.githubusercontent.com/Qonfused/OCE-Build/main/ci/registry/project.json | jq -r '.version')" >> "$GITHUB_ENV"
 
       - name: Upload to Release
-        uses: meeDamian/github-release@2.0
+        uses: softprops/action-gh-release@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          tag: nightly
+          tag_name: nightly
           name: Nightly Build (v${{ env.version }})
           body: |
             This release contains a nightly build of ocebuild v${{ env.version }} for Windows, Linux and macOS.
@@ -136,6 +156,5 @@ jobs:
 
             For information about changes present in this pre-release version, refer to the [CHANGELOG](https://github.com/Qonfused/OCE-Build/blob/main/CHANGELOG.md).
           files: dist/ocebuild*
-          gzip: folders
           prerelease: true
-          allow_override: true
+          overwrite_files: true

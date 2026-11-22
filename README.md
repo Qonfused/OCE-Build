@@ -61,6 +61,9 @@ source code is available under the `ocebuild.cli` module.
 
 The recommended way to install the CLI is from [GitHub releases](https://github.com/Qonfused/OCE-Build/releases). This will provide you with a standalone executable that can be used without installing Python or any other dependencies. The CLI is available for Windows, macOS, and Linux.
 
+On macOS, download `ocebuild` for Intel or `ocebuild.macos-arm64` for Apple
+Silicon. Both bootstrap scripts select the executable for the host architecture.
+
 To install the CLI / library from PyPI, you will need to have Python 3.8 or
 later installed. You can install Python from [python.org](https://www.python.org/downloads/)
 or from your package manager. For more information on installing Python, refer

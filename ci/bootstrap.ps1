@@ -52,6 +52,12 @@ $OCEBUILD_VERSION="nightly"
 # Check the OS platform to determine the executable file extension
 $EXT = if ($IsWindows) { ".exe" } elseif ($IsLinux) { ".linux" } else { "" }
 
+if ($IsMacOS) {
+  $architecture =
+    [System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture
+  if ($architecture -eq "Arm64") { $EXT = ".macos-arm64" }
+}
+
 $BINARY_URL="$OCEBUILD_URL/releases/download/$OCEBUILD_VERSION/ocebuild$EXT"
 $BINARY_PATH="$([System.IO.Path]::GetTempPath())\ocebuild$EXT"
 Bootstrap -uri $BINARY_URL -dest $BINARY_PATH
