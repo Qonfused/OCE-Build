@@ -9,6 +9,7 @@
 from datetime import datetime, timedelta
 from functools import partial
 from urllib.request import Request
+from urllib.parse import quote
 
 from typing import List, Optional, Tuple, Union
 
@@ -144,24 +145,9 @@ def github_release_catalog(url: str) -> dict:
   Returns:
     Release catalog.
   """
-  page = 1
-  page_retries = 5
-  while (page_retries > 0):
-    try:
-      base_url, tag = url.replace('https://github.com', '/repos').split('/tag/')
-      release_catalog = github_api_request(base_url + f'?per_page=100&page={page}').json()
-      release_entry = next(e for e in release_catalog if e['tag_name'] == tag)
-      if not release_entry:
-        raise ValueError(f'No release catalog entry found for {tag}.')
-      return release_entry
-    except StopIteration:
-      page += 1
-      if not page_retries:
-        raise ValueError(f'No release catalog entry found in {url} for {tag}.')
-      else:
-        page_retries -= 1
-    except:
-      if not github_rate_limit(raise_error=True): raise
+  base_url, tag = url.replace('https://github.com', '/repos').split('/tag/', 1)
+  endpoint = base_url + '/tags/' + quote(tag, safe='')
+  return github_api_request(endpoint).json()
 
 ################################################################################
 #                        URL formatting/retrieval functions                    #
