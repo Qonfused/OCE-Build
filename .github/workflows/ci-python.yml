@@ -57,7 +57,11 @@ jobs:
           show-progress: false
       # Setup python virtual environment
       - name: Install poetry
-        run: pipx install poetry==${{ env.poetry-version }}
+        run: |
+          pipx install poetry==${{ env.poetry-version }}
+          # Poetry loads its packaging module in each test interpreter.
+          # Keep that module compatible with Python 3.8.
+          poetry self add 'packaging<24'
       - name: Setup Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
