@@ -144,6 +144,26 @@ only meant to be a brief overview of the project structure and development
 guidelines. For more information, refer to the [contributing](/CONTRIBUTING.md)
 documentation.*
 
+### Releases
+
+Pushing a version tag builds the CLI for Windows, Linux, Intel Macs, and
+Apple Silicon Macs and publishes the binaries under that tag:
+
+```sh
+git tag v0.2.0
+git push origin v0.2.0
+```
+
+CI sets the package version from the tag before building and checks the
+version reported by each executable before uploading it. For `v0.2.0`,
+the executable, Python package metadata, and project registry all use
+`0.2.0`; no version-file edits are needed before tagging. Prerelease
+tags such as `v0.2.0-rc.1` are normalized to `0.2.0rc1` and published as
+GitHub prereleases.
+
+Scheduled and manually dispatched builds continue to update `nightly`
+using the development version recorded in the checkout.
+
 ### Guidelines and Philosophy
 
 The general philosophy for this project is to keep things as simple as possible.

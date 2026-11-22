@@ -4,28 +4,37 @@
 # Copyright (c) 2023, The OCE Build Authors. All rights reserved.
 # SPDX-License-Identifier: BSD-3-Clause
 ##
-"""Bumps the project version using the given semver string."""
+"""Sets or increments the project version."""
 
 from argparse import ArgumentParser
 from json import dumps as json_dumps
+from pathlib import Path
+from re import search
+from runpy import run_path
 
 from types import SimpleNamespace
 from typing import Optional
 
-from ci import PROJECT_ROOT
+from packaging.version import Version
 
-from ocebuild.parsers.regex import re_search
-from ocebuild.version import __file__ as __version_file__, __version__
-from ocebuild.version import _BUILD, _MAJOR_VERSION, _MINOR_VERSION, _PATCH_VERSION, _PRE_RELEASE
 
-from third_party.cpython.pathlib import Path
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+__version_file__ = PROJECT_ROOT / 'ocebuild/version.py'
+# Release builds set the version before the package is installed.
+_metadata = run_path(str(__version_file__))
+__version__ = _metadata['__version__']
+_MAJOR_VERSION = _metadata['_MAJOR_VERSION']
+_MINOR_VERSION = _metadata['_MINOR_VERSION']
+_PATCH_VERSION = _metadata['_PATCH_VERSION']
+_PRE_RELEASE = _metadata['_PRE_RELEASE']
+_BUILD = _metadata['_BUILD']
 
 
 version = SimpleNamespace(major=int(_MAJOR_VERSION),
                           minor=int(_MINOR_VERSION),
                           patch=int(_PATCH_VERSION),
                           pre_release=_PRE_RELEASE,
-                          build=int(_BUILD))
+                          build=_BUILD)
 """Represents the current version of the project."""
 
 def bump_version(major: Optional[bool]=None,
@@ -47,7 +56,7 @@ def bump_version(major: Optional[bool]=None,
   if   pre_release:
     version.pre_release = pre_release
     if _PRE_RELEASE.split(".", maxsplit=1)[0] == pre_release:
-      if _match := re_search(r'(.*?)(?<=[^\d])(\d+)', _PRE_RELEASE, group=None):
+      if _match := search(r'(.*?)(?<=[^\d])(\d+)', _PRE_RELEASE):
         pre_release_tag = _match.groups()[0]
         pre_release_num = int(_match.groups()[1])
       else:
@@ -58,7 +67,7 @@ def bump_version(major: Optional[bool]=None,
       version.pre_release += '1'
   # Handle increment and reset of build versions
   if build:
-    version.build += 1
+    version.build = int(version.build) + 1
   else:
     version.build = 0
 
@@ -74,9 +83,18 @@ def format_version(version_: SimpleNamespace) -> str:
   return base_semver
 
 
-def _main(**kwargs) -> None:
-  # Bump the project version
-  version_str = bump_version(**kwargs)
+def _main(version_string: Optional[str]=None, **kwargs) -> None:
+  if version_string is None:
+    version_str = bump_version(**kwargs)
+  else:
+    parsed = Version(version_string)
+    version_str = str(parsed)
+    version.major, version.minor, version.patch = (
+      parsed.major, parsed.minor, parsed.micro)
+    version.pre_release = parsed.public[len(parsed.base_version):].lstrip('.')
+    version.build = parsed.local or 0
+    if parsed.local and parsed.local.isdigit():
+      version.build = int(parsed.local)
 
   # Update version file
   version_file = Path(__version_file__)
@@ -92,8 +110,8 @@ def _main(**kwargs) -> None:
                f"_PATCH_VERSION = {version.patch}") \
       .replace(f"_PRE_RELEASE   = '{_PRE_RELEASE}'",
                f"_PRE_RELEASE   = '{version.pre_release}'") \
-      .replace(f"_BUILD         = {_BUILD}",
-               f"_BUILD         = {version.build}")
+      .replace(f"_BUILD         = {_BUILD!r}",
+               f"_BUILD         = {version.build!r}")
     # Replace semver string
     file_text = file_text \
       .replace(f"__version__    = '{__version__}'",
@@ -106,11 +124,11 @@ def _main(**kwargs) -> None:
   with open(project_cfg, 'r', encoding='UTF-8') as file:
     file_text = file.read()
     # Get version string pattern
-    prefix = re_search(f'(version\\s*=\\s)"{__version__}"', file_text, 1)
+    prefix = search(f'(version\\s*=\\s)"{__version__}"', file_text).group(1)
     # Replace semver string
     file_text = file_text \
       .replace(f'{prefix}"{__version__}"',
-               f'{prefix}"{version_str}"')
+               f'{prefix}"{version_str}"', 1)
     # Write to file
     Path(project_cfg).write_text(file_text, encoding='UTF-8')
 
@@ -118,10 +136,12 @@ def _main(**kwargs) -> None:
   registry_vers = Path(PROJECT_ROOT, 'ci', 'registry', 'project.json')
   registry_vers.write_text(json_dumps({ 'version': version_str }))
 
-  print(f"Bumped version from '{__version__}' to '{version_str}'")
+  print(f"Set project version to '{version_str}'")
 
 if __name__ == "__main__":
   parser = ArgumentParser()
+  parser.add_argument('--version', dest='version_string',
+                      help='Sets an exact version or release tag.')
   parser.add_argument('--major',
                       action='store_true',
                       help='Bumps the version major.')
@@ -138,7 +158,8 @@ if __name__ == "__main__":
                       help='Bumps the version build.')
   args = parser.parse_args()
 
-  _main(major=args.major,
+  _main(version_string=args.version_string,
+        major=args.major,
         minor=args.minor,
         patch=args.patch,
         pre_release=args.pre_release,

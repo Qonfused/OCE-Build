@@ -1,5 +1,7 @@
-name: Nightly Build
+name: Build and Release
 on:
+  push:
+    tags: ['v*']
   schedule:
     - cron: '0 0 * * 1-5'
   workflow_dispatch:
@@ -23,7 +25,7 @@ jobs:
       - name: Get new commits
         id: check
         run: |
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]] ||
+          if [[ "${{ github.event_name }}" != "schedule" ]] ||
              [[ $(git log --oneline --since '24 hours ago' |
                   wc -l) -gt 0 ]]; then
             echo "alive=true" >> "$GITHUB_OUTPUT"
@@ -34,6 +36,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     needs: [check-commit]
     if: ${{ needs.check-commit.outputs.alive == 'true' }}
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      prerelease: ${{ steps.version.outputs.prerelease }}
     strategy:
       fail-fast: false
       matrix:
@@ -77,6 +82,29 @@ jobs:
       - name: Install python dev dependencies
         run: pip3 install packaging --ignore-installed
 
+      - name: Set release version
+        id: version
+        shell: bash
+        env:
+          RELEASE_TAG: >-
+            ${{ github.event_name == 'push' && github.ref_name || '' }}
+        run: |
+          if [[ -n "$RELEASE_TAG" ]]; then
+            python3 ci/scripts/bump_version.py --version "$RELEASE_TAG"
+          fi
+          python3 - <<'PYTHON'
+          import json
+          import os
+          from packaging.version import Version
+
+          with open('ci/registry/project.json') as registry:
+              version = json.load(registry)['version']
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              print(f'version={version}', file=output)
+              prerelease = str(Version(version).is_prerelease).lower()
+              print(f'prerelease={prerelease}', file=output)
+          PYTHON
+
       # Setup Poetry virtual environment
       - name: Use matrix python version in Poetry virtualenv
         run: poetry env use $(python3 -c "import sys; print(sys.executable)")
@@ -101,9 +129,24 @@ jobs:
         run: |
           lipo "dist/${{ matrix.binary }}" -verify_arch \
             "${{ matrix.arch == 'x64' && 'x86_64' || 'arm64' }}"
-      - name: Run packaged CLI
+      - name: Verify packaged version
         shell: bash
-        run: ./dist/${{ matrix.binary }} --version
+        env:
+          BINARY: dist/${{ matrix.binary }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          python3 - <<'PYTHON'
+          import os
+          import subprocess
+
+          actual = subprocess.check_output(
+              [os.path.abspath(os.environ['BINARY']), '--version'],
+              text=True).strip()
+          print(actual)
+          expected = f"ocebuild-cli {os.environ['VERSION']}"
+          if actual != expected:
+              raise SystemExit(f'Expected {expected}, got {actual}')
+          PYTHON
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -118,43 +161,34 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Checkout source metadata
-        uses: actions/checkout@v4
-        with:
-          show-progress: false
       - name: Download all platform artifacts
         uses: actions/download-artifact@v4
         with:
           pattern: ocebuild-py${{ env.python-version }}-*
           path: dist
+          merge-multiple: true
       - name: Display structure of downloaded files
         run: ls -R
         working-directory: dist
       - name: Set executable permissions
         run: |
-          find dist -mindepth 2 -type f -exec mv -t dist {} + && \
-          find dist -type d -empty -delete && \
           chmod +x dist/*
-
-      - name: Get metadata for the latest commit hash and branch name
-        shell: bash
-        run: |
-          echo "sha_short=$(git rev-parse --short "$GITHUB_SHA")" >> "$GITHUB_ENV"
-          echo "branch=$(echo ${GITHUB_REF#refs/heads/})" >> "$GITHUB_ENV"
-          echo "version=$(curl -s https://raw.githubusercontent.com/Qonfused/OCE-Build/main/ci/registry/project.json | jq -r '.version')" >> "$GITHUB_ENV"
 
       - name: Upload to Release
         uses: softprops/action-gh-release@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          tag_name: nightly
-          name: Nightly Build (v${{ env.version }})
-          body: |
-            This release contains a nightly build of ocebuild v${{ env.version }} for Windows, Linux and macOS.
-
-            This build is automatically generated from the [latest commit](https://github.com/Qonfused/OCE-Build/commit/${{ env.sha_short }}) on the ${{ env.branch }} branch and is not guaranteed to be stable.
-
-            For information about changes present in this pre-release version, refer to the [CHANGELOG](https://github.com/Qonfused/OCE-Build/blob/main/CHANGELOG.md).
+          tag_name: >-
+            ${{ github.event_name == 'push' && github.ref_name || 'nightly' }}
+          name: >-
+            ${{ github.event_name == 'push' && github.ref_name ||
+                format('Nightly Build (v{0})', needs.build.outputs.version) }}
           files: dist/ocebuild*
-          prerelease: true
+          prerelease: >-
+            ${{ github.event_name != 'push' ||
+                needs.build.outputs.prerelease == 'true' }}
+          make_latest: >-
+            ${{ github.event_name == 'push' &&
+                needs.build.outputs.prerelease == 'false' }}
+          fail_on_unmatched_files: true
           overwrite_files: true

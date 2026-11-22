@@ -13,6 +13,12 @@ script  = "ci.scripts.bump_version:_main"
 help    = "[CI] Bumps the project version using the given semver string."
 
   [[tool.poe.tasks.bump-version.args]]
+  name = "version_string"
+  options = ["--version"]
+  type = "string"
+  help = "Sets an exact version or release tag."
+
+  [[tool.poe.tasks.bump-version.args]]
   name = "major"
   options = ["--major"]
   type = "boolean"
