@@ -10,7 +10,7 @@
 set -euo pipefail
 
 OCEBUILD_URL="https://github.com/Qonfused/OCE-Build"
-OCEBUILD_VERSION="nightly"
+OCEBUILD_VERSION="${OCEBUILD_VERSION:-nightly}"
 
 #region Shell Macros
 

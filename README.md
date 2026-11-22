@@ -64,6 +64,18 @@ The recommended way to install the CLI is from [GitHub releases](https://github.
 On macOS, download `ocebuild` for Intel or `ocebuild.macos-arm64` for Apple
 Silicon. Both bootstrap scripts select the executable for the host architecture.
 
+The bootstrap scripts download `nightly` by default. From a source
+checkout, set `OCEBUILD_VERSION` to select a release:
+
+```sh
+OCEBUILD_VERSION=v0.2.0 bash ci/bootstrap.sh --version
+```
+
+```powershell
+$env:OCEBUILD_VERSION = "v0.2.0"
+./ci/bootstrap.ps1 --version
+```
+
 To install the CLI / library from PyPI, you will need to have Python 3.8 or
 later installed. You can install Python from [python.org](https://www.python.org/downloads/)
 or from your package manager. For more information on installing Python, refer

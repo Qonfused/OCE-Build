@@ -47,7 +47,11 @@ function Bootstrap {
 Write-Host "Downloading OCE Build CLI..."
 
 $OCEBUILD_URL="https://github.com/Qonfused/OCE-Build"
-$OCEBUILD_VERSION="nightly"
+$OCEBUILD_VERSION = if ($env:OCEBUILD_VERSION) {
+  $env:OCEBUILD_VERSION
+} else {
+  "nightly"
+}
 
 # Check the OS platform to determine the executable file extension
 $EXT = if ($IsWindows) { ".exe" } elseif ($IsLinux) { ".linux" } else { "" }
